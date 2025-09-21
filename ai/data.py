@@ -1,7 +1,6 @@
 import functools
 import random
 import warnings
-from lightning.pytorch.cli import instantiate_class
 import torch
 import librosa
 import numpy as np
@@ -9,9 +8,9 @@ import lightning.pytorch as pl
 from numpy.typing import NDArray
 from scipy.signal import fftconvolve
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 from torch import Tensor
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader
 from audiomentations import *
 from audiomentations.core.audio_loading_utils import load_sound_file
 from audiomentations.core.transforms_interface import BaseWaveformTransform
@@ -27,6 +26,34 @@ AddBackgroundNoise.__init__.__annotations__["noise_transform"] = Any
 
 
 ################################################################################
+
+
+class AdjustDuration(BaseWaveformTransform):
+    def __init__(self, duration_samples: int, p: float = 0.5):
+        super().__init__(p)
+        self.duration_samples = duration_samples
+
+    def randomize_parameters(self, samples: NDArray[np.float32], sample_rate: int):
+        super().randomize_parameters(samples, sample_rate)
+        if self.parameters["should_apply"]:
+            self.parameters["offset"] = np.random.randint(
+                0, max(len(samples) - self.duration_samples, 1)
+            )
+
+    def apply(
+        self, samples: NDArray[np.float32], sample_rate: int
+    ) -> NDArray[np.float32]:
+        sample_length = len(samples)
+        if self.duration_samples > 0:
+            if sample_length >= self.duration_samples:
+                offset = self.parameters.get("offset", 0)
+                return samples[offset : offset + self.duration_samples]
+            else:
+                # Pad to the end
+                pad_width = self.duration_samples - sample_length
+                return np.pad(samples, (0, pad_width), mode="constant")
+        else:
+            return samples
 
 
 class JustNoise(BaseWaveformTransform):
@@ -204,18 +231,25 @@ class KWSDataset(Dataset):
         self._vad_model = load_silero_vad()
 
     def _get_target(self, waveform: Tensor, original_waveform: Tensor) -> Tensor:
-        speech_timestamps = get_speech_timestamps(waveform, self._vad_model)
-        original_speech_timestamps = get_speech_timestamps(
-            original_waveform, self._vad_model
+        def get_first_duration(timestamps):
+            if timestamps:
+                ts = timestamps[0]
+                return ts["end"] - ts["start"]
+            return None
+
+        speech_duration = get_first_duration(
+            get_speech_timestamps(waveform, self._vad_model)
         )
-        if speech_timestamps and original_speech_timestamps:
-            speech_timestamps = speech_timestamps[0]
-            original_speech_timestamps = original_speech_timestamps[0]
-            target = (speech_timestamps["end"] - speech_timestamps["start"]) / (
-                original_speech_timestamps["end"] - original_speech_timestamps["start"]
-            )
+        original_duration = get_first_duration(
+            get_speech_timestamps(original_waveform, self._vad_model)
+        )
+
+        if speech_duration is not None and original_duration and original_duration > 0:
+            target = speech_duration / original_duration
+            target = target if target >= 0.7 else 0.0
         else:
             target = 0.0
+
         return torch.FloatTensor([target]).clamp(0.0, 1.0)
 
     def __len__(self) -> int:
@@ -238,7 +272,8 @@ class KWSDataset(Dataset):
         target_waveform = self.transforms(
             samples=waveform, sample_rate=self.sampling_rate
         )
-        target = self._get_target(target_waveform, waveform)
+        original_waveform = self.transforms.transforms[0](waveform, self.sampling_rate)
+        target = self._get_target(target_waveform, original_waveform)
         self.transforms.unfreeze_parameters()
 
         return input, target
