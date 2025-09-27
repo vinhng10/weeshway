@@ -1,8 +1,4 @@
-import {
-  BuiltInKeywords,
-  PorcupineManager,
-} from "@picovoice/porcupine-react-native";
-import { useAudioPlayer } from "expo-audio";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
 import {
   ExpoSpeechRecognitionModule,
@@ -10,9 +6,14 @@ import {
 } from "expo-speech-recognition";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet } from "react-native";
+import { AudioRecorder } from "react-native-audio-api";
+import { ExecutorchModule, ScalarType } from "react-native-executorch";
+import { useModule } from "react-native-executorch/src/hooks/useModule";
 import { HapticTab } from "./HapticTab";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
+
+const DUCKING_VOLUME = 0.1;
 
 export default function AudioPlayer() {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,15 +26,21 @@ export default function AudioPlayer() {
     useState(false);
   const [originalVolume, setOriginalVolume] = useState<number | null>(null);
 
-  // Volume ducking configuration (how much to reduce volume during speech recognition)
-  const DUCKING_VOLUME = 0.2; // Reduce volume to 20% during speech recognition
-
   const player = useAudioPlayer(audioSource ? { uri: audioSource } : null);
-  const porcupineRef = useRef<PorcupineManager | null>(null);
-  const playerRef = useRef(player);
+  const status = useAudioPlayerStatus(player);
+  const recorderRef = useRef<AudioRecorder | null>(null);
+  const audioHistoryRef = useRef<Float32Array>(new Float32Array(16000).fill(0));
 
-  // Replace with your Picovoice AccessKey
-  const ACCESS_KEY = "";
+  const model = useModule({
+    module: ExecutorchModule,
+    model: require("../assets/model.pte"),
+  });
+
+  useEffect(() => {
+    if (status.didJustFinish) {
+      stopAudio();
+    }
+  }, [status.didJustFinish]);
 
   const formatTime = (milliseconds: number | null) => {
     if (!milliseconds) return "0:00";
@@ -50,10 +57,8 @@ export default function AudioPlayer() {
         copyToCacheDirectory: true,
       });
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
+      if (!result.canceled && result.assets?.length > 0) {
         const asset = result.assets[0];
-
-        // Load new audio file
         setAudioSource(asset.uri);
         setFileName(asset.name);
       }
@@ -88,16 +93,6 @@ export default function AudioPlayer() {
     }
   };
 
-  const restartAudio = () => {
-    try {
-      player.seekTo(0);
-      player.play();
-    } catch (error) {
-      Alert.alert("Error", "Failed to restart audio");
-      console.error("Error restarting audio:", error);
-    }
-  };
-
   const handleTranscriptCommand = (text: string) => {
     const normalized = text.toLowerCase();
     if (normalized.includes("play the music")) {
@@ -114,7 +109,6 @@ export default function AudioPlayer() {
   const duckAudioVolume = () => {
     try {
       if (originalVolume === null) {
-        // Store the current volume before ducking
         setOriginalVolume(player.volume || 1.0);
       }
       player.volume = DUCKING_VOLUME;
@@ -136,39 +130,97 @@ export default function AudioPlayer() {
     }
   };
 
+  const startWakeWordRecorder = async () => {
+    if (!model.isReady || recorderRef.current) return;
+
+    const recorder = new AudioRecorder({
+      sampleRate: 16000,
+      bufferLengthInSamples: 2000,
+    });
+
+    recorder.onAudioReady(async ({ buffer }) => {
+      try {
+        if (!model.isReady) return;
+
+        const newSamples = buffer.getChannelData(0);
+        const newSamplesLength = newSamples.length;
+        const totalInputLength = 16000;
+
+        const history = audioHistoryRef.current;
+        const remainingSamples = totalInputLength - newSamplesLength;
+
+        const combinedSamples = new Float32Array(totalInputLength);
+        combinedSamples.set(history.slice(newSamplesLength), 0);
+        combinedSamples.set(newSamples, remainingSamples);
+
+        audioHistoryRef.current = combinedSamples;
+
+        const input = {
+          dataPtr: combinedSamples,
+          sizes: [1, 1, 16000],
+          scalarType: ScalarType.FLOAT,
+        };
+
+        const output = await model.forward([input]);
+        const outputData = new Float32Array(output[0].dataPtr as ArrayBuffer);
+
+        if (outputData[0] > 0.5) {
+          console.log("Wake word detected with confidence:", outputData[0]);
+          setWakeTriggerAt(Date.now());
+        }
+      } catch (error) {
+        // Silent catch to avoid spam in console
+      }
+    });
+
+    recorderRef.current = recorder;
+
+    try {
+      await recorder.start();
+      console.log("Wake word detection started");
+    } catch (error) {
+      console.error("Failed to start wake word detection:", error);
+      recorderRef.current = null;
+    }
+  };
+
+  const stopWakeWordRecorder = async () => {
+    if (recorderRef.current) {
+      try {
+        await recorderRef.current.stop();
+        recorderRef.current = null;
+        audioHistoryRef.current.fill(0);
+      } catch (error) {
+        console.warn("Failed to stop wake word recorder:", error);
+      }
+    }
+  };
+
   const startSpeechRecognitionOnce = async () => {
     try {
-      // Store if audio was playing before starting speech recognition
       const isCurrentlyPlaying = player.playing;
       setWasPlayingBeforeWakeWord(isCurrentlyPlaying);
 
-      // Duck audio volume to reduce interference
       if (isCurrentlyPlaying) {
         duckAudioVolume();
       }
 
-      // Stop Porcupine to free up audio input for speech recognition
-      if (porcupineRef.current) {
-        await porcupineRef.current.stop();
-      }
+      await stopWakeWordRecorder();
 
       const permission =
         await ExpoSpeechRecognitionModule.requestPermissionsAsync();
       if (!permission.granted) {
         console.warn("Speech permission not granted", permission);
-        // Restart Porcupine if speech recognition failed to start
-        if (porcupineRef.current) {
-          await porcupineRef.current.start();
-        }
+        await startWakeWordRecorder();
+        restoreAudioVolume();
         return;
       }
+
       const available = ExpoSpeechRecognitionModule.isRecognitionAvailable();
       if (!available) {
         console.warn("Speech recognition not available on this device");
-        // Restart Porcupine if speech recognition failed to start
-        if (porcupineRef.current) {
-          await porcupineRef.current.start();
-        }
+        await startWakeWordRecorder();
+        restoreAudioVolume();
         return;
       }
 
@@ -178,7 +230,6 @@ export default function AudioPlayer() {
         continuous: false,
       });
 
-      // Ensure audio continues playing if it was playing before
       if (isCurrentlyPlaying && !player.playing) {
         try {
           player.play();
@@ -191,25 +242,13 @@ export default function AudioPlayer() {
       }
     } catch (e) {
       console.warn("Failed to start speech recognition", e);
-      // Restore volume if speech recognition failed
       restoreAudioVolume();
-      // Restart Porcupine if speech recognition failed to start
-      if (porcupineRef.current) {
-        try {
-          await porcupineRef.current.start();
-        } catch (restartError) {
-          console.warn(
-            "Failed to restart Porcupine after speech recognition error",
-            restartError
-          );
-        }
-      }
+      await startWakeWordRecorder();
     }
   };
 
   useSpeechRecognitionEvent("start", () => {
     setRecognizing(true);
-    // Ensure audio continues playing during speech recognition with ducked volume
     if (wasPlayingBeforeWakeWord && !player.playing) {
       try {
         player.play();
@@ -224,16 +263,14 @@ export default function AudioPlayer() {
 
   useSpeechRecognitionEvent("end", async () => {
     setRecognizing(false);
+
     if (transcript) {
       handleTranscriptCommand(transcript);
     }
     setTranscript("");
 
-    // Restore original audio volume
     restoreAudioVolume();
 
-    // Ensure audio continues playing if it was playing before wake word detection
-    // (unless the voice command explicitly stopped it)
     if (
       wasPlayingBeforeWakeWord &&
       !player.playing &&
@@ -249,34 +286,24 @@ export default function AudioPlayer() {
       }
     }
 
-    // Reset the state
     setWasPlayingBeforeWakeWord(false);
 
-    // Restart Porcupine wake word detection after speech recognition ends
-    if (porcupineRef.current) {
-      try {
-        await porcupineRef.current.start();
-      } catch (restartError) {
-        console.warn(
-          "Failed to restart Porcupine after speech recognition ended",
-          restartError
-        );
-      }
-    }
+    // Restart wake word detection
+    await startWakeWordRecorder();
   });
+
   useSpeechRecognitionEvent("result", (event) => {
     const next = event.results?.[0]?.transcript ?? "";
     setTranscript(next);
   });
+
   useSpeechRecognitionEvent("error", async (event) => {
     console.log("Speech error:", event.error, event.message);
     setRecognizing(false);
     setTranscript("");
 
-    // Restore original audio volume
     restoreAudioVolume();
 
-    // Restore audio playback if it was playing before wake word detection
     if (wasPlayingBeforeWakeWord && !player.playing) {
       try {
         player.play();
@@ -288,76 +315,33 @@ export default function AudioPlayer() {
       }
     }
 
-    // Reset the state
     setWasPlayingBeforeWakeWord(false);
 
-    // Restart Porcupine wake word detection after speech recognition error
-    if (porcupineRef.current) {
-      try {
-        await porcupineRef.current.start();
-      } catch (restartError) {
-        console.warn(
-          "Failed to restart Porcupine after speech recognition error",
-          restartError
-        );
-      }
-    }
+    // Restart wake word detection
+    await startWakeWordRecorder();
   });
 
-  // Keep a live ref to the current player instance
+  // Initialize wake word detection when audio is loaded and model is ready
   useEffect(() => {
-    playerRef.current = player;
-  }, [player]);
+    if (!audioSource || !model.isReady) return;
 
-  // Initialize Porcupine once an audio file is loaded
-  useEffect(() => {
-    const startPorcupine = async () => {
-      if (!audioSource || porcupineRef.current || !ACCESS_KEY) return;
-      try {
-        const detectionCallback = (keywordIndex: number) => {
-          // Wake word detected on native thread, signal JS thread
-          setWakeTriggerAt(Date.now());
-        };
-        const processErrorCallback = (error: any) => {
-          console.error("Porcupine error:", error);
-        };
-        porcupineRef.current = await PorcupineManager.fromBuiltInKeywords(
-          ACCESS_KEY,
-          [BuiltInKeywords.PORCUPINE, BuiltInKeywords.BUMBLEBEE],
-          detectionCallback,
-          processErrorCallback,
-          undefined,
-          [1.0, 1.0]
-        );
-        await porcupineRef.current.start();
-      } catch (e) {
-        console.error("Failed to initialize Porcupine:", e);
-      }
+    startWakeWordRecorder();
+
+    return () => {
+      stopWakeWordRecorder();
     };
-    startPorcupine();
-  }, [audioSource, ACCESS_KEY]);
+  }, [audioSource, model.isReady]);
 
-  // React to wake detection on JS thread: start speech recognition
+  // React to wake word detection
   useEffect(() => {
     if (!wakeTriggerAt) return;
-    const id = setTimeout(() => {
-      startSpeechRecognitionOnce();
-    }, 0);
-    return () => clearTimeout(id);
+    startSpeechRecognitionOnce();
   }, [wakeTriggerAt]);
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      // cleanup wake word engine
-      (async () => {
-        try {
-          if (porcupineRef.current) {
-            await porcupineRef.current.stop();
-            await porcupineRef.current.delete();
-            porcupineRef.current = null;
-          }
-        } catch {}
-      })();
+      stopWakeWordRecorder();
     };
   }, []);
 
@@ -387,7 +371,7 @@ export default function AudioPlayer() {
             {fileName}
           </ThemedText>
           <ThemedText style={styles.timeInfo}>
-            {formatTime(player.currentTime * 1000)} / {""}
+            {formatTime(player.currentTime * 1000)} /{" "}
             {formatTime(player.duration * 1000)}
           </ThemedText>
         </ThemedView>
@@ -404,13 +388,6 @@ export default function AudioPlayer() {
       {audioSource && (
         <ThemedView style={styles.controlsSection}>
           <ThemedView style={styles.controlsRow}>
-            <HapticTab
-              style={[styles.button, styles.controlButton]}
-              onPress={restartAudio}
-            >
-              <ThemedText style={styles.buttonText}>Restart</ThemedText>
-            </HapticTab>
-
             <HapticTab
               style={[
                 styles.button,
