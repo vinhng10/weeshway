@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSMicrophoneUsageDescription": "App requires microphone access to detect wake words and transcribe speech.",
         "NSSpeechRecognitionUsageDescription": "App transcribes your speech to text when you start listening."
-      }
+      },
+      "bundleIdentifier": "com.anonymous.danceai"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +22,11 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.danceai"
+      "package": "com.anonymous.danceai",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",

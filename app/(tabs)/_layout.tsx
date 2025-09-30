@@ -30,9 +30,27 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Audio Player",
+          title: "Home",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="play.circle.fill" color={color} />
+            <IconSymbol size={28} name="house.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="project"
+        options={{
+          title: "Project",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="music.note" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.circle.fill" color={color} />
           ),
         }}
       />
