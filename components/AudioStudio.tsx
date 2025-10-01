@@ -16,7 +16,7 @@ import {
 } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
-const PIXELS_PER_SECOND = 20;
+const PIXELS_PER_SECOND = 30;
 
 interface AudioSegment {
   id: string;
@@ -436,12 +436,13 @@ const styles = StyleSheet.create({
   ticksRow: {
     height: 24,
     position: "relative",
-    marginVertical: 6,
+    top: 6,
   },
   spacer: {
     width: screenWidth / 2,
   },
   track: {
+    top: 26,
     height: 60,
     position: "relative",
     overflow: "hidden",
@@ -476,7 +477,6 @@ const styles = StyleSheet.create({
     right: 12,
     zIndex: 20,
     backgroundColor: "rgba(0,0,0,0.7)",
-    // Keep transparent background so it visually matches inline labels
   },
   text: {
     color: "white",
