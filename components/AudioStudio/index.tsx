@@ -16,7 +16,11 @@ import { useAudioParts } from "./hooks/useAudioParts";
 import { useVoiceCommands } from "./hooks/useVoiceCommands";
 import { useWakeWordDetection } from "./hooks/useWakeWordDetection";
 import { AudioPlayerAction, PIXELS_PER_SECOND } from "./types";
-import { mapUserIdsToIndices } from "./utils";
+import {
+  addPaddingToMergedParts,
+  mapUserIdsToIndices,
+  mergeConsecutiveParts,
+} from "./utils";
 
 export default function AudioStudio() {
   const [audioSource, setAudioSource] = useState<string | null>(null);
@@ -93,15 +97,18 @@ export default function AudioStudio() {
           animated: false,
         });
 
-        // Handle part-based playback
+        // Handle part-based playback (consecutive parts are merged with padding)
         const selectedParts = getSelectedParts();
         if (selectedParts.length > 0) {
-          const currentPart = selectedParts[currentPartIndex];
+          // Merge consecutive parts and add padding for smoother transitions
+          const mergedParts = mergeConsecutiveParts(selectedParts);
+          const paddedParts = addPaddingToMergedParts(mergedParts, duration, 2);
+          const currentPart = paddedParts[currentPartIndex];
 
           if (currentPart && currentTime >= currentPart.endTime) {
             const nextIndex = currentPartIndex + 1;
-            if (nextIndex < selectedParts.length) {
-              const nextPart = selectedParts[nextIndex];
+            if (nextIndex < paddedParts.length) {
+              const nextPart = paddedParts[nextIndex];
               player.seekTo(nextPart.startTime);
               setCurrentPartIndex(nextIndex);
             } else {
@@ -183,7 +190,10 @@ export default function AudioStudio() {
         const selectedParts = getSelectedParts();
 
         if (selectedParts.length > 0) {
-          const firstPart = selectedParts[0];
+          // Use merged parts with padding for smoother playback
+          const mergedParts = mergeConsecutiveParts(selectedParts);
+          const paddedParts = addPaddingToMergedParts(mergedParts, duration, 2);
+          const firstPart = paddedParts[0];
           player.seekTo(firstPart.startTime);
           setCurrentPartIndex(0);
         }
