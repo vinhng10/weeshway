@@ -1,21 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { AudioPart } from "../types";
 
 export const useAudioParts = (duration: number) => {
   const [parts, setParts] = useState<AudioPart[]>([]);
+  const previousDurationRef = useRef<number>(0);
 
-  // Initialize parts when audio is loaded
+  // Initialize or reset parts when audio is loaded or changed
   useEffect(() => {
-    if (duration > 0 && parts.length === 0) {
-      setParts([
-        {
-          id: 0,
-          startTime: 0,
-          endTime: duration,
-          selected: false,
-        },
-      ]);
+    if (duration > 0) {
+      // Reset parts if duration changed (new song loaded) or if parts is empty
+      if (
+        parts.length === 0 ||
+        Math.abs(previousDurationRef.current - duration) > 0.1
+      ) {
+        setParts([
+          {
+            id: 0,
+            startTime: 0,
+            endTime: duration,
+            selected: false,
+          },
+        ]);
+        previousDurationRef.current = duration;
+      }
     }
   }, [duration]);
 
@@ -34,6 +42,7 @@ export const useAudioParts = (duration: number) => {
   };
 
   const handleSplit = (splitTime: number) => {
+    console.log("handleSplit", splitTime);
     // Find the part that contains the current time
     const partIndex = parts.findIndex(
       (seg) => splitTime > seg.startTime && splitTime < seg.endTime
@@ -73,6 +82,8 @@ export const useAudioParts = (duration: number) => {
       ...part,
       id: index,
     }));
+
+    console.log("reassignedParts", reassignedParts);
 
     setParts(reassignedParts);
   };

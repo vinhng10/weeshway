@@ -55,7 +55,6 @@ export const Track = forwardRef<ScrollView, TrackProps>(
           scrollEventThrottle={16}
           onScroll={onScroll}
           onScrollBeginDrag={onScrollBegin}
-          onScrollEndDrag={onScrollEnd}
           onMomentumScrollEnd={onScrollEnd}
         >
           <View style={styles.trackWrapper}>

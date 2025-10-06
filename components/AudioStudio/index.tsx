@@ -29,7 +29,6 @@ export default function AudioStudio() {
   const scrollViewRef = useRef<ScrollView>(null);
   const [isManualScrolling, setIsManualScrolling] = useState(false);
   const [displayTime, setDisplayTime] = useState<number>(0);
-  const scrollTimeoutRef = useRef<number | null>(null);
   const [currentPartIndex, setCurrentPartIndex] = useState<number>(0);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
 
@@ -143,26 +142,16 @@ export default function AudioStudio() {
 
   const handleScrollBegin = () => {
     setIsManualScrolling(true);
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
   };
 
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const scrollPosition = event.nativeEvent.contentOffset.x;
-
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
+    if (duration > 0 && trackWidth > 0) {
+      const scrollPosition = event.nativeEvent.contentOffset.x;
+      const playbackTime = (scrollPosition / trackWidth) * duration;
+      const clampedTime = Math.max(0, Math.min(playbackTime, duration));
+      player.seekTo(clampedTime);
     }
-
-    scrollTimeoutRef.current = setTimeout(() => {
-      if (duration > 0 && trackWidth > 0) {
-        const playbackTime = (scrollPosition / trackWidth) * duration;
-        const clampedTime = Math.max(0, Math.min(playbackTime, duration));
-        player.seekTo(clampedTime);
-      }
-      setIsManualScrolling(false);
-    }, 100);
+    setIsManualScrolling(false);
   };
 
   const loadAudioFile = async () => {
@@ -174,6 +163,20 @@ export default function AudioStudio() {
 
       if (!result.canceled && result.assets[0]) {
         const { uri } = result.assets[0];
+
+        // Stop playback if currently playing
+        if (player.playing) {
+          try {
+            player.pause();
+          } catch {}
+        }
+
+        // Reset states for new song
+        setCurrentPartIndex(0);
+        setDisplayTime(0);
+        setIsManualScrolling(false);
+
+        // Set new audio source (this will trigger duration change and parts reset)
         setAudioSource(uri);
       }
     } catch (error) {

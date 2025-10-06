@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -47,7 +47,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         onPress={onToggleWakeWord}
       >
         <Ionicons
-          name={wakeWordEnabled ? "mic" : "mic-off"}
+          name={wakeWordEnabled ? "sparkles" : "sparkles-outline"}
           size={26}
           color={wakeWordEnabled ? "#4CAF50" : "white"}
         />
