@@ -12,14 +12,14 @@ import {
 import { ControlBar } from "./components/ControlBar";
 import { DisplayArea } from "./components/DisplayArea";
 import { Track } from "./components/Track";
-import { useAudioParts } from "./hooks/useAudioParts";
+import { useAudioRoutines } from "./hooks/useAudioRoutines";
 import { useVoiceCommands } from "./hooks/useVoiceCommands";
 import { useWakeWordDetection } from "./hooks/useWakeWordDetection";
 import { AudioPlayerAction, PIXELS_PER_SECOND } from "./types";
 import {
-  addPaddingToMergedParts,
+  addPaddingToMergedRoutines,
   mapUserIdsToIndices,
-  mergeConsecutiveParts,
+  mergeConsecutiveRoutines,
 } from "./utils";
 
 export default function AudioStudio() {
@@ -29,7 +29,7 @@ export default function AudioStudio() {
   const scrollViewRef = useRef<ScrollView>(null);
   const [isManualScrolling, setIsManualScrolling] = useState(false);
   const [displayTime, setDisplayTime] = useState<number>(0);
-  const [currentPartIndex, setCurrentPartIndex] = useState<number>(0);
+  const [currentRoutineIndex, setCurrentRoutineIndex] = useState<number>(0);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
 
   const duration = status.duration || 0;
@@ -37,13 +37,13 @@ export default function AudioStudio() {
 
   // Custom hooks
   const {
-    parts,
-    togglePartSelection,
-    getSelectedParts,
+    routines,
+    toggleRoutineSelection,
+    getSelectedRoutines,
     handleSplit,
     handleMerge,
-    selectPartsByIndices,
-  } = useAudioParts(duration);
+    selectRoutinesByIndices,
+  } = useAudioRoutines(duration);
 
   const { wakeTriggerAt, startWakeWordRecorder, stopWakeWordRecorder } =
     useWakeWordDetection(wakeWordEnabled, audioSource);
@@ -57,17 +57,17 @@ export default function AudioStudio() {
       return;
     }
 
-    const indices = mapUserIdsToIndices(action.parts, parts.length);
+    const indices = mapUserIdsToIndices(action.routines, routines.length);
     if (indices.length === 0) return;
 
-    selectPartsByIndices(indices);
+    selectRoutinesByIndices(indices);
 
     const firstIndex = indices[0];
-    const firstPart = parts[firstIndex];
-    if (firstPart) {
+    const firstRoutine = routines[firstIndex];
+    if (firstRoutine) {
       try {
-        player.seekTo(firstPart.startTime);
-        setCurrentPartIndex(0);
+        player.seekTo(firstRoutine.startTime);
+        setCurrentRoutineIndex(0);
         player.play();
       } catch (e) {
         console.warn("Failed to start playback from voice command", e);
@@ -96,23 +96,27 @@ export default function AudioStudio() {
           animated: false,
         });
 
-        // Handle part-based playback (consecutive parts are merged with padding)
-        const selectedParts = getSelectedParts();
-        if (selectedParts.length > 0) {
-          // Merge consecutive parts and add padding for smoother transitions
-          const mergedParts = mergeConsecutiveParts(selectedParts);
-          const paddedParts = addPaddingToMergedParts(mergedParts, duration, 2);
-          const currentPart = paddedParts[currentPartIndex];
+        // Handle routine-based playback (consecutive routines are merged with padding)
+        const selectedRoutines = getSelectedRoutines();
+        if (selectedRoutines.length > 0) {
+          // Merge consecutive routines and add padding for smoother transitions
+          const mergedRoutines = mergeConsecutiveRoutines(selectedRoutines);
+          const paddedRoutines = addPaddingToMergedRoutines(
+            mergedRoutines,
+            duration,
+            2
+          );
+          const currentRoutine = paddedRoutines[currentRoutineIndex];
 
-          if (currentPart && currentTime >= currentPart.endTime) {
-            const nextIndex = currentPartIndex + 1;
-            if (nextIndex < paddedParts.length) {
-              const nextPart = paddedParts[nextIndex];
-              player.seekTo(nextPart.startTime);
-              setCurrentPartIndex(nextIndex);
+          if (currentRoutine && currentTime >= currentRoutine.endTime) {
+            const nextIndex = currentRoutineIndex + 1;
+            if (nextIndex < paddedRoutines.length) {
+              const nextRoutine = paddedRoutines[nextIndex];
+              player.seekTo(nextRoutine.startTime);
+              setCurrentRoutineIndex(nextIndex);
             } else {
               player.pause();
-              setCurrentPartIndex(0);
+              setCurrentRoutineIndex(0);
             }
           }
         }
@@ -120,7 +124,13 @@ export default function AudioStudio() {
 
       return () => clearInterval(interval);
     }
-  }, [player.playing, isManualScrolling, duration, currentPartIndex, parts]);
+  }, [
+    player.playing,
+    isManualScrolling,
+    duration,
+    currentRoutineIndex,
+    routines,
+  ]);
 
   // React to wake word detection
   useEffect(() => {
@@ -172,11 +182,11 @@ export default function AudioStudio() {
         }
 
         // Reset states for new song
-        setCurrentPartIndex(0);
+        setCurrentRoutineIndex(0);
         setDisplayTime(0);
         setIsManualScrolling(false);
 
-        // Set new audio source (this will trigger duration change and parts reset)
+        // Set new audio source (this will trigger duration change and routines reset)
         setAudioSource(uri);
       }
     } catch (error) {
@@ -190,15 +200,19 @@ export default function AudioStudio() {
       if (player.playing) {
         player.pause();
       } else {
-        const selectedParts = getSelectedParts();
+        const selectedRoutines = getSelectedRoutines();
 
-        if (selectedParts.length > 0) {
-          // Use merged parts with padding for smoother playback
-          const mergedParts = mergeConsecutiveParts(selectedParts);
-          const paddedParts = addPaddingToMergedParts(mergedParts, duration, 2);
-          const firstPart = paddedParts[0];
-          player.seekTo(firstPart.startTime);
-          setCurrentPartIndex(0);
+        if (selectedRoutines.length > 0) {
+          // Use merged routines with padding for smoother playback
+          const mergedRoutines = mergeConsecutiveRoutines(selectedRoutines);
+          const paddedRoutines = addPaddingToMergedRoutines(
+            mergedRoutines,
+            duration,
+            2
+          );
+          const firstRoutine = paddedRoutines[0];
+          player.seekTo(firstRoutine.startTime);
+          setCurrentRoutineIndex(0);
         }
 
         player.play();
@@ -235,11 +249,11 @@ export default function AudioStudio() {
         ref={scrollViewRef}
         duration={duration}
         displayTime={displayTime}
-        parts={parts}
+        routines={routines}
         onScroll={handleScroll}
         onScrollBegin={handleScrollBegin}
         onScrollEnd={handleScrollEnd}
-        onPartPress={togglePartSelection}
+        onRoutinePress={toggleRoutineSelection}
       />
     </View>
   );

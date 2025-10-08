@@ -10,12 +10,12 @@ AudioStudio/
 ├── types.ts                     # Shared TypeScript types and constants
 ├── utils.ts                     # Utility functions
 ├── components/                  # UI Components
-│   ├── AudioPartItem.tsx       # Individual audio part renderer
+│   ├── AudioRoutineItem.tsx       # Individual audio routine renderer
 │   ├── ControlBar.tsx          # Control buttons (play, split, merge, etc.)
 │   ├── DisplayArea.tsx         # Main display with transcript overlay
-│   └── Track.tsx            # Track with parts and time markers
+│   └── Track.tsx            # Track with routines and time markers
 └── hooks/                       # Custom React hooks
-    ├── useAudioParts.ts        # Audio parts state management
+    ├── useAudioRoutines.ts        # Audio routines state management
     ├── useVoiceCommands.ts     # Speech recognition & Groq integration
     └── useWakeWordDetection.ts # Wake word detection logic
 ```
@@ -34,11 +34,11 @@ AudioStudio/
 
 ### 2. **Custom Hooks**
 
-#### `useAudioParts(duration)`
+#### `useAudioRoutines(duration)`
 
-- Manages the array of audio parts
+- Manages the array of audio routines
 - Handles split, merge, and selection operations
-- Returns: `parts`, `togglePartSelection`, `handleSplit`, `handleMerge`, `selectPartsByIndices`
+- Returns: `routines`, `toggleRoutineSelection`, `handleSplit`, `handleMerge`, `selectRoutinesByIndices`
 
 #### `useWakeWordDetection(enabled, audioSource)`
 
@@ -68,20 +68,20 @@ AudioStudio/
 #### `Track`
 
 - Scrollable track view
-- Renders time markers and audio parts
+- Renders time markers and audio routines
 - Handles scroll events
 
-#### `AudioPartItem`
+#### `AudioRoutineItem`
 
-- Individual audio part visualization
-- Shows part ID number
+- Individual audio routine visualization
+- Shows routine ID number
 - Handles selection
 
 ### 4. **Shared Code**
 
 #### `types.ts`
 
-- `AudioPart`: Interface for audio parts
+- `AudioRoutine`: Interface for audio routines
 - `AudioPlayerAction`: Groq response type
 - Constants: `DUCKING_VOLUME`, `PIXELS_PER_SECOND`
 
@@ -89,8 +89,8 @@ AudioStudio/
 
 - `formatTime()`: Convert seconds to MM:SS
 - `mapUserIdsToIndices()`: Convert 1-based user IDs to 0-based array indices
-- `mergeConsecutiveParts()`: Combine consecutive audio parts into continuous parts to eliminate playback glitches
-- `addPaddingToMergedParts()`: Add padding only before the first part and after the last part for smoother transitions and context
+- `mergeConsecutiveRoutines()`: Combine consecutive audio routines into continuous routines to eliminate playback glitches
+- `addPaddingToMergedRoutines()`: Add padding only before the first routine and after the last routine for smoother transitions and context
 
 ## Key Improvements
 
@@ -123,10 +123,10 @@ AudioStudio/
 
 ### ✅ **Smooth Playback**
 
-- Consecutive audio parts are automatically merged during playback
-- Eliminates glitches at transitions between consecutive parts
-- Only seeks when jumping to non-consecutive parts
-- Adds padding (2 seconds) before the first part and after the last part only for smoother transitions and context
+- Consecutive audio routines are automatically merged during playback
+- Eliminates glitches at transitions between consecutive routines
+- Only seeks when jumping to non-consecutive routines
+- Adds padding (2 seconds) before the first routine and after the last routine only for smoother transitions and context
 
 ## Data Flow
 
@@ -141,7 +141,7 @@ AudioStudio/
          │                 │              │              │
     ┌────▼─────┐    ┌─────▼──────┐  ┌───▼──────┐  ┌───▼──────┐
     │ useAudio │    │ useWakeWord│  │useVoice  │  │   UI     │
-    │  Parts   │    │ Detection  │  │Commands  │  │Components│
+    │  Routines   │    │ Detection  │  │Commands  │  │Components│
     └────┬─────┘    └─────┬──────┘  └───┬──────┘  └───┬──────┘
          │                 │              │             │
          └─────────────────┴──────────────┴─────────────┘

@@ -64,27 +64,27 @@ export const useVoiceCommands = ({
           {
             role: "system",
             content:
-              "You are an audio player voice assistant. Infer user's intent from the voice command and return the audio player action and target audio parts.",
+              "You are an audio player voice assistant. Infer user's intent from the voice command and return the audio player action and target audio routines.",
           },
-          { role: "user", content: "Play parts three and five" },
+          { role: "user", content: "Play routines three and five" },
           {
             role: "assistant",
-            content: JSON.stringify({ action: "play", parts: [3, 5] }),
+            content: JSON.stringify({ action: "play", routines: [3, 5] }),
           },
           { role: "user", content: "Stop the music" },
           {
             role: "assistant",
-            content: JSON.stringify({ action: "stop", parts: [] }),
+            content: JSON.stringify({ action: "stop", routines: [] }),
           },
           { role: "user", content: "Play last two section" },
           {
             role: "assistant",
-            content: JSON.stringify({ action: "play", parts: [-2, -1] }),
+            content: JSON.stringify({ action: "play", routines: [-2, -1] }),
           },
           { role: "user", content: "Play one four six" },
           {
             role: "assistant",
-            content: JSON.stringify({ action: "play", parts: [1, 4, 6] }),
+            content: JSON.stringify({ action: "play", routines: [1, 4, 6] }),
           },
           { role: "user", content: inputText },
         ],
@@ -96,9 +96,9 @@ export const useVoiceCommands = ({
               type: "object",
               properties: {
                 action: { type: "string", enum: ["play", "stop"] },
-                parts: { type: "array", items: { type: "number" } },
+                routines: { type: "array", items: { type: "number" } },
               },
-              required: ["action", "parts"],
+              required: ["action", "routines"],
               additionalProperties: false,
             },
           },
@@ -110,7 +110,7 @@ export const useVoiceCommands = ({
         typeof parsed === "object" &&
         parsed &&
         (parsed.action === "play" || parsed.action === "stop") &&
-        Array.isArray(parsed.parts)
+        Array.isArray(parsed.routines)
       ) {
         return parsed as AudioPlayerAction;
       }

@@ -1,4 +1,4 @@
-export interface AudioPart {
+export interface AudioRoutine {
   id: number;
   startTime: number;
   endTime: number;
@@ -7,7 +7,7 @@ export interface AudioPart {
 
 export interface AudioPlayerAction {
   action: "play" | "stop";
-  parts: number[];
+  routines: number[];
 }
 
 export const DUCKING_VOLUME = 0.1;

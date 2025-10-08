@@ -8,20 +8,20 @@ import {
   Text,
   View,
 } from "react-native";
-import { AudioPart, PIXELS_PER_SECOND } from "../types";
+import { AudioRoutine, PIXELS_PER_SECOND } from "../types";
 import { formatTime } from "../utils";
-import { AudioPartItem } from "./AudioPartItem";
+import { AudioRoutineItem } from "./AudioRoutineItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 interface TrackProps {
   duration: number;
   displayTime: number;
-  parts: AudioPart[];
+  routines: AudioRoutine[];
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   onScrollBegin: () => void;
   onScrollEnd: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
-  onPartPress: (partId: number) => void;
+  onRoutinePress: (routineId: number) => void;
 }
 
 export const Track = forwardRef<ScrollView, TrackProps>(
@@ -29,11 +29,11 @@ export const Track = forwardRef<ScrollView, TrackProps>(
     {
       duration,
       displayTime,
-      parts,
+      routines,
       onScroll,
       onScrollBegin,
       onScrollEnd,
-      onPartPress,
+      onRoutinePress,
     },
     ref
   ) => {
@@ -83,13 +83,13 @@ export const Track = forwardRef<ScrollView, TrackProps>(
                   )}
               </View>
 
-              {/* Track track - parts */}
+              {/* Track track - routines */}
               <View style={[styles.track, { width: trackWidth }]}>
-                {parts.map((part) => (
-                  <AudioPartItem
-                    key={part.id}
-                    part={part}
-                    onPress={onPartPress}
+                {routines.map((routine) => (
+                  <AudioRoutineItem
+                    key={routine.id}
+                    routine={routine}
+                    onPress={onRoutinePress}
                   />
                 ))}
               </View>
