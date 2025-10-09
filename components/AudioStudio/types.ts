@@ -1,7 +1,7 @@
-export interface AudioRoutine {
+export interface Routine {
   id: number;
-  startTime: number;
-  endTime: number;
+  musicStartTime: number;
+  musicEndTime: number;
   selected: boolean;
 }
 

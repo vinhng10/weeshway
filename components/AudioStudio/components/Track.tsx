@@ -8,23 +8,23 @@ import {
   Text,
   View,
 } from "react-native";
-import { AudioRoutine, PIXELS_PER_SECOND } from "../types";
+import { PIXELS_PER_SECOND, Routine } from "../types";
 import {
   addPaddingToMergedRoutines,
   formatTime,
   mergeConsecutiveRoutines,
 } from "../utils";
-import { AudioRoutineItem } from "./AudioRoutineItem";
+import { RoutineItem } from "./RoutineItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 interface TrackProps {
   player?: any; // expo-audio player instance
-  routines: AudioRoutine[];
+  routines: Routine[];
   onRoutinePress?: (routineId: number) => void;
   duration?: number;
   // Auto-scrolling props
-  selectedRoutines?: AudioRoutine[];
+  selectedRoutines?: Routine[];
   currentRoutineIndex?: number;
   onRoutineIndexChange?: (index: number) => void;
 }
@@ -79,11 +79,14 @@ export const Track = ({
           );
           const currentRoutine = paddedRoutines[currentRoutineIndex];
 
-          if (currentRoutine && player.currentTime >= currentRoutine.endTime) {
+          if (
+            currentRoutine &&
+            player.currentTime >= currentRoutine.musicEndTime
+          ) {
             const nextIndex = currentRoutineIndex + 1;
             if (nextIndex < paddedRoutines.length) {
               const nextRoutine = paddedRoutines[nextIndex];
-              player.seekTo(nextRoutine.startTime);
+              player.seekTo(nextRoutine.musicStartTime);
               onRoutineIndexChange?.(nextIndex);
             } else {
               player.pause();
@@ -141,7 +144,7 @@ export const Track = ({
             {/* Track track - routines */}
             <View style={[styles.track, { width: trackWidth }]}>
               {routines.map((routine) => (
-                <AudioRoutineItem
+                <RoutineItem
                   key={routine.id}
                   routine={routine}
                   onPress={onRoutinePress}
@@ -161,7 +164,8 @@ export const Track = ({
 
 const styles = StyleSheet.create({
   trackContainer: {
-    height: 200,
+    height: "50%",
+    // backgroundColor: "#111",
   },
   trackWrapper: {
     flexDirection: "row",
@@ -180,8 +184,8 @@ const styles = StyleSheet.create({
     width: screenWidth / 2,
   },
   track: {
-    top: 26,
-    height: 60,
+    top: 12,
+    height: 54,
     position: "relative",
     overflow: "hidden",
   },
@@ -199,8 +203,8 @@ const styles = StyleSheet.create({
   },
   cursor: {
     position: "absolute",
-    top: 40,
-    bottom: 0,
+    top: 24,
+    bottom: 4,
     left: "50%",
     width: 2,
     backgroundColor: "#ffffff",

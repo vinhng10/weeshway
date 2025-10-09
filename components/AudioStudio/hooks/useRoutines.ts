@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
-import { AudioRoutine } from "../types";
+import { Routine } from "../types";
 
-export const useAudioRoutines = (duration: number) => {
-  const [routines, setRoutines] = useState<AudioRoutine[]>([]);
+export const useRoutines = (duration: number) => {
+  const [routines, setRoutines] = useState<Routine[]>([]);
   const previousDurationRef = useRef<number>(0);
 
   // Initialize or reset routines when audio is loaded or changed
@@ -17,8 +17,8 @@ export const useAudioRoutines = (duration: number) => {
         setRoutines([
           {
             id: 0,
-            startTime: 0,
-            endTime: duration,
+            musicStartTime: 0,
+            musicEndTime: duration,
             selected: false,
           },
         ]);
@@ -38,13 +38,13 @@ export const useAudioRoutines = (duration: number) => {
   const getSelectedRoutines = () => {
     return routines
       .filter((seg) => seg.selected)
-      .sort((a, b) => a.startTime - b.startTime);
+      .sort((a, b) => a.musicStartTime - b.musicStartTime);
   };
 
   const handleSplit = (splitTime: number) => {
     // Find the routine that contains the current time
     const routineIndex = routines.findIndex(
-      (seg) => splitTime > seg.startTime && splitTime < seg.endTime
+      (seg) => splitTime > seg.musicStartTime && splitTime < seg.musicEndTime
     );
 
     if (routineIndex === -1) {
@@ -64,14 +64,14 @@ export const useAudioRoutines = (duration: number) => {
       1,
       {
         id: routineIndex,
-        startTime: routineToSplit.startTime,
-        endTime: splitTime,
+        musicStartTime: routineToSplit.musicStartTime,
+        musicEndTime: splitTime,
         selected: false,
       },
       {
         id: routineIndex + 1,
-        startTime: splitTime,
-        endTime: routineToSplit.endTime,
+        musicStartTime: splitTime,
+        musicEndTime: routineToSplit.musicEndTime,
         selected: false,
       }
     );
@@ -108,10 +108,10 @@ export const useAudioRoutines = (duration: number) => {
     const routinesToMerge = routines.slice(firstIndex, lastIndex + 1);
 
     // Create merged routine
-    const merged: AudioRoutine = {
+    const merged: Routine = {
       id: firstIndex,
-      startTime: routinesToMerge[0].startTime,
-      endTime: routinesToMerge[routinesToMerge.length - 1].endTime,
+      musicStartTime: routinesToMerge[0].musicStartTime,
+      musicEndTime: routinesToMerge[routinesToMerge.length - 1].musicEndTime,
       selected: true,
     };
 

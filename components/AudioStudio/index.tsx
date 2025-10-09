@@ -5,7 +5,7 @@ import { Alert, StyleSheet, View } from "react-native";
 import { ControlBar } from "./components/ControlBar";
 import { DisplayArea } from "./components/DisplayArea";
 import { Track } from "./components/Track";
-import { useAudioRoutines } from "./hooks/useAudioRoutines";
+import { useRoutines } from "./hooks/useRoutines";
 import { useVoiceCommands } from "./hooks/useVoiceCommands";
 import { useWakeWordDetection } from "./hooks/useWakeWordDetection";
 import { AudioPlayerAction } from "./types";
@@ -32,7 +32,7 @@ export default function AudioStudio() {
     handleSplit,
     handleMerge,
     selectRoutinesByIndices,
-  } = useAudioRoutines(duration);
+  } = useRoutines(duration);
 
   const { wakeTriggerAt, startWakeWordRecorder, stopWakeWordRecorder } =
     useWakeWordDetection(wakeWordEnabled, audioSource);
@@ -55,7 +55,7 @@ export default function AudioStudio() {
     const firstRoutine = routines[firstIndex];
     if (firstRoutine) {
       try {
-        player.seekTo(firstRoutine.startTime);
+        player.seekTo(firstRoutine.musicStartTime);
         setCurrentRoutineIndex(0);
         player.play();
       } catch (e) {
@@ -122,7 +122,7 @@ export default function AudioStudio() {
             2
           );
           const firstRoutine = paddedRoutines[0];
-          player.seekTo(firstRoutine.startTime);
+          player.seekTo(firstRoutine.musicStartTime);
           setCurrentRoutineIndex(0);
         }
 
@@ -156,15 +156,26 @@ export default function AudioStudio() {
         onToggleWakeWord={toggleWakeWordDetection}
       />
 
-      <Track
-        player={player}
-        duration={duration}
-        routines={routines}
-        onRoutinePress={toggleRoutineSelection}
-        selectedRoutines={getSelectedRoutines()}
-        currentRoutineIndex={currentRoutineIndex}
-        onRoutineIndexChange={setCurrentRoutineIndex}
-      />
+      <View style={styles.tracksContainer}>
+        <Track
+          player={player}
+          duration={duration}
+          routines={routines}
+          onRoutinePress={toggleRoutineSelection}
+          selectedRoutines={getSelectedRoutines()}
+          currentRoutineIndex={currentRoutineIndex}
+          onRoutineIndexChange={setCurrentRoutineIndex}
+        />
+        <Track
+          player={player}
+          duration={duration}
+          routines={routines}
+          onRoutinePress={toggleRoutineSelection}
+          selectedRoutines={getSelectedRoutines()}
+          currentRoutineIndex={currentRoutineIndex}
+          onRoutineIndexChange={setCurrentRoutineIndex}
+        />
+      </View>
     </View>
   );
 }
@@ -172,5 +183,9 @@ export default function AudioStudio() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  tracksContainer: {
+    flexDirection: "column",
+    height: 200,
   },
 });

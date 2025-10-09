@@ -1,4 +1,4 @@
-import { AudioRoutine } from "./types";
+import { Routine } from "./types";
 
 export const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
@@ -31,7 +31,7 @@ export const mapUserIdsToIndices = (
  * Combines consecutive audio routines into continuous routines to eliminate
  * glitches during playback transitions.
  *
- * @param routines - Array of audio routines sorted by startTime
+ * @param routines - Array of audio routines sorted by musicStartTime
  * @returns Array of merged routines where consecutive routines are combined
  *
  * @example
@@ -39,17 +39,19 @@ export const mapUserIdsToIndices = (
  * Output: [routine(0-20), routine(40-60)]
  */
 export const mergeConsecutiveRoutines = (
-  routines: AudioRoutine[]
-): Array<{ startTime: number; endTime: number }> => {
+  routines: Routine[]
+): Array<{ musicStartTime: number; musicEndTime: number }> => {
   if (routines.length === 0) return [];
 
   // Sort by start time to ensure correct order
-  const sorted = [...routines].sort((a, b) => a.startTime - b.startTime);
+  const sorted = [...routines].sort(
+    (a, b) => a.musicStartTime - b.musicStartTime
+  );
 
-  const merged: Array<{ startTime: number; endTime: number }> = [];
+  const merged: Array<{ musicStartTime: number; musicEndTime: number }> = [];
   let currentRoutine = {
-    startTime: sorted[0].startTime,
-    endTime: sorted[0].endTime,
+    musicStartTime: sorted[0].musicStartTime,
+    musicEndTime: sorted[0].musicEndTime,
   };
 
   for (let i = 1; i < sorted.length; i++) {
@@ -58,17 +60,17 @@ export const mergeConsecutiveRoutines = (
     // Check if this routine is consecutive (starts where previous ended)
     // Use a small epsilon for floating point comparison
     const isConsecutive =
-      Math.abs(routine.startTime - currentRoutine.endTime) < 0.001;
+      Math.abs(routine.musicStartTime - currentRoutine.musicEndTime) < 0.001;
 
     if (isConsecutive) {
       // Extend the current routine
-      currentRoutine.endTime = routine.endTime;
+      currentRoutine.musicEndTime = routine.musicEndTime;
     } else {
       // Save current routine and start a new one
       merged.push(currentRoutine);
       currentRoutine = {
-        startTime: routine.startTime,
-        endTime: routine.endTime,
+        musicStartTime: routine.musicStartTime,
+        musicEndTime: routine.musicEndTime,
       };
     }
   }
@@ -93,10 +95,10 @@ export const mergeConsecutiveRoutines = (
  * Output: [routine(8-20), routine(40-50), routine(60-72)]
  */
 export const addPaddingToMergedRoutines = (
-  mergedRoutines: Array<{ startTime: number; endTime: number }>,
+  mergedRoutines: Array<{ musicStartTime: number; musicEndTime: number }>,
   totalDuration: number,
   paddingSeconds: number = 2
-): Array<{ startTime: number; endTime: number }> => {
+): Array<{ musicStartTime: number; musicEndTime: number }> => {
   if (mergedRoutines.length === 0) return [];
 
   return mergedRoutines.map((routine, index) => {
@@ -104,16 +106,16 @@ export const addPaddingToMergedRoutines = (
     const isLast = index === mergedRoutines.length - 1;
 
     const paddedStart = isFirst
-      ? Math.max(0, routine.startTime - paddingSeconds)
-      : routine.startTime;
+      ? Math.max(0, routine.musicStartTime - paddingSeconds)
+      : routine.musicStartTime;
 
     const paddedEnd = isLast
-      ? Math.min(totalDuration, routine.endTime + paddingSeconds)
-      : routine.endTime;
+      ? Math.min(totalDuration, routine.musicEndTime + paddingSeconds)
+      : routine.musicEndTime;
 
     return {
-      startTime: paddedStart,
-      endTime: paddedEnd,
+      musicStartTime: paddedStart,
+      musicEndTime: paddedEnd,
     };
   });
 };

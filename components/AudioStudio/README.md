@@ -10,12 +10,12 @@ AudioStudio/
 ├── types.ts                     # Shared TypeScript types and constants
 ├── utils.ts                     # Utility functions
 ├── components/                  # UI Components
-│   ├── AudioRoutineItem.tsx       # Individual audio routine renderer
+│   ├── RoutineItem.tsx       # Individual audio routine renderer
 │   ├── ControlBar.tsx          # Control buttons (play, split, merge, etc.)
 │   ├── DisplayArea.tsx         # Main display with transcript overlay
 │   └── Track.tsx            # Track with routines and time markers
 └── hooks/                       # Custom React hooks
-    ├── useAudioRoutines.ts        # Audio routines state management
+    ├── useRoutines.ts        # Audio routines state management
     ├── useVoiceCommands.ts     # Speech recognition & Groq integration
     └── useWakeWordDetection.ts # Wake word detection logic
 ```
@@ -34,7 +34,7 @@ AudioStudio/
 
 ### 2. **Custom Hooks**
 
-#### `useAudioRoutines(duration)`
+#### `useRoutines(duration)`
 
 - Manages the array of audio routines
 - Handles split, merge, and selection operations
@@ -71,7 +71,7 @@ AudioStudio/
 - Renders time markers and audio routines
 - Handles scroll events
 
-#### `AudioRoutineItem`
+#### `RoutineItem`
 
 - Individual audio routine visualization
 - Shows routine ID number
@@ -81,7 +81,7 @@ AudioStudio/
 
 #### `types.ts`
 
-- `AudioRoutine`: Interface for audio routines
+- `Routine`: Interface for audio routines
 - `AudioPlayerAction`: Groq response type
 - Constants: `DUCKING_VOLUME`, `PIXELS_PER_SECOND`
 
