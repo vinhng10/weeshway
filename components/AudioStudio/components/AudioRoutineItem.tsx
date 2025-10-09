@@ -4,7 +4,7 @@ import { AudioRoutine, PIXELS_PER_SECOND } from "../types";
 
 interface AudioRoutineItemProps {
   routine: AudioRoutine;
-  onPress: (routineId: number) => void;
+  onPress?: (routineId: number) => void;
 }
 
 export const AudioRoutineItem: React.FC<AudioRoutineItemProps> = ({

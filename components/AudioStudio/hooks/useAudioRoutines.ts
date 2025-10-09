@@ -42,7 +42,6 @@ export const useAudioRoutines = (duration: number) => {
   };
 
   const handleSplit = (splitTime: number) => {
-    console.log("handleSplit", splitTime);
     // Find the routine that contains the current time
     const routineIndex = routines.findIndex(
       (seg) => splitTime > seg.startTime && splitTime < seg.endTime

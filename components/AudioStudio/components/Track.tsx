@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   NativeScrollEvent,
@@ -9,101 +9,155 @@ import {
   View,
 } from "react-native";
 import { AudioRoutine, PIXELS_PER_SECOND } from "../types";
-import { formatTime } from "../utils";
+import {
+  addPaddingToMergedRoutines,
+  formatTime,
+  mergeConsecutiveRoutines,
+} from "../utils";
 import { AudioRoutineItem } from "./AudioRoutineItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 interface TrackProps {
-  duration: number;
-  displayTime: number;
+  player?: any; // expo-audio player instance
   routines: AudioRoutine[];
-  onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
-  onScrollBegin: () => void;
-  onScrollEnd: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
-  onRoutinePress: (routineId: number) => void;
+  onRoutinePress?: (routineId: number) => void;
+  duration?: number;
+  // Auto-scrolling props
+  selectedRoutines?: AudioRoutine[];
+  currentRoutineIndex?: number;
+  onRoutineIndexChange?: (index: number) => void;
 }
 
-export const Track = forwardRef<ScrollView, TrackProps>(
-  (
-    {
-      duration,
-      displayTime,
-      routines,
-      onScroll,
-      onScrollBegin,
-      onScrollEnd,
-      onRoutinePress,
-    },
-    ref
-  ) => {
-    const trackWidth = duration * PIXELS_PER_SECOND;
+export const Track = ({
+  player,
+  routines,
+  onRoutinePress,
+  duration = 0,
+  selectedRoutines = [],
+  currentRoutineIndex = 0,
+  onRoutineIndexChange,
+}: TrackProps) => {
+  const trackWidth = duration * PIXELS_PER_SECOND;
+  const internalScrollRef = useRef<ScrollView>(null);
+  const [isManualScrolling, setIsManualScrolling] = useState(false);
 
-    return (
-      <View style={styles.trackContainer}>
-        {/* Timestamp at top-right corner */}
-        <View style={styles.timestampContainer}>
-          <Text style={styles.labelText}>
-            {formatTime(displayTime)}/{formatTime(duration || 0)}
-          </Text>
-        </View>
+  const handleScrollBegin = () => {
+    setIsManualScrolling(true);
+  };
 
-        <ScrollView
-          ref={ref}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          scrollEventThrottle={16}
-          onScroll={onScroll}
-          onScrollBeginDrag={onScrollBegin}
-          onMomentumScrollEnd={onScrollEnd}
-        >
-          <View style={styles.trackWrapper}>
-            <View style={styles.spacer} />
-            <View style={styles.trackContent}>
-              {/* Top ticks row */}
-              <View style={[styles.ticksRow, { width: trackWidth }]}>
-                {duration > 0 &&
-                  Array.from(
-                    { length: Math.floor(duration / 5) + 1 },
-                    (_, index) => {
-                      const time = index * 5;
-                      const position = time * PIXELS_PER_SECOND;
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (duration > 0 && trackWidth > 0) {
+      const scrollPosition = event.nativeEvent.contentOffset.x;
+      const playbackTime = (scrollPosition / trackWidth) * duration;
+      const clampedTime = Math.max(0, Math.min(playbackTime, duration));
+      player?.seekTo(clampedTime);
+    }
+    setIsManualScrolling(false);
+  };
 
-                      return (
-                        <View
-                          key={index}
-                          style={[styles.marker, { left: position }]}
-                        >
-                          <Text style={styles.labelText}>
-                            {formatTime(time)}
-                          </Text>
-                        </View>
-                      );
-                    }
-                  )}
-              </View>
+  // Auto-scroll based on playback time
+  useEffect(() => {
+    if (player?.playing && !isManualScrolling && duration > 0) {
+      const interval = setInterval(() => {
+        const scrollPosition = player.currentTime * PIXELS_PER_SECOND;
 
-              {/* Track track - routines */}
-              <View style={[styles.track, { width: trackWidth }]}>
-                {routines.map((routine) => (
-                  <AudioRoutineItem
-                    key={routine.id}
-                    routine={routine}
-                    onPress={onRoutinePress}
-                  />
-                ))}
-              </View>
+        // Use internal ref for auto-scrolling
+        internalScrollRef.current?.scrollTo({
+          x: scrollPosition,
+          animated: false,
+        });
+
+        // Handle routine-based playback (consecutive routines are merged with padding)
+        if (selectedRoutines.length > 0) {
+          // Merge consecutive routines and add padding for smoother transitions
+          const mergedRoutines = mergeConsecutiveRoutines(selectedRoutines);
+          const paddedRoutines = addPaddingToMergedRoutines(
+            mergedRoutines,
+            duration,
+            2
+          );
+          const currentRoutine = paddedRoutines[currentRoutineIndex];
+
+          if (currentRoutine && player.currentTime >= currentRoutine.endTime) {
+            const nextIndex = currentRoutineIndex + 1;
+            if (nextIndex < paddedRoutines.length) {
+              const nextRoutine = paddedRoutines[nextIndex];
+              player.seekTo(nextRoutine.startTime);
+              onRoutineIndexChange?.(nextIndex);
+            } else {
+              player.pause();
+              onRoutineIndexChange?.(0);
+            }
+          }
+        }
+      }, 10);
+
+      return () => clearInterval(interval);
+    }
+  }, [
+    player,
+    isManualScrolling,
+    duration,
+    currentRoutineIndex,
+    selectedRoutines,
+    onRoutineIndexChange,
+  ]);
+
+  return (
+    <View style={styles.trackContainer}>
+      <ScrollView
+        ref={internalScrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScrollBeginDrag={handleScrollBegin}
+        onMomentumScrollEnd={handleScrollEnd}
+      >
+        <View style={styles.trackWrapper}>
+          <View style={styles.spacer} />
+          <View style={styles.trackContent}>
+            {/* Top ticks row */}
+            <View style={[styles.ticksRow, { width: trackWidth }]}>
+              {duration > 0 &&
+                Array.from(
+                  { length: Math.floor(duration / 5) + 1 },
+                  (_, index) => {
+                    const time = index * 5;
+                    const position = time * PIXELS_PER_SECOND;
+
+                    return (
+                      <View
+                        key={index}
+                        style={[styles.marker, { left: position }]}
+                      >
+                        <Text style={styles.labelText}>{formatTime(time)}</Text>
+                      </View>
+                    );
+                  }
+                )}
             </View>
-            <View style={styles.spacer} />
-          </View>
-        </ScrollView>
 
-        {/* Cursor */}
-        <View style={styles.cursor} />
-      </View>
-    );
-  }
-);
+            {/* Track track - routines */}
+            <View style={[styles.track, { width: trackWidth }]}>
+              {routines.map((routine) => (
+                <AudioRoutineItem
+                  key={routine.id}
+                  routine={routine}
+                  onPress={onRoutinePress}
+                />
+              ))}
+            </View>
+          </View>
+          <View style={styles.spacer} />
+        </View>
+      </ScrollView>
+
+      {/* Cursor */}
+      <View style={styles.cursor} />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   trackContainer: {
@@ -142,13 +196,6 @@ const styles = StyleSheet.create({
     color: "#c9c9c9",
     fontSize: 12,
     fontWeight: "600",
-  },
-  timestampContainer: {
-    position: "absolute",
-    top: 6,
-    right: 12,
-    zIndex: 20,
-    backgroundColor: "rgba(0,0,0,0.7)",
   },
   cursor: {
     position: "absolute",
