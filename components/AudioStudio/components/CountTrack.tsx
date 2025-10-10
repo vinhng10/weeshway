@@ -19,17 +19,16 @@ import { RoutineItem } from "./RoutineItem";
 const { width: screenWidth } = Dimensions.get("window");
 
 interface TrackProps {
-  player?: any; // expo-audio player instance
+  player?: any;
   routines: Routine[];
   onRoutinePress?: (routineId: number) => void;
   duration?: number;
-  // Auto-scrolling props
   selectedRoutines?: Routine[];
   currentRoutineIndex?: number;
   onRoutineIndexChange?: (index: number) => void;
 }
 
-export const Track = ({
+export const CountTrack = ({
   player,
   routines,
   onRoutinePress,
@@ -38,6 +37,11 @@ export const Track = ({
   currentRoutineIndex = 0,
   onRoutineIndexChange,
 }: TrackProps) => {
+  // Filter routines to only show those with count audio
+  const routinesWithCountAudio = routines.filter(
+    (routine) => routine.countSource !== undefined
+  );
+
   const trackWidth = duration * PIXELS_PER_SECOND;
   const internalScrollRef = useRef<ScrollView>(null);
   const [isManualScrolling, setIsManualScrolling] = useState(false);
@@ -141,9 +145,9 @@ export const Track = ({
                 )}
             </View>
 
-            {/* Track track - routines */}
+            {/* Track track - routines with count audio */}
             <View style={[styles.track, { width: trackWidth }]}>
-              {routines.map((routine) => (
+              {routinesWithCountAudio.map((routine) => (
                 <RoutineItem
                   key={routine.id}
                   routine={routine}
