@@ -139,10 +139,14 @@ export const useRoutineStore = create<RoutineState>()(
           // Generate unique filename to avoid conflicts
           const uniqueName = `${md5}.${uri.split(".").pop()}`;
           const destinationFile = new File(appDir, uniqueName);
-          if (destinationFile.uri === get().audioSource) return;
 
           // Copy the file to the app's directory using the latest API
-          sourceFile.copy(destinationFile);
+          if (
+            !destinationFile.exists &&
+            destinationFile.uri !== get().audioSource
+          ) {
+            sourceFile.copy(destinationFile);
+          }
 
           // Update state with the new file URI
           set(() => ({ audioSource: destinationFile.uri }));
