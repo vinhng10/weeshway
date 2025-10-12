@@ -1,5 +1,4 @@
 export interface Routine {
-  id: number;
   musicStartTime: number;
   musicEndTime: number;
   countStartTime?: number;

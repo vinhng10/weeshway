@@ -1,3 +1,4 @@
+import { AudioPlayer, AudioStatus } from "expo-audio";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
@@ -8,7 +9,8 @@ import {
   Text,
   View,
 } from "react-native";
-import { PIXELS_PER_SECOND, Routine } from "../types";
+import { useRoutineStore } from "../hooks/useState";
+import { PIXELS_PER_SECOND } from "../types";
 import {
   addPaddingToMergedRoutines,
   formatTime,
@@ -19,24 +21,21 @@ import { RoutineItem } from "./RoutineItem";
 const { width: screenWidth } = Dimensions.get("window");
 
 interface TrackProps {
-  player?: any;
-  routines: Routine[];
-  onRoutinePress?: (routineId: number) => void;
-  duration?: number;
-  selectedRoutines?: Routine[];
+  player: AudioPlayer;
+  status: AudioStatus;
   currentRoutineIndex?: number;
   onRoutineIndexChange?: (index: number) => void;
 }
 
 export const MusicTrack = ({
   player,
-  routines,
-  onRoutinePress,
-  duration = 0,
-  selectedRoutines = [],
+  status,
   currentRoutineIndex = 0,
   onRoutineIndexChange,
 }: TrackProps) => {
+  const { routines, getSelected, setSelected } = useRoutineStore();
+  const selectedRoutines = getSelected();
+  const duration = status.duration;
   const trackWidth = duration * PIXELS_PER_SECOND;
   const internalScrollRef = useRef<ScrollView>(null);
   const [isManualScrolling, setIsManualScrolling] = useState(false);
@@ -57,7 +56,7 @@ export const MusicTrack = ({
 
   // Auto-scroll based on playback time
   useEffect(() => {
-    if (player?.playing && !isManualScrolling && duration > 0) {
+    if (player.playing && !isManualScrolling && duration > 0) {
       const interval = setInterval(() => {
         const scrollPosition = player.currentTime * PIXELS_PER_SECOND;
 
@@ -99,11 +98,10 @@ export const MusicTrack = ({
     }
   }, [
     player,
-    isManualScrolling,
     duration,
+    isManualScrolling,
     currentRoutineIndex,
     selectedRoutines,
-    onRoutineIndexChange,
   ]);
 
   return (
@@ -121,32 +119,32 @@ export const MusicTrack = ({
           <View style={styles.trackContent}>
             {/* Top ticks row */}
             <View style={[styles.ticksRow, { width: trackWidth }]}>
-              {duration > 0 &&
-                Array.from(
-                  { length: Math.floor(duration / 5) + 1 },
-                  (_, index) => {
-                    const time = index * 5;
-                    const position = time * PIXELS_PER_SECOND;
+              {Array.from(
+                { length: Math.floor(duration / 5) + 1 },
+                (_, index) => {
+                  const time = index * 5;
+                  const position = time * PIXELS_PER_SECOND;
 
-                    return (
-                      <View
-                        key={index}
-                        style={[styles.marker, { left: position }]}
-                      >
-                        <Text style={styles.labelText}>{formatTime(time)}</Text>
-                      </View>
-                    );
-                  }
-                )}
+                  return (
+                    <View
+                      key={index}
+                      style={[styles.marker, { left: position }]}
+                    >
+                      <Text style={styles.labelText}>{formatTime(time)}</Text>
+                    </View>
+                  );
+                }
+              )}
             </View>
 
-            {/* Track track - routines */}
+            {/* Routines */}
             <View style={[styles.track, { width: trackWidth }]}>
-              {routines.map((routine) => (
+              {routines.map((routine, index) => (
                 <RoutineItem
-                  key={routine.id}
+                  key={index}
+                  index={index}
                   routine={routine}
-                  onPress={onRoutinePress}
+                  onPress={setSelected}
                 />
               ))}
             </View>

@@ -1,16 +1,13 @@
-import React from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { PIXELS_PER_SECOND, Routine } from "../types";
 
 interface RoutineItemProps {
+  index: number;
   routine: Routine;
-  onPress?: (routineId: number) => void;
+  onPress?: (index: number) => void;
 }
 
-export const RoutineItem: React.FC<RoutineItemProps> = ({
-  routine,
-  onPress,
-}) => {
+export const RoutineItem = ({ index, routine, onPress }: RoutineItemProps) => {
   const routineStart = routine.musicStartTime * PIXELS_PER_SECOND;
   const routineWidth =
     (routine.musicEndTime - routine.musicStartTime) * PIXELS_PER_SECOND;
@@ -25,9 +22,9 @@ export const RoutineItem: React.FC<RoutineItemProps> = ({
           width: routineWidth,
         },
       ]}
-      onPress={() => onPress?.(routine.id)}
+      onPress={() => onPress?.(index)}
     >
-      <Text style={styles.routineIdText}>{routine.id + 1}</Text>
+      <Text style={styles.routineIdText}>{index + 1}</Text>
     </Pressable>
   );
 };
