@@ -1,3 +1,4 @@
+import { Directory, File, Paths } from "expo-file-system";
 import Storage from "expo-native-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -5,18 +6,21 @@ import { Routine } from "../types";
 
 interface RoutineState {
   routines: Routine[];
+  audioSource: string | null;
   initialize: (duration: number) => void;
   split: (splitTime: number) => void;
   merge: () => void;
   setSelected: (index: number) => void;
   getSelected: () => Routine[];
   setSelectedByIndices: (indices: number[]) => void;
+  setAudioSource: (uri: string) => void;
 }
 
 export const useRoutineStore = create<RoutineState>()(
   persist(
     (set, get) => ({
       routines: [],
+      audioSource: null,
       initialize: (duration: number) => {
         set(() => ({
           routines: [
@@ -119,11 +123,42 @@ export const useRoutineStore = create<RoutineState>()(
       getSelected: () => {
         return get().routines.filter((routine) => routine.selected);
       },
+      setAudioSource: async (uri: string) => {
+        try {
+          const sourceFile = new File(uri);
+          const { md5 } = sourceFile.info({ md5: true });
+
+          // Create app-specific directory for audio files
+          const appDir = new Directory(Paths.document, "audio_files");
+
+          // Ensure the directory exists
+          if (!appDir.exists) {
+            appDir.create({ intermediates: true });
+          }
+
+          // Generate unique filename to avoid conflicts
+          const uniqueName = `${md5}.${uri.split(".").pop()}`;
+          const destinationFile = new File(appDir, uniqueName);
+          if (destinationFile.uri === get().audioSource) return;
+
+          // Copy the file to the app's directory using the latest API
+          sourceFile.copy(destinationFile);
+
+          // Update state with the new file URI
+          set(() => ({ audioSource: destinationFile.uri }));
+        } catch (error) {
+          console.error("Error copying and storing audio file:", error);
+          return null;
+        }
+      },
     }),
     {
       name: "routine-storage",
       storage: createJSONStorage(() => Storage),
-      partialize: (state) => ({ routines: state.routines }),
+      partialize: (state) => ({
+        routines: state.routines,
+        audioSource: state.audioSource,
+      }),
     }
   )
 );

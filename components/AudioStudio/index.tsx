@@ -16,21 +16,22 @@ import {
 } from "./utils";
 
 export default function AudioStudio() {
-  const [audioSource, setAudioSource] = useState<string | null>(null);
-  const player = useAudioPlayer(audioSource ? { uri: audioSource } : null);
-  const status = useAudioPlayerStatus(player);
   const [currentRoutineIndex, setCurrentRoutineIndex] = useState<number>(0);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
 
   // Zustand stores
   const {
     routines,
+    audioSource,
     initialize,
     split,
     merge,
     setSelectedByIndices,
     getSelected,
+    setAudioSource,
   } = useRoutineStore();
+  const player = useAudioPlayer(audioSource);
+  const status = useAudioPlayerStatus(player);
 
   const { wakeTriggerAt, startWakeWordRecorder, stopWakeWordRecorder } =
     useWakeWordDetection(wakeWordEnabled, audioSource);
@@ -71,7 +72,9 @@ export default function AudioStudio() {
 
   // Initialize routines when audio is loaded
   useEffect(() => {
-    initialize(status.duration);
+    if (status.duration > 0) {
+      initialize(status.duration);
+    }
   }, [status.duration]);
 
   // React to wake word detection
@@ -99,7 +102,7 @@ export default function AudioStudio() {
         // Reset states for new song
         setCurrentRoutineIndex(0);
 
-        // Set new audio source (this will trigger duration change and routines reset)
+        // Set new audio source
         setAudioSource(uri);
       }
     } catch (error) {
