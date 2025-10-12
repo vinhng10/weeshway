@@ -72,7 +72,7 @@ export default function AudioStudio() {
 
   // Initialize routines when audio is loaded
   useEffect(() => {
-    if (status.duration > 0) {
+    if (status.duration > 0 && routines.length === 0) {
       initialize(status.duration);
     }
   }, [status.duration]);

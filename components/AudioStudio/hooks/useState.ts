@@ -149,7 +149,7 @@ export const useRoutineStore = create<RoutineState>()(
           }
 
           // Update state with the new file URI
-          set(() => ({ audioSource: destinationFile.uri }));
+          set(() => ({ audioSource: destinationFile.uri, routines: [] }));
         } catch (error) {
           console.error("Error copying and storing audio file:", error);
           return null;
