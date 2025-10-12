@@ -1,115 +1,37 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { PIXELS_PER_SECOND, Routine } from "../types";
-import {
-  addPaddingToMergedRoutines,
-  formatTime,
-  mergeConsecutiveRoutines,
-} from "../utils";
-import { RoutineItem } from "./RoutineItem";
+import { AudioPlayer, AudioStatus } from "expo-audio";
+import React, { useRef } from "react";
+import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRoutineStore } from "../hooks/useState";
+import { PIXELS_PER_SECOND } from "../types";
+import { formatTime } from "../utils";
+import { CountItem } from "./CountItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 interface TrackProps {
-  player?: any;
-  routines: Routine[];
-  onRoutinePress?: (routineId: number) => void;
-  duration?: number;
-  selectedRoutines?: Routine[];
+  player: AudioPlayer;
+  status: AudioStatus;
   currentRoutineIndex?: number;
   onRoutineIndexChange?: (index: number) => void;
 }
 
 export const CountTrack = ({
   player,
-  routines,
-  onRoutinePress,
-  duration = 0,
-  selectedRoutines = [],
+  status,
   currentRoutineIndex = 0,
   onRoutineIndexChange,
 }: TrackProps) => {
-  // Filter routines to only show those with count audio
-  const routinesWithCountAudio = routines.filter(
-    (routine) => routine.countSource !== undefined
-  );
+  const { getSelectedWithCount } = useRoutineStore();
+  const routines = getSelectedWithCount();
 
+  // duration should be the sum of all count durations of routines
+  const duration = routines.reduce((sum, routine) => {
+    const countStart = routine.countStartTime ?? 0;
+    const countEnd = routine.countEndTime ?? 0;
+    return sum + Math.max(0, countEnd - countStart);
+  }, 0);
   const trackWidth = duration * PIXELS_PER_SECOND;
   const internalScrollRef = useRef<ScrollView>(null);
-  const [isManualScrolling, setIsManualScrolling] = useState(false);
-
-  const handleScrollBegin = () => {
-    setIsManualScrolling(true);
-  };
-
-  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (duration > 0 && trackWidth > 0) {
-      const scrollPosition = event.nativeEvent.contentOffset.x;
-      const playbackTime = (scrollPosition / trackWidth) * duration;
-      const clampedTime = Math.max(0, Math.min(playbackTime, duration));
-      player?.seekTo(clampedTime);
-    }
-    setIsManualScrolling(false);
-  };
-
-  // Auto-scroll based on playback time
-  useEffect(() => {
-    if (player?.playing && !isManualScrolling && duration > 0) {
-      const interval = setInterval(() => {
-        const scrollPosition = player.currentTime * PIXELS_PER_SECOND;
-
-        // Use internal ref for auto-scrolling
-        internalScrollRef.current?.scrollTo({
-          x: scrollPosition,
-          animated: false,
-        });
-
-        // Handle routine-based playback (consecutive routines are merged with padding)
-        if (selectedRoutines.length > 0) {
-          // Merge consecutive routines and add padding for smoother transitions
-          const mergedRoutines = mergeConsecutiveRoutines(selectedRoutines);
-          const paddedRoutines = addPaddingToMergedRoutines(
-            mergedRoutines,
-            duration,
-            2
-          );
-          const currentRoutine = paddedRoutines[currentRoutineIndex];
-
-          if (
-            currentRoutine &&
-            player.currentTime >= currentRoutine.musicEndTime
-          ) {
-            const nextIndex = currentRoutineIndex + 1;
-            if (nextIndex < paddedRoutines.length) {
-              const nextRoutine = paddedRoutines[nextIndex];
-              player.seekTo(nextRoutine.musicStartTime);
-              onRoutineIndexChange?.(nextIndex);
-            } else {
-              player.pause();
-              onRoutineIndexChange?.(0);
-            }
-          }
-        }
-      }, 10);
-
-      return () => clearInterval(interval);
-    }
-  }, [
-    player,
-    isManualScrolling,
-    duration,
-    currentRoutineIndex,
-    selectedRoutines,
-    onRoutineIndexChange,
-  ]);
 
   return (
     <View style={styles.trackContainer}>
@@ -118,8 +40,6 @@ export const CountTrack = ({
         horizontal
         showsHorizontalScrollIndicator={false}
         scrollEventThrottle={16}
-        onScrollBeginDrag={handleScrollBegin}
-        onMomentumScrollEnd={handleScrollEnd}
       >
         <View style={styles.trackWrapper}>
           <View style={styles.spacer} />
@@ -145,14 +65,10 @@ export const CountTrack = ({
                 )}
             </View>
 
-            {/* Track track - routines with count audio */}
+            {/* Count Item */}
             <View style={[styles.track, { width: trackWidth }]}>
-              {routinesWithCountAudio.map((routine) => (
-                <RoutineItem
-                  key={routine.id}
-                  routine={routine}
-                  onPress={onRoutinePress}
-                />
+              {routines.map((_, index) => (
+                <CountItem key={index} index={index} />
               ))}
             </View>
           </View>
@@ -169,7 +85,18 @@ export const CountTrack = ({
 const styles = StyleSheet.create({
   trackContainer: {
     height: "50%",
-    // backgroundColor: "#111",
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  emptyText: {
+    color: "#888",
+    fontSize: 14,
+    textAlign: "center",
+    fontStyle: "italic",
   },
   trackWrapper: {
     flexDirection: "row",

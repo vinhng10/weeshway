@@ -119,7 +119,7 @@ export const MusicTrack = ({
           <View style={styles.trackContent}>
             {/* Top ticks row */}
             <View style={[styles.ticksRow, { width: trackWidth }]}>
-              {Array.from(
+              {duration > 0 && Array.from(
                 { length: Math.floor(duration / 5) + 1 },
                 (_, index) => {
                   const time = index * 5;

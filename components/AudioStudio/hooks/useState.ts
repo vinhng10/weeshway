@@ -12,8 +12,11 @@ interface RoutineState {
   merge: () => void;
   setSelected: (index: number) => void;
   getSelected: () => Routine[];
+  getSelectedWithCount: () => Routine[];
   setSelectedByIndices: (indices: number[]) => void;
   setAudioSource: (uri: string) => void;
+  setCountSource: (uri: string) => void;
+  initializeCountTimes: (duration: number) => void;
 }
 
 export const useRoutineStore = create<RoutineState>()(
@@ -123,6 +126,11 @@ export const useRoutineStore = create<RoutineState>()(
       getSelected: () => {
         return get().routines.filter((routine) => routine.selected);
       },
+      getSelectedWithCount: () => {
+        return get().routines.filter(
+          (routine) => routine.selected && routine.countSource
+        );
+      },
       setAudioSource: async (uri: string) => {
         try {
           const sourceFile = new File(uri);
@@ -153,6 +161,86 @@ export const useRoutineStore = create<RoutineState>()(
         } catch (error) {
           console.error("Error copying and storing audio file:", error);
           return null;
+        }
+      },
+      setCountSource: async (uri: string) => {
+        // Get currently selected routines
+        const selectedRoutines = get().getSelected();
+
+        // Only proceed if exactly one routine is selected
+        if (selectedRoutines.length !== 1) {
+          console.warn("setCountSource: Exactly one routine must be selected");
+          return;
+        }
+
+        const sourceFile = new File(uri);
+        const { md5 } = sourceFile.info({ md5: true });
+
+        // Create app-specific directory for count files
+        const appDir = new Directory(Paths.document, "count_files");
+
+        // Ensure the directory exists
+        if (!appDir.exists) {
+          appDir.create({ intermediates: true });
+        }
+
+        // Generate unique filename to avoid conflicts
+        const uniqueName = `${md5}.${uri.split(".").pop()}`;
+        const destinationFile = new File(appDir, uniqueName);
+
+        // Copy the file to the app's directory using the latest API
+        if (!destinationFile.exists) {
+          sourceFile.copy(destinationFile);
+        }
+
+        // Find the index of the selected routine and update its countSource
+        const routines = get().routines;
+        const selectedIndex = routines.findIndex((routine) => routine.selected);
+
+        if (selectedIndex !== -1) {
+          set((state) => ({
+            routines: state.routines.map((routine, index) =>
+              index === selectedIndex
+                ? { ...routine, countSource: destinationFile.uri }
+                : routine
+            ),
+          }));
+        }
+      },
+      initializeCountTimes: (duration: number) => {
+        // Get currently selected routines
+        const selectedRoutines = get().getSelected();
+
+        // Only proceed if exactly one routine is selected
+        if (selectedRoutines.length !== 1) {
+          console.warn(
+            "initializeCountTimes: Exactly one routine must be selected"
+          );
+          return;
+        }
+
+        // Validate duration
+        if (duration <= 0) {
+          console.warn("initializeCountTimes: Duration must be greater than 0");
+          return;
+        }
+
+        // Find the index of the selected routine and initialize its count times
+        const routines = get().routines;
+        const selectedIndex = routines.findIndex((routine) => routine.selected);
+
+        if (selectedIndex !== -1) {
+          set((state) => ({
+            routines: state.routines.map((routine, index) =>
+              index === selectedIndex
+                ? {
+                    ...routine,
+                    countStartTime: 0,
+                    countEndTime: duration,
+                  }
+                : routine
+            ),
+          }));
         }
       },
     }),

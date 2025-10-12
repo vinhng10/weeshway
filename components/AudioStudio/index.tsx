@@ -3,6 +3,7 @@ import * as DocumentPicker from "expo-document-picker";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { ControlBar } from "./components/ControlBar";
+import { CountTrack } from "./components/CountTrack";
 import { DisplayArea } from "./components/DisplayArea";
 import { MusicTrack } from "./components/MusicTrack";
 import { useRoutineStore } from "./hooks/useState";
@@ -29,6 +30,7 @@ export default function AudioStudio() {
     setSelectedByIndices,
     getSelected,
     setAudioSource,
+    setCountSource,
   } = useRoutineStore();
   const player = useAudioPlayer(audioSource);
   const status = useAudioPlayerStatus(player);
@@ -83,7 +85,7 @@ export default function AudioStudio() {
     startSpeechRecognition();
   }, [wakeTriggerAt]);
 
-  const loadAudioFile = async () => {
+  const loadMusicFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: "audio/*",
@@ -108,6 +110,34 @@ export default function AudioStudio() {
     } catch (error) {
       Alert.alert("Error", "Failed to load audio file");
       console.error("Error loading audio:", error);
+    }
+  };
+
+  const loadCountFile = async () => {
+    try {
+      // Check if exactly one routine is selected
+      const selectedRoutines = getSelected();
+      if (selectedRoutines.length !== 1) {
+        Alert.alert(
+          "Selection Required",
+          "Please select exactly one routine to add count audio to."
+        );
+        return;
+      }
+
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "audio/*",
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const { uri } = result.assets[0];
+
+        // Set count source for the selected routine
+        setCountSource(uri);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to load count audio file");
+      console.error("Error loading count audio:", error);
     }
   };
 
@@ -154,8 +184,8 @@ export default function AudioStudio() {
       <ControlBar
         isPlaying={status.playing}
         wakeWordEnabled={wakeWordEnabled}
-        onLoadAudio={loadAudioFile}
-        onLoadCountAudio={() => {}}
+        onLoadAudio={loadMusicFile}
+        onLoadCountAudio={loadCountFile}
         onTogglePlayback={togglePlayback}
         onSplit={() => split(status.currentTime)}
         onMerge={merge}
@@ -164,6 +194,12 @@ export default function AudioStudio() {
 
       <View style={styles.tracksContainer}>
         <MusicTrack
+          player={player}
+          status={status}
+          currentRoutineIndex={currentRoutineIndex}
+          onRoutineIndexChange={setCurrentRoutineIndex}
+        />
+        <CountTrack
           player={player}
           status={status}
           currentRoutineIndex={currentRoutineIndex}
