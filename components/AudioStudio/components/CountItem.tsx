@@ -36,11 +36,7 @@ export const CountItem = ({ index }: CountItemProps) => {
 
   // Initialize count times
   useEffect(() => {
-    if (
-      !routine.countStartTime &&
-      !routine.countEndTime &&
-      status.duration > 0
-    ) {
+    if (status.duration > 0) {
       initializeCountTimes(status.duration);
     }
   }, [status.duration]);
