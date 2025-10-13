@@ -1,4 +1,9 @@
-import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import {
+  AudioPlayer,
+  AudioStatus,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+} from "expo-audio";
 import { useEffect } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { useRoutineStore } from "../hooks/useState";
@@ -6,9 +11,15 @@ import { PIXELS_PER_SECOND } from "../types";
 
 interface CountItemProps {
   index: number;
+  onPlayerReady?: (index: number, player: AudioPlayer | null) => void;
+  onStatusChange?: (index: number, status: AudioStatus) => void;
 }
 
-export const CountItem = ({ index }: CountItemProps) => {
+export const CountItem = ({
+  index,
+  onPlayerReady,
+  onStatusChange,
+}: CountItemProps) => {
   const { getSelectedWithCount, initializeCountTimes } = useRoutineStore();
   const routines = getSelectedWithCount();
   const routine = routines[index];
@@ -40,6 +51,22 @@ export const CountItem = ({ index }: CountItemProps) => {
       initializeCountTimes(status.duration);
     }
   }, [status.duration]);
+
+  useEffect(() => {
+    if (!routine || !routine.countSource) {
+      return;
+    }
+
+    onPlayerReady?.(index, player);
+
+    return () => {
+      onPlayerReady?.(index, null);
+    };
+  }, [index, onPlayerReady, player, routine]);
+
+  useEffect(() => {
+    onStatusChange?.(index, status);
+  }, [index, onStatusChange, status]);
 
   return (
     <Pressable

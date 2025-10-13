@@ -7,6 +7,7 @@ interface ControlBarProps {
   wakeWordEnabled: boolean;
   onLoadAudio: () => void;
   onLoadCountAudio: () => void;
+  onPlayCountAudio: () => void;
   onTogglePlayback: () => void;
   onSplit: () => void;
   onMerge: () => void;
@@ -18,6 +19,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   wakeWordEnabled,
   onLoadAudio,
   onLoadCountAudio,
+  onPlayCountAudio,
   onTogglePlayback,
   onSplit,
   onMerge,
@@ -31,6 +33,10 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 
       <TouchableOpacity style={styles.controlButton} onPress={onLoadCountAudio}>
         <Ionicons name="mic" size={26} color="white" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.controlButton} onPress={onPlayCountAudio}>
+        <Ionicons name="play-circle" size={26} color="white" />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.controlButton} onPress={onTogglePlayback}>

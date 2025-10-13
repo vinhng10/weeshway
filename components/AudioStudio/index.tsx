@@ -1,9 +1,9 @@
-import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
-import React, { useEffect, useState } from "react";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { ControlBar } from "./components/ControlBar";
-import { CountTrack } from "./components/CountTrack";
+import { CountTrack, CountTrackHandle } from "./components/CountTrack";
 import { DisplayArea } from "./components/DisplayArea";
 import { MusicTrack } from "./components/MusicTrack";
 import { useRoutineStore } from "./hooks/useState";
@@ -19,6 +19,7 @@ import {
 export default function AudioStudio() {
   const [currentRoutineIndex, setCurrentRoutineIndex] = useState<number>(0);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
+  const countTrackRef = useRef<CountTrackHandle>(null);
 
   // Zustand stores
   const {
@@ -29,6 +30,7 @@ export default function AudioStudio() {
     merge,
     setSelectedByIndices,
     getSelected,
+    getSelectedWithCount,
     setAudioSource,
     setCountSource,
   } = useRoutineStore();
@@ -141,11 +143,26 @@ export default function AudioStudio() {
     }
   };
 
+  const playSelectedCountAudio = () => {
+    const routinesWithCount = getSelectedWithCount();
+
+    if (routinesWithCount.length === 0) {
+      Alert.alert(
+        "No count audio",
+        "Select at least one routine with count audio to play."
+      );
+      return;
+    }
+
+    countTrackRef.current?.playSelectedCounts();
+  };
+
   const togglePlayback = () => {
     try {
       if (status.playing) {
         player.pause();
       } else {
+        countTrackRef.current?.stopSelectedCounts();
         const selectedRoutines = getSelected();
 
         if (selectedRoutines.length > 0) {
@@ -186,6 +203,7 @@ export default function AudioStudio() {
         wakeWordEnabled={wakeWordEnabled}
         onLoadAudio={loadMusicFile}
         onLoadCountAudio={loadCountFile}
+        onPlayCountAudio={playSelectedCountAudio}
         onTogglePlayback={togglePlayback}
         onSplit={() => split(status.currentTime)}
         onMerge={merge}
@@ -204,6 +222,7 @@ export default function AudioStudio() {
           status={status}
           currentRoutineIndex={currentRoutineIndex}
           onRoutineIndexChange={setCurrentRoutineIndex}
+          ref={countTrackRef}
         />
       </View>
     </View>
