@@ -132,36 +132,30 @@ export const useRoutineStore = create<RoutineState>()(
         );
       },
       setAudioSource: async (uri: string) => {
-        try {
-          const sourceFile = new File(uri);
-          const { md5 } = sourceFile.info({ md5: true });
+        const sourceFile = new File(uri);
+        const { md5 } = sourceFile.info({ md5: true });
 
-          // Create app-specific directory for audio files
-          const appDir = new Directory(Paths.document, "audio_files");
+        // Create app-specific directory for audio files
+        const appDir = new Directory(Paths.document, "audio_files");
 
-          // Ensure the directory exists
-          if (!appDir.exists) {
-            appDir.create({ intermediates: true });
-          }
-
-          // Generate unique filename to avoid conflicts
-          const uniqueName = `${md5}.${uri.split(".").pop()}`;
-          const destinationFile = new File(appDir, uniqueName);
-
-          // Copy the file to the app's directory using the latest API
-          if (
-            !destinationFile.exists &&
-            destinationFile.uri !== get().audioSource
-          ) {
-            sourceFile.copy(destinationFile);
-          }
-
-          // Update state with the new file URI
-          set(() => ({ audioSource: destinationFile.uri, routines: [] }));
-        } catch (error) {
-          console.error("Error copying and storing audio file:", error);
-          return null;
+        // Ensure the directory exists
+        if (!appDir.exists) {
+          appDir.create({ intermediates: true });
         }
+
+        // Generate unique filename to avoid conflicts
+        const uniqueName = `${md5}.${uri.split(".").pop()}`;
+        const destinationFile = new File(appDir, uniqueName);
+
+        // Copy the file to the app's directory using the latest API
+        if (!destinationFile.exists) {
+          sourceFile.copy(destinationFile);
+        }
+
+        // Update state with the new file URI
+        const routines =
+          destinationFile.uri === get().audioSource ? get().routines : [];
+        set(() => ({ audioSource: destinationFile.uri, routines }));
       },
       setCountSource: async (uri: string) => {
         // Get currently selected routines

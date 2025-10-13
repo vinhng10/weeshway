@@ -6,10 +6,9 @@ import { PIXELS_PER_SECOND } from "../types";
 
 interface CountItemProps {
   index: number;
-  onPress?: (index: number) => void;
 }
 
-export const CountItem = ({ index, onPress }: CountItemProps) => {
+export const CountItem = ({ index }: CountItemProps) => {
   const { getSelectedWithCount, initializeCountTimes } = useRoutineStore();
   const routines = getSelectedWithCount();
   const routine = routines[index];
