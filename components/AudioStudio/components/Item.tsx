@@ -1,28 +1,29 @@
 import { Pressable, StyleSheet, Text } from "react-native";
-import { PIXELS_PER_SECOND, Routine } from "../types";
+import { useItemStore } from "../hooks/useState";
+import { PIXELS_PER_SECOND } from "../types";
 
-interface RoutineItemProps {
+interface ItemProps {
   index: number;
-  routine: Routine;
-  onPress?: (index: number) => void;
+  type: string;
 }
 
-export const RoutineItem = ({ index, routine, onPress }: RoutineItemProps) => {
-  const routineStart = routine.musicStartTime * PIXELS_PER_SECOND;
-  const routineWidth =
-    (routine.musicEndTime - routine.musicStartTime) * PIXELS_PER_SECOND;
+export const Item = ({ index, type }: ItemProps) => {
+  const { states, setSelected } = useItemStore();
+  const item = states[type][index];
+  const start = item.startTime * PIXELS_PER_SECOND;
+  const width = (item.endTime - item.startTime) * PIXELS_PER_SECOND;
 
   return (
     <Pressable
       style={[
         styles.routine,
-        routine.selected && styles.routineSelected,
+        item.selected && styles.routineSelected,
         {
-          left: routineStart,
-          width: routineWidth,
+          left: start,
+          width: width,
         },
       ]}
-      onPress={() => onPress?.(index)}
+      onPress={() => setSelected(type, index)}
     >
       <Text style={styles.routineIdText}>{index + 1}</Text>
     </Pressable>

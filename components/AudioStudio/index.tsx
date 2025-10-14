@@ -1,66 +1,67 @@
-import * as DocumentPicker from "expo-document-picker";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import React, { useEffect, useRef, useState } from "react";
+import * as DocumentPicker from "expo-document-picker";
+import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { ControlBar } from "./components/ControlBar";
-import { CountTrack, CountTrackHandle } from "./components/CountTrack";
 import { DisplayArea } from "./components/DisplayArea";
-import { MusicTrack } from "./components/MusicTrack";
-import { useRoutineStore } from "./hooks/useState";
+import { Track } from "./components/Track";
+import { useItemStore } from "./hooks/useState";
 import { useVoiceCommands } from "./hooks/useVoiceCommands";
 import { useWakeWordDetection } from "./hooks/useWakeWordDetection";
 import { AudioPlayerAction } from "./types";
 import {
-  addPaddingToMergedRoutines,
+  addPaddingToMergedItems,
   mapUserIdsToIndices,
-  mergeConsecutiveRoutines,
+  mergeConsecutiveItems,
 } from "./utils";
 
 export default function AudioStudio() {
-  const [currentRoutineIndex, setCurrentRoutineIndex] = useState<number>(0);
+  const [currentItemIndex, setCurrentItemIndex] = useState<number>(0);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
-  const countTrackRef = useRef<CountTrackHandle>(null);
+  const [type, setType] = useState<"musics" | "counts">("musics");
 
   // Zustand stores
   const {
-    routines,
-    audioSource,
+    states,
+    sources,
     initialize,
     split,
     merge,
     setSelectedByIndices,
     getSelected,
-    getSelectedWithCount,
-    setAudioSource,
-    setCountSource,
-  } = useRoutineStore();
-  const player = useAudioPlayer(audioSource);
-  const status = useAudioPlayerStatus(player);
+    setSource,
+  } = useItemStore();
+  const musicPlayer = useAudioPlayer(sources.musics);
+  const musicStatus = useAudioPlayerStatus(musicPlayer);
+  const countPlayer = useAudioPlayer(sources.counts);
+  const countStatus = useAudioPlayerStatus(countPlayer);
+  const player = { musics: musicPlayer, counts: countPlayer };
+  const status = { musics: musicStatus, counts: countStatus };
 
   const { wakeTriggerAt, startWakeWordRecorder, stopWakeWordRecorder } =
-    useWakeWordDetection(wakeWordEnabled, audioSource);
+    useWakeWordDetection(wakeWordEnabled, sources.musics);
 
   const handleAudioAction = (action: AudioPlayerAction) => {
     if (!action) return;
     if (action.action === "stop") {
       try {
-        player.pause();
+        player[type].pause();
       } catch {}
       return;
     }
 
-    const indices = mapUserIdsToIndices(action.routines, routines.length);
+    const indices = mapUserIdsToIndices(action.routines, states.musics.length);
     if (indices.length === 0) return;
 
-    setSelectedByIndices(indices);
+    setSelectedByIndices("musics", indices);
 
     const firstIndex = indices[0];
-    const firstRoutine = routines[firstIndex];
-    if (firstRoutine) {
+    const firstItem = states.musics[firstIndex];
+    if (firstItem) {
       try {
-        player.seekTo(firstRoutine.musicStartTime);
-        setCurrentRoutineIndex(0);
-        player.play();
+        player[type].seekTo(firstItem.startTime);
+        setCurrentItemIndex(0);
+        player[type].play();
       } catch (e) {
         console.warn("Failed to start playback from voice command", e);
       }
@@ -68,7 +69,7 @@ export default function AudioStudio() {
   };
 
   const { recognizing, transcript, startSpeechRecognition } = useVoiceCommands({
-    player,
+    player: player[type],
     onAudioAction: handleAudioAction,
     onWakeWordRecorderStart: startWakeWordRecorder,
     onWakeWordRecorderStop: stopWakeWordRecorder,
@@ -76,10 +77,10 @@ export default function AudioStudio() {
 
   // Initialize routines when audio is loaded
   useEffect(() => {
-    if (status.duration > 0 && routines.length === 0) {
-      initialize(status.duration);
+    if (status[type].duration > 0 && states[type].length === 0) {
+      initialize(type, status[type].duration);
     }
-  }, [status.duration]);
+  }, [status[type].duration]);
 
   // React to wake word detection
   useEffect(() => {
@@ -87,7 +88,7 @@ export default function AudioStudio() {
     startSpeechRecognition();
   }, [wakeTriggerAt]);
 
-  const loadMusicFile = async () => {
+  const loadAudioFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: "audio/*",
@@ -96,18 +97,11 @@ export default function AudioStudio() {
       if (!result.canceled && result.assets[0]) {
         const { uri } = result.assets[0];
 
-        // Stop playback if currently playing
-        if (status.playing) {
-          try {
-            player.pause();
-          } catch {}
-        }
-
         // Reset states for new song
-        setCurrentRoutineIndex(0);
+        setCurrentItemIndex(0);
 
         // Set new audio source
-        setAudioSource(uri);
+        setSource(type, uri);
       }
     } catch (error) {
       Alert.alert("Error", "Failed to load audio file");
@@ -115,70 +109,27 @@ export default function AudioStudio() {
     }
   };
 
-  const loadCountFile = async () => {
-    try {
-      // Check if exactly one routine is selected
-      const selectedRoutines = getSelected();
-      if (selectedRoutines.length !== 1) {
-        Alert.alert(
-          "Selection Required",
-          "Please select exactly one routine to add count audio to."
-        );
-        return;
-      }
-
-      const result = await DocumentPicker.getDocumentAsync({
-        type: "audio/*",
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const { uri } = result.assets[0];
-
-        // Set count source for the selected routine
-        setCountSource(uri);
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to load count audio file");
-      console.error("Error loading count audio:", error);
-    }
-  };
-
-  const playSelectedCountAudio = () => {
-    const routinesWithCount = getSelectedWithCount();
-
-    if (routinesWithCount.length === 0) {
-      Alert.alert(
-        "No count audio",
-        "Select at least one routine with count audio to play."
-      );
-      return;
-    }
-
-    countTrackRef.current?.playSelectedCounts();
-  };
-
   const togglePlayback = () => {
     try {
-      if (status.playing) {
-        player.pause();
+      if (status[type].playing) {
+        player[type].pause();
       } else {
-        countTrackRef.current?.stopSelectedCounts();
-        const selectedRoutines = getSelected();
+        const selectedItems = getSelected(type);
 
-        if (selectedRoutines.length > 0) {
+        if (selectedItems.length > 0) {
           // Use merged routines with padding for smoother playback
-          const mergedRoutines = mergeConsecutiveRoutines(selectedRoutines);
-          const paddedRoutines = addPaddingToMergedRoutines(
-            mergedRoutines,
-            status.duration,
+          const mergedItems = mergeConsecutiveItems(selectedItems);
+          const paddedItems = addPaddingToMergedItems(
+            mergedItems,
+            status[type].duration,
             2
           );
-          const firstRoutine = paddedRoutines[0];
-          player.seekTo(firstRoutine.musicStartTime);
-          setCurrentRoutineIndex(0);
+          const firstItem = paddedItems[0];
+          player[type].seekTo(firstItem.startTime);
+          setCurrentItemIndex(0);
         }
 
-        player.play();
+        player[type].play();
       }
     } catch (error) {
       console.error("Playback error:", error);
@@ -199,30 +150,31 @@ export default function AudioStudio() {
       <DisplayArea recognizing={recognizing} transcript={transcript} />
 
       <ControlBar
-        isPlaying={status.playing}
+        type={type}
+        isPlaying={status[type].playing}
         wakeWordEnabled={wakeWordEnabled}
-        onLoadAudio={loadMusicFile}
-        onLoadCountAudio={loadCountFile}
-        onPlayCountAudio={playSelectedCountAudio}
+        onLoadAudio={loadAudioFile}
         onTogglePlayback={togglePlayback}
-        onSplit={() => split(status.currentTime)}
-        onMerge={merge}
+        onSplit={() => split(type, status[type].currentTime)}
+        onMerge={() => merge(type)}
         onToggleWakeWord={toggleWakeWordDetection}
+        onToggleType={() => setType(type === "musics" ? "counts" : "musics")}
       />
 
       <View style={styles.tracksContainer}>
-        <MusicTrack
-          player={player}
-          status={status}
-          currentRoutineIndex={currentRoutineIndex}
-          onRoutineIndexChange={setCurrentRoutineIndex}
+        <Track
+          type="musics"
+          player={musicPlayer}
+          status={musicStatus}
+          currentItemIndex={currentItemIndex}
+          onItemIndexChange={setCurrentItemIndex}
         />
-        <CountTrack
-          player={player}
-          status={status}
-          currentRoutineIndex={currentRoutineIndex}
-          onRoutineIndexChange={setCurrentRoutineIndex}
-          ref={countTrackRef}
+        <Track
+          type="counts"
+          player={countPlayer}
+          status={countStatus}
+          currentItemIndex={currentItemIndex}
+          onItemIndexChange={setCurrentItemIndex}
         />
       </View>
     </View>

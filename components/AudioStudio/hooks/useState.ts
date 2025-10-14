@@ -2,136 +2,142 @@ import { Directory, File, Paths } from "expo-file-system";
 import Storage from "expo-native-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { Routine } from "../types";
+import { Item } from "../types";
 
-interface RoutineState {
-  routines: Routine[];
-  audioSource: string | null;
-  initialize: (duration: number) => void;
-  split: (splitTime: number) => void;
-  merge: () => void;
-  setSelected: (index: number) => void;
-  getSelected: () => Routine[];
-  getSelectedWithCount: () => Routine[];
-  setSelectedByIndices: (indices: number[]) => void;
-  setAudioSource: (uri: string) => void;
-  setCountSource: (uri: string) => void;
-  initializeCountTimes: (duration: number) => void;
+interface ItemState {
+  states: { [type: string]: Item[] };
+  sources: { [type: string]: string | null };
+  initialize: (type: string, duration: number) => void;
+  split: (type: string, splitTime: number) => void;
+  merge: (type: string) => void;
+  setSelected: (type: string, index: number) => void;
+  getSelected: (type: string) => Item[];
+  setSelectedByIndices: (type: string, indices: number[]) => void;
+  setSource: (type: string, uri: string) => void;
 }
 
-export const useRoutineStore = create<RoutineState>()(
+export const useItemStore = create<ItemState>()(
   persist(
     (set, get) => ({
-      routines: [],
-      audioSource: null,
-      initialize: (duration: number) => {
+      states: { musics: [], counts: [] },
+      sources: { musics: null, counts: null },
+      initialize: (type: string, duration: number) => {
         set(() => ({
-          routines: [
-            {
-              musicStartTime: 0,
-              musicEndTime: duration,
-              selected: false,
-            },
-          ],
+          states: {
+            ...get().states,
+            [type]: [
+              {
+                startTime: 0,
+                endTime: duration,
+                selected: false,
+              },
+            ],
+          },
         }));
       },
-      split: (time: number) => {
-        // Get routines
-        const routines = get().routines;
+      split: (type: string, time: number) => {
+        // Get items
+        const items = get().states[type];
 
-        // Find the routine that contains the split time
-        const routineIndex = routines.findIndex(
-          (seg) => time > seg.musicStartTime && time < seg.musicEndTime
+        // Find the item that contains the split time
+        const itemIndex = items.findIndex(
+          (seg) => time > seg.startTime && time < seg.endTime
         );
-        if (routineIndex === -1) return;
-        const routineToSplit = routines[routineIndex];
+        if (itemIndex === -1) return;
+        const itemToSplit = items[itemIndex];
 
-        // Create two new routines
-        const newRoutines = [...routines];
-        newRoutines.splice(
-          routineIndex,
+        // Create two new items
+        const newItems = [...items];
+        newItems.splice(
+          itemIndex,
           1,
           {
-            musicStartTime: routineToSplit.musicStartTime,
-            musicEndTime: time,
+            startTime: itemToSplit.startTime,
+            endTime: time,
             selected: false,
           },
           {
-            musicStartTime: time,
-            musicEndTime: routineToSplit.musicEndTime,
+            startTime: time,
+            endTime: itemToSplit.endTime,
             selected: false,
           }
         );
 
-        // Set new routines
+        // Set new items
         set(() => ({
-          routines: newRoutines,
+          states: {
+            ...get().states,
+            [type]: newItems,
+          },
         }));
       },
-      merge: () => {
-        // Get routines
-        const routines = get().routines;
+      merge: (type: string) => {
+        // Get items
+        const items = get().states[type];
 
-        // Find indices of selected routines
-        const selectedIndices = routines
-          .map((routine, index) => (routine.selected ? index : -1))
+        // Find indices of selected items
+        const selectedIndices = items
+          .map((item, index) => (item.selected ? index : -1))
           .filter((index) => index !== -1)
           .sort((a, b) => a - b);
 
-        // Need at least two routines to merge
+        // Need at least two items to merge
         if (selectedIndices.length < 2) return;
 
-        // Check if all selected routines are consecutive
+        // Check if all selected items are consecutive
         for (let i = 1; i < selectedIndices.length; i++)
           if (selectedIndices[i] !== selectedIndices[i - 1] + 1) return;
 
-        // Get the routines to merge
+        // Get the items to merge
         const firstIndex = selectedIndices[0];
         const lastIndex = selectedIndices[selectedIndices.length - 1];
-        const routinesToMerge = routines.slice(firstIndex, lastIndex + 1);
+        const itemsToMerge = items.slice(firstIndex, lastIndex + 1);
 
-        // Create merged routine
-        const merged: Routine = {
-          musicStartTime: routinesToMerge[0].musicStartTime,
-          musicEndTime:
-            routinesToMerge[routinesToMerge.length - 1].musicEndTime,
+        // Create merged item
+        const merged: Item = {
+          startTime: itemsToMerge[0].startTime,
+          endTime: itemsToMerge[itemsToMerge.length - 1].endTime,
           selected: true,
         };
 
-        // Create new routines array with merged routine
-        const newRoutines = [
-          ...routines.slice(0, firstIndex),
+        // Create new items array with merged item
+        const newItems = [
+          ...items.slice(0, firstIndex),
           merged,
-          ...routines.slice(lastIndex + 1),
+          ...items.slice(lastIndex + 1),
         ];
 
-        // Set new routines
+        // Set new items
         set(() => ({
-          routines: newRoutines,
+          states: {
+            ...get().states,
+            [type]: newItems,
+          },
         }));
       },
-      setSelectedByIndices: (indices: number[]) =>
+      setSelectedByIndices: (type: string, indices: number[]) =>
         set((state) => ({
-          routines: state.routines.map((routine, index) => ({
-            ...routine,
-            selected: indices.includes(index),
-          })),
+          states: {
+            ...state.states,
+            [type]: state.states[type].map((item, index) => ({
+              ...item,
+              selected: indices.includes(index),
+            })),
+          },
         })),
-      setSelected: (index: number) =>
+      setSelected: (type: string, index: number) =>
         set((state) => ({
-          routines: state.routines.map((routine, i) =>
-            i === index ? { ...routine, selected: !routine.selected } : routine
-          ),
+          states: {
+            ...state.states,
+            [type]: state.states[type].map((item, i) =>
+              i === index ? { ...item, selected: !item.selected } : item
+            ),
+          },
         })),
-      getSelected: () => {
-        return get().routines.filter((routine) => routine.selected);
+      getSelected: (type: string) => {
+        return get().states[type].filter((item) => item.selected);
       },
-      getSelectedWithCount: () => {
-        return get().routines.filter(
-          (routine) => routine.selected && routine.countSource
-        );
-      },
-      setAudioSource: async (uri: string) => {
+      setSource: async (type: string, uri: string) => {
         const sourceFile = new File(uri);
         const { md5 } = sourceFile.info({ md5: true });
 
@@ -153,97 +159,20 @@ export const useRoutineStore = create<RoutineState>()(
         }
 
         // Update state with the new file URI
-        const routines =
-          destinationFile.uri === get().audioSource ? get().routines : [];
-        set(() => ({ audioSource: destinationFile.uri, routines }));
-      },
-      setCountSource: async (uri: string) => {
-        // Get currently selected routines
-        const selectedRoutines = get().getSelected();
-
-        // Only proceed if exactly one routine is selected
-        if (selectedRoutines.length !== 1) {
-          console.warn("setCountSource: Exactly one routine must be selected");
-          return;
-        }
-
-        const sourceFile = new File(uri);
-        const { md5 } = sourceFile.info({ md5: true });
-
-        // Create app-specific directory for count files
-        const appDir = new Directory(Paths.document, "count_files");
-
-        // Ensure the directory exists
-        if (!appDir.exists) {
-          appDir.create({ intermediates: true });
-        }
-
-        // Generate unique filename to avoid conflicts
-        const uniqueName = `${md5}.${uri.split(".").pop()}`;
-        const destinationFile = new File(appDir, uniqueName);
-
-        // Copy the file to the app's directory using the latest API
-        if (!destinationFile.exists) {
-          sourceFile.copy(destinationFile);
-        }
-
-        // Find the index of the selected routine and update its countSource
-        const routines = get().routines;
-        const selectedIndex = routines.findIndex((routine) => routine.selected);
-
-        if (selectedIndex !== -1) {
-          set((state) => ({
-            routines: state.routines.map((routine, index) =>
-              index === selectedIndex
-                ? { ...routine, countSource: destinationFile.uri }
-                : routine
-            ),
-          }));
-        }
-      },
-      initializeCountTimes: (duration: number) => {
-        // Get currently selected routines
-        const selectedRoutines = get().getSelected();
-
-        // Only proceed if exactly one routine is selected
-        if (selectedRoutines.length !== 1) {
-          console.warn(
-            "initializeCountTimes: Exactly one routine must be selected"
-          );
-          return;
-        }
-
-        // Validate duration
-        if (duration <= 0) {
-          console.warn("initializeCountTimes: Duration must be greater than 0");
-          return;
-        }
-
-        // Find the index of the selected routine and initialize its count times
-        const routines = get().routines;
-        const selectedIndex = routines.findIndex((routine) => routine.selected);
-
-        if (selectedIndex !== -1) {
-          set((state) => ({
-            routines: state.routines.map((routine, index) =>
-              index === selectedIndex
-                ? {
-                    ...routine,
-                    countStartTime: 0,
-                    countEndTime: duration,
-                  }
-                : routine
-            ),
-          }));
-        }
+        const items =
+          destinationFile.uri === get().sources[type] ? get().states[type] : [];
+        set(() => ({
+          sources: { ...get().sources, [type]: destinationFile.uri },
+          states: { ...get().states, [type]: items },
+        }));
       },
     }),
     {
-      name: "routine-storage",
+      name: "item-storage",
       storage: createJSONStorage(() => Storage),
       partialize: (state) => ({
-        routines: state.routines,
-        audioSource: state.audioSource,
+        states: state.states,
+        sources: state.sources,
       }),
     }
   )

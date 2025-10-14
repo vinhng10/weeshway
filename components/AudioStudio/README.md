@@ -10,12 +10,12 @@ AudioStudio/
 ├── types.ts                     # Shared TypeScript types and constants
 ├── utils.ts                     # Utility functions
 ├── components/                  # UI Components
-│   ├── RoutineItem.tsx       # Individual audio routine renderer
+│   ├── Item.tsx       # Individual audio routine renderer
 │   ├── ControlBar.tsx          # Control buttons (play, split, merge, etc.)
 │   ├── DisplayArea.tsx         # Main display with transcript overlay
 │   └── Track.tsx            # Track with routines and time markers
 └── hooks/                       # Custom React hooks
-    ├── useRoutines.ts        # Audio routines state management
+    ├── useItems.ts        # Audio routines state management
     ├── useVoiceCommands.ts     # Speech recognition & Groq integration
     └── useWakeWordDetection.ts # Wake word detection logic
 ```
@@ -34,11 +34,11 @@ AudioStudio/
 
 ### 2. **Custom Hooks**
 
-#### `useRoutines(duration)`
+#### `useItems(duration)`
 
 - Manages the array of audio routines
 - Handles split, merge, and selection operations
-- Returns: `routines`, `toggleRoutineSelection`, `handleSplit`, `handleMerge`, `selectRoutinesByIndices`
+- Returns: `routines`, `toggleItemSelection`, `handleSplit`, `handleMerge`, `selectItemsByIndices`
 
 #### `useWakeWordDetection(enabled, audioSource)`
 
@@ -71,7 +71,7 @@ AudioStudio/
 - Renders time markers and audio routines
 - Handles scroll events
 
-#### `RoutineItem`
+#### `Item`
 
 - Individual audio routine visualization
 - Shows routine ID number
@@ -81,7 +81,7 @@ AudioStudio/
 
 #### `types.ts`
 
-- `Routine`: Interface for audio routines
+- `Item`: Interface for audio routines
 - `AudioPlayerAction`: Groq response type
 - Constants: `DUCKING_VOLUME`, `PIXELS_PER_SECOND`
 
@@ -89,8 +89,8 @@ AudioStudio/
 
 - `formatTime()`: Convert seconds to MM:SS
 - `mapUserIdsToIndices()`: Convert 1-based user IDs to 0-based array indices
-- `mergeConsecutiveRoutines()`: Combine consecutive audio routines into continuous routines to eliminate playback glitches
-- `addPaddingToMergedRoutines()`: Add padding only before the first routine and after the last routine for smoother transitions and context
+- `mergeConsecutiveItems()`: Combine consecutive audio routines into continuous routines to eliminate playback glitches
+- `addPaddingToMergedItems()`: Add padding only before the first routine and after the last routine for smoother transitions and context
 
 ## Key Improvements
 
@@ -141,7 +141,7 @@ AudioStudio/
          │                 │              │              │
     ┌────▼─────┐    ┌─────▼──────┐  ┌───▼──────┐  ┌───▼──────┐
     │ useAudio │    │ useWakeWord│  │useVoice  │  │   UI     │
-    │  Routines   │    │ Detection  │  │Commands  │  │Components│
+    │  Items   │    │ Detection  │  │Commands  │  │Components│
     └────┬─────┘    └─────┬──────┘  └───┬──────┘  └───┬──────┘
          │                 │              │             │
          └─────────────────┴──────────────┴─────────────┘

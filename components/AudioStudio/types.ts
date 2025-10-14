@@ -1,9 +1,6 @@
-export interface Routine {
-  musicStartTime: number;
-  musicEndTime: number;
-  countStartTime?: number;
-  countEndTime?: number;
-  countSource?: string;
+export interface Item {
+  startTime: number;
+  endTime: number;
   selected: boolean;
 }
 

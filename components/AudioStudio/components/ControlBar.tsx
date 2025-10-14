@@ -3,40 +3,43 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface ControlBarProps {
+  type: "musics" | "counts";
   isPlaying: boolean;
   wakeWordEnabled: boolean;
   onLoadAudio: () => void;
-  onLoadCountAudio: () => void;
-  onPlayCountAudio: () => void;
   onTogglePlayback: () => void;
   onSplit: () => void;
   onMerge: () => void;
   onToggleWakeWord: () => void;
+  onToggleType: () => void;
 }
 
 export const ControlBar: React.FC<ControlBarProps> = ({
+  type,
   isPlaying,
   wakeWordEnabled,
   onLoadAudio,
-  onLoadCountAudio,
-  onPlayCountAudio,
   onTogglePlayback,
   onSplit,
   onMerge,
   onToggleWakeWord,
+  onToggleType,
 }) => {
   return (
     <View style={styles.controlBar}>
+      <TouchableOpacity
+        style={[styles.controlButton, styles.typeToggleButton]}
+        onPress={onToggleType}
+      >
+        <Ionicons
+          name={type === "musics" ? "musical-notes" : "mic"}
+          size={26}
+          color={type === "musics" ? "#FFD700" : "#00BFFF"}
+        />
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.controlButton} onPress={onLoadAudio}>
-        <Ionicons name="musical-notes" size={26} color="white" />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.controlButton} onPress={onLoadCountAudio}>
-        <Ionicons name="mic" size={26} color="white" />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.controlButton} onPress={onPlayCountAudio}>
-        <Ionicons name="play-circle" size={26} color="white" />
+        <Ionicons name="folder-open" size={26} color="white" />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.controlButton} onPress={onTogglePlayback}>
@@ -85,6 +88,10 @@ const styles = StyleSheet.create({
   },
   controlButtonActive: {
     backgroundColor: "rgba(76, 175, 80, 0.2)",
+    borderRadius: 8,
+  },
+  typeToggleButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 8,
   },
 });

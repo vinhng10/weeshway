@@ -9,32 +9,34 @@ import {
   Text,
   View,
 } from "react-native";
-import { useRoutineStore } from "../hooks/useState";
+import { useItemStore } from "../hooks/useState";
 import { PIXELS_PER_SECOND } from "../types";
 import {
-  addPaddingToMergedRoutines,
+  addPaddingToMergedItems,
   formatTime,
-  mergeConsecutiveRoutines,
+  mergeConsecutiveItems,
 } from "../utils";
-import { RoutineItem } from "./RoutineItem";
+import { Item } from "./Item";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 interface TrackProps {
+  type: string;
   player: AudioPlayer;
   status: AudioStatus;
-  currentRoutineIndex?: number;
-  onRoutineIndexChange?: (index: number) => void;
+  currentItemIndex?: number;
+  onItemIndexChange?: (index: number) => void;
 }
 
-export const MusicTrack = ({
+export const Track = ({
+  type,
   player,
   status,
-  currentRoutineIndex = 0,
-  onRoutineIndexChange,
+  currentItemIndex = 0,
+  onItemIndexChange,
 }: TrackProps) => {
-  const { routines, getSelected, setSelected } = useRoutineStore();
-  const selectedRoutines = getSelected();
+  const { states, getSelected } = useItemStore();
+  const selectedItems = getSelected(type);
   const duration = status.duration;
   const trackWidth = duration * PIXELS_PER_SECOND;
   const internalScrollRef = useRef<ScrollView>(null);
@@ -67,28 +69,21 @@ export const MusicTrack = ({
         });
 
         // Handle routine-based playback (consecutive routines are merged with padding)
-        if (selectedRoutines.length > 0) {
+        if (selectedItems.length > 0) {
           // Merge consecutive routines and add padding for smoother transitions
-          const mergedRoutines = mergeConsecutiveRoutines(selectedRoutines);
-          const paddedRoutines = addPaddingToMergedRoutines(
-            mergedRoutines,
-            duration,
-            2
-          );
-          const currentRoutine = paddedRoutines[currentRoutineIndex];
+          const mergedItems = mergeConsecutiveItems(selectedItems);
+          const paddedItems = addPaddingToMergedItems(mergedItems, duration, 2);
+          const currentItem = paddedItems[currentItemIndex];
 
-          if (
-            currentRoutine &&
-            player.currentTime >= currentRoutine.musicEndTime
-          ) {
-            const nextIndex = currentRoutineIndex + 1;
-            if (nextIndex < paddedRoutines.length) {
-              const nextRoutine = paddedRoutines[nextIndex];
-              player.seekTo(nextRoutine.musicStartTime);
-              onRoutineIndexChange?.(nextIndex);
+          if (currentItem && player.currentTime >= currentItem.endTime) {
+            const nextIndex = currentItemIndex + 1;
+            if (nextIndex < paddedItems.length) {
+              const nextItem = paddedItems[nextIndex];
+              player.seekTo(nextItem.startTime);
+              onItemIndexChange?.(nextIndex);
             } else {
               player.pause();
-              onRoutineIndexChange?.(0);
+              onItemIndexChange?.(0);
             }
           }
         }
@@ -96,13 +91,7 @@ export const MusicTrack = ({
 
       return () => clearInterval(interval);
     }
-  }, [
-    player,
-    duration,
-    isManualScrolling,
-    currentRoutineIndex,
-    selectedRoutines,
-  ]);
+  }, [player, duration, isManualScrolling, currentItemIndex, selectedItems]);
 
   return (
     <View style={styles.trackContainer}>
@@ -119,33 +108,29 @@ export const MusicTrack = ({
           <View style={styles.trackContent}>
             {/* Top ticks row */}
             <View style={[styles.ticksRow, { width: trackWidth }]}>
-              {duration > 0 && Array.from(
-                { length: Math.floor(duration / 5) + 1 },
-                (_, index) => {
-                  const time = index * 5;
-                  const position = time * PIXELS_PER_SECOND;
+              {duration > 0 &&
+                Array.from(
+                  { length: Math.floor(duration / 5) + 1 },
+                  (_, index) => {
+                    const time = index * 5;
+                    const position = time * PIXELS_PER_SECOND;
 
-                  return (
-                    <View
-                      key={index}
-                      style={[styles.marker, { left: position }]}
-                    >
-                      <Text style={styles.labelText}>{formatTime(time)}</Text>
-                    </View>
-                  );
-                }
-              )}
+                    return (
+                      <View
+                        key={index}
+                        style={[styles.marker, { left: position }]}
+                      >
+                        <Text style={styles.labelText}>{formatTime(time)}</Text>
+                      </View>
+                    );
+                  }
+                )}
             </View>
 
-            {/* Routines */}
+            {/* Items */}
             <View style={[styles.track, { width: trackWidth }]}>
-              {routines.map((routine, index) => (
-                <RoutineItem
-                  key={index}
-                  index={index}
-                  routine={routine}
-                  onPress={setSelected}
-                />
+              {states[type].map((item, index) => (
+                <Item key={index} index={index} type={type} />
               ))}
             </View>
           </View>
