@@ -13,7 +13,7 @@ AudioStudio/
 │   ├── Item.tsx       # Individual audio routine renderer
 │   ├── ControlBar.tsx          # Control buttons (play, split, merge, etc.)
 │   ├── DisplayArea.tsx         # Main display with transcript overlay
-│   └── Track.tsx            # Track with routines and time markers
+│   └── Track.tsx            # Track with routines and time ticks
 └── hooks/                       # Custom React hooks
     ├── useItems.ts        # Audio routines state management
     ├── useVoiceCommands.ts     # Speech recognition & Groq integration
@@ -68,7 +68,7 @@ AudioStudio/
 #### `Track`
 
 - Scrollable track view
-- Renders time markers and audio routines
+- Renders time ticks and audio routines
 - Handles scroll events
 
 #### `Item`

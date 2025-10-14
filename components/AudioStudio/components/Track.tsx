@@ -118,7 +118,7 @@ export const Track = ({
                     return (
                       <View
                         key={index}
-                        style={[styles.marker, { left: position }]}
+                        style={[styles.tick, { left: position }]}
                       >
                         <Text style={styles.labelText}>{formatTime(time)}</Text>
                       </View>
@@ -171,12 +171,13 @@ const styles = StyleSheet.create({
     position: "relative",
     overflow: "hidden",
   },
-  marker: {
+  tick: {
     position: "absolute",
     top: 0,
     height: "100%",
     justifyContent: "flex-start",
     alignItems: "center",
+    transform: [{ translateX: "-50%" }],
   },
   labelText: {
     color: "#c9c9c9",
