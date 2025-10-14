@@ -22,7 +22,7 @@ export default function AudioStudio() {
 
   // Zustand stores
   const {
-    states,
+    items,
     sources,
     initialize,
     split,
@@ -50,13 +50,13 @@ export default function AudioStudio() {
       return;
     }
 
-    const indices = mapToIndices(action.items, states.music.length);
+    const indices = mapToIndices(action.items, items.music.length);
     if (indices.length === 0) return;
 
     setSelectedByIndices(action.type, indices);
 
     const firstIndex = indices[0];
-    const firstItem = states.music[firstIndex];
+    const firstItem = items.music[firstIndex];
     if (firstItem) {
       try {
         player[action.type].seekTo(firstItem.startTime);
@@ -77,7 +77,7 @@ export default function AudioStudio() {
 
   // Initialize items when audio is loaded
   useEffect(() => {
-    if (status[type].duration > 0 && states[type].length === 0) {
+    if (status[type].duration > 0 && items[type].length === 0) {
       initialize(type, status[type].duration);
     }
   }, [status[type].duration]);
@@ -97,7 +97,7 @@ export default function AudioStudio() {
       if (!result.canceled && result.assets[0]) {
         const { uri } = result.assets[0];
 
-        // Reset states for new song
+        // Reset items for new song
         setCurrentItemIndex(0);
 
         // Set new audio source

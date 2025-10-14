@@ -8,8 +8,8 @@ interface ItemProps {
 }
 
 export const Item = ({ index, type }: ItemProps) => {
-  const { states, setSelected } = useItemStore();
-  const item = states[type][index];
+  const { items, setSelected } = useItemStore();
+  const item = items[type][index];
   const start = item.startTime * PIXELS_PER_SECOND;
   const width = (item.endTime - item.startTime) * PIXELS_PER_SECOND;
 

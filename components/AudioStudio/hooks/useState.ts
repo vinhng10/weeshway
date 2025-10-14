@@ -5,7 +5,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { Item } from "../types";
 
 interface ItemState {
-  states: { [type: string]: Item[] };
+  items: { [type: string]: Item[] };
   sources: { [type: string]: string | null };
   initialize: (type: string, duration: number) => void;
   split: (type: string, splitTime: number) => void;
@@ -19,12 +19,12 @@ interface ItemState {
 export const useItemStore = create<ItemState>()(
   persist(
     (set, get) => ({
-      states: { music: [], count: [] },
+      items: { music: [], count: [] },
       sources: { music: null, count: null },
       initialize: (type: string, duration: number) => {
         set(() => ({
-          states: {
-            ...get().states,
+          items: {
+            ...get().items,
             [type]: [
               {
                 startTime: 0,
@@ -37,7 +37,7 @@ export const useItemStore = create<ItemState>()(
       },
       split: (type: string, time: number) => {
         // Get items
-        const items = get().states[type];
+        const items = get().items[type];
 
         // Find the item that contains the split time
         const itemIndex = items.findIndex(
@@ -65,15 +65,15 @@ export const useItemStore = create<ItemState>()(
 
         // Set new items
         set(() => ({
-          states: {
-            ...get().states,
+          items: {
+            ...get().items,
             [type]: newItems,
           },
         }));
       },
       merge: (type: string) => {
         // Get items
-        const items = get().states[type];
+        const items = get().items[type];
 
         // Find indices of selected items
         const selectedIndices = items
@@ -109,17 +109,17 @@ export const useItemStore = create<ItemState>()(
 
         // Set new items
         set(() => ({
-          states: {
-            ...get().states,
+          items: {
+            ...get().items,
             [type]: newItems,
           },
         }));
       },
       setSelectedByIndices: (type: string, indices: number[]) =>
         set((state) => ({
-          states: {
-            ...state.states,
-            [type]: state.states[type].map((item, index) => ({
+          items: {
+            ...state.items,
+            [type]: state.items[type].map((item, index) => ({
               ...item,
               selected: indices.includes(index),
             })),
@@ -127,15 +127,15 @@ export const useItemStore = create<ItemState>()(
         })),
       setSelected: (type: string, index: number) =>
         set((state) => ({
-          states: {
-            ...state.states,
-            [type]: state.states[type].map((item, i) =>
+          items: {
+            ...state.items,
+            [type]: state.items[type].map((item, i) =>
               i === index ? { ...item, selected: !item.selected } : item
             ),
           },
         })),
       getSelected: (type: string) => {
-        return get().states[type].filter((item) => item.selected);
+        return get().items[type].filter((item) => item.selected);
       },
       setSource: async (type: string, uri: string) => {
         const sourceFile = new File(uri);
@@ -160,10 +160,10 @@ export const useItemStore = create<ItemState>()(
 
         // Update state with the new file URI
         const items =
-          destinationFile.uri === get().sources[type] ? get().states[type] : [];
+          destinationFile.uri === get().sources[type] ? get().items[type] : [];
         set(() => ({
           sources: { ...get().sources, [type]: destinationFile.uri },
-          states: { ...get().states, [type]: items },
+          items: { ...get().items, [type]: items },
         }));
       },
     }),
@@ -171,7 +171,7 @@ export const useItemStore = create<ItemState>()(
       name: "item-storage",
       storage: createJSONStorage(() => Storage),
       partialize: (state) => ({
-        states: state.states,
+        items: state.items,
         sources: state.sources,
       }),
     }

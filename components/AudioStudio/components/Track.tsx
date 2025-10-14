@@ -35,7 +35,7 @@ export const Track = ({
   currentItemIndex = 0,
   onItemIndexChange,
 }: TrackProps) => {
-  const { states, getSelected } = useItemStore();
+  const { items, getSelected } = useItemStore();
   const selectedItems = getSelected(type);
   const duration = status.duration;
   const trackWidth = duration * PIXELS_PER_SECOND;
@@ -129,7 +129,7 @@ export const Track = ({
 
             {/* Items */}
             <View style={[styles.track, { width: trackWidth }]}>
-              {states[type].map((item, index) => (
+              {items[type].map((item, index) => (
                 <Item key={index} index={index} type={type} />
               ))}
             </View>
