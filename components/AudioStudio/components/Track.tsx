@@ -68,9 +68,9 @@ export const Track = ({
           animated: false,
         });
 
-        // Handle routine-based playback (consecutive routines are merged with padding)
+        // Handle item-based playback (consecutive items are merged with padding)
         if (selectedItems.length > 0) {
-          // Merge consecutive routines and add padding for smoother transitions
+          // Merge consecutive items and add padding for smoother transitions
           const mergedItems = mergeConsecutiveItems(selectedItems);
           const paddedItems = addPaddingToMergedItems(mergedItems, duration, 2);
           const currentItem = paddedItems[currentItemIndex];

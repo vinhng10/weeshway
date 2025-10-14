@@ -19,8 +19,8 @@ interface ItemState {
 export const useItemStore = create<ItemState>()(
   persist(
     (set, get) => ({
-      states: { musics: [], counts: [] },
-      sources: { musics: null, counts: null },
+      states: { music: [], count: [] },
+      sources: { music: null, count: null },
       initialize: (type: string, duration: number) => {
         set(() => ({
           states: {

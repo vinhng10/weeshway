@@ -16,8 +16,8 @@ export const Item = ({ index, type }: ItemProps) => {
   return (
     <Pressable
       style={[
-        styles.routine,
-        item.selected && styles.routineSelected,
+        styles.item,
+        item.selected && styles.itemSelected,
         {
           left: start,
           width: width,
@@ -25,13 +25,13 @@ export const Item = ({ index, type }: ItemProps) => {
       ]}
       onPress={() => setSelected(type, index)}
     >
-      <Text style={styles.routineIdText}>{index + 1}</Text>
+      <Text style={styles.itemIdText}>{index + 1}</Text>
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
-  routine: {
+  item: {
     position: "absolute",
     height: "100%",
     borderRadius: 8,
@@ -41,11 +41,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  routineSelected: {
+  itemSelected: {
     borderColor: "#ffffff",
     borderWidth: 3,
   },
-  routineIdText: {
+  itemIdText: {
     color: "white",
     fontSize: 24,
     fontWeight: "bold",

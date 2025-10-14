@@ -18,7 +18,7 @@ import {
 export default function AudioStudio() {
   const [currentItemIndex, setCurrentItemIndex] = useState<number>(0);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
-  const [type, setType] = useState<"musics" | "counts">("musics");
+  const [type, setType] = useState<"music" | "count">("music");
 
   // Zustand stores
   const {
@@ -31,15 +31,15 @@ export default function AudioStudio() {
     getSelected,
     setSource,
   } = useItemStore();
-  const musicPlayer = useAudioPlayer(sources.musics);
+  const musicPlayer = useAudioPlayer(sources.music);
   const musicStatus = useAudioPlayerStatus(musicPlayer);
-  const countPlayer = useAudioPlayer(sources.counts);
+  const countPlayer = useAudioPlayer(sources.count);
   const countStatus = useAudioPlayerStatus(countPlayer);
-  const player = { musics: musicPlayer, counts: countPlayer };
-  const status = { musics: musicStatus, counts: countStatus };
+  const player = { music: musicPlayer, count: countPlayer };
+  const status = { music: musicStatus, count: countStatus };
 
   const { wakeTriggerAt, startWakeWordRecorder, stopWakeWordRecorder } =
-    useWakeWordDetection(wakeWordEnabled, sources.musics);
+    useWakeWordDetection(wakeWordEnabled, sources.music);
 
   const handleAudioAction = (action: AudioPlayerAction) => {
     if (!action) return;
@@ -50,13 +50,13 @@ export default function AudioStudio() {
       return;
     }
 
-    const indices = mapUserIdsToIndices(action.routines, states.musics.length);
+    const indices = mapUserIdsToIndices(action.items, states.music.length);
     if (indices.length === 0) return;
 
-    setSelectedByIndices("musics", indices);
+    setSelectedByIndices("music", indices);
 
     const firstIndex = indices[0];
-    const firstItem = states.musics[firstIndex];
+    const firstItem = states.music[firstIndex];
     if (firstItem) {
       try {
         player[type].seekTo(firstItem.startTime);
@@ -75,7 +75,7 @@ export default function AudioStudio() {
     onWakeWordRecorderStop: stopWakeWordRecorder,
   });
 
-  // Initialize routines when audio is loaded
+  // Initialize items when audio is loaded
   useEffect(() => {
     if (status[type].duration > 0 && states[type].length === 0) {
       initialize(type, status[type].duration);
@@ -117,7 +117,7 @@ export default function AudioStudio() {
         const selectedItems = getSelected(type);
 
         if (selectedItems.length > 0) {
-          // Use merged routines with padding for smoother playback
+          // Use merged items with padding for smoother playback
           const mergedItems = mergeConsecutiveItems(selectedItems);
           const paddedItems = addPaddingToMergedItems(
             mergedItems,
@@ -158,19 +158,19 @@ export default function AudioStudio() {
         onSplit={() => split(type, status[type].currentTime)}
         onMerge={() => merge(type)}
         onToggleWakeWord={toggleWakeWordDetection}
-        onToggleType={() => setType(type === "musics" ? "counts" : "musics")}
+        onToggleType={() => setType(type === "music" ? "count" : "music")}
       />
 
       <View style={styles.tracksContainer}>
         <Track
-          type="musics"
+          type="music"
           player={musicPlayer}
           status={musicStatus}
           currentItemIndex={currentItemIndex}
           onItemIndexChange={setCurrentItemIndex}
         />
         <Track
-          type="counts"
+          type="count"
           player={countPlayer}
           status={countStatus}
           currentItemIndex={currentItemIndex}

@@ -10,12 +10,12 @@ AudioStudio/
 ├── types.ts                     # Shared TypeScript types and constants
 ├── utils.ts                     # Utility functions
 ├── components/                  # UI Components
-│   ├── Item.tsx       # Individual audio routine renderer
+│   ├── Item.tsx       # Individual audio item renderer
 │   ├── ControlBar.tsx          # Control buttons (play, split, merge, etc.)
 │   ├── DisplayArea.tsx         # Main display with transcript overlay
-│   └── Track.tsx            # Track with routines and time ticks
+│   └── Track.tsx            # Track with items and time ticks
 └── hooks/                       # Custom React hooks
-    ├── useItems.ts        # Audio routines state management
+    ├── useItems.ts        # Audio items state management
     ├── useVoiceCommands.ts     # Speech recognition & Groq integration
     └── useWakeWordDetection.ts # Wake word detection logic
 ```
@@ -36,9 +36,9 @@ AudioStudio/
 
 #### `useItems(duration)`
 
-- Manages the array of audio routines
+- Manages the array of audio items
 - Handles split, merge, and selection operations
-- Returns: `routines`, `toggleItemSelection`, `handleSplit`, `handleMerge`, `selectItemsByIndices`
+- Returns: `items`, `toggleItemSelection`, `handleSplit`, `handleMerge`, `selectItemsByIndices`
 
 #### `useWakeWordDetection(enabled, audioSource)`
 
@@ -68,20 +68,20 @@ AudioStudio/
 #### `Track`
 
 - Scrollable track view
-- Renders time ticks and audio routines
+- Renders time ticks and audio items
 - Handles scroll events
 
 #### `Item`
 
-- Individual audio routine visualization
-- Shows routine ID number
+- Individual audio item visualization
+- Shows item ID number
 - Handles selection
 
 ### 4. **Shared Code**
 
 #### `types.ts`
 
-- `Item`: Interface for audio routines
+- `Item`: Interface for audio items
 - `AudioPlayerAction`: Groq response type
 - Constants: `DUCKING_VOLUME`, `PIXELS_PER_SECOND`
 
@@ -89,8 +89,8 @@ AudioStudio/
 
 - `formatTime()`: Convert seconds to MM:SS
 - `mapUserIdsToIndices()`: Convert 1-based user IDs to 0-based array indices
-- `mergeConsecutiveItems()`: Combine consecutive audio routines into continuous routines to eliminate playback glitches
-- `addPaddingToMergedItems()`: Add padding only before the first routine and after the last routine for smoother transitions and context
+- `mergeConsecutiveItems()`: Combine consecutive audio items into continuous items to eliminate playback glitches
+- `addPaddingToMergedItems()`: Add padding only before the first item and after the last item for smoother transitions and context
 
 ## Key Improvements
 
@@ -123,10 +123,10 @@ AudioStudio/
 
 ### ✅ **Smooth Playback**
 
-- Consecutive audio routines are automatically merged during playback
-- Eliminates glitches at transitions between consecutive routines
-- Only seeks when jumping to non-consecutive routines
-- Adds padding (2 seconds) before the first routine and after the last routine only for smoother transitions and context
+- Consecutive audio items are automatically merged during playback
+- Eliminates glitches at transitions between consecutive items
+- Only seeks when jumping to non-consecutive items
+- Adds padding (2 seconds) before the first item and after the last item only for smoother transitions and context
 
 ## Data Flow
 

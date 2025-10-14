@@ -3,7 +3,7 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface ControlBarProps {
-  type: "musics" | "counts";
+  type: "music" | "count";
   isPlaying: boolean;
   wakeWordEnabled: boolean;
   onLoadAudio: () => void;
@@ -32,9 +32,9 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         onPress={onToggleType}
       >
         <Ionicons
-          name={type === "musics" ? "musical-notes" : "mic"}
+          name={type === "music" ? "musical-notes" : "mic"}
           size={26}
-          color={type === "musics" ? "#FFD700" : "#00BFFF"}
+          color={type === "music" ? "#FFD700" : "#00BFFF"}
         />
       </TouchableOpacity>
 

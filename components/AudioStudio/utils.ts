@@ -28,23 +28,23 @@ export const mapUserIdsToIndices = (
 };
 
 /**
- * Combines consecutive audio routines into continuous routines to eliminate
+ * Combines consecutive audio items into continuous items to eliminate
  * glitches during playback transitions.
  *
- * @param routines - Array of audio routines sorted by startTime
- * @returns Array of merged routines where consecutive routines are combined
+ * @param items - Array of audio items sorted by startTime
+ * @returns Array of merged items where consecutive items are combined
  *
  * @example
- * Input:  [routine1(0-10), routine2(10-20), routine4(40-50), routine5(50-60)]
- * Output: [routine(0-20), routine(40-60)]
+ * Input:  [item1(0-10), item2(10-20), item4(40-50), item5(50-60)]
+ * Output: [item(0-20), item(40-60)]
  */
 export const mergeConsecutiveItems = (
-  routines: Item[]
+  items: Item[]
 ): Array<{ startTime: number; endTime: number }> => {
-  if (routines.length === 0) return [];
+  if (items.length === 0) return [];
 
   // Sort by start time to ensure correct order
-  const sorted = [...routines].sort((a, b) => a.startTime - b.startTime);
+  const sorted = [...items].sort((a, b) => a.startTime - b.startTime);
 
   const merged: Array<{ startTime: number; endTime: number }> = [];
   let currentItem = {
@@ -53,44 +53,44 @@ export const mergeConsecutiveItems = (
   };
 
   for (let i = 1; i < sorted.length; i++) {
-    const routine = sorted[i];
+    const item = sorted[i];
 
-    // Check if this routine is consecutive (starts where previous ended)
+    // Check if this item is consecutive (starts where previous ended)
     // Use a small epsilon for floating point comparison
     const isConsecutive =
-      Math.abs(routine.startTime - currentItem.endTime) < 0.001;
+      Math.abs(item.startTime - currentItem.endTime) < 0.001;
 
     if (isConsecutive) {
-      // Extend the current routine
-      currentItem.endTime = routine.endTime;
+      // Extend the current item
+      currentItem.endTime = item.endTime;
     } else {
-      // Save current routine and start a new one
+      // Save current item and start a new one
       merged.push(currentItem);
       currentItem = {
-        startTime: routine.startTime,
-        endTime: routine.endTime,
+        startTime: item.startTime,
+        endTime: item.endTime,
       };
     }
   }
 
-  // Don't forget the last routine
+  // Don't forget the last item
   merged.push(currentItem);
 
   return merged;
 };
 
 /**
- * Extends merged routines with padding before the first routine and after the last routine only
+ * Extends merged items with padding before the first item and after the last item only
  * to provide smoother transitions and more context.
  *
- * @param mergedItems - Array of merged routines from mergeConsecutiveItems
+ * @param mergedItems - Array of merged items from mergeConsecutiveItems
  * @param totalDuration - Total duration of the audio file
  * @param paddingSeconds - Amount of padding to add (default: 2 seconds)
- * @returns Array of extended routines with padding only on first and last
+ * @returns Array of extended items with padding only on first and last
  *
  * @example
- * Input:  [routine(10-20), routine(40-50), routine(60-70)], totalDuration: 100, padding: 2
- * Output: [routine(8-20), routine(40-50), routine(60-72)]
+ * Input:  [item(10-20), item(40-50), item(60-70)], totalDuration: 100, padding: 2
+ * Output: [item(8-20), item(40-50), item(60-72)]
  */
 export const addPaddingToMergedItems = (
   mergedItems: Array<{ startTime: number; endTime: number }>,
@@ -99,17 +99,17 @@ export const addPaddingToMergedItems = (
 ): Array<{ startTime: number; endTime: number }> => {
   if (mergedItems.length === 0) return [];
 
-  return mergedItems.map((routine, index) => {
+  return mergedItems.map((item, index) => {
     const isFirst = index === 0;
     const isLast = index === mergedItems.length - 1;
 
     const paddedStart = isFirst
-      ? Math.max(0, routine.startTime - paddingSeconds)
-      : routine.startTime;
+      ? Math.max(0, item.startTime - paddingSeconds)
+      : item.startTime;
 
     const paddedEnd = isLast
-      ? Math.min(totalDuration, routine.endTime + paddingSeconds)
-      : routine.endTime;
+      ? Math.min(totalDuration, item.endTime + paddingSeconds)
+      : item.endTime;
 
     return {
       startTime: paddedStart,

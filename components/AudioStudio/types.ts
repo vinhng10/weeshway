@@ -6,7 +6,8 @@ export interface Item {
 
 export interface AudioPlayerAction {
   action: "play" | "stop";
-  routines: number[];
+  items: number[];
+  type: "music" | "count";
 }
 
 export const DUCKING_VOLUME = 0.1;
