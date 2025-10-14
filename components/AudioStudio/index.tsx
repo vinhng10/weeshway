@@ -11,7 +11,7 @@ import { useWakeWordDetection } from "./hooks/useWakeWordDetection";
 import { AudioPlayerAction } from "./types";
 import {
   addPaddingToMergedItems,
-  mapUserIdsToIndices,
+  mapToIndices,
   mergeConsecutiveItems,
 } from "./utils";
 
@@ -45,23 +45,23 @@ export default function AudioStudio() {
     if (!action) return;
     if (action.action === "stop") {
       try {
-        player[type].pause();
+        player[action.type].pause();
       } catch {}
       return;
     }
 
-    const indices = mapUserIdsToIndices(action.items, states.music.length);
+    const indices = mapToIndices(action.items, states.music.length);
     if (indices.length === 0) return;
 
-    setSelectedByIndices("music", indices);
+    setSelectedByIndices(action.type, indices);
 
     const firstIndex = indices[0];
     const firstItem = states.music[firstIndex];
     if (firstItem) {
       try {
-        player[type].seekTo(firstItem.startTime);
+        player[action.type].seekTo(firstItem.startTime);
         setCurrentItemIndex(0);
-        player[type].play();
+        player[action.type].play();
       } catch (e) {
         console.warn("Failed to start playback from voice command", e);
       }

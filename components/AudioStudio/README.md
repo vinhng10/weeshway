@@ -88,7 +88,7 @@ AudioStudio/
 #### `utils.ts`
 
 - `formatTime()`: Convert seconds to MM:SS
-- `mapUserIdsToIndices()`: Convert 1-based user IDs to 0-based array indices
+- `mapToIndices()`: Convert 1-based user IDs to 0-based array indices
 - `mergeConsecutiveItems()`: Combine consecutive audio items into continuous items to eliminate playback glitches
 - `addPaddingToMergedItems()`: Add padding only before the first item and after the last item for smoother transitions and context
 

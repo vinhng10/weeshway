@@ -66,7 +66,7 @@ export const useVoiceCommands = ({
             content:
               "You are an audio player voice assistant. Infer user's intent from the voice command and return the audio player action, target audio items, and audio type (music or count).",
           },
-          { role: "user", content: "Play items three and five" },
+          { role: "user", content: "Play music parts three and five" },
           {
             role: "assistant",
             content: JSON.stringify({
@@ -84,16 +84,16 @@ export const useVoiceCommands = ({
               type: "music",
             }),
           },
-          { role: "user", content: "Play the last two section" },
+          { role: "user", content: "Count the last two routines" },
           {
             role: "assistant",
             content: JSON.stringify({
               action: "play",
               items: [-2, -1],
-              type: "music",
+              type: "count",
             }),
           },
-          { role: "user", content: "Play one four six" },
+          { role: "user", content: "Play music of routine one four six" },
           {
             role: "assistant",
             content: JSON.stringify({
@@ -102,12 +102,12 @@ export const useVoiceCommands = ({
               type: "music",
             }),
           },
-          { role: "user", content: "Count to five" },
+          { role: "user", content: "Count routine one to three" },
           {
             role: "assistant",
             content: JSON.stringify({
               action: "play",
-              items: [5],
+              items: [1, 2, 3],
               type: "count",
             }),
           },
@@ -116,6 +116,24 @@ export const useVoiceCommands = ({
             role: "assistant",
             content: JSON.stringify({
               action: "stop",
+              items: [],
+              type: "count",
+            }),
+          },
+          { role: "user", content: "Play music from start to finish" },
+          {
+            role: "assistant",
+            content: JSON.stringify({
+              action: "play",
+              items: [],
+              type: "music",
+            }),
+          },
+          { role: "user", content: "Count everything" },
+          {
+            role: "assistant",
+            content: JSON.stringify({
+              action: "play",
               items: [],
               type: "count",
             }),

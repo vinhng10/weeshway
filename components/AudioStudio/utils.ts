@@ -8,23 +8,14 @@ export const formatTime = (seconds: number): string => {
     .padStart(2, "0")}`;
 };
 
-export const mapUserIdsToIndices = (
-  userIds: number[],
-  count: number
-): number[] => {
-  const indices: number[] = [];
-  for (const id of userIds) {
-    let idx: number | null = null;
-    if (id > 0) idx = id - 1;
-    else if (id < 0) idx = count + id;
-    if (idx !== null && idx >= 0 && idx < count) {
-      indices.push(idx);
-    }
-  }
-  // Deduplicate preserving order
-  const unique: number[] = [];
-  for (const i of indices) if (!unique.includes(i)) unique.push(i);
-  return unique;
+export const mapToIndices = (ids: number[], count: number): number[] => {
+  return ids.length === 0
+    ? Array.from({ length: count }, (_, i) => i)
+    : ids
+        .map((id) => (id > 0 ? id - 1 : count + id))
+        .filter(
+          (idx): idx is number => idx !== null && idx >= 0 && idx < count
+        );
 };
 
 /**
