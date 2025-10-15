@@ -1,12 +1,12 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-interface DisplayAreaProps {
+interface IDisplayAreaProps {
   recognizing: boolean;
   transcript: string;
 }
 
-export const DisplayArea: React.FC<DisplayAreaProps> = ({
+export const DisplayArea: React.FC<IDisplayAreaProps> = ({
   recognizing,
   transcript,
 }) => {

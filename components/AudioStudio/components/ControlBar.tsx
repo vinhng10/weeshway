@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
-interface ControlBarProps {
+interface IControlBarProps {
   type: "music" | "count";
   isPlaying: boolean;
   wakeWordEnabled: boolean;
@@ -14,7 +14,7 @@ interface ControlBarProps {
   onToggleType: () => void;
 }
 
-export const ControlBar: React.FC<ControlBarProps> = ({
+export const ControlBar: React.FC<IControlBarProps> = ({
   type,
   isPlaying,
   wakeWordEnabled,

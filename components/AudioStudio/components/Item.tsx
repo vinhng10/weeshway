@@ -1,15 +1,16 @@
 import { Pressable, StyleSheet, Text } from "react-native";
 import { useItemStore } from "../hooks/useState";
-import { PIXELS_PER_SECOND } from "../types";
+import { IItem, PIXELS_PER_SECOND } from "../types";
 
 interface ItemProps {
   index: number;
   type: string;
+  projectId: string;
+  item: IItem;
 }
 
-export const Item = ({ index, type }: ItemProps) => {
-  const { items, setSelected } = useItemStore();
-  const item = items[type][index];
+export const Item = ({ index, type, projectId, item }: ItemProps) => {
+  const setSelected = useItemStore((state) => state.setSelected);
   const start = item.startTime * PIXELS_PER_SECOND;
   const width = (item.endTime - item.startTime) * PIXELS_PER_SECOND;
 
@@ -23,7 +24,7 @@ export const Item = ({ index, type }: ItemProps) => {
           width: width,
         },
       ]}
-      onPress={() => setSelected(type, index)}
+      onPress={() => setSelected(projectId, type, index)}
     >
       <Text style={styles.itemIdText}>{index + 1}</Text>
     </Pressable>

@@ -9,8 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { useItemStore } from "../hooks/useState";
-import { PIXELS_PER_SECOND } from "../types";
+import { IItem, PIXELS_PER_SECOND } from "../types";
 import {
   addPaddingToMergedItems,
   formatTime,
@@ -20,23 +19,26 @@ import { Item } from "./Item";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-interface TrackProps {
+interface ITrackProps {
   type: string;
+  projectId: string;
   player: AudioPlayer;
   status: AudioStatus;
+  items: IItem[];
   currentItemIndex?: number;
   onItemIndexChange?: (index: number) => void;
 }
 
 export const Track = ({
   type,
+  projectId,
   player,
   status,
+  items,
   currentItemIndex = 0,
   onItemIndexChange,
-}: TrackProps) => {
-  const { items, getSelected } = useItemStore();
-  const selectedItems = getSelected(type);
+}: ITrackProps) => {
+  const selectedItems = items.filter((item) => item.selected);
   const duration = status.duration;
   const trackWidth = duration * PIXELS_PER_SECOND;
   const internalScrollRef = useRef<ScrollView>(null);
@@ -91,7 +93,14 @@ export const Track = ({
 
       return () => clearInterval(interval);
     }
-  }, [player, duration, isManualScrolling, currentItemIndex, selectedItems]);
+  }, [
+    player,
+    duration,
+    isManualScrolling,
+    currentItemIndex,
+    selectedItems,
+    onItemIndexChange,
+  ]);
 
   return (
     <View style={styles.trackContainer}>
@@ -129,8 +138,14 @@ export const Track = ({
 
             {/* Items */}
             <View style={[styles.track, { width: trackWidth }]}>
-              {items[type].map((item, index) => (
-                <Item key={index} index={index} type={type} />
+              {items.map((item, index) => (
+                <Item
+                  key={index}
+                  index={index}
+                  type={type}
+                  projectId={projectId}
+                  item={item}
+                />
               ))}
             </View>
           </View>

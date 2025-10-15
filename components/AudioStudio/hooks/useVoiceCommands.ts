@@ -5,15 +5,15 @@ import {
 } from "expo-speech-recognition";
 import Groq from "groq-sdk";
 import { useState } from "react";
-import { AudioPlayerAction, DUCKING_VOLUME } from "../types";
+import { DUCKING_VOLUME, IAudioPlayerAction } from "../types";
 
 const llm = new Groq({
   apiKey: "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",
 });
 
-interface UseVoiceCommandsParams {
+interface IUseVoiceCommandsParams {
   player: AudioPlayer;
-  onAudioAction: (action: AudioPlayerAction) => void;
+  onAudioAction: (action: IAudioPlayerAction) => void;
   onWakeWordRecorderStart: () => Promise<void>;
   onWakeWordRecorderStop: () => Promise<void>;
 }
@@ -23,7 +23,7 @@ export const useVoiceCommands = ({
   onAudioAction,
   onWakeWordRecorderStart,
   onWakeWordRecorderStop,
-}: UseVoiceCommandsParams) => {
+}: IUseVoiceCommandsParams) => {
   const [recognizing, setRecognizing] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [wasPlayingBeforeWakeWord, setWasPlayingBeforeWakeWord] =
@@ -56,7 +56,7 @@ export const useVoiceCommands = ({
 
   const fetchModelResponse = async (
     inputText: string
-  ): Promise<AudioPlayerAction | null> => {
+  ): Promise<IAudioPlayerAction | null> => {
     try {
       const response = await llm.chat.completions.create({
         model: "meta-llama/llama-4-scout-17b-16e-instruct",
@@ -166,7 +166,7 @@ export const useVoiceCommands = ({
         Array.isArray(parsed.items) &&
         (parsed.type === "music" || parsed.type === "count")
       ) {
-        return parsed as AudioPlayerAction;
+        return parsed as IAudioPlayerAction;
       }
       return null;
     } catch (err) {
@@ -263,7 +263,7 @@ export const useVoiceCommands = ({
     setTranscript(next);
     setRecognizing(false);
 
-    let modelResult: AudioPlayerAction | null = null;
+    let modelResult: IAudioPlayerAction | null = null;
     if (next) {
       modelResult = await fetchModelResponse(next);
       if (modelResult) {

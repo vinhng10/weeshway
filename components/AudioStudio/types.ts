@@ -1,10 +1,10 @@
-export interface Item {
+export interface IItem {
   startTime: number;
   endTime: number;
   selected: boolean;
 }
 
-export interface AudioPlayerAction {
+export interface IAudioPlayerAction {
   action: "play" | "stop";
   items: number[];
   type: "music" | "count";
