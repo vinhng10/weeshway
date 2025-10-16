@@ -1,47 +1,52 @@
-import { ScrollView, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import React from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <ThemedView style={styles.section}>
-          <ThemedText type="title" style={styles.title}>
-            Home
-          </ThemedText>
-          <ThemedText style={styles.subtitle}>
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Home</Text>
+          <Text style={styles.subtitle}>
             Welcome to DanceAI! This is your home screen. Navigate to the
             Project tab to access the audio editor.
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000000",
   },
   content: {
     flex: 1,
   },
-  section: {
+  formContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "#1b1b1b",
+    margin: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.06)",
   },
   title: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#ffffff",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 32,
   },
   subtitle: {
+    fontSize: 16,
+    color: "#b5b5b5",
     textAlign: "center",
-    opacity: 0.7,
+    lineHeight: 24,
   },
 });

@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text } from "react-native";
-import { useItemStore } from "../hooks/useState";
+import { useProjectStore } from "../hooks/useProjectStore";
 import { IItem, PIXELS_PER_SECOND } from "../types";
 
 interface ItemProps {
@@ -10,7 +10,7 @@ interface ItemProps {
 }
 
 export const Item = ({ index, type, projectId, item }: ItemProps) => {
-  const setSelected = useItemStore((state) => state.setSelected);
+  const setSelected = useProjectStore((state) => state.setSelected);
   const start = item.startTime * PIXELS_PER_SECOND;
   const width = (item.endTime - item.startTime) * PIXELS_PER_SECOND;
 

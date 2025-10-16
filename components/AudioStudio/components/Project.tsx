@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import type { IProject } from "../hooks/useState";
+import type { IProject } from "../hooks/useProjectStore";
 
 interface ProjectProps {
   project: IProject;
@@ -48,10 +48,16 @@ export const Project = ({
         </Text>
       </View>
       <View style={styles.projectActions}>
-        <TouchableOpacity style={styles.iconButton} onPress={handlePlay("music")}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handlePlay("music")}
+        >
           <Ionicons name="musical-notes" size={22} color="#FFD700" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={handlePlay("count")}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handlePlay("count")}
+        >
           <Ionicons name="mic" size={22} color="#00BFFF" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconButton} onPress={handleDelete}>

@@ -16,8 +16,7 @@ import { ControlBar } from "./components/ControlBar";
 import { DisplayArea } from "./components/DisplayArea";
 import { Project } from "./components/Project";
 import { Track } from "./components/Track";
-import type { IProject } from "./hooks/useState";
-import { useItemStore } from "./hooks/useState";
+import { useProjectStore } from "./hooks/useProjectStore";
 import { useVoiceCommands } from "./hooks/useVoiceCommands";
 import { useWakeWordDetection } from "./hooks/useWakeWordDetection";
 import { IAudioPlayerAction } from "./types";
@@ -52,7 +51,7 @@ export default function AudioStudio() {
     setSelectedByIndices,
     getSelected,
     setSource,
-  } = useItemStore();
+  } = useProjectStore();
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === selectedProjectId) ?? null,
     [projects, selectedProjectId]

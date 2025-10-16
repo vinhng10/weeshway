@@ -47,7 +47,7 @@ const updateProject = (
     project.id === projectId ? updater(project) : project
   );
 
-export const useItemStore = create<IProjectState>()(
+export const useProjectStore = create<IProjectState>()(
   persist(
     (set, get) => ({
       projects: [],
@@ -60,7 +60,9 @@ export const useItemStore = create<IProjectState>()(
       },
       removeProject: (projectId: string) => {
         set((state) => ({
-          projects: state.projects.filter((project) => project.id !== projectId),
+          projects: state.projects.filter(
+            (project) => project.id !== projectId
+          ),
         }));
       },
       initialize: (projectId: string, type: string, duration: number) => {

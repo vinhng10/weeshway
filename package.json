@@ -36,6 +36,7 @@
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.11",
     "expo-web-browser": "~14.2.0",
+    "firebase": "^12.4.0",
     "groq-sdk": "^0.33.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
