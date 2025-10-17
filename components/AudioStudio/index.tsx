@@ -123,15 +123,7 @@ export default function AudioStudio({
     if (countStatus.duration > 0 && countItems.length === 0) {
       initialize(project.id, "count", countStatus.duration);
     }
-  }, [
-    project,
-    project?.id,
-    musicItems.length,
-    countItems.length,
-    musicStatus.duration,
-    countStatus.duration,
-    initialize,
-  ]);
+  }, [musicStatus.duration, countStatus.duration]);
 
   // React to wake word detection
   useEffect(() => {
