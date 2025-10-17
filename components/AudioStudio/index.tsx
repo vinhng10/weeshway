@@ -1,3 +1,12 @@
+import { IAudioPlayerAction } from "@/components/AudioStudio/types";
+import {
+  addPaddingToMergedItems,
+  mapToIndices,
+  mergeConsecutiveItems,
+} from "@/components/AudioStudio/utils";
+import { useProjectStore } from "@/hooks/useProjectStore";
+import { useVoiceCommands } from "@/hooks/useVoiceCommands";
+import { useWakeWordDetection } from "@/hooks/useWakeWordDetection";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
@@ -5,18 +14,9 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ControlBar } from "./components/ControlBar";
-import { DisplayArea } from "./components/DisplayArea";
-import { Track } from "./components/Track";
-import { useProjectStore } from "./hooks/useProjectStore";
-import { useVoiceCommands } from "./hooks/useVoiceCommands";
-import { useWakeWordDetection } from "./hooks/useWakeWordDetection";
-import { IAudioPlayerAction } from "./types";
-import {
-  addPaddingToMergedItems,
-  mapToIndices,
-  mergeConsecutiveItems,
-} from "./utils";
+import { ControlBar } from "./ControlBar";
+import { DisplayArea } from "./DisplayArea";
+import { Track } from "./Track";
 
 interface AudioStudioProps {
   projectId: string;

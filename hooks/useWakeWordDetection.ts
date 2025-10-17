@@ -13,7 +13,7 @@ export const useWakeWordDetection = (
 
   const model = useModule({
     module: ExecutorchModule,
-    model: require("../../../assets/model.pte"),
+    model: require("@/assets/model.pte"),
   });
 
   const startWakeWordRecorder = async () => {

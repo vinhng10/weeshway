@@ -1,5 +1,5 @@
-import type { IProject } from "@/components/AudioStudio/hooks/useProjectStore";
-import { useProjectStore } from "@/components/AudioStudio/hooks/useProjectStore";
+import type { IProject } from "@/hooks/useProjectStore";
+import { useProjectStore } from "@/hooks/useProjectStore";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";

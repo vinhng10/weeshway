@@ -1,6 +1,6 @@
+import { useProjectStore } from "@/hooks/useProjectStore";
 import { Pressable, StyleSheet, Text } from "react-native";
-import { useProjectStore } from "../hooks/useProjectStore";
-import { IItem, PIXELS_PER_SECOND } from "../types";
+import { IItem, PIXELS_PER_SECOND } from "./types";
 
 interface ItemProps {
   index: number;

@@ -9,13 +9,13 @@ import {
   Text,
   View,
 } from "react-native";
-import { IItem, PIXELS_PER_SECOND } from "../types";
+import { Item } from "./Item";
+import { IItem, PIXELS_PER_SECOND } from "./types";
 import {
   addPaddingToMergedItems,
   formatTime,
   mergeConsecutiveItems,
-} from "../utils";
-import { Item } from "./Item";
+} from "./utils";
 
 const { width: screenWidth } = Dimensions.get("window");
 
