@@ -2,19 +2,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  Alert,
-  FlatList,
-  Modal,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ControlBar } from "./components/ControlBar";
 import { DisplayArea } from "./components/DisplayArea";
-import { Project } from "./components/Project";
+import { ProjectList } from "./components/ProjectList";
 import { Track } from "./components/Track";
 import { useProjectStore } from "./hooks/useProjectStore";
 import { useVoiceCommands } from "./hooks/useVoiceCommands";
@@ -33,8 +24,6 @@ export default function AudioStudio() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null
   );
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
   const [pendingPlayback, setPendingPlayback] = useState<{
     projectId: string;
     type: "music" | "count";
@@ -192,85 +181,6 @@ export default function AudioStudio() {
     }
   };
 
-  const handleCreateProject = () => {
-    setNewProjectName("");
-    setShowCreateModal(true);
-  };
-
-  const handleSubmitProject = () => {
-    const trimmed = newProjectName.trim();
-    if (!trimmed) {
-      Alert.alert("Invalid name", "Please enter a project name.");
-      return;
-    }
-    const projectId = addProject(trimmed);
-    setShowCreateModal(false);
-    setNewProjectName("");
-    setSelectedProjectId(projectId);
-  };
-
-  const handleDeleteProject = (projectId: string) => {
-    const project = projects.find((p) => p.id === projectId);
-    if (!project) return;
-
-    Alert.alert(
-      "Delete Project",
-      `Are you sure you want to delete "${project.name}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            try {
-              player.music.pause();
-              player.count.pause();
-            } catch {}
-            if (selectedProjectId === projectId) {
-              setSelectedProjectId(null);
-              setPendingPlayback(null);
-            }
-            removeProject(projectId);
-          },
-        },
-      ]
-    );
-  };
-
-  const handleOpenProject = (projectId: string) => {
-    try {
-      musicPlayer.pause();
-      countPlayer.pause();
-    } catch {}
-    setSelectedProjectId(projectId);
-    setPendingPlayback(null);
-    setCurrentItemIndex(0);
-  };
-
-  const handlePlayProject = (
-    projectId: string,
-    playbackType: "music" | "count"
-  ) => {
-    const project = projects.find((p) => p.id === projectId);
-    if (!project) return;
-    if (!project.sources[playbackType]) {
-      Alert.alert(
-        "Audio not loaded",
-        `Load a ${
-          playbackType === "music" ? "music" : "count"
-        } track before playing.`
-      );
-      return;
-    }
-    try {
-      musicPlayer.pause();
-      countPlayer.pause();
-    } catch {}
-    setSelectedProjectId(projectId);
-    setType(playbackType);
-    setPendingPlayback({ projectId, type: playbackType });
-  };
-
   const handleBackToProjects = () => {
     try {
       player.music.pause();
@@ -325,82 +235,18 @@ export default function AudioStudio() {
   if (!selectedProject) {
     return (
       <View style={styles.container}>
-        <View style={styles.projectListWrapper}>
-          <View style={styles.projectListHeader}>
-            <Text style={styles.projectListTitle}>Projects</Text>
-            <TouchableOpacity
-              style={styles.createButton}
-              onPress={handleCreateProject}
-            >
-              <Ionicons name="add" size={20} color="#ffffff" />
-              <Text style={styles.createButtonText}>New Project</Text>
-            </TouchableOpacity>
-          </View>
-          {projects.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateTitle}>No projects yet</Text>
-              <Text style={styles.emptyStateSubtitle}>
-                Create your first project to start editing audio.
-              </Text>
-              <TouchableOpacity
-                style={[styles.createButton, styles.emptyCreateButton]}
-                onPress={handleCreateProject}
-              >
-                <Ionicons name="add" size={20} color="#ffffff" />
-                <Text style={styles.createButtonText}>Create Project</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <FlatList
-              data={projects}
-              renderItem={({ item }) => (
-                <Project
-                  project={item}
-                  onOpen={handleOpenProject}
-                  onPlay={handlePlayProject}
-                  onDelete={handleDeleteProject}
-                />
-              )}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.projectList}
-            />
-          )}
-        </View>
-
-        <Modal
-          visible={showCreateModal}
-          animationType="fade"
-          transparent
-          onRequestClose={() => setShowCreateModal(false)}
-        >
-          <View style={styles.modalBackdrop}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Create Project</Text>
-              <TextInput
-                style={styles.modalInput}
-                value={newProjectName}
-                onChangeText={setNewProjectName}
-                placeholder="Project name"
-                placeholderTextColor="#999999"
-                autoFocus
-              />
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.modalCancelButton]}
-                  onPress={() => setShowCreateModal(false)}
-                >
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.modalConfirmButton]}
-                  onPress={handleSubmitProject}
-                >
-                  <Text style={styles.modalButtonText}>Create</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        <ProjectList
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          musicPlayer={musicPlayer}
+          countPlayer={countPlayer}
+          onSetSelectedProjectId={setSelectedProjectId}
+          onSetPendingPlayback={setPendingPlayback}
+          onSetCurrentItemIndex={setCurrentItemIndex}
+          onSetType={setType}
+          addProject={addProject}
+          removeProject={removeProject}
+        />
       </View>
     );
   }

@@ -11,32 +11,28 @@ import type { IProject } from "../hooks/useProjectStore";
 
 interface ProjectProps {
   project: IProject;
-  onOpen: (projectId: string) => void;
-  onPlay: (projectId: string, type: "music" | "count") => void;
-  onDelete: (projectId: string) => void;
+  onOpen: (project: IProject) => void;
+  onPlay: (project: IProject, type: "music" | "count") => void;
+  onDelete: (project: IProject) => void;
 }
 
-export const Project = ({
-  project,
-  onOpen,
-  onPlay,
-  onDelete,
-}: ProjectProps) => {
+export const Project = ({ project, onOpen, onPlay, onDelete }: ProjectProps) => {
   const handlePlay =
-    (type: "music" | "count") => (event: GestureResponderEvent) => {
+    (type: "music" | "count") =>
+    (event: GestureResponderEvent) => {
       event.stopPropagation();
-      onPlay(project.id, type);
+      onPlay(project, type);
     };
 
   const handleDelete = (event: GestureResponderEvent) => {
     event.stopPropagation();
-    onDelete(project.id);
+    onDelete(project);
   };
 
   return (
     <TouchableOpacity
       style={styles.projectItem}
-      onPress={() => onOpen(project.id)}
+      onPress={() => onOpen(project)}
       activeOpacity={0.8}
     >
       <View style={styles.projectInfo}>
