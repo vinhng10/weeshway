@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AudioRecorder } from "react-native-audio-api";
 import { ExecutorchModule, ScalarType } from "react-native-executorch";
 import { useModule } from "react-native-executorch/src/hooks/useModule";
@@ -82,10 +82,6 @@ export const useWakeWordDetection = (
     }
   };
 
-  const resetWakeTrigger = useCallback(() => {
-    setWakeTriggerAt(null);
-  }, [setWakeTriggerAt]);
-
   // Initialize wake word detection when audio is loaded and model is ready
   useEffect(() => {
     if (!audioSource || !model.isReady || !enabled) return;
@@ -106,7 +102,6 @@ export const useWakeWordDetection = (
 
   return {
     wakeTriggerAt,
-    resetWakeTrigger,
     startWakeWordRecorder,
     stopWakeWordRecorder,
   };
