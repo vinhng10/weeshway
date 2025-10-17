@@ -1,4 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -31,8 +32,8 @@ export const ControlBar: React.FC<IControlBarProps> = ({
         style={[styles.controlButton, styles.typeToggleButton]}
         onPress={onToggleType}
       >
-        <Ionicons
-          name={type === "music" ? "musical-notes" : "mic"}
+        <MaterialIcons
+          name={type === "music" ? "music-note" : "format-list-numbered"}
           size={26}
           color={type === "music" ? "#FFD700" : "#00BFFF"}
         />

@@ -1,6 +1,7 @@
 import type { IProject } from "@/components/AudioStudio/hooks/useProjectStore";
 import { useProjectStore } from "@/components/AudioStudio/hooks/useProjectStore";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -80,13 +81,17 @@ const ProjectItem = ({ project }: { project: IProject }) => {
           style={styles.iconButton}
           onPress={() => handlePlayProject("music")}
         >
-          <Ionicons name="musical-notes" size={22} color="#FFD700" />
+          <MaterialIcons name="music-note" size={22} color="#FFD700" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => handlePlayProject("count")}
         >
-          <Ionicons name="mic" size={22} color="#00BFFF" />
+          <MaterialIcons
+            name="format-list-numbered"
+            size={22}
+            color="#00BFFF"
+          />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
