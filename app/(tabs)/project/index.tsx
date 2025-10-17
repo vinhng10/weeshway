@@ -1,4 +1,7 @@
+import type { IProject } from "@/components/AudioStudio/hooks/useProjectStore";
+import { useProjectStore } from "@/components/AudioStudio/hooks/useProjectStore";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -10,75 +13,38 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import type { IProject } from "../hooks/useProjectStore";
-import { Project } from "./Project";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-interface ProjectListProps {
-  projects: IProject[];
-  selectedProjectId: string | null;
-  musicPlayer: any;
-  countPlayer: any;
-  onSetSelectedProjectId: (projectId: string | null) => void;
-  onSetPendingPlayback: (
-    playback: { projectId: string; type: "music" | "count" } | null
-  ) => void;
-  onSetCurrentItemIndex: (index: number) => void;
-  onSetType: (type: "music" | "count") => void;
-  addProject: (name: string) => string;
-  removeProject: (projectId: string) => void;
-}
+const ProjectItem = ({ project }: { project: IProject }) => {
+  const removeProject = useProjectStore((state) => state.removeProject);
+  const router = useRouter();
 
-export const ProjectList = ({
-  projects,
-  selectedProjectId,
-  musicPlayer,
-  countPlayer,
-  onSetSelectedProjectId,
-  onSetPendingPlayback,
-  onSetCurrentItemIndex,
-  onSetType,
-  addProject,
-  removeProject,
-}: ProjectListProps) => {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
-
-  const pausePlayers = () => {
-    try {
-      musicPlayer.pause();
-    } catch {}
-    try {
-      countPlayer.pause();
-    } catch {}
+  const handleOpenProject = () => {
+    router.push({
+      pathname: "/(tabs)/project/[projectId]",
+      params: { projectId: project.id },
+    });
   };
 
-  const handleOpenProject = (project: IProject) => {
-    pausePlayers();
-    onSetSelectedProjectId(project.id);
-    onSetPendingPlayback(null);
-    onSetCurrentItemIndex(0);
-  };
-
-  const handlePlayProject = (
-    project: IProject,
-    playbackType: "music" | "count"
-  ) => {
-    if (!project.sources[playbackType]) {
+  const handlePlayProject = (type: "music" | "count") => {
+    if (!project.sources[type]) {
       Alert.alert(
         "Audio not loaded",
-        `Load a ${
-          playbackType === "music" ? "music" : "count"
-        } track before playing.`
+        `Load a ${type === "music" ? "music" : "count"} track before playing.`
       );
       return;
     }
-    pausePlayers();
-    onSetSelectedProjectId(project.id);
-    onSetType(playbackType);
-    onSetPendingPlayback({ projectId: project.id, type: playbackType });
+    router.push({
+      pathname: "/(tabs)/project/[projectId]",
+      params: {
+        projectId: project.id,
+        type,
+        autoplay: "1",
+      },
+    });
   };
 
-  const handleDeleteProject = (project: IProject) => {
+  const handleDeleteProject = () => {
     Alert.alert(
       "Delete Project",
       `Are you sure you want to delete "${project.name}"?`,
@@ -88,17 +54,58 @@ export const ProjectList = ({
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            pausePlayers();
-            if (selectedProjectId === project.id) {
-              onSetSelectedProjectId(null);
-              onSetPendingPlayback(null);
-            }
             removeProject(project.id);
           },
         },
       ]
     );
   };
+
+  return (
+    <TouchableOpacity
+      style={styles.projectItem}
+      onPress={() => handleOpenProject()}
+      activeOpacity={0.8}
+    >
+      <View style={styles.projectInfo}>
+        <Text style={styles.projectName}>{project.name}</Text>
+        <Text style={styles.projectMeta}>
+          {`${project.items.music?.length ?? 0} music segments · ${
+            project.items.count?.length ?? 0
+          } count segments`}
+        </Text>
+      </View>
+      <View style={styles.projectActions}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => handlePlayProject("music")}
+        >
+          <Ionicons name="musical-notes" size={22} color="#FFD700" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => handlePlayProject("count")}
+        >
+          <Ionicons name="mic" size={22} color="#00BFFF" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handleDeleteProject}
+        >
+          <Ionicons name="trash" size={22} color="#FF6B6B" />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+export default function ProjectListScreen() {
+  const projects = useProjectStore((state) => state.projects);
+  const addProject = useProjectStore((state) => state.addProject);
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const router = useRouter();
 
   const handleCreateProject = () => {
     setNewProjectName("");
@@ -114,11 +121,14 @@ export const ProjectList = ({
     const projectId = addProject(trimmed);
     setShowCreateModal(false);
     setNewProjectName("");
-    onSetSelectedProjectId(projectId);
+    router.push({
+      pathname: "/(tabs)/project/[projectId]",
+      params: { projectId },
+    });
   };
 
   return (
-    <View style={styles.projectListWrapper}>
+    <SafeAreaView style={styles.projectListWrapper}>
       <View style={styles.projectListHeader}>
         <Text style={styles.projectListTitle}>Projects</Text>
         <TouchableOpacity
@@ -146,14 +156,7 @@ export const ProjectList = ({
       ) : (
         <FlatList
           data={projects}
-          renderItem={({ item }) => (
-            <Project
-              project={item}
-              onOpen={handleOpenProject}
-              onPlay={handlePlayProject}
-              onDelete={handleDeleteProject}
-            />
-          )}
+          renderItem={({ item }) => <ProjectItem project={item} />}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.projectList}
         />
@@ -193,9 +196,9 @@ export const ProjectList = ({
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   projectListWrapper: {
@@ -303,5 +306,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#ffffff",
+  },
+  projectItem: {
+    backgroundColor: "#1b1b1b",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.06)",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  projectInfo: {
+    flex: 1,
+  },
+  projectName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#ffffff",
+    marginBottom: 6,
+  },
+  projectMeta: {
+    fontSize: 14,
+    color: "#b5b5b5",
+  },
+  projectActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 12,
+  },
+  iconButton: {
+    marginLeft: 12,
+    padding: 8,
+    borderRadius: 999,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
   },
 });

@@ -10,15 +10,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: "#1b1b1b",
-        },
-        headerTintColor: "#ffffff",
-        headerTitleStyle: {
-          fontWeight: "700",
-          fontSize: 18,
-        },
+        headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
@@ -49,7 +41,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="project"
         options={{
-          title: "Project",
+          title: "Projects",
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="music.note" color={color} />
           ),

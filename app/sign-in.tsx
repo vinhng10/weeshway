@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "./ctx";
 
 export default function SignIn() {
@@ -37,7 +38,7 @@ export default function SignIn() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.formContainer}>
         <Text style={styles.title}>Sign In</Text>
 
@@ -85,7 +86,7 @@ export default function SignIn() {
           </Link>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

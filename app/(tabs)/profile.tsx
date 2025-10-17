@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../ctx";
 
 export default function ProfileScreen() {
@@ -13,7 +14,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.formContainer}>
         <Text style={styles.title}>Profile</Text>
 
@@ -39,7 +40,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutButtonText}>Sign Out</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

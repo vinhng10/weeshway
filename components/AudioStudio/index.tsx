@@ -1,11 +1,12 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
-import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ControlBar } from "./components/ControlBar";
 import { DisplayArea } from "./components/DisplayArea";
-import { ProjectList } from "./components/ProjectList";
 import { Track } from "./components/Track";
 import { useProjectStore } from "./hooks/useProjectStore";
 import { useVoiceCommands } from "./hooks/useVoiceCommands";
@@ -17,51 +18,67 @@ import {
   mergeConsecutiveItems,
 } from "./utils";
 
-export default function AudioStudio() {
+interface AudioStudioProps {
+  projectId: string;
+  initialType?: "music" | "count";
+  autoPlay?: boolean;
+}
+
+export default function AudioStudio({
+  projectId,
+  initialType = "music",
+  autoPlay = false,
+}: AudioStudioProps) {
   const [currentItemIndex, setCurrentItemIndex] = useState<number>(0);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
-  const [type, setType] = useState<"music" | "count">("music");
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null
-  );
-  const [pendingPlayback, setPendingPlayback] = useState<{
-    projectId: string;
-    type: "music" | "count";
-  } | null>(null);
+  const [type, setType] = useState<"music" | "count">(initialType);
+  const [autoPlaybackType, setAutoPlaybackType] = useState<
+    "music" | "count" | null
+  >(autoPlay ? initialType : null);
+  const router = useRouter();
 
-  // Zustand stores
-  const {
-    projects,
-    addProject,
-    removeProject,
-    initialize,
-    split,
-    merge,
-    setSelectedByIndices,
-    getSelected,
-    setSource,
-  } = useProjectStore();
-  const selectedProject = useMemo(
-    () => projects.find((project) => project.id === selectedProjectId) ?? null,
-    [projects, selectedProjectId]
+  // Zustand store selectors
+  const project = useProjectStore(
+    (state) => state.projects.find((item) => item.id === projectId) ?? null
   );
-  const musicItems = selectedProject?.items.music ?? [];
-  const countItems = selectedProject?.items.count ?? [];
-  const musicPlayer = useAudioPlayer(selectedProject?.sources.music ?? null);
+  const initialize = useProjectStore((state) => state.initialize);
+  const split = useProjectStore((state) => state.split);
+  const merge = useProjectStore((state) => state.merge);
+  const setSelectedByIndices = useProjectStore(
+    (state) => state.setSelectedByIndices
+  );
+  const getSelected = useProjectStore((state) => state.getSelected);
+  const setSource = useProjectStore((state) => state.setSource);
+
+  useEffect(() => {
+    setType(initialType);
+  }, [initialType]);
+
+  useEffect(() => {
+    if (autoPlay) {
+      setAutoPlaybackType(initialType);
+    } else {
+      setAutoPlaybackType(null);
+    }
+  }, [autoPlay, initialType]);
+
+  useEffect(() => {
+    setCurrentItemIndex(0);
+  }, [projectId]);
+  const musicItems = project?.items.music ?? [];
+  const countItems = project?.items.count ?? [];
+  const musicPlayer = useAudioPlayer(project?.sources.music ?? null);
   const musicStatus = useAudioPlayerStatus(musicPlayer);
-  const countPlayer = useAudioPlayer(selectedProject?.sources.count ?? null);
+  const countPlayer = useAudioPlayer(project?.sources.count ?? null);
   const countStatus = useAudioPlayerStatus(countPlayer);
   const player = { music: musicPlayer, count: countPlayer };
   const status = { music: musicStatus, count: countStatus };
 
   const { wakeTriggerAt, startWakeWordRecorder, stopWakeWordRecorder } =
-    useWakeWordDetection(
-      wakeWordEnabled,
-      selectedProject?.sources.music ?? null
-    );
+    useWakeWordDetection(wakeWordEnabled, project?.sources.music ?? null);
 
   const handleAudioAction = (action: IAudioPlayerAction) => {
-    if (!selectedProject) return;
+    if (!project) return;
     if (!action) return;
     if (action.action === "stop") {
       try {
@@ -70,11 +87,11 @@ export default function AudioStudio() {
       return;
     }
 
-    const projectItems = selectedProject.items[action.type] ?? [];
+    const projectItems = project.items[action.type] ?? [];
     const indices = mapToIndices(action.items, projectItems.length);
     if (indices.length === 0) return;
 
-    setSelectedByIndices(selectedProject.id, action.type, indices);
+    setSelectedByIndices(project.id, action.type, indices);
 
     const firstIndex = indices[0];
     const firstItem = projectItems[firstIndex];
@@ -98,17 +115,17 @@ export default function AudioStudio() {
 
   // Initialize items when audio is loaded
   useEffect(() => {
-    if (!selectedProject) return;
+    if (!project) return;
 
     if (musicStatus.duration > 0 && musicItems.length === 0) {
-      initialize(selectedProject.id, "music", musicStatus.duration);
+      initialize(project.id, "music", musicStatus.duration);
     }
     if (countStatus.duration > 0 && countItems.length === 0) {
-      initialize(selectedProject.id, "count", countStatus.duration);
+      initialize(project.id, "count", countStatus.duration);
     }
   }, [
-    selectedProject,
-    selectedProject?.id,
+    project,
+    project?.id,
     musicItems.length,
     countItems.length,
     musicStatus.duration,
@@ -123,7 +140,7 @@ export default function AudioStudio() {
   }, [wakeTriggerAt]);
 
   const loadAudioFile = async () => {
-    if (!selectedProject) return;
+    if (!project) return;
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: "audio/*",
@@ -136,7 +153,7 @@ export default function AudioStudio() {
         setCurrentItemIndex(0);
 
         // Set new audio source
-        setSource(selectedProject.id, type, uri);
+        setSource(project.id, type, uri);
       }
     } catch (error) {
       Alert.alert("Error", "Failed to load audio file");
@@ -145,12 +162,12 @@ export default function AudioStudio() {
   };
 
   const togglePlayback = () => {
-    if (!selectedProject) return;
+    if (!project) return;
     try {
       if (status[type].playing) {
         player[type].pause();
       } else {
-        const selectedItems = getSelected(selectedProject.id, type);
+        const selectedItems = getSelected(project.id, type);
 
         if (selectedItems.length > 0) {
           // Use merged items with padding for smoother playback
@@ -186,21 +203,22 @@ export default function AudioStudio() {
       player.music.pause();
       player.count.pause();
     } catch {}
-    setSelectedProjectId(null);
-    setPendingPlayback(null);
     setCurrentItemIndex(0);
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/(tabs)/project");
+    }
   };
 
   useEffect(() => {
-    if (
-      !pendingPlayback ||
-      !selectedProject ||
-      pendingPlayback.projectId !== selectedProject.id
-    ) {
+    if (!project || !autoPlaybackType) {
       return;
     }
 
-    const isMusic = pendingPlayback.type === "music";
+    setType(autoPlaybackType);
+
+    const isMusic = autoPlaybackType === "music";
     const targetPlayer = isMusic ? musicPlayer : countPlayer;
     const targetDuration = isMusic
       ? musicStatus.duration
@@ -213,46 +231,40 @@ export default function AudioStudio() {
       } catch (error) {
         console.warn("Failed to start playback for project shortcut", error);
       } finally {
-        setPendingPlayback(null);
+        setAutoPlaybackType(null);
       }
     }
   }, [
-    pendingPlayback,
-    selectedProject,
-    selectedProject?.id,
+    autoPlaybackType,
+    project,
     musicStatus.duration,
     countStatus.duration,
     musicPlayer,
     countPlayer,
   ]);
 
-  useEffect(() => {
-    if (!selectedProjectId) {
-      setCurrentItemIndex(0);
-    }
-  }, [selectedProjectId]);
-
-  if (!selectedProject) {
+  if (!project) {
     return (
       <View style={styles.container}>
-        <ProjectList
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          musicPlayer={musicPlayer}
-          countPlayer={countPlayer}
-          onSetSelectedProjectId={setSelectedProjectId}
-          onSetPendingPlayback={setPendingPlayback}
-          onSetCurrentItemIndex={setCurrentItemIndex}
-          onSetType={setType}
-          addProject={addProject}
-          removeProject={removeProject}
-        />
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateTitle}>Project not found</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            Select a project from the list to start editing audio.
+          </Text>
+          <TouchableOpacity
+            style={[styles.createButton, styles.emptyCreateButton]}
+            onPress={() => router.replace("/(tabs)/project")}
+          >
+            <Ionicons name="albums" size={20} color="#ffffff" />
+            <Text style={styles.createButtonText}>Back to Projects</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.studioHeader}>
         <TouchableOpacity
           style={styles.backButton}
@@ -261,7 +273,7 @@ export default function AudioStudio() {
           <Ionicons name="chevron-back" size={22} color="#ffffff" />
           <Text style={styles.backButtonText}>Projects</Text>
         </TouchableOpacity>
-        <Text style={styles.studioTitle}>{selectedProject.name}</Text>
+        <Text style={styles.studioTitle}>{project.name}</Text>
         <View style={styles.headerSpacer} />
       </View>
       <DisplayArea recognizing={recognizing} transcript={transcript} />
@@ -272,10 +284,8 @@ export default function AudioStudio() {
         wakeWordEnabled={wakeWordEnabled}
         onLoadAudio={loadAudioFile}
         onTogglePlayback={togglePlayback}
-        onSplit={() =>
-          split(selectedProject.id, type, status[type].currentTime ?? 0)
-        }
-        onMerge={() => merge(selectedProject.id, type)}
+        onSplit={() => split(project.id, type, status[type].currentTime ?? 0)}
+        onMerge={() => merge(project.id, type)}
         onToggleWakeWord={toggleWakeWordDetection}
         onToggleType={() => setType(type === "music" ? "count" : "music")}
       />
@@ -283,7 +293,7 @@ export default function AudioStudio() {
       <View style={styles.tracksContainer}>
         <Track
           type="music"
-          projectId={selectedProject.id}
+          projectId={project.id}
           items={musicItems}
           player={musicPlayer}
           status={musicStatus}
@@ -292,7 +302,7 @@ export default function AudioStudio() {
         />
         <Track
           type="count"
-          projectId={selectedProject.id}
+          projectId={project.id}
           items={countItems}
           player={countPlayer}
           status={countStatus}
@@ -300,7 +310,7 @@ export default function AudioStudio() {
           onItemIndexChange={setCurrentItemIndex}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

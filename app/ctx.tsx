@@ -90,3 +90,5 @@ export function AuthProvider({ children }: PropsWithChildren) {
     </AuthContext>
   );
 }
+
+export default AuthProvider;

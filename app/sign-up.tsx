@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "./ctx";
 
 export default function CreateAccountScreen() {
@@ -50,7 +51,7 @@ export default function CreateAccountScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.formContainer}>
         <Text style={styles.title}>Create Account</Text>
 
@@ -112,7 +113,7 @@ export default function CreateAccountScreen() {
           </Link>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
