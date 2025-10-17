@@ -36,6 +36,12 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+.vscode
+*.ipynb
 app-example
 android
 ios
+.emulator-data
+functions
+*.log
+*.pte

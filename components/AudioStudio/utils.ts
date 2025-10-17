@@ -1,4 +1,4 @@
-import { Item } from "./types";
+import { IItem } from "./types";
 
 export const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
@@ -30,7 +30,7 @@ export const mapToIndices = (ids: number[], count: number): number[] => {
  * Output: [item(0-20), item(40-60)]
  */
 export const mergeConsecutiveItems = (
-  items: Item[]
+  items: IItem[]
 ): Array<{ startTime: number; endTime: number }> => {
   if (items.length === 0) return [];
 

@@ -10,7 +10,15 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: "#1b1b1b",
+        },
+        headerTintColor: "#ffffff",
+        headerTitleStyle: {
+          fontWeight: "700",
+          fontSize: 18,
+        },
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
