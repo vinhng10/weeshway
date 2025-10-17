@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AudioRecorder } from "react-native-audio-api";
 import { ExecutorchModule, ScalarType } from "react-native-executorch";
 import { useModule } from "react-native-executorch/src/hooks/useModule";
@@ -50,7 +50,7 @@ export const useWakeWordDetection = (
         const output = await model.forward([input]);
         const outputData = new Float32Array(output[0].dataPtr as ArrayBuffer);
 
-        if (outputData[0] > 0.5) {
+        if (outputData[0] > 0.7) {
           console.log("Wake word detected with confidence:", outputData[0]);
           setWakeTriggerAt(Date.now());
         }
@@ -82,6 +82,10 @@ export const useWakeWordDetection = (
     }
   };
 
+  const resetWakeTrigger = useCallback(() => {
+    setWakeTriggerAt(null);
+  }, [setWakeTriggerAt]);
+
   // Initialize wake word detection when audio is loaded and model is ready
   useEffect(() => {
     if (!audioSource || !model.isReady || !enabled) return;
@@ -102,7 +106,7 @@ export const useWakeWordDetection = (
 
   return {
     wakeTriggerAt,
-    resetWakeTrigger: () => setWakeTriggerAt(null),
+    resetWakeTrigger,
     startWakeWordRecorder,
     stopWakeWordRecorder,
   };

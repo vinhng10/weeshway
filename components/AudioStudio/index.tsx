@@ -65,11 +65,15 @@ export default function AudioStudio() {
   const player = { music: musicPlayer, count: countPlayer };
   const status = { music: musicStatus, count: countStatus };
 
-  const { wakeTriggerAt, startWakeWordRecorder, stopWakeWordRecorder } =
-    useWakeWordDetection(
-      wakeWordEnabled,
-      selectedProject?.sources.music ?? null
-    );
+  const {
+    wakeTriggerAt,
+    resetWakeTrigger,
+    startWakeWordRecorder,
+    stopWakeWordRecorder,
+  } = useWakeWordDetection(
+    wakeWordEnabled,
+    selectedProject?.sources.music ?? null
+  );
 
   const handleAudioAction = (action: IAudioPlayerAction) => {
     if (!selectedProject) return;
@@ -130,8 +134,17 @@ export default function AudioStudio() {
   // React to wake word detection
   useEffect(() => {
     if (!wakeTriggerAt) return;
-    startSpeechRecognition();
-  }, [wakeTriggerAt, startSpeechRecognition]);
+
+    const run = async () => {
+      try {
+        await startSpeechRecognition();
+      } finally {
+        resetWakeTrigger();
+      }
+    };
+
+    void run();
+  }, [wakeTriggerAt, startSpeechRecognition, resetWakeTrigger]);
 
   const loadAudioFile = async () => {
     if (!selectedProject) return;
