@@ -1,11 +1,5 @@
-import { auth } from "@/firebaseConfig";
-import {
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  User,
-} from "firebase/auth";
+import { supabase } from "@/supabase";
+import { Session } from "@supabase/supabase-js";
 import {
   createContext,
   use,
@@ -18,14 +12,18 @@ const AuthContext = createContext<{
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  user: User | null;
+  session: Session | null;
+  profile: any;
   isLoading: boolean;
+  isLoggedIn: boolean;
 }>({
   signIn: () => Promise.resolve(),
   signUp: () => Promise.resolve(),
   signOut: () => Promise.resolve(),
-  user: null,
+  session: null,
+  profile: null,
   isLoading: true,
+  isLoggedIn: false,
 });
 
 // Use this hook to access the user info.
@@ -39,41 +37,89 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch the session once, and subscribe to auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const fetchSession = async () => {
+      setIsLoading(true);
+
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error) {
+        console.error("Error fetching session:", error);
+      }
+
+      setSession(session);
       setIsLoading(false);
+    };
+
+    fetchSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", { event: _event, session });
+      setSession(session);
     });
 
     // Cleanup subscription on unmount
-    return () => unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  // Fetch the profile when the session changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setIsLoading(true);
+
+      if (session) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+
+        setProfile(data);
+      } else {
+        setProfile(null);
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchProfile();
+  }, [session]);
 
   const signIn = async (email: string, password: string) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
+      const { error } = await supabase.auth.signInWithPassword({
         email,
-        password
-      );
-      setUser(userCredential.user);
-      setIsLoading(false);
+        password,
+      });
+      if (error) throw error;
     } catch (error) {
-      setUser(null);
-      setIsLoading(false);
       throw error; // Re-throw to allow the calling component to handle it
     }
   };
 
   const signUp = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) throw error;
   };
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   };
 
   return (
@@ -82,8 +128,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
         signIn,
         signUp,
         signOut,
-        user,
+        session,
+        profile,
         isLoading,
+        isLoggedIn: session != null,
       }}
     >
       {children}

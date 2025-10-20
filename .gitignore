@@ -47,3 +47,4 @@ dataconnect
 functions
 *.log
 *.pte
+supabase

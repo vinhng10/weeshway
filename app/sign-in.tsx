@@ -30,8 +30,8 @@ export default function SignIn() {
 
     try {
       await signIn(email, password);
-    } catch (error) {
-      setError(error as string);
+    } catch (error: any) {
+      setError(error.message || "Failed to sign in");
     } finally {
       setLoading(false);
     }
