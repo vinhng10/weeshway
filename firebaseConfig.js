@@ -1,4 +1,5 @@
 // Import the functions you need from the SDKs you need
+import { connectorConfig } from "@dataconnect/generated";
 import Storage from "expo-native-storage";
 import { initializeApp } from "firebase/app";
 import {
@@ -6,6 +7,10 @@ import {
   getReactNativePersistence,
   initializeAuth,
 } from "firebase/auth";
+import {
+  connectDataConnectEmulator,
+  getDataConnect,
+} from "firebase/data-connect";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -24,9 +29,13 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(Storage),
 });
 connectAuthEmulator(auth, "http://10.0.0.25:9099");
+
+const dataConnect = getDataConnect(app, connectorConfig);
+connectDataConnectEmulator(dataConnect, "10.0.0.25", 9399);
 
 export { app, auth };

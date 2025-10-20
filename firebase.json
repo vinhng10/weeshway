@@ -15,7 +15,20 @@
     "ui": {
       "enabled": true
     },
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "pubsub": {
+      "host": "0.0.0.0",
+      "port": 8085
+    },
+    "storage": {
+      "host": "0.0.0.0",
+      "port": 9199
+    },
+    "dataconnect": {
+      "host": "0.0.0.0",
+      "port": 9399,
+      "dataDir": "dataconnect/.dataconnect/pgliteData"
+    }
   },
   "functions": [
     {
@@ -30,5 +43,11 @@
       ],
       "runtime": "python313"
     }
-  ]
+  ],
+  "dataconnect": {
+    "source": "dataconnect"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
 }

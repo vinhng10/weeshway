@@ -41,7 +41,9 @@ yarn-error.*
 app-example
 android
 ios
-.emulator-data
+.firebase
+.exportedData
+dataconnect
 functions
 *.log
 *.pte
