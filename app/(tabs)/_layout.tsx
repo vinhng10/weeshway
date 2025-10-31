@@ -18,6 +18,7 @@ export default function TabLayout() {
         },
         tabBarStyle: {
           backgroundColor: theme.colors.foreground,
+          borderTopWidth: 0,
         },
       }}
     >
@@ -36,7 +37,7 @@ export default function TabLayout() {
           title: "Projects",
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="music.note" color={color} />
+            <IconSymbol size={28} name="folder.fill" color={color} />
           ),
         }}
       />
@@ -45,7 +46,7 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.circle.fill" color={color} />
+            <IconSymbol size={28} name="person.fill" color={color} />
           ),
         }}
       />
@@ -54,7 +55,7 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="gear.circle" color={color} />
+            <IconSymbol size={28} name="gearshape.fill" color={color} />
           ),
         }}
       />

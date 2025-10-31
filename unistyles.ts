@@ -22,11 +22,11 @@ const lightTheme = {
 
 const darkTheme = {
   colors: {
-    background: "#221A11",
-    foreground: "#332618",
+    background: "#0C0C0C",
+    foreground: "#0C0C0C",
     typography: "#FFFFFF",
     dimmed: "#A8A198",
-    tint: "#C9AD92",
+    tint: "#99A1AF",
     activeTint: "#FFFFFF",
     link: "#0C2461",
     accents: {
