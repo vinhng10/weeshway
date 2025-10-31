@@ -1,32 +1,24 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
 
-import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useUnistyles } from "react-native-unistyles";
 
 export default function TabLayout() {
+  const { theme } = useUnistyles();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-            backgroundColor: "rgba(27, 27, 27, 0.95)",
-            borderTopColor: "rgba(255, 255, 255, 0.06)",
-          },
-          default: {
-            backgroundColor: "#1b1b1b",
-            borderTopColor: "rgba(255, 255, 255, 0.06)",
-          },
-        }),
-        tabBarActiveTintColor: "#FFD700",
-        tabBarInactiveTintColor: "#b5b5b5",
+        tabBarInactiveTintColor: theme.colors.tint,
+        tabBarActiveTintColor: theme.colors.activeTint,
+        sceneStyle: {
+          backgroundColor: theme.colors.background,
+        },
+        tabBarStyle: {
+          backgroundColor: theme.colors.foreground,
+        },
       }}
     >
       <Tabs.Screen
@@ -54,6 +46,15 @@ export default function TabLayout() {
           title: "Profile",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person.circle.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="gear.circle" color={color} />
           ),
         }}
       />

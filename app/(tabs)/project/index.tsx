@@ -1,3 +1,4 @@
+import { ThemedView } from "@/components/themed-view";
 import type { IProject } from "@/hooks/useProjectStore";
 import { useProjectStore } from "@/hooks/useProjectStore";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -8,13 +9,12 @@ import {
   Alert,
   FlatList,
   Modal,
-  StyleSheet,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native-unistyles";
 
 const ProjectItem = ({ project }: { project: IProject }) => {
   const removeProject = useProjectStore((state) => state.removeProject);
@@ -68,15 +68,15 @@ const ProjectItem = ({ project }: { project: IProject }) => {
       onPress={() => handleOpenProject()}
       activeOpacity={0.8}
     >
-      <View style={styles.projectInfo}>
+      <ThemedView style={styles.projectInfo}>
         <Text style={styles.projectName}>{project.name}</Text>
         <Text style={styles.projectMeta}>
           {`${project.items.music?.length ?? 0} music segments · ${
             project.items.count?.length ?? 0
           } count segments`}
         </Text>
-      </View>
-      <View style={styles.projectActions}>
+      </ThemedView>
+      <ThemedView style={styles.projectActions}>
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => handlePlayProject("music")}
@@ -99,7 +99,7 @@ const ProjectItem = ({ project }: { project: IProject }) => {
         >
           <Ionicons name="trash" size={22} color="#FF6B6B" />
         </TouchableOpacity>
-      </View>
+      </ThemedView>
     </TouchableOpacity>
   );
 };
@@ -133,8 +133,8 @@ export default function ProjectListScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.projectListWrapper}>
-      <View style={styles.projectListHeader}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <ThemedView style={styles.projectListHeader}>
         <Text style={styles.projectListTitle}>Projects</Text>
         <TouchableOpacity
           style={styles.createButton}
@@ -143,9 +143,9 @@ export default function ProjectListScreen() {
           <Ionicons name="add" size={20} color="#ffffff" />
           <Text style={styles.createButtonText}>New Project</Text>
         </TouchableOpacity>
-      </View>
+      </ThemedView>
       {projects.length === 0 ? (
-        <View style={styles.emptyState}>
+        <ThemedView style={styles.emptyState}>
           <Text style={styles.emptyStateTitle}>No projects yet</Text>
           <Text style={styles.emptyStateSubtitle}>
             Create your first project to start editing audio.
@@ -157,7 +157,7 @@ export default function ProjectListScreen() {
             <Ionicons name="add" size={20} color="#ffffff" />
             <Text style={styles.createButtonText}>Create Project</Text>
           </TouchableOpacity>
-        </View>
+        </ThemedView>
       ) : (
         <FlatList
           data={projects}
@@ -173,8 +173,8 @@ export default function ProjectListScreen() {
         transparent
         onRequestClose={() => setShowCreateModal(false)}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalContent}>
+        <ThemedView style={styles.modalBackdrop}>
+          <ThemedView style={styles.modalContent}>
             <Text style={styles.modalTitle}>Create Project</Text>
             <TextInput
               style={styles.modalInput}
@@ -184,7 +184,7 @@ export default function ProjectListScreen() {
               placeholderTextColor="#999999"
               autoFocus
             />
-            <View style={styles.modalActions}>
+            <ThemedView style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.modalCancelButton]}
                 onPress={() => setShowCreateModal(false)}
@@ -197,20 +197,19 @@ export default function ProjectListScreen() {
               >
                 <Text style={styles.modalButtonText}>Create</Text>
               </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+            </ThemedView>
+          </ThemedView>
+        </ThemedView>
       </Modal>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  projectListWrapper: {
+const styles = StyleSheet.create((theme, rt) => ({
+  container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 40,
-    backgroundColor: "#0f0f0f",
+    marginTop: rt.insets.top,
+    paddingHorizontal: theme.gap(2),
   },
   projectListHeader: {
     flexDirection: "row",
@@ -347,4 +346,4 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: "rgba(255, 255, 255, 0.06)",
   },
-});
+}));

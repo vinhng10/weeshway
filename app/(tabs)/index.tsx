@@ -1,53 +1,39 @@
-import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SongTile } from "@/components/song-tile";
+import { ThemedText } from "@/components/themed-text";
+import { playlist } from "@/mocks/playlist";
+import { router } from "expo-router";
+import { ScrollView, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 
-export default function HomeScreen() {
+export default function PlaylistScreen() {
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Home</Text>
-          <Text style={styles.subtitle}>
-            Welcome to DanceAI! This is your home screen. Navigate to the
-            Project tab to access the audio editor.
-          </Text>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <View style={styles.header}>
+          <ThemedText type="title">Playlist</ThemedText>
         </View>
+        {playlist.map((song) => (
+          <SongTile
+            song={song}
+            onPress={() => router.push(`/(tabs)/player/${song.id}`)}
+            key={song.id}
+          />
+        ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
-    flex: 1,
-    backgroundColor: "#000000",
+    marginTop: rt.insets.top + theme.gap(3),
+    backgroundColor: theme.colors.background,
   },
-  content: {
-    flex: 1,
+  contentContainer: {
+    gap: theme.gap(3),
+    paddingHorizontal: theme.gap(2),
   },
-  formContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "#1b1b1b",
-    margin: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
+  header: {
+    paddingBottom: theme.gap(2),
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#ffffff",
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#b5b5b5",
-    textAlign: "center",
-    lineHeight: 24,
-  },
-});
+}));

@@ -8,16 +8,18 @@ function RootNavigator() {
   const { isLoggedIn } = useAuth();
 
   return (
-    <Stack>
-      <Stack.Protected guard={isLoggedIn}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack.Protected>
+    <React.Fragment>
+      <Stack>
+        <Stack.Protected guard={isLoggedIn}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack.Protected>
 
-      <Stack.Protected guard={!isLoggedIn}>
-        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-        <Stack.Screen name="sign-up" options={{ headerShown: false }} />
-      </Stack.Protected>
-    </Stack>
+        <Stack.Protected guard={!isLoggedIn}>
+          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+          <Stack.Screen name="sign-up" options={{ headerShown: false }} />
+        </Stack.Protected>
+      </Stack>
+    </React.Fragment>
   );
 }
 
