@@ -1,22 +1,64 @@
-import { SongTile } from "@/components/song-tile";
-import { ThemedText } from "@/components/themed-text";
-import { playlist } from "@/mocks/playlist";
+import { AvatarGroup } from "@/components/avatar-group";
+import { Chip } from "@/components/chip";
+import { FilterBar, FilterOption } from "@/components/filter-bar";
+import { Tile } from "@/components/tile";
+import { wishes } from "@/mocks/wishes";
 import { router } from "expo-router";
+import { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function PlaylistScreen() {
+type WishStatusFilter = "all" | "available" | "granted" | "waiting";
+
+const STATUS_FILTERS: FilterOption<WishStatusFilter>[] = [
+  { id: "all", label: "All" },
+  { id: "available", label: "Class available" },
+  { id: "granted", label: "Granted" },
+  { id: "waiting", label: "Waiting" },
+];
+
+export default function WishesScreen() {
+  const [activeFilter, setActiveFilter] = useState<WishStatusFilter>("all");
+
+  const filteredWishes = useMemo(() => {
+    if (activeFilter === "all") {
+      return wishes;
+    }
+
+    return wishes.filter((wish) => {
+      if (activeFilter === "waiting") {
+        return wish.status === undefined;
+      }
+      return wish.status === activeFilter;
+    });
+  }, [activeFilter]);
+
   return (
     <View style={styles.container}>
+      <FilterBar
+        filters={STATUS_FILTERS}
+        activeFilter={activeFilter}
+        onFilterPress={setActiveFilter}
+      />
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <View style={styles.header}>
-          <ThemedText type="title">Playlist</ThemedText>
-        </View>
-        {playlist.map((song) => (
-          <SongTile
-            song={song}
-            onPress={() => router.push(`/(tabs)/player/${song.id}`)}
-            key={song.id}
+        {filteredWishes.map((wish) => (
+          <Tile
+            imageSource={{ uri: wish.imageUrl }}
+            title={wish.title}
+            subtitle={wish.artist}
+            metadata={`${wish.style} • ${wish.level}`}
+            backgroundColor={wish.status}
+            rightContent={
+              wish.avatars &&
+              wish.avatars.length > 0 && (
+                <>
+                  <AvatarGroup max={2} avatars={wish.avatars} />
+                  <Chip type="light" label={wish.status ?? ""} />
+                </>
+              )
+            }
+            onPress={() => router.push(`/(tabs)/player/${wish.id}`)}
+            key={wish.id}
           />
         ))}
       </ScrollView>
@@ -26,14 +68,13 @@ export default function PlaylistScreen() {
 
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
+    flexDirection: "column",
+    alignItems: "center",
     marginTop: rt.insets.top + theme.gap(3),
     backgroundColor: theme.colors.background,
   },
   contentContainer: {
-    gap: theme.gap(3),
-    paddingHorizontal: theme.gap(2),
-  },
-  header: {
-    paddingBottom: theme.gap(2),
+    gap: theme.gap(1),
+    padding: theme.gap(2),
   },
 }));

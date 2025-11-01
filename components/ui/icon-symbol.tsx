@@ -9,7 +9,7 @@ type IconMapping = Record<
   SymbolViewProps["name"],
   ComponentProps<typeof MaterialIcons>["name"]
 >;
-type IconSymbolName = keyof typeof MAPPING;
+export type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -29,6 +29,7 @@ const MAPPING = {
   "forward.fill": "fast-forward",
   "forward.end.fill": "last-page",
   "play.circle.fill": "play-circle-filled",
+  "chevron.down": "keyboard-arrow-down",
 } as IconMapping;
 
 /**
@@ -44,7 +45,7 @@ export function IconSymbol({
 }: {
   name: IconSymbolName;
   size?: number;
-  color: string | OpaqueColorValue;
+  color?: string | OpaqueColorValue;
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {

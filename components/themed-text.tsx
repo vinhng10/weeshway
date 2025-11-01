@@ -26,17 +26,18 @@ const styles = StyleSheet.create((theme) => ({
     variants: {
       type: {
         default: {
-          fontSize: 16,
-          lineHeight: 24,
+          fontSize: 14,
+          lineHeight: 16,
         },
         title: {
-          fontSize: 32,
-          fontWeight: "bold",
-          lineHeight: 32,
+          fontSize: 18,
+          lineHeight: 20,
+          fontWeight: "900",
         },
         subtitle: {
           fontSize: 20,
-          fontWeight: "bold",
+          lineHeight: 20,
+          fontWeight: "700",
         },
         link: {
           lineHeight: 30,

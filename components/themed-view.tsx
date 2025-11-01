@@ -3,8 +3,8 @@ import { StyleSheet } from "react-native-unistyles";
 
 export type ThemedViewProps = ViewProps;
 
-export function ThemedView({ style, ...otherProps }: ThemedViewProps) {
-  return <View style={[styles.container, style]} {...otherProps} />;
+export function ThemedView({ style, ...rest }: ThemedViewProps) {
+  return <View style={[styles.container, style]} {...rest} />;
 }
 
 const styles = StyleSheet.create((theme) => ({
