@@ -22,22 +22,13 @@ export default function SettingsLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Settings",
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="settings-theme"
+        name="[wishId]"
         options={{
-          title: "Change theme",
-          presentation: "modal",
-          headerShown: true,
-        }}
-      />
-      <Stack.Screen
-        name="settings-accent"
-        options={{
-          title: "Change accent",
+          title: "Wish Detail",
           presentation: "modal",
           headerShown: true,
         }}

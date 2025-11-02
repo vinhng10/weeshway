@@ -18,6 +18,7 @@ export type IconSymbolName = keyof typeof MAPPING;
  */
 const MAPPING = {
   "house.fill": "home",
+  "wand.and.sparkles": "auto-fix-high",
   "folder.fill": "workspaces",
   "person.fill": "person",
   "gearshape.fill": "settings",

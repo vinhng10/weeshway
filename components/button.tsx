@@ -25,7 +25,8 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
 const style = StyleSheet.create((theme) => ({
   button: {
     width: "100%",
-    padding: theme.gap(2),
+    height: theme.gap(6),
+    paddingHorizontal: theme.gap(2),
     justifyContent: "center",
     alignItems: "center",
     borderRadius: theme.gap(2),
