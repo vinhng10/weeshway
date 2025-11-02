@@ -9,13 +9,7 @@ const lightTheme = {
     tint: "#9A734C",
     activeTint: "#1B140C",
     link: "#1E3799",
-    accents: {
-      banana: "#F6E58D",
-      pumpkin: "#FFBE76",
-      apple: "#FF7979",
-      grass: "#BADC58",
-      storm: "#686DE0",
-    },
+    highlight: "#FF5154",
   },
   gap: (v: number) => v * 8,
 } as const;
@@ -29,13 +23,7 @@ const darkTheme = {
     tint: "#99A1AF",
     activeTint: "#FFFFFF",
     link: "#0C2461",
-    accents: {
-      banana: "#f9CA24",
-      pumpkin: "#F0932B",
-      apple: "#EB4D4B",
-      grass: "#6AB04C",
-      storm: "#4834D4",
-    },
+    highlight: "#FF5154",
   },
   gap: (v: number) => v * 8,
 } as const;
