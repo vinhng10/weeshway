@@ -8,13 +8,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
-import Carousel from "react-native-reanimated-carousel";
+import Carousel, {
+  ICarouselInstance,
+  Pagination,
+} from "react-native-reanimated-carousel";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Wish() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
   const router = useRouter();
-  const scrollOffsetValue = useSharedValue<number>(0);
 
   // Find the wish by ID
   const wish = wishes.find((w) => w.id === Number(wishId));
@@ -35,6 +37,15 @@ export default function Wish() {
   const handlePlay = (classId: number) => {
     console.log("Play class:", classId);
     // Add play logic here
+  };
+
+  const ref = React.useRef<ICarouselInstance>(null);
+  const progress = useSharedValue<number>(0);
+  const onPressPagination = (index: number) => {
+    ref.current?.scrollTo({
+      count: index - progress.value,
+      animated: true,
+    });
   };
 
   return (
@@ -58,13 +69,14 @@ export default function Wish() {
                 : "Granted classes"}
             </ThemedText>
             <Carousel
+              ref={ref}
               loop={true}
               width={360}
               height={360}
               snapEnabled={true}
               pagingEnabled={true}
               data={wish.classes}
-              defaultScrollOffsetValue={scrollOffsetValue}
+              onProgressChange={progress}
               style={styles.carousel}
               mode="parallax"
               modeConfig={{
@@ -83,6 +95,14 @@ export default function Wish() {
                   />
                 </View>
               )}
+            />
+            <Pagination.Basic
+              progress={progress}
+              data={wish.classes}
+              dotStyle={styles.dotStyle}
+              activeDotStyle={styles.activeDotStyle}
+              containerStyle={styles.paginationContainer}
+              onPress={onPressPagination}
             />
           </View>
         )}
@@ -123,7 +143,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   backButton: {
     position: "absolute",
-    left: theme.gap(2),
+    left: theme.gap(1),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -134,6 +154,18 @@ const styles = StyleSheet.create((theme, rt) => ({
     padding: theme.gap(1),
     justifyContent: "center",
     alignItems: "center",
+  },
+  paginationContainer: {
+    gap: theme.gap(1),
+    marginTop: -theme.gap(2),
+  },
+  dotStyle: {
+    backgroundColor: theme.colors.dimmed,
+    borderRadius: 999,
+  },
+  activeDotStyle: {
+    backgroundColor: theme.colors.typography,
+    borderRadius: 999,
   },
   descriptionContainer: {
     height: theme.gap(12),
