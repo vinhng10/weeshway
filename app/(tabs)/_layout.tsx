@@ -41,9 +41,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="project"
+        name="class"
         options={{
-          title: "Projects",
+          title: "Classes",
           headerShown: false,
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="folder.fill" color={color} />

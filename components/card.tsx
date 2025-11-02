@@ -3,14 +3,14 @@ import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Class } from "@/types";
+import { ClassType } from "@/types";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { ImageBackground, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface ClassCardProps {
-  classData: Class;
+  classData: ClassType;
   onBook?: () => void;
   onPlay?: () => void;
 }

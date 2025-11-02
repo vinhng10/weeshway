@@ -51,6 +51,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   scrollContent: {
     gap: theme.gap(1),
+    paddingVertical: theme.gap(1),
     paddingHorizontal: theme.gap(2),
     alignItems: "center",
   },

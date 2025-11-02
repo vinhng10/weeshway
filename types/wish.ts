@@ -1,6 +1,6 @@
 import { ImageSourcePropType } from "react-native";
 
-export type Wish = {
+export type WishType = {
   id: number;
   title: string;
   artist: string;
@@ -11,15 +11,16 @@ export type Wish = {
   description: string;
   status: "available" | "granted" | undefined;
   avatars?: ImageSourcePropType[];
-  classes?: Class[];
+  classes?: ClassType[];
 };
 
-export type Class = {
+export type ClassType = {
   id: number;
   instructor: {
     name: string;
     imageUrl: string;
   };
+  genre?: string;
   songTitle: string;
   artist: string;
   style: string;
@@ -31,5 +32,3 @@ export type Class = {
   spotsLeft: number;
   backgroundImage: string;
 };
-
-export type Wishes = Array<Wish>;

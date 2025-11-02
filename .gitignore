@@ -48,3 +48,4 @@ functions
 *.log
 *.pte
 supabase
+mocks

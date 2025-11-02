@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import React from "react";
 import { useUnistyles } from "react-native-unistyles";
 
-export default function WishLayout() {
+export default function ClassLayout() {
   const { theme } = useUnistyles();
 
   return (
@@ -26,7 +26,7 @@ export default function WishLayout() {
         }}
       />
       <Stack.Screen
-        name="[wishId]"
+        name="[classId]"
         options={{
           headerShown: false,
         }}

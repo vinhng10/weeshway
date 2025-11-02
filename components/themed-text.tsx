@@ -26,7 +26,7 @@ const styles = StyleSheet.create((theme) => ({
     variants: {
       type: {
         default: {
-          fontSize: 16,
+          fontSize: 14,
           lineHeight: 16,
         },
         h1: {
@@ -44,11 +44,6 @@ const styles = StyleSheet.create((theme) => ({
         h4: {
           fontSize: 18,
           lineHeight: 20,
-        },
-        link: {
-          lineHeight: 30,
-          fontSize: 16,
-          color: theme.colors.link,
         },
       },
       bold: {

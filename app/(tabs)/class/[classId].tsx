@@ -1,13 +1,20 @@
-import { ClassCarousel } from "@/components/carousel";
+import { ClassCard } from "@/components/card";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { wishes } from "@/mocks/wishes";
+import { ClassType } from "@/types";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as React from "react";
 import { Pressable, ScrollView, View } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+import Carousel, {
+  ICarouselInstance,
+  Pagination,
+} from "react-native-reanimated-carousel";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Wish() {
+export default function Class() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
   const router = useRouter();
 
@@ -32,6 +39,15 @@ export default function Wish() {
     // Add play logic here
   };
 
+  const ref = React.useRef<ICarouselInstance>(null);
+  const progress = useSharedValue<number>(0);
+  const onPressPagination = (index: number) => {
+    ref.current?.scrollTo({
+      count: index - progress.value,
+      animated: true,
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -46,16 +62,47 @@ export default function Wish() {
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {/* Top Classes Container */}
         {wish.classes && wish.classes.length > 0 && (
-          <View style={styles.section}>
+          <View>
             <ThemedText bold type="h4">
               {wish.status === "available"
                 ? "Your top classes"
                 : "Granted classes"}
             </ThemedText>
-            <ClassCarousel
-              classes={wish.classes}
-              onBook={handleBook}
-              onPlay={handlePlay}
+            <Carousel
+              ref={ref}
+              loop={true}
+              width={360}
+              height={360}
+              snapEnabled={true}
+              pagingEnabled={true}
+              data={wish.classes}
+              onProgressChange={progress}
+              style={styles.carousel}
+              mode="parallax"
+              modeConfig={{
+                parallaxScrollingScale: 0.9,
+                parallaxScrollingOffset: 50,
+              }}
+              onSnapToItem={(index: number) =>
+                console.log("current index:", index)
+              }
+              renderItem={({ item }: { item: ClassType }) => (
+                <View style={styles.carouselItem}>
+                  <ClassCard
+                    classData={item}
+                    onBook={() => handleBook(item.id)}
+                    onPlay={() => handlePlay(item.id)}
+                  />
+                </View>
+              )}
+            />
+            <Pagination.Basic
+              progress={progress}
+              data={wish.classes}
+              dotStyle={styles.dotStyle}
+              activeDotStyle={styles.activeDotStyle}
+              containerStyle={styles.paginationContainer}
+              onPress={onPressPagination}
             />
           </View>
         )}
@@ -100,6 +147,26 @@ const styles = StyleSheet.create((theme, rt) => ({
     justifyContent: "center",
     alignItems: "center",
   },
+  carousel: {
+    width: "100%",
+  },
+  carouselItem: {
+    padding: theme.gap(1),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  paginationContainer: {
+    gap: theme.gap(1),
+    marginTop: -theme.gap(2),
+  },
+  dotStyle: {
+    backgroundColor: theme.colors.dimmed,
+    borderRadius: 999,
+  },
+  activeDotStyle: {
+    backgroundColor: theme.colors.typography,
+    borderRadius: 999,
+  },
   descriptionContainer: {
     height: theme.gap(12),
     padding: theme.gap(1),
@@ -107,9 +174,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     borderRadius: theme.gap(2),
   },
   wishContainer: {
-    gap: theme.gap(1),
-  },
-  section: {
     gap: theme.gap(1),
   },
 }));
