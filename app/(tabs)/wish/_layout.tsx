@@ -29,8 +29,7 @@ export default function SettingsLayout() {
         name="[wishId]"
         options={{
           title: "Wish Detail",
-          presentation: "modal",
-          headerShown: true,
+          headerShown: false,
         }}
       />
     </Stack>

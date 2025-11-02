@@ -30,7 +30,10 @@ const MAPPING = {
   "forward.fill": "fast-forward",
   "forward.end.fill": "last-page",
   "play.circle.fill": "play-circle-filled",
+  "chevron.left": "keyboard-arrow-left",
   "chevron.down": "keyboard-arrow-down",
+  "location.app.fill": "location-on",
+  "timer.circle.fill": "access-time-filled",
 } as IconMapping;
 
 /**

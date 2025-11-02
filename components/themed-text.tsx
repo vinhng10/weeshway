@@ -26,18 +26,24 @@ const styles = StyleSheet.create((theme) => ({
     variants: {
       type: {
         default: {
-          fontSize: 14,
+          fontSize: 16,
           lineHeight: 16,
         },
-        title: {
+        h1: {
+          fontSize: 32,
+          lineHeight: 34,
+        },
+        h2: {
+          fontSize: 24,
+          lineHeight: 26,
+        },
+        h3: {
+          fontSize: 20,
+          lineHeight: 22,
+        },
+        h4: {
           fontSize: 18,
           lineHeight: 20,
-          fontWeight: "900",
-        },
-        subtitle: {
-          fontSize: 20,
-          lineHeight: 20,
-          fontWeight: "700",
         },
         link: {
           lineHeight: 30,
@@ -47,12 +53,12 @@ const styles = StyleSheet.create((theme) => ({
       },
       bold: {
         true: {
-          fontWeight: "bold",
+          fontWeight: 900,
         },
       },
       dimmed: {
         true: {
-          color: theme.colors.tint,
+          color: theme.colors.dimmed,
         },
       },
     },

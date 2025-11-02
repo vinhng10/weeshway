@@ -14,7 +14,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
   return (
     <Pressable onPress={onPress}>
       <View style={style.button}>
-        <ThemedText bold type="title" style={style.label}>
+        <ThemedText bold type="h3" style={style.label}>
           {label}
         </ThemedText>
       </View>

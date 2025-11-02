@@ -18,7 +18,7 @@ const STATUS_FILTERS: FilterOption<WishStatusFilter>[] = [
   { id: "waiting", label: "Waiting" },
 ];
 
-export default function WishesScreen() {
+export default function Wishes() {
   const [activeFilter, setActiveFilter] = useState<WishStatusFilter>("all");
 
   const filteredWishes = useMemo(() => {
@@ -41,7 +41,10 @@ export default function WishesScreen() {
         activeFilter={activeFilter}
         onFilterPress={setActiveFilter}
       />
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.contentContainer}
+      >
         {filteredWishes.map((wish) => (
           <Tile
             imageSource={{ uri: wish.imageUrl }}
@@ -78,9 +81,7 @@ export default function WishesScreen() {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    flexDirection: "column",
-    alignItems: "center",
-    marginTop: rt.insets.top + theme.gap(3),
+    marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
   },
   contentContainer: {
@@ -88,8 +89,9 @@ const styles = StyleSheet.create((theme, rt) => ({
     padding: theme.gap(2),
   },
   buttonContainer: {
-    width: "100%",
-    marginBottom: rt.insets.bottom,
-    paddingHorizontal: theme.gap(2),
+    width: "70%",
+    position: "absolute",
+    alignSelf: "center",
+    bottom: theme.gap(2),
   },
 }));

@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import React from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
 import { AuthProvider, useAuth } from "./ctx";
@@ -25,8 +26,10 @@ function RootNavigator() {
 
 export default function Root() {
   return (
-    <AuthProvider>
-      <RootNavigator />
-    </AuthProvider>
+    <GestureHandlerRootView>
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

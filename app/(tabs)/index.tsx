@@ -5,7 +5,7 @@ import { StyleSheet } from "react-native-unistyles";
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <ThemedText type="title">Home</ThemedText>
+      <ThemedText type="h1">Home</ThemedText>
     </View>
   );
 }

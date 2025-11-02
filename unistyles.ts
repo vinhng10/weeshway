@@ -25,7 +25,7 @@ const darkTheme = {
     background: "#0C0C0C",
     foreground: "#0C0C0C",
     typography: "#FFFFFF",
-    dimmed: "#A8A198",
+    dimmed: "#BFBFBF",
     tint: "#99A1AF",
     activeTint: "#FFFFFF",
     link: "#0C2461",

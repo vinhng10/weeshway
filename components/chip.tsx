@@ -57,13 +57,16 @@ const styles = StyleSheet.create((theme) => ({
     },
   },
   label: {
-    fontSize: 14,
     lineHeight: 16,
-    fontWeight: "700",
+    fontWeight: "600",
     variants: {
       size: {
-        default: {},
-        large: {},
+        default: {
+          fontSize: 14,
+        },
+        large: {
+          fontSize: 16,
+        },
       },
       type: {
         light: {

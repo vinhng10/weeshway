@@ -43,15 +43,10 @@ export const Tile: React.FunctionComponent<TileProps> = ({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
       >
-        <View style={styles.leftSection}>
+        <View style={styles.leftContainer}>
           <Avatar source={imageSource} size="large" shape="square" />
           <View style={styles.textContainer}>
-            <ThemedText
-              bold
-              type="title"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
+            <ThemedText bold type="h4" numberOfLines={1} ellipsizeMode="tail">
               {title}
             </ThemedText>
             {subtitle && (
@@ -67,7 +62,7 @@ export const Tile: React.FunctionComponent<TileProps> = ({
           </View>
         </View>
 
-        <View style={styles.rightSection}>
+        <View style={styles.rightContainer}>
           {rightContent ? rightContent : <></>}
         </View>
       </LinearGradient>
@@ -77,7 +72,6 @@ export const Tile: React.FunctionComponent<TileProps> = ({
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    flex: 1,
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -85,14 +79,14 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.gap(1),
     borderRadius: theme.gap(2),
   },
-  leftSection: {
+  leftContainer: {
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
     gap: theme.gap(1),
     width: "70%",
   },
-  rightSection: {
+  rightContainer: {
     flexDirection: "column",
     justifyContent: "flex-end",
     alignItems: "flex-end",
