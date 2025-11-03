@@ -4,7 +4,7 @@ import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 
 type ChipProps = UnistylesVariants<typeof styles> & {
   label: string;
-  onPress?: () => void;
+  onPress?: any;
   icon?: IconSymbolName;
 };
 

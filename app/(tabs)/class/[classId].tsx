@@ -1,125 +1,117 @@
-import { ClassCard } from "@/components/card";
+import { Avatar } from "@/components/avatar";
+import { Button } from "@/components/button";
+import { Hero } from "@/components/hero";
+import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
-import { Tile } from "@/components/tile";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { wishes } from "@/mocks/wishes";
-import { ClassType } from "@/types";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import * as React from "react";
-import { Pressable, ScrollView, View } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
-import Carousel, {
-  ICarouselInstance,
-  Pagination,
-} from "react-native-reanimated-carousel";
+import { classes } from "@/mocks/classes";
+import { useLocalSearchParams } from "expo-router";
+import React from "react";
+import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Class() {
-  const { wishId } = useLocalSearchParams<{ wishId: string }>();
-  const router = useRouter();
+  const { classId } = useLocalSearchParams<{ classId: string }>();
+  const classData = classes.find((c) => c.id === Number(classId));
 
-  // Find the wish by ID
-  const wish = wishes.find((w) => w.id === Number(wishId));
-
-  if (!wish) {
+  if (!classData) {
     return (
       <View style={styles.container}>
-        <ThemedText>Wish not found</ThemedText>
+        <ThemedText>Class not found</ThemedText>
       </View>
     );
   }
 
-  const handleBook = (classId: number) => {
-    console.log("Book class:", classId);
-    // Add booking logic here
-  };
-
-  const handlePlay = (classId: number) => {
-    console.log("Play class:", classId);
-    // Add play logic here
-  };
-
-  const ref = React.useRef<ICarouselInstance>(null);
-  const progress = useSharedValue<number>(0);
-  const onPressPagination = (index: number) => {
-    ref.current?.scrollTo({
-      count: index - progress.value,
-      animated: true,
-    });
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol name="chevron.left" size={32} color="#FFFFFF" />
-        </Pressable>
-        <ThemedText bold type="h4">
-          Wish
-        </ThemedText>
-      </View>
+      {/* Hero Section with Song Image */}
+      <Hero
+        source={{ uri: classData.backgroundImage }}
+        title={classData.songTitle}
+        subtitle={classData.artist}
+        onShare={() => {}}
+        onPlay={() => {}}
+      />
 
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        {/* Top Classes Container */}
-        {wish.classes && wish.classes.length > 0 && (
-          <View>
-            <ThemedText bold type="h4">
-              {wish.status === "available"
-                ? "Your top classes"
-                : "Granted classes"}
-            </ThemedText>
-            <Carousel
-              ref={ref}
-              loop={true}
-              width={360}
-              height={360}
-              snapEnabled={true}
-              pagingEnabled={true}
-              data={wish.classes}
-              onProgressChange={progress}
-              style={styles.carousel}
-              mode="parallax"
-              modeConfig={{
-                parallaxScrollingScale: 0.9,
-                parallaxScrollingOffset: 50,
-              }}
-              onSnapToItem={(index: number) =>
-                console.log("current index:", index)
-              }
-              renderItem={({ item }: { item: ClassType }) => (
-                <View style={styles.carouselItem}>
-                  <ClassCard
-                    classData={item}
-                    onBook={() => handleBook(item.id)}
-                    onPlay={() => handlePlay(item.id)}
-                  />
-                </View>
-              )}
-            />
-            <Pagination.Basic
-              progress={progress}
-              data={wish.classes}
-              dotStyle={styles.dotStyle}
-              activeDotStyle={styles.activeDotStyle}
-              containerStyle={styles.paginationContainer}
-              onPress={onPressPagination}
-            />
-          </View>
-        )}
-
-        <View style={styles.wishContainer}>
-          <Tile
-            imageSource={{ uri: wish.imageUrl }}
-            title={wish.title}
-            subtitle={wish.artist}
-            metadata={`${wish.style} • ${wish.level}`}
-            onPress={() => console.log("Navigate to class")}
+      {/* Scrollable Content */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Song Card */}
+        <View style={styles.teacherContainer}>
+          <Avatar
+            source={{ uri: classData.instructor.imageUrl }}
+            size="large"
+            shape="circle"
+            bordered={true}
           />
-          <View style={styles.descriptionContainer}>
-            <ThemedText>{wish.description}</ThemedText>
-          </View>
+          <ThemedText bold type="h3">
+            {classData.instructor.name}
+          </ThemedText>
         </View>
+
+        {/* Style and Level Selects */}
+        <View style={styles.row}>
+          <BoxInput
+            label="Style"
+            type="type"
+            value={classData.style}
+            editable={false}
+          />
+          <BoxInput
+            label="Level"
+            type="type"
+            value={classData.level}
+            editable={false}
+          />
+        </View>
+
+        {/* Price and Spots Info Fields */}
+        <View style={styles.row}>
+          <BoxInput
+            label="Price"
+            type="type"
+            value={`$${classData.price}`}
+            editable={false}
+          />
+          <BoxInput
+            label="Spots"
+            type="type"
+            value={classData.spotsLeft.toString()}
+            editable={false}
+          />
+        </View>
+
+        {/* Date & Time Row */}
+        <RowInput
+          label="Date & Time"
+          icon="timer.circle.fill"
+          value={`${classData.date}, ${classData.time}`}
+          editable={false}
+        />
+
+        {/* Location Row */}
+        <RowInput
+          label="Location"
+          icon="location.app.fill"
+          value={classData.studio}
+          editable={false}
+        />
+
+        {/* Project Description Input */}
+        <TextInput
+          placeholder="Project description ..."
+          value={classData.description}
+          editable={false}
+          multiline
+          numberOfLines={4}
+        />
       </ScrollView>
+
+      {/* Book Button */}
+      <View style={styles.buttonContainer}>
+        <Button label="Book" onPress={() => {}} />
+      </View>
     </View>
   );
 }
@@ -128,52 +120,28 @@ const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
+    backgroundColor: theme.colors.background,
   },
-  contentContainer: {
-    flex: 1,
-    gap: theme.gap(2),
+  scrollContent: {
     padding: theme.gap(2),
+    gap: theme.gap(2),
+    paddingBottom: theme.gap(4),
   },
-  headerContainer: {
-    width: "100%",
-    justifyContent: "center",
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: theme.gap(2),
-    position: "relative",
+    gap: theme.gap(2),
   },
-  backButton: {
+  buttonContainer: {
+    width: "70%",
     position: "absolute",
-    left: theme.gap(1),
-    justifyContent: "center",
+    alignSelf: "center",
+    bottom: theme.gap(2),
+  },
+  teacherContainer: {
+    flexDirection: "row",
     alignItems: "center",
-  },
-  carousel: {
-    width: "100%",
-  },
-  carouselItem: {
-    padding: theme.gap(1),
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  paginationContainer: {
-    gap: theme.gap(1),
-    marginTop: -theme.gap(2),
-  },
-  dotStyle: {
-    backgroundColor: theme.colors.dimmed,
-    borderRadius: 999,
-  },
-  activeDotStyle: {
-    backgroundColor: theme.colors.typography,
-    borderRadius: 999,
-  },
-  descriptionContainer: {
-    height: theme.gap(12),
-    padding: theme.gap(1),
-    backgroundColor: theme.colors.foreground,
-    borderRadius: theme.gap(2),
-  },
-  wishContainer: {
-    gap: theme.gap(1),
+    gap: theme.gap(2),
   },
 }));

@@ -5,7 +5,7 @@ import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type HeaderProps = {
-  title: string;
+  title?: string;
 };
 
 export const Header: React.FunctionComponent<HeaderProps> = ({ title }) => {

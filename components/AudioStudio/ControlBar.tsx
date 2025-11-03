@@ -7,12 +7,12 @@ interface IControlBarProps {
   type: "music" | "count";
   isPlaying: boolean;
   wakeWordEnabled: boolean;
-  onLoadAudio: () => void;
-  onTogglePlayback: () => void;
-  onSplit: () => void;
-  onMerge: () => void;
-  onToggleWakeWord: () => void;
-  onToggleType: () => void;
+  onLoadAudio: any;
+  onTogglePlayback: any;
+  onSplit: any;
+  onMerge: any;
+  onToggleWakeWord: any;
+  onToggleType: any;
 }
 
 export const ControlBar: React.FC<IControlBarProps> = ({

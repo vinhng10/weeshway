@@ -3,7 +3,8 @@ import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { wishes } from "@/mocks/wishes";
-import { useLocalSearchParams } from "expo-router";
+import { ClassType } from "@/types";
+import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -21,16 +22,6 @@ export default function Wish() {
     );
   }
 
-  const handleBook = (classId: number) => {
-    console.log("Book class:", classId);
-    // Add booking logic here
-  };
-
-  const handlePlay = (classId: number) => {
-    console.log("Play class:", classId);
-    // Add play logic here
-  };
-
   return (
     <View style={styles.container}>
       <Header title="Wish" />
@@ -45,9 +36,12 @@ export default function Wish() {
                 : "Granted classes"}
             </ThemedText>
             <ClassCarousel
-              classes={wish.classes}
-              onBook={handleBook}
-              onPlay={handlePlay}
+              data={wish.classes}
+              onBook={() => {}}
+              onPlay={() => {}}
+              onPress={(data: ClassType) =>
+                router.push(`/(tabs)/class/${data.id}`)
+              }
             />
           </View>
         )}

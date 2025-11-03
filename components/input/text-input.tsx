@@ -10,10 +10,10 @@ export type TextInputProps = RNTextInputProps &
   UnistylesVariants<typeof styles>;
 
 export function TextInput({
-  multiline,
   type,
   bold,
   dimmed,
+  multiline,
   style,
   ...rest
 }: TextInputProps) {
@@ -31,6 +31,7 @@ export function TextInput({
 
   return (
     <RNTextInput
+      multiline={multiline}
       style={[
         styles.container,
         textStyles.textColor,

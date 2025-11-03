@@ -31,4 +31,5 @@ export type ClassType = {
   price: number;
   spotsLeft: number;
   backgroundImage: string;
+  description?: string;
 };

@@ -29,12 +29,13 @@ const MAPPING = {
   "backward.fill": "fast-rewind",
   "forward.fill": "fast-forward",
   "forward.end.fill": "last-page",
-  "play.circle.fill": "play-circle-filled",
+  play: "play-arrow",
   "chevron.left": "keyboard-arrow-left",
   "chevron.down": "keyboard-arrow-down",
   "location.app.fill": "location-on",
   "timer.circle.fill": "access-time-filled",
   "music.note": "music-note",
+  "square.and.arrow.up": "share",
 } as IconMapping;
 
 /**

@@ -1,4 +1,4 @@
-import { ClassCard } from "@/components/card";
+import { Card } from "@/components/card";
 import { ClassType } from "@/types";
 import * as React from "react";
 import { View } from "react-native";
@@ -9,36 +9,23 @@ import Carousel, {
 } from "react-native-reanimated-carousel";
 import { StyleSheet } from "react-native-unistyles";
 
-interface ClassCarouselProps {
-  classes: ClassType[];
-  onBook?: (classId: number) => void;
-  onPlay?: (classId: number) => void;
+interface CarouselProps {
+  data: any[];
+  onBook?: any;
+  onPlay?: any;
+  onPress?: any;
 }
 
-export const ClassCarousel: React.FunctionComponent<ClassCarouselProps> = ({
-  classes,
+export const ClassCarousel: React.FunctionComponent<CarouselProps> = ({
+  data,
   onBook,
   onPlay,
+  onPress,
 }) => {
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
 
-  const onPressPagination = (index: number) => {
-    ref.current?.scrollTo({
-      count: index - progress.value,
-      animated: true,
-    });
-  };
-
-  const handleBook = (classId: number) => {
-    onBook?.(classId);
-  };
-
-  const handlePlay = (classId: number) => {
-    onPlay?.(classId);
-  };
-
-  if (!classes || classes.length === 0) {
+  if (!data || data.length === 0) {
     return null;
   }
 
@@ -51,7 +38,7 @@ export const ClassCarousel: React.FunctionComponent<ClassCarouselProps> = ({
         height={360}
         snapEnabled={true}
         pagingEnabled={true}
-        data={classes}
+        data={data}
         onProgressChange={progress}
         style={styles.carousel}
         mode="parallax"
@@ -63,21 +50,21 @@ export const ClassCarousel: React.FunctionComponent<ClassCarouselProps> = ({
         onSnapToItem={(index: number) => console.log("current index:", index)}
         renderItem={({ item }: { item: ClassType }) => (
           <View style={styles.carouselItem}>
-            <ClassCard
-              classData={item}
-              onBook={() => handleBook(item.id)}
-              onPlay={() => handlePlay(item.id)}
+            <Card
+              data={item}
+              onBook={onBook}
+              onPlay={onPlay}
+              onPress={onPress}
             />
           </View>
         )}
       />
       <Pagination.Basic
         progress={progress}
-        data={classes}
+        data={data}
         dotStyle={styles.dotStyle}
         activeDotStyle={styles.activeDotStyle}
         containerStyle={styles.dotContainer}
-        onPress={onPressPagination}
       />
     </View>
   );

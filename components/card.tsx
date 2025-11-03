@@ -3,27 +3,28 @@ import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { ClassType } from "@/types";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { ImageBackground, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-interface ClassCardProps {
-  classData: ClassType;
-  onBook?: () => void;
-  onPlay?: () => void;
+interface CardProps {
+  data: any;
+  onBook?: any;
+  onPlay?: any;
+  onPress?: any;
 }
 
-export const ClassCard: React.FunctionComponent<ClassCardProps> = ({
-  classData,
+export const Card: React.FunctionComponent<CardProps> = ({
+  data,
   onBook,
   onPlay,
+  onPress,
 }) => {
   return (
-    <View style={styles.container}>
+    <Pressable onPress={() => onPress(data)}>
       <ImageBackground
-        source={{ uri: classData.backgroundImage }}
+        source={{ uri: data.backgroundImage }}
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >
@@ -36,17 +37,17 @@ export const ClassCard: React.FunctionComponent<ClassCardProps> = ({
           {/* Top Container */}
           <View style={styles.topContainer}>
             <Avatar
-              source={{ uri: classData.instructor.imageUrl }}
+              source={{ uri: data.instructor.imageUrl }}
               size="large"
               shape="circle"
               bordered={true}
             />
             <ThemedText bold type="h3">
-              {classData.instructor.name}
+              {data.instructor.name}
             </ThemedText>
             <View style={styles.chipContainer}>
-              <Chip label={classData.style} type="light" />
-              <Chip label={classData.level} type="light" />
+              <Chip label={data.style} type="light" />
+              <Chip label={data.level} type="light" />
             </View>
           </View>
 
@@ -55,10 +56,10 @@ export const ClassCard: React.FunctionComponent<ClassCardProps> = ({
             {/* Song Info */}
             <View style={styles.rowGroup}>
               <ThemedText bold type="h3">
-                {classData.songTitle}
+                {data.songTitle}
               </ThemedText>
               <ThemedText dimmed style={styles.artist}>
-                {classData.artist}
+                {data.artist}
               </ThemedText>
             </View>
 
@@ -71,9 +72,9 @@ export const ClassCard: React.FunctionComponent<ClassCardProps> = ({
                     size={16}
                     color="#FFFFFF"
                   />
-                  <ThemedText>{classData.studio}</ThemedText>
+                  <ThemedText>{data.studio}</ThemedText>
                 </View>
-                <ThemedText bold>${classData.price.toFixed(2)}</ThemedText>
+                <ThemedText bold>${data.price.toFixed(2)}</ThemedText>
               </View>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
@@ -83,11 +84,11 @@ export const ClassCard: React.FunctionComponent<ClassCardProps> = ({
                     color="#FFFFFF"
                   />
                   <ThemedText>
-                    {classData.date}, {classData.time}
+                    {data.date}, {data.time}
                   </ThemedText>
                 </View>
                 <ThemedText bold style={styles.highlight}>
-                  {classData.spotsLeft} spots left
+                  {data.spotsLeft} spots left
                 </ThemedText>
               </View>
             </View>
@@ -96,31 +97,25 @@ export const ClassCard: React.FunctionComponent<ClassCardProps> = ({
           {/* Bottom Container */}
           <View style={styles.bottomContainer}>
             <View style={styles.bookButton}>
-              <Button label="Book" onPress={onBook || (() => {})} />
+              <Button label="Book" onPress={() => onBook(data)} />
             </View>
-            <Pressable style={styles.playButton} onPress={onPlay}>
+            <Pressable style={styles.playButton} onPress={() => onPlay(data)}>
               <IconSymbol
-                name="play.circle.fill"
-                size={48}
+                name="play"
+                size={36}
                 color="rgba(255, 255, 255, 0.6)"
               />
             </Pressable>
           </View>
         </LinearGradient>
       </ImageBackground>
-    </View>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create((theme) => ({
-  container: {
-    borderRadius: theme.gap(2),
-    overflow: "hidden",
-    backgroundColor: "red",
-  },
   background: {
-    width: "100%",
-    height: "100%",
+    flex: 1,
   },
   backgroundImage: {
     borderRadius: theme.gap(2),

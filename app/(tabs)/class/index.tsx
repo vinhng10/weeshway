@@ -3,7 +3,9 @@ import { ClassCarousel } from "@/components/carousel";
 import { ChipBar, Option } from "@/components/chip-bar";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
-import { featuredClasses, upcomingClasses } from "@/mocks/classes";
+import { classes } from "@/mocks/classes";
+import { ClassType } from "@/types";
+import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -20,7 +22,8 @@ const CLASS_FILTERS: Option<ClassOption>[] = [
 export default function Classes() {
   const [activeOption, setActiveOption] = useState<ClassOption>("all");
 
-  const featured = useMemo(() => featuredClasses, []);
+  const featuredClasses = classes.slice(0, 3);
+  const upcomingClasses = classes.slice(3);
 
   const filteredUpcoming = useMemo(() => {
     if (activeOption === "all") {
@@ -58,11 +61,14 @@ export default function Classes() {
           <ThemedText bold type="h4">
             You might like
           </ThemedText>
-          {featured.length > 0 && (
+          {featuredClasses.length > 0 && (
             <ClassCarousel
-              classes={featured}
+              data={featuredClasses}
               onBook={() => {}}
               onPlay={() => {}}
+              onPress={(data: ClassType) =>
+                router.push(`/(tabs)/class/${data.id}`)
+              }
             />
           )}
         </View>
@@ -91,7 +97,7 @@ export default function Classes() {
                     </ThemedText>
                   </>
                 }
-                onPress={() => {}}
+                onPress={() => router.push(`/(tabs)/class/${danceClass.id}`)}
               />
             ))}
           </View>
