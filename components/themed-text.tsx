@@ -18,7 +18,7 @@ export function ThemedText({
   return <Text style={[styles.textColor, styles.textType, style]} {...rest} />;
 }
 
-const styles = StyleSheet.create((theme) => ({
+export const styles = StyleSheet.create((theme) => ({
   textColor: {
     color: theme.colors.typography,
   },
@@ -44,6 +44,10 @@ const styles = StyleSheet.create((theme) => ({
         h4: {
           fontSize: 18,
           lineHeight: 20,
+        },
+        h5: {
+          fontSize: 16,
+          lineHeight: 18,
         },
       },
       bold: {

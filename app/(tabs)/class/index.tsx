@@ -1,6 +1,6 @@
 import { Avatar } from "@/components/avatar";
 import { ClassCarousel } from "@/components/carousel";
-import { FilterBar, FilterOption } from "@/components/filter-bar";
+import { ChipBar, Option } from "@/components/chip-bar";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { featuredClasses, upcomingClasses } from "@/mocks/classes";
@@ -8,9 +8,9 @@ import { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type ClassFilter = "all" | "genre" | "style" | "level";
+type ClassOption = "all" | "genre" | "style" | "level";
 
-const CLASS_FILTERS: FilterOption<ClassFilter>[] = [
+const CLASS_FILTERS: Option<ClassOption>[] = [
   { id: "all", label: "All" },
   { id: "genre", label: "Genre", hasDropdown: true },
   { id: "style", label: "Style", hasDropdown: true },
@@ -18,36 +18,37 @@ const CLASS_FILTERS: FilterOption<ClassFilter>[] = [
 ];
 
 export default function Classes() {
-  const [activeFilter, setActiveFilter] = useState<ClassFilter>("all");
+  const [activeOption, setActiveOption] = useState<ClassOption>("all");
 
   const featured = useMemo(() => featuredClasses, []);
 
   const filteredUpcoming = useMemo(() => {
-    if (activeFilter === "all") {
+    if (activeOption === "all") {
       return upcomingClasses;
     }
 
-    if (activeFilter === "genre") {
+    if (activeOption === "genre") {
       return upcomingClasses.filter((danceClass) => danceClass.genre);
     }
 
-    if (activeFilter === "style") {
+    if (activeOption === "style") {
       return upcomingClasses.filter((danceClass) => danceClass.style);
     }
 
-    if (activeFilter === "level") {
+    if (activeOption === "level") {
       return upcomingClasses.filter((danceClass) => danceClass.level);
     }
 
     return upcomingClasses;
-  }, [activeFilter]);
+  }, [activeOption]);
 
   return (
     <View style={styles.container}>
-      <FilterBar
-        filters={CLASS_FILTERS}
-        activeFilter={activeFilter}
-        onFilterPress={setActiveFilter}
+      <ChipBar
+        padding
+        options={CLASS_FILTERS}
+        activeOption={activeOption}
+        onPress={setActiveOption}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}

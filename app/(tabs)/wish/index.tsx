@@ -1,7 +1,7 @@
 import { AvatarGroup } from "@/components/avatar-group";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
-import { FilterBar, FilterOption } from "@/components/filter-bar";
+import { ChipBar, Option } from "@/components/chip-bar";
 import { Tile } from "@/components/tile";
 import { wishes } from "@/mocks/wishes";
 import { router } from "expo-router";
@@ -9,9 +9,9 @@ import { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type WishStatusFilter = "all" | "available" | "granted" | "waiting";
+type WishStatusOption = "all" | "available" | "granted" | "waiting";
 
-const STATUS_FILTERS: FilterOption<WishStatusFilter>[] = [
+const STATUS_FILTERS: Option<WishStatusOption>[] = [
   { id: "all", label: "All" },
   { id: "available", label: "Class available" },
   { id: "granted", label: "Granted" },
@@ -19,27 +19,28 @@ const STATUS_FILTERS: FilterOption<WishStatusFilter>[] = [
 ];
 
 export default function Wishes() {
-  const [activeFilter, setActiveFilter] = useState<WishStatusFilter>("all");
+  const [activeOption, setActiveOption] = useState<WishStatusOption>("all");
 
   const filteredWishes = useMemo(() => {
-    if (activeFilter === "all") {
+    if (activeOption === "all") {
       return wishes;
     }
 
     return wishes.filter((wish) => {
-      if (activeFilter === "waiting") {
+      if (activeOption === "waiting") {
         return wish.status === undefined;
       }
-      return wish.status === activeFilter;
+      return wish.status === activeOption;
     });
-  }, [activeFilter]);
+  }, [activeOption]);
 
   return (
     <View style={styles.container}>
-      <FilterBar
-        filters={STATUS_FILTERS}
-        activeFilter={activeFilter}
-        onFilterPress={setActiveFilter}
+      <ChipBar
+        padding
+        options={STATUS_FILTERS}
+        activeOption={activeOption}
+        onPress={setActiveOption}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}

@@ -17,7 +17,7 @@ const lightTheme = {
 const darkTheme = {
   colors: {
     background: "#0C0C0C",
-    foreground: "#0C0C0C",
+    foreground: "#1B1B1B",
     typography: "#FFFFFF",
     dimmed: "#BFBFBF",
     tint: "#99A1AF",

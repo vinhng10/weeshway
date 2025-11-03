@@ -34,6 +34,7 @@ const MAPPING = {
   "chevron.down": "keyboard-arrow-down",
   "location.app.fill": "location-on",
   "timer.circle.fill": "access-time-filled",
+  "music.note": "music-note",
 } as IconMapping;
 
 /**

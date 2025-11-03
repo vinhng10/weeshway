@@ -1,15 +1,14 @@
 import { ClassCarousel } from "@/components/carousel";
+import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { wishes } from "@/mocks/wishes";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, ScrollView, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Wish() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
-  const router = useRouter();
 
   // Find the wish by ID
   const wish = wishes.find((w) => w.id === Number(wishId));
@@ -34,14 +33,7 @@ export default function Wish() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol name="chevron.left" size={32} color="#FFFFFF" />
-        </Pressable>
-        <ThemedText bold type="h4">
-          Wish
-        </ThemedText>
-      </View>
+      <Header title="Wish" />
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {/* Top Classes Container */}
@@ -87,23 +79,10 @@ const styles = StyleSheet.create((theme, rt) => ({
     gap: theme.gap(2),
     padding: theme.gap(2),
   },
-  headerContainer: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: theme.gap(2),
-    position: "relative",
-  },
-  backButton: {
-    position: "absolute",
-    left: theme.gap(1),
-    justifyContent: "center",
-    alignItems: "center",
-  },
   descriptionContainer: {
     height: theme.gap(12),
     padding: theme.gap(1),
-    backgroundColor: "#1B1B1B",
+    backgroundColor: theme.colors.foreground,
     borderRadius: theme.gap(2),
   },
   wishContainer: {

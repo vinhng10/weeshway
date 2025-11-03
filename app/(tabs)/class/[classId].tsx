@@ -170,7 +170,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   descriptionContainer: {
     height: theme.gap(12),
     padding: theme.gap(1),
-    backgroundColor: "#1B1B1B",
+    backgroundColor: theme.colors.foreground,
     borderRadius: theme.gap(2),
   },
   wishContainer: {

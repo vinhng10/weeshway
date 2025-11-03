@@ -50,7 +50,7 @@ const styles = StyleSheet.create((theme) => ({
           backgroundColor: "#FFFFFF",
         },
         dark: {
-          backgroundColor: "#1B1B1B",
+          backgroundColor: theme.colors.foreground,
         },
         highlight: {},
       },
