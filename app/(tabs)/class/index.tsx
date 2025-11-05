@@ -55,7 +55,7 @@ export default function Classes() {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={styles.scrollContainer}
       >
         <View style={styles.section}>
           <ThemedText type="h4">You might like</ThemedText>
@@ -109,8 +109,8 @@ const styles = StyleSheet.create((theme, rt) => ({
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
   },
-  contentContainer: {
-    gap: theme.gap(1),
+  scrollContainer: {
+    gap: theme.gap(2),
     padding: theme.gap(2),
   },
   section: {

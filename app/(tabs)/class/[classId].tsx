@@ -34,7 +34,7 @@ export default function Class() {
 
       {/* Scrollable Content */}
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
         {/* Song Card */}
@@ -45,9 +45,7 @@ export default function Class() {
             shape="circle"
             bordered={true}
           />
-          <ThemedText type="h3">
-            {classData.instructor.name}
-          </ThemedText>
+          <ThemedText type="h3">{classData.instructor.name}</ThemedText>
         </View>
 
         {/* Style and Level Selects */}
@@ -122,7 +120,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
   },
-  scrollContent: {
+  scrollContainer: {
     padding: theme.gap(2),
     gap: theme.gap(2),
     paddingBottom: theme.gap(4),

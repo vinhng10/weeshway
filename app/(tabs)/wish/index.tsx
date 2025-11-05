@@ -44,7 +44,7 @@ export default function Wishes() {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={styles.scrollContainer}
       >
         {filteredWishes.map((wish) => (
           <Tile
@@ -85,7 +85,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
   },
-  contentContainer: {
+  scrollContainer: {
     gap: theme.gap(1),
     padding: theme.gap(2),
   },

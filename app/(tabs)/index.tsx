@@ -72,7 +72,7 @@ export default function HomeScreen() {
 
       {/* Scrollable Content */}
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
         {/* Search Input */}
@@ -188,7 +188,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
   },
-  scrollContent: {
+  scrollContainer: {
     padding: theme.gap(2),
     gap: theme.gap(2),
     paddingBottom: theme.gap(4),

@@ -26,7 +26,7 @@ export default function Wish() {
     <View style={styles.container}>
       <Header title="Wish" />
 
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Top Classes Container */}
         {wish.classes && wish.classes.length > 0 && (
           <View style={styles.section}>
@@ -68,7 +68,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
   },
-  contentContainer: {
+  scrollContainer: {
     flex: 1,
     gap: theme.gap(2),
     padding: theme.gap(2),

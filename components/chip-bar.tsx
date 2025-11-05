@@ -28,7 +28,7 @@ export const ChipBar = <T extends string = string>({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.scrollContainer}
       >
         {options.map((option) => {
           const isActive = option.id === activeOption;
@@ -53,7 +53,7 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     width: "100%",
   },
-  scrollContent: {
+  scrollContainer: {
     gap: theme.gap(1),
     alignItems: "center",
     variants: {

@@ -58,7 +58,6 @@ const styles = StyleSheet.create((theme) => ({
     },
   },
   label: {
-    lineHeight: 16,
     variants: {
       size: {
         default: {
