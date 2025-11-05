@@ -17,7 +17,6 @@ interface HeroProps {
   subtitle: string;
   onShare?: () => void;
   onPlay?: () => void;
-  showHeader?: boolean;
 }
 
 export const Hero: React.FunctionComponent<HeroProps> = ({
@@ -26,7 +25,6 @@ export const Hero: React.FunctionComponent<HeroProps> = ({
   subtitle,
   onShare,
   onPlay,
-  showHeader = true,
 }) => {
   return (
     <ImageBackground source={source} style={styles.background}>
@@ -40,7 +38,7 @@ export const Hero: React.FunctionComponent<HeroProps> = ({
         <View style={styles.contentContainer}>
           <View style={styles.songInfo}>
             <ThemedText type="h1">{title}</ThemedText>
-            <ThemedText dimmed type="h2">
+            <ThemedText dimmed type="h3">
               {subtitle}
             </ThemedText>
           </View>
@@ -79,7 +77,6 @@ const styles = StyleSheet.create((theme) => ({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: "red",
     zIndex: 1,
   },
   contentContainer: {
@@ -90,6 +87,7 @@ const styles = StyleSheet.create((theme) => ({
     paddingVertical: theme.gap(1),
   },
   songInfo: {
+    width: "70%",
     gap: theme.gap(0.5),
   },
   buttonContainer: {
