@@ -46,7 +46,7 @@ export const Tile: React.FunctionComponent<TileProps> = ({
         <View style={styles.leftContainer}>
           <Avatar source={imageSource} size="large" shape="square" />
           <View style={styles.textContainer}>
-            <ThemedText bold type="h5" numberOfLines={1} ellipsizeMode="tail">
+            <ThemedText type="h5" numberOfLines={1} ellipsizeMode="tail">
               {title}
             </ThemedText>
             {subtitle && (

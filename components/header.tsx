@@ -16,9 +16,7 @@ export const Header: React.FunctionComponent<HeaderProps> = ({ title }) => {
       <Pressable onPress={() => router.back()} style={styles.backButton}>
         <IconSymbol name="chevron.left" size={32} color="#FFFFFF" />
       </Pressable>
-      <ThemedText bold type="h4">
-        {title}
-      </ThemedText>
+      <ThemedText type="h4">{title}</ThemedText>
     </View>
   );
 };

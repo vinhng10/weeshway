@@ -38,9 +38,7 @@ export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
       disabled={!editable}
     >
       <View style={styles.labelContainer}>
-        <ThemedText bold dimmed>
-          {label}
-        </ThemedText>
+        <ThemedText dimmed>{label}</ThemedText>
         {type === "select" && (
           <IconSymbol style={styles.icon} name="chevron.down" size={16} />
         )}
@@ -48,13 +46,12 @@ export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
 
       {type === "select" ? (
         <View style={styles.valueContainer}>
-          <ThemedText bold type="h5">
+          <ThemedText type="h5">
             {selectedOption?.label || placeholder || ""}
           </ThemedText>
         </View>
       ) : (
         <TextInput
-          bold
           type="h5"
           value={value}
           onChangeText={onValueChange}

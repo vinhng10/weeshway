@@ -15,10 +15,18 @@ export function ThemedText({
     bold,
     dimmed,
   });
-  return <Text style={[styles.textColor, styles.textType, style]} {...rest} />;
+  return (
+    <Text
+      style={[styles.textFamily, styles.textColor, styles.textType, style]}
+      {...rest}
+    />
+  );
 }
 
 export const styles = StyleSheet.create((theme) => ({
+  textFamily: {
+    fontFamily: theme.fontFamily,
+  },
   textColor: {
     color: theme.colors.typography,
   },

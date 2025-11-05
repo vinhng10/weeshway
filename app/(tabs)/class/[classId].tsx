@@ -45,7 +45,7 @@ export default function Class() {
             shape="circle"
             bordered={true}
           />
-          <ThemedText bold type="h3">
+          <ThemedText type="h3">
             {classData.instructor.name}
           </ThemedText>
         </View>

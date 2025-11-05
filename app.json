@@ -41,7 +41,13 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
         }
       ],
-      "expo-speech-recognition"
+      "expo-speech-recognition",
+      [
+        "expo-font",
+        {
+          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

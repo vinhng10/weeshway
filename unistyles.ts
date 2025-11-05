@@ -11,6 +11,7 @@ const lightTheme = {
     link: "#1E3799",
     highlight: "#FF5154",
   },
+  fontFamily: "MomoTrustDisplay-Regular",
   gap: (v: number) => v * 8,
 } as const;
 
@@ -25,6 +26,7 @@ const darkTheme = {
     link: "#0C2461",
     highlight: "#FF5154",
   },
+  fontFamily: "MomoTrustDisplay-Regular",
   gap: (v: number) => v * 8,
 } as const;
 

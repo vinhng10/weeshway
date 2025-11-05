@@ -39,9 +39,7 @@ export const Hero: React.FunctionComponent<HeroProps> = ({
         <Header />
         <View style={styles.contentContainer}>
           <View style={styles.songInfo}>
-            <ThemedText bold type="h1">
-              {title}
-            </ThemedText>
+            <ThemedText type="h1">{title}</ThemedText>
             <ThemedText dimmed type="h2">
               {subtitle}
             </ThemedText>

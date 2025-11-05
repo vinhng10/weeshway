@@ -30,7 +30,7 @@ export default function Wish() {
         {/* Top Classes Container */}
         {wish.classes && wish.classes.length > 0 && (
           <View style={styles.section}>
-            <ThemedText bold type="h4">
+            <ThemedText type="h4">
               {wish.status === "available"
                 ? "Your top classes"
                 : "Granted classes"}

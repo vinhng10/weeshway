@@ -1,5 +1,6 @@
+import { ThemedText } from "@/components/themed-text";
 import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 
 type ChipProps = UnistylesVariants<typeof styles> & {
@@ -20,7 +21,7 @@ export const Chip: React.FunctionComponent<ChipProps> = ({
   return (
     <Pressable onPress={onPress} disabled={!onPress}>
       <View style={styles.container}>
-        <Text style={styles.label}>{label}</Text>
+        <ThemedText style={styles.label}>{label}</ThemedText>
         {icon && <IconSymbol style={styles.icon} name={icon} size={16} />}
       </View>
     </Pressable>
@@ -58,7 +59,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   label: {
     lineHeight: 16,
-    fontWeight: "600",
     variants: {
       size: {
         default: {

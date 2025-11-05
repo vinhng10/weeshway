@@ -34,6 +34,7 @@ export function TextInput({
       multiline={multiline}
       style={[
         styles.container,
+        textStyles.textFamily,
         textStyles.textColor,
         textStyles.textType,
         style,

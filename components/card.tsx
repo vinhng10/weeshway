@@ -42,9 +42,7 @@ export const Card: React.FunctionComponent<CardProps> = ({
               shape="circle"
               bordered={true}
             />
-            <ThemedText bold type="h3">
-              {data.instructor.name}
-            </ThemedText>
+            <ThemedText type="h3">{data.instructor.name}</ThemedText>
             <View style={styles.chipContainer}>
               <Chip label={data.style} type="light" />
               <Chip label={data.level} type="light" />
@@ -55,12 +53,8 @@ export const Card: React.FunctionComponent<CardProps> = ({
           <View style={styles.middleContainer}>
             {/* Song Info */}
             <View style={styles.rowGroup}>
-              <ThemedText bold type="h3">
-                {data.songTitle}
-              </ThemedText>
-              <ThemedText dimmed style={styles.artist}>
-                {data.artist}
-              </ThemedText>
+              <ThemedText type="h3">{data.songTitle}</ThemedText>
+              <ThemedText dimmed>{data.artist}</ThemedText>
             </View>
 
             {/* Location and DateTime Info */}
@@ -74,7 +68,7 @@ export const Card: React.FunctionComponent<CardProps> = ({
                   />
                   <ThemedText>{data.studio}</ThemedText>
                 </View>
-                <ThemedText bold>${data.price.toFixed(2)}</ThemedText>
+                <ThemedText>${data.price.toFixed(2)}</ThemedText>
               </View>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
@@ -87,7 +81,7 @@ export const Card: React.FunctionComponent<CardProps> = ({
                     {data.date}, {data.time}
                   </ThemedText>
                 </View>
-                <ThemedText bold style={styles.highlight}>
+                <ThemedText style={styles.highlight}>
                   {data.spotsLeft} spots left
                 </ThemedText>
               </View>
@@ -141,12 +135,9 @@ const styles = StyleSheet.create((theme) => ({
     width: "100%",
     gap: theme.gap(2.5),
   },
-  artist: {
-    color: "#CCCCCC",
-  },
   rowGroup: {
     flexDirection: "column",
-    gap: theme.gap(1),
+    gap: theme.gap(0.5),
   },
   row: {
     flexDirection: "row",

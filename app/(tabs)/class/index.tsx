@@ -58,9 +58,7 @@ export default function Classes() {
         contentContainerStyle={styles.contentContainer}
       >
         <View style={styles.section}>
-          <ThemedText bold type="h4">
-            You might like
-          </ThemedText>
+          <ThemedText type="h4">You might like</ThemedText>
           {featuredClasses.length > 0 && (
             <ClassCarousel
               data={featuredClasses}
@@ -74,10 +72,8 @@ export default function Classes() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText bold type="h4">
-            Upcoming
-          </ThemedText>
-          <View style={styles.upcomingList}>
+          <ThemedText type="h4">Upcoming</ThemedText>
+          <View style={styles.list}>
             {filteredUpcoming.map((danceClass) => (
               <Tile
                 key={danceClass.id}
@@ -92,7 +88,7 @@ export default function Classes() {
                       shape="circle"
                       bordered
                     />
-                    <ThemedText bold style={styles.highlight}>
+                    <ThemedText style={styles.highlight}>
                       {danceClass.spotsLeft} spots left
                     </ThemedText>
                   </>
@@ -120,7 +116,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   section: {
     gap: theme.gap(1),
   },
-  upcomingList: {
+  list: {
     gap: theme.gap(1),
   },
   highlight: {
