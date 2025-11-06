@@ -1,9 +1,9 @@
 import { Card } from "@/components/card";
-import { ClassType } from "@/types";
+import { ProjectType } from "@/types";
 import * as React from "react";
 import { View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
-import Carousel, {
+import RNCarousel, {
   ICarouselInstance,
   Pagination,
 } from "react-native-reanimated-carousel";
@@ -16,7 +16,7 @@ interface CarouselProps {
   onPress?: any;
 }
 
-export const ClassCarousel: React.FunctionComponent<CarouselProps> = ({
+export const Carousel: React.FunctionComponent<CarouselProps> = ({
   data,
   onBook,
   onPlay,
@@ -31,7 +31,7 @@ export const ClassCarousel: React.FunctionComponent<CarouselProps> = ({
 
   return (
     <View>
-      <Carousel
+      <RNCarousel
         ref={ref}
         loop={true}
         width={360}
@@ -48,7 +48,7 @@ export const ClassCarousel: React.FunctionComponent<CarouselProps> = ({
           parallaxAdjacentItemScale: 0.8,
         }}
         onSnapToItem={(index: number) => console.log("current index:", index)}
-        renderItem={({ item }: { item: ClassType }) => (
+        renderItem={({ item }: { item: ProjectType }) => (
           <View style={styles.carouselItem}>
             <Card
               data={item}

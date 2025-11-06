@@ -36,6 +36,7 @@ const MAPPING = {
   "timer.circle.fill": "access-time-filled",
   "music.note": "music-note",
   "square.and.arrow.up": "share",
+  heart: "favorite",
 } as IconMapping;
 
 /**

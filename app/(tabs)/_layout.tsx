@@ -56,6 +56,16 @@ export default function TabLayout() {
           title: "Wish Board",
           headerShown: false,
           tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="wand.and.sparkles" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="project"
+        options={{
+          title: "Projects",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="folder.fill" color={color} />
           ),
         }}

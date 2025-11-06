@@ -67,14 +67,13 @@ export default function Wishes() {
           />
         ))}
       </ScrollView>
-      <View style={styles.buttonContainer}>
-        <Button
-          label="Make A Wish"
-          onPress={() => {
-            router.back();
-          }}
-        />
-      </View>
+      <Button
+        stickyBottom
+        label="Make A Wish"
+        onPress={() => {
+          router.back();
+        }}
+      />
     </View>
   );
 }
@@ -88,11 +87,5 @@ const styles = StyleSheet.create((theme, rt) => ({
   scrollContainer: {
     gap: theme.gap(1),
     padding: theme.gap(2),
-  },
-  buttonContainer: {
-    width: "70%",
-    position: "absolute",
-    alignSelf: "center",
-    bottom: theme.gap(2),
   },
 }));

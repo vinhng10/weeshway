@@ -1,10 +1,10 @@
 import { Avatar } from "@/components/avatar";
-import { ClassCarousel } from "@/components/carousel";
+import { Carousel } from "@/components/carousel";
 import { ChipBar, Option } from "@/components/chip-bar";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
-import { classes } from "@/mocks/classes";
-import { ClassType } from "@/types";
+import { projects } from "@/mocks/projects";
+import { ProjectType } from "@/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -22,8 +22,8 @@ const CLASS_FILTERS: Option<ClassOption>[] = [
 export default function Classes() {
   const [activeOption, setActiveOption] = useState<ClassOption>("all");
 
-  const featuredClasses = classes.slice(0, 3);
-  const upcomingClasses = classes.slice(3);
+  const featuredClasses = projects.slice(0, 3);
+  const upcomingClasses = projects.slice(3);
 
   const filteredUpcoming = useMemo(() => {
     if (activeOption === "all") {
@@ -60,11 +60,11 @@ export default function Classes() {
         <View style={styles.section}>
           <ThemedText type="h4">You might like</ThemedText>
           {featuredClasses.length > 0 && (
-            <ClassCarousel
+            <Carousel
               data={featuredClasses}
               onBook={() => {}}
               onPlay={() => {}}
-              onPress={(data: ClassType) =>
+              onPress={(data: ProjectType) =>
                 router.push(`/(tabs)/class/${data.id}`)
               }
             />

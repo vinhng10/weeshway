@@ -11,11 +11,12 @@ export type WishType = {
   description: string;
   status: "available" | "granted" | undefined;
   avatars?: ImageSourcePropType[];
-  classes?: ClassType[];
+  classes?: ProjectType[];
 };
 
-export type ClassType = {
+export type ProjectType = {
   id: number;
+  status: "private" | "public" | "released" | "cancelled" | undefined;
   instructor: {
     name: string;
     imageUrl: string;
@@ -32,4 +33,5 @@ export type ClassType = {
   spotsLeft: number;
   backgroundImage: string;
   description?: string;
+  likes: number;
 };

@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function HomeScreen() {
+export default function Project() {
   const [searchQuery, setSearchQuery] = useState("Levitating");
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -175,7 +175,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Create Button */}
-      <Button stickyBottom label="Create" onPress={handleCreate} />
+      <Button label="Create" onPress={handleCreate} stickyBottom />
     </View>
   );
 }

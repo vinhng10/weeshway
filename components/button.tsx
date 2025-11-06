@@ -1,20 +1,28 @@
-import { Pressable, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { Pressable, View, type ViewProps } from "react-native";
+import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 import { ThemedText } from "./themed-text";
 
-interface ButtonProps {
+export type ButtonProps = {
   label: string;
   onPress(): void;
-}
+} & ViewProps &
+  UnistylesVariants<typeof styles>;
 
 export const Button: React.FunctionComponent<ButtonProps> = ({
   label,
   onPress,
+  stickyBottom,
+  style,
+  ...rest
 }) => {
+  styles.useVariants({
+    stickyBottom,
+  });
+
   return (
     <Pressable onPress={onPress}>
-      <View style={style.button}>
-        <ThemedText type="h4" style={style.label}>
+      <View style={[styles.button, styles.position, style]} {...rest}>
+        <ThemedText type="h4" style={styles.label}>
           {label}
         </ThemedText>
       </View>
@@ -22,7 +30,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
   );
 };
 
-const style = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme) => ({
   button: {
     width: "100%",
     height: theme.gap(6),
@@ -31,6 +39,18 @@ const style = StyleSheet.create((theme) => ({
     alignItems: "center",
     borderRadius: theme.gap(2),
     backgroundColor: "#FFFFFF",
+  },
+  position: {
+    variants: {
+      stickyBottom: {
+        true: {
+          width: "70%",
+          position: "absolute",
+          alignSelf: "center",
+          bottom: theme.gap(2),
+        },
+      },
+    },
   },
   label: {
     color: "#000000",

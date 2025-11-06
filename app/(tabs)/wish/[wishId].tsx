@@ -1,9 +1,9 @@
-import { ClassCarousel } from "@/components/carousel";
+import { Carousel } from "@/components/carousel";
 import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { wishes } from "@/mocks/wishes";
-import { ClassType } from "@/types";
+import { ProjectType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -35,11 +35,11 @@ export default function Wish() {
                 ? "Your top classes"
                 : "Granted classes"}
             </ThemedText>
-            <ClassCarousel
+            <Carousel
               data={wish.classes}
               onBook={() => {}}
               onPlay={() => {}}
-              onPress={(data: ClassType) =>
+              onPress={(data: ProjectType) =>
                 router.push(`/(tabs)/class/${data.id}`)
               }
             />

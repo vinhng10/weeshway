@@ -39,11 +39,11 @@ const styles = StyleSheet.create((theme) => ({
       size: {
         default: {
           paddingHorizontal: theme.gap(1),
-          paddingVertical: theme.gap(0.5),
+          paddingVertical: theme.gap(0.2),
         },
         large: {
           paddingHorizontal: theme.gap(2),
-          paddingVertical: theme.gap(1.5),
+          paddingVertical: theme.gap(1.2),
         },
       },
       type: {
@@ -53,7 +53,9 @@ const styles = StyleSheet.create((theme) => ({
         dark: {
           backgroundColor: theme.colors.foreground,
         },
-        highlight: {},
+        highlight: {
+          paddingHorizontal: 0,
+        },
       },
     },
   },

@@ -1,15 +1,36 @@
 import { Stack } from "expo-router";
 import React from "react";
+import { useUnistyles } from "react-native-unistyles";
 
 export default function ProjectLayout() {
+  const { theme } = useUnistyles();
+
   return (
     <Stack
       screenOptions={{
-        headerShown: false,
+        headerTitleStyle: {
+          color: theme.colors.typography,
+        },
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+        },
         contentStyle: {
-          backgroundColor: "#000000",
+          backgroundColor: theme.colors.background,
         },
       }}
-    />
+    >
+      <Stack.Screen
+        name="index"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="[projectId]"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
   );
 }

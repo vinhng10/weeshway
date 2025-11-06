@@ -3,7 +3,7 @@ import { Button } from "@/components/button";
 import { Hero } from "@/components/hero";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
-import { classes } from "@/mocks/classes";
+import { projects } from "@/mocks/projects";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { ScrollView, View } from "react-native";
@@ -11,7 +11,7 @@ import { StyleSheet } from "react-native-unistyles";
 
 export default function Class() {
   const { classId } = useLocalSearchParams<{ classId: string }>();
-  const classData = classes.find((c) => c.id === Number(classId));
+  const classData = projects.find((c) => c.id === Number(classId));
 
   if (!classData) {
     return (
@@ -107,9 +107,7 @@ export default function Class() {
       </ScrollView>
 
       {/* Book Button */}
-      <View style={styles.buttonContainer}>
-        <Button label="Book" onPress={() => {}} />
-      </View>
+      <Button stickyBottom label="Book" onPress={() => {}} />
     </View>
   );
 }
@@ -130,12 +128,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     justifyContent: "space-between",
     alignItems: "center",
     gap: theme.gap(2),
-  },
-  buttonContainer: {
-    width: "70%",
-    position: "absolute",
-    alignSelf: "center",
-    bottom: theme.gap(2),
   },
   teacherContainer: {
     flexDirection: "row",
