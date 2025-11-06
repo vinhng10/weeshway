@@ -127,7 +127,11 @@ export default function Projects() {
         </View>
       </ScrollView>
 
-      <Button stickyBottom label="Create Project" onPress={() => {}} />
+      <Button
+        stickyBottom
+        label="Create Project"
+        onPress={() => router.push("/(tabs)/project/create")}
+      />
     </View>
   );
 }
