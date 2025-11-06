@@ -3,6 +3,7 @@ import { Chip } from "@/components/chip";
 import { ChipBar, Option } from "@/components/chip-bar";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
+import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { projects } from "@/mocks/projects";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
@@ -60,52 +61,68 @@ export default function Projects() {
         <View style={styles.section}>
           <ThemedText type="h4">This Week</ThemedText>
           <View style={styles.list}>
-            {thisWeekProjects.map((project) => (
-              <Tile
-                key={project.id}
-                imageSource={{ uri: project.backgroundImage }}
-                title={project.songTitle}
-                subtitle={project.artist}
-                metadata={`${project.style} • ${project.level}`}
-                rightContent={
-                  <>
-                    <Chip
-                      type="highlight"
-                      icon="heart"
-                      label={project.likes.toString()}
-                    />
-                    <Chip type="light" label={project.status ?? ""} />
-                  </>
-                }
-                onPress={() => router.push(`/(tabs)/project/${project.id}`)}
-              />
-            ))}
+            {thisWeekProjects.map((project) => {
+              let icon: IconSymbolName | undefined = undefined;
+              let label = "";
+              if (project.status === "public") {
+                icon = "heart";
+                label = project.likes.toString();
+              }
+              if (project.status === "released") {
+                icon = "person.fill";
+                label = `${project.books} | ${project.spots}`;
+              }
+              return (
+                <Tile
+                  key={project.id}
+                  imageSource={{ uri: project.backgroundImage }}
+                  title={project.songTitle}
+                  subtitle={project.artist}
+                  metadata={`${project.style} • ${project.level}`}
+                  rightContent={
+                    <>
+                      <Chip type="highlight" icon={icon} label={label} />
+                      <Chip type="light" label={project.status ?? ""} />
+                    </>
+                  }
+                  onPress={() => router.push(`/(tabs)/project/${project.id}`)}
+                />
+              );
+            })}
           </View>
         </View>
 
         <View style={styles.section}>
           <ThemedText type="h4">Projects</ThemedText>
           <View style={styles.list}>
-            {filteredUpcoming.map((project) => (
-              <Tile
-                key={project.id}
-                imageSource={{ uri: project.backgroundImage }}
-                title={project.songTitle}
-                subtitle={project.artist}
-                metadata={`${project.style} • ${project.level}`}
-                rightContent={
-                  <>
-                    <Chip
-                      type="highlight"
-                      icon="heart"
-                      label={project.likes.toString()}
-                    />
-                    <Chip type="light" label={project.status ?? ""} />
-                  </>
-                }
-                onPress={() => router.push(`/(tabs)/project/${project.id}`)}
-              />
-            ))}
+            {otherProjects.map((project) => {
+              let icon: IconSymbolName | undefined = undefined;
+              let label = "";
+              if (project.status === "public") {
+                icon = "heart";
+                label = project.likes.toString();
+              }
+              if (project.status === "released") {
+                icon = "person.fill";
+                label = `${project.books} | ${project.spots}`;
+              }
+              return (
+                <Tile
+                  key={project.id}
+                  imageSource={{ uri: project.backgroundImage }}
+                  title={project.songTitle}
+                  subtitle={project.artist}
+                  metadata={`${project.style} • ${project.level}`}
+                  rightContent={
+                    <>
+                      <Chip type="highlight" icon={icon} label={label} />
+                      <Chip type="light" label={project.status ?? ""} />
+                    </>
+                  }
+                  onPress={() => router.push(`/(tabs)/project/${project.id}`)}
+                />
+              );
+            })}
           </View>
         </View>
       </ScrollView>
@@ -130,9 +147,5 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   list: {
     gap: theme.gap(1),
-  },
-  highlight: {
-    color: theme.colors.highlight,
-    paddingTop: theme.gap(0.5),
   },
 }));

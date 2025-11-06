@@ -89,7 +89,7 @@ export default function Classes() {
                       bordered
                     />
                     <ThemedText style={styles.highlight}>
-                      {danceClass.spotsLeft} spots left
+                      {danceClass.spots - danceClass.books} spots left
                     </ThemedText>
                   </>
                 }

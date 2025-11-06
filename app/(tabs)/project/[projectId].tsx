@@ -3,22 +3,37 @@ import { ChipBar } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
-import React, { useState } from "react";
+import { projects } from "@/mocks/projects";
+import { useLocalSearchParams } from "expo-router";
+import React, { useMemo, useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Project() {
-  const [searchQuery, setSearchQuery] = useState("Levitating");
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [visibility, setVisibility] = useState("private");
-  const [style, setStyle] = useState("hiphop");
-  const [level, setLevel] = useState("intermediate");
-  const [price, setPrice] = useState("$19.99");
-  const [spots, setSpots] = useState("25");
+  const { projectId } = useLocalSearchParams<{ projectId: string }>();
+  const project = useMemo(
+    () => projects.find((p) => p.id === Number(projectId)),
+    [projectId]
+  );
+
+  // Initialize state with project data or defaults
+  const [searchQuery, setSearchQuery] = useState(project?.songTitle || "");
+  const [projectName, setProjectName] = useState(project?.songTitle || "");
+  const [projectDescription, setProjectDescription] = useState(
+    project?.description || ""
+  );
+  const [visibility, setVisibility] = useState(project?.status ?? "private");
+  const [style, setStyle] = useState(project?.style ?? "hiphop");
+  const [level, setLevel] = useState(project?.level ?? "intermediate");
+  const [price, setPrice] = useState(
+    project?.price ? `$${project.price.toFixed(2)}` : "$0.00"
+  );
+  const [spots, setSpots] = useState(project?.spots.toString() || "0");
   const [audioFile, setAudioFile] = useState<string | undefined>();
-  const [dateTime, setDateTime] = useState("July 25, 19:00 - 20:30");
-  const [location, setLocation] = useState("Dance Studio Pro");
+  const [dateTime, setDateTime] = useState(
+    project ? `${project.date}, ${project.time}` : ""
+  );
+  const [location, setLocation] = useState(project?.studio ?? "");
 
   const visibilityOptions = [
     { id: "private", label: "Private" },
@@ -27,16 +42,20 @@ export default function Project() {
   ];
 
   const styleOptions = [
-    { label: "Hip Hop", value: "hiphop" },
-    { label: "Ballet", value: "ballet" },
-    { label: "Contemporary", value: "contemporary" },
-    { label: "Jazz", value: "jazz" },
+    { label: "Hip Hop", value: "Hip Hop" },
+    { label: "Urban", value: "Urban" },
+    { label: "House", value: "House" },
+    { label: "Pop", value: "Pop" },
+    { label: "Ballet", value: "Ballet" },
+    { label: "Contemporary", value: "Contemporary" },
+    { label: "Jazz", value: "Jazz" },
   ];
 
   const levelOptions = [
-    { label: "Beginner", value: "beginner" },
-    { label: "Intermediate", value: "intermediate" },
-    { label: "Advanced", value: "advanced" },
+    { label: "Beginner", value: "Beginner" },
+    { label: "Intermediate", value: "Intermediate" },
+    { label: "Advanced", value: "Advanced" },
+    { label: "Open Level", value: "Open Level" },
   ];
 
   const handleCreate = () => {
@@ -84,11 +103,9 @@ export default function Project() {
 
         {/* Song Card */}
         <Tile
-          imageSource={{
-            uri: "https://i.scdn.co/image/ab67616d0000b2737d469421bb0b23b32b4851da",
-          }}
-          title="Echoes of the Night"
-          subtitle="Liam Carter"
+          imageSource={{ uri: project?.backgroundImage }}
+          title={project?.songTitle ?? ""}
+          subtitle={project?.artist ?? ""}
           onPress={() => {}}
         />
 

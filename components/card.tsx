@@ -82,7 +82,7 @@ export const Card: React.FunctionComponent<CardProps> = ({
                   </ThemedText>
                 </View>
                 <ThemedText style={styles.highlight}>
-                  {data.spotsLeft} spots left
+                  {data.spots - data.books} spots left
                 </ThemedText>
               </View>
             </View>

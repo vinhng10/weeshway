@@ -30,7 +30,8 @@ export type ProjectType = {
   date: string;
   time: string;
   price: number;
-  spotsLeft: number;
+  spots: number;
+  books: number;
   backgroundImage: string;
   description?: string;
   likes: number;

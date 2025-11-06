@@ -75,7 +75,7 @@ export default function Class() {
           <BoxInput
             label="Spots"
             type="type"
-            value={classData.spotsLeft.toString()}
+            value={`${classData.spots - classData.books}`}
             editable={false}
           />
         </View>

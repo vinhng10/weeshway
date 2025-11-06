@@ -12,7 +12,7 @@ interface ChipBarProps<T extends string = string>
   extends UnistylesVariants<typeof styles> {
   options: Option<T>[];
   activeOption?: T;
-  onPress?: (option: T) => void;
+  onPress?: any;
 }
 
 export const ChipBar = <T extends string = string>({
