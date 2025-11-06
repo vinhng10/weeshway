@@ -54,8 +54,8 @@ export default function Classes() {
         onPress={setActiveOption}
       />
       <ScrollView
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
           <ThemedText type="h4">You might like</ThemedText>

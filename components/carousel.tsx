@@ -1,4 +1,4 @@
-import { Card } from "@/components/card";
+import { ClassCard } from "@/components/class-card";
 import { ProjectType } from "@/types";
 import * as React from "react";
 import { View } from "react-native";
@@ -50,7 +50,7 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({
         onSnapToItem={(index: number) => console.log("current index:", index)}
         renderItem={({ item }: { item: ProjectType }) => (
           <View style={styles.carouselItem}>
-            <Card
+            <ClassCard
               data={item}
               onBook={onBook}
               onPlay={onPlay}

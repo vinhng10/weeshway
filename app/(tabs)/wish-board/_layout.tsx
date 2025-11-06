@@ -25,6 +25,12 @@ export default function ClassLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="[wishId]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

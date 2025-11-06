@@ -80,11 +80,12 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.gap(2),
   },
   leftContainer: {
+    flex: 1,
+    flexShrink: 1,
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
     gap: theme.gap(1),
-    width: "70%",
   },
   rightContainer: {
     flexDirection: "column",

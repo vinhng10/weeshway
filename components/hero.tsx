@@ -37,7 +37,7 @@ export const Hero: React.FunctionComponent<HeroProps> = ({
         <Header />
         <View style={styles.contentContainer}>
           <View style={styles.songInfo}>
-            <ThemedText type="h1">{title}</ThemedText>
+            <ThemedText type="h2">{title}</ThemedText>
             <ThemedText dimmed type="h3">
               {subtitle}
             </ThemedText>
@@ -45,7 +45,7 @@ export const Hero: React.FunctionComponent<HeroProps> = ({
           <View style={styles.buttonContainer}>
             <Pressable style={styles.button} onPress={onShare}>
               <IconSymbol
-                name="square.and.arrow.up"
+                name="sharedwithyou"
                 size={24}
                 color="rgba(255, 255, 255, 0.6)"
               />
@@ -82,12 +82,13 @@ const styles = StyleSheet.create((theme) => ({
   contentContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-end",
     paddingHorizontal: theme.gap(2),
     paddingVertical: theme.gap(1),
   },
   songInfo: {
-    width: "70%",
+    flex: 1,
+    flexShrink: 1,
     gap: theme.gap(0.5),
   },
   buttonContainer: {

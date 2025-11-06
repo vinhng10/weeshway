@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Project() {
+export default function MakeAWish() {
   // Initialize state with project data or defaults
   const [searchQuery, setSearchQuery] = useState("");
   const [projectName, setProjectName] = useState("");
@@ -175,7 +175,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   scrollContainer: {
     padding: theme.gap(2),
     gap: theme.gap(2),
-    paddingBottom: theme.gap(4),
   },
   row: {
     flexDirection: "row",

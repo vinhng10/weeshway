@@ -3,19 +3,20 @@ import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { ProjectType } from "@/types";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { ImageBackground, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface CardProps {
-  data: any;
+  data: ProjectType;
   onBook?: any;
   onPlay?: any;
   onPress?: any;
 }
 
-export const Card: React.FunctionComponent<CardProps> = ({
+export const ClassCard: React.FunctionComponent<CardProps> = ({
   data,
   onBook,
   onPlay,

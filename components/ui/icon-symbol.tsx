@@ -35,7 +35,7 @@ const MAPPING = {
   "location.app.fill": "location-on",
   "timer.circle.fill": "access-time-filled",
   "music.note": "music-note",
-  "square.and.arrow.up": "share",
+  sharedwithyou: "share",
   heart: "favorite",
 } as IconMapping;
 

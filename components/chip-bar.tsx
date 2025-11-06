@@ -27,8 +27,8 @@ export const ChipBar = <T extends string = string>({
     <View style={styles.container}>
       <ScrollView
         horizontal
-        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
+        showsHorizontalScrollIndicator={false}
       >
         {options.map((option) => {
           const isActive = option.id === activeOption;

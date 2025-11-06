@@ -26,7 +26,10 @@ export default function Wish() {
     <View style={styles.container}>
       <Header title="Wish" />
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Top Classes Container */}
         {wish.classes && wish.classes.length > 0 && (
           <View style={styles.section}>

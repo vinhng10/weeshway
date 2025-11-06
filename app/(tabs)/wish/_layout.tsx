@@ -31,6 +31,12 @@ export default function WishLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="create"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

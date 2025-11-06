@@ -38,8 +38,8 @@ export const styles = StyleSheet.create((theme) => ({
           lineHeight: 16,
         },
         h1: {
-          fontSize: 32,
-          lineHeight: 34,
+          fontSize: 30,
+          lineHeight: 32,
         },
         h2: {
           fontSize: 24,

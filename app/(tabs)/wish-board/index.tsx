@@ -33,8 +33,8 @@ export default function WishBoard() {
         onPress={setActiveOption}
       />
       <ScrollView
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
           <ThemedText type="h4">Explore</ThemedText>
@@ -56,7 +56,7 @@ export default function WishBoard() {
                 title={wish.title}
                 subtitle={wish.artist}
                 metadata={`${wish.style} • ${wish.level}`}
-                onPress={() => router.push(`/(tabs)/wish/${wish.id}`)}
+                onPress={() => router.push(`/(tabs)/wish-board/${wish.id}`)}
                 key={wish.id}
               />
             ))}

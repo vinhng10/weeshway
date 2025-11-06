@@ -43,8 +43,8 @@ export default function Wishes() {
         onPress={setActiveOption}
       />
       <ScrollView
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
         {filteredWishes.map((wish) => (
           <Tile
@@ -71,7 +71,7 @@ export default function Wishes() {
         stickyBottom
         label="Make A Wish"
         onPress={() => {
-          router.back();
+          router.push("/(tabs)/wish/create");
         }}
       />
     </View>
