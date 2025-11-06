@@ -46,21 +46,6 @@
         "expo-font",
         {
           "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"],
-          "android": {
-            "fonts": [
-              {
-                "fontFamily": "MomoTrustDisplay-Regular",
-                "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/MomoTrustDisplay-Regular.ttf"
-                  }
-                ]
-              }
-            ]
-          },
-          "ios": {
-            "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
-          }
         }
       ]
     ],
