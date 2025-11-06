@@ -94,7 +94,7 @@ export default function HomeScreen() {
 
         {/* Project Name Input */}
         <TextInput
-          placeholder="Project name ..."
+          placeholder="Project name..."
           value={projectName}
           onChangeText={setProjectName}
         />
