@@ -75,7 +75,7 @@ export default function Projects() {
               return (
                 <Tile
                   key={project.id}
-                  imageSource={{ uri: project.backgroundImage }}
+                  imageSource={project.backgroundImage}
                   title={project.songTitle}
                   subtitle={project.artist}
                   metadata={`${project.style} • ${project.level}`}
@@ -109,7 +109,7 @@ export default function Projects() {
               return (
                 <Tile
                   key={project.id}
-                  imageSource={{ uri: project.backgroundImage }}
+                  imageSource={project.backgroundImage}
                   title={project.songTitle}
                   subtitle={project.artist}
                   metadata={`${project.style} • ${project.level}`}

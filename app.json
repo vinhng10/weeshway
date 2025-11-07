@@ -41,11 +41,18 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
         }
       ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
+      ],
       "expo-speech-recognition",
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"],
+          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
         }
       ]
     ],

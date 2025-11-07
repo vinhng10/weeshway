@@ -1,5 +1,6 @@
 import { Avatar } from "@/components/avatar";
 import { Carousel } from "@/components/carousel";
+import { Chip } from "@/components/chip";
 import { ChipBar, Option } from "@/components/chip-bar";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
@@ -77,20 +78,23 @@ export default function Classes() {
             {filteredUpcoming.map((danceClass) => (
               <Tile
                 key={danceClass.id}
-                imageSource={{ uri: danceClass.backgroundImage }}
+                imageSource={danceClass.backgroundImage}
                 title={danceClass.songTitle}
                 subtitle={danceClass.artist}
                 metadata={`${danceClass.style} • ${danceClass.level}`}
                 rightContent={
                   <>
                     <Avatar
-                      source={{ uri: danceClass.instructor.imageUrl }}
+                      source={danceClass.instructor.imageUrl}
                       shape="circle"
                       bordered
                     />
-                    <ThemedText style={styles.highlight}>
-                      {danceClass.spots - danceClass.books} spots left
-                    </ThemedText>
+                    <Chip
+                      type="highlight"
+                      label={`${
+                        danceClass.spots - danceClass.books
+                      } spots left`}
+                    />
                   </>
                 }
                 onPress={() => router.push(`/(tabs)/class/${danceClass.id}`)}
@@ -118,9 +122,5 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   list: {
     gap: theme.gap(1),
-  },
-  highlight: {
-    color: theme.colors.highlight,
-    paddingTop: theme.gap(0.5),
   },
 }));

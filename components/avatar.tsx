@@ -1,7 +1,11 @@
-import { Image, type ImageProps } from "react-native";
+import { Image, type ImageProps } from "expo-image";
+import { Pressable } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 
-export type AvatarProps = ImageProps & UnistylesVariants<typeof styles>;
+export type AvatarProps = ImageProps &
+  UnistylesVariants<typeof styles> & {
+    onPress?: any;
+  };
 
 export function Avatar({
   style,
@@ -9,6 +13,7 @@ export function Avatar({
   size,
   bordered,
   shape,
+  onPress,
   ...rest
 }: AvatarProps) {
   styles.useVariants({
@@ -16,7 +21,16 @@ export function Avatar({
     bordered,
     shape,
   });
-  return <Image source={source} style={[styles.avatar, style]} {...rest} />;
+  return (
+    <Pressable onPress={onPress}>
+      <Image
+        source={source}
+        style={[styles.avatar, style]}
+        contentFit="cover"
+        {...rest}
+      />
+    </Pressable>
+  );
 }
 
 const styles = StyleSheet.create((theme) => ({

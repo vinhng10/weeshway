@@ -4,9 +4,10 @@ import { Chip } from "@/components/chip";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ProjectType } from "@/types";
+import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { ImageBackground, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface CardProps {
@@ -25,20 +26,20 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
   return (
     <Pressable onPress={() => onPress(data)}>
       <ImageBackground
-        source={{ uri: data.backgroundImage }}
+        source={data.backgroundImage}
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >
         <LinearGradient
           style={styles.overlay}
-          colors={["rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 0.8)"]}
-          start={{ x: 0, y: 0.3 }}
+          colors={["rgba(255, 255, 255, 0.1)", "rgba(0, 0, 0, 0.9)"]}
+          start={{ x: 0.0, y: 0.3 }}
           end={{ x: 0, y: 1 }}
         >
           {/* Top Container */}
           <View style={styles.topContainer}>
             <Avatar
-              source={{ uri: data.instructor.imageUrl }}
+              source={data.instructor.imageUrl}
               size="large"
               shape="circle"
               bordered={true}

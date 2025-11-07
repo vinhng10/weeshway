@@ -70,7 +70,6 @@ export default function SignIn() {
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSignIn}
           disabled={loading}
-          activeOpacity={0.8}
         >
           {loading ? (
             <ActivityIndicator color="#000000" size="small" />

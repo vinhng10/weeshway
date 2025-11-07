@@ -14,13 +14,18 @@ export type WishType = {
   classes?: ProjectType[];
 };
 
+export type UserType = {
+  id: number;
+  name: string;
+  bio: string;
+  imageUrl: string;
+  videoUrls: string[];
+};
+
 export type ProjectType = {
   id: number;
   status: "private" | "public" | "released" | "cancelled" | undefined;
-  instructor: {
-    name: string;
-    imageUrl: string;
-  };
+  instructor: UserType;
   genre?: string;
   songTitle: string;
   artist: string;

@@ -70,7 +70,7 @@ export default function Project() {
       >
         {/* Song Card */}
         <Tile
-          imageSource={{ uri: project?.backgroundImage }}
+          imageSource={project?.backgroundImage}
           title={project?.songTitle ?? ""}
           subtitle={project?.artist ?? ""}
           onPress={() => {}}

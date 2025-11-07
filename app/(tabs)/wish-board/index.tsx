@@ -52,7 +52,7 @@ export default function WishBoard() {
           <View style={styles.list}>
             {wishes.map((wish) => (
               <Tile
-                imageSource={{ uri: wish.imageUrl }}
+                imageSource={wish.imageUrl}
                 title={wish.title}
                 subtitle={wish.artist}
                 metadata={`${wish.style} • ${wish.level}`}

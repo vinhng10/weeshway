@@ -4,7 +4,7 @@ import { Hero } from "@/components/hero";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
 import { projects } from "@/mocks/projects";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -25,7 +25,7 @@ export default function Class() {
     <View style={styles.container}>
       {/* Hero Section with Song Image */}
       <Hero
-        source={{ uri: classData.backgroundImage }}
+        source={classData.backgroundImage}
         title={classData.songTitle}
         subtitle={classData.artist}
         onShare={() => {}}
@@ -40,10 +40,13 @@ export default function Class() {
         {/* Song Card */}
         <View style={styles.teacherContainer}>
           <Avatar
-            source={{ uri: classData.instructor.imageUrl }}
+            source={classData.instructor.imageUrl}
             size="large"
             shape="circle"
             bordered={true}
+            onPress={() => {
+              router.push(`/(tabs)/profile/${classData.instructor.id}`);
+            }}
           />
           <ThemedText type="h3">{classData.instructor.name}</ThemedText>
         </View>

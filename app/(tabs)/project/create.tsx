@@ -64,9 +64,7 @@ export default function MakeAWish() {
 
         {/* Song Card */}
         <Tile
-          imageSource={{
-            uri: "https://i.scdn.co/image/ab67616d0000b2737d469421bb0b23b32b4851da",
-          }}
+          imageSource="https://i.scdn.co/image/ab67616d0000b2737d469421bb0b23b32b4851da"
           title="Echoes of the Night"
           subtitle="Liam Carter"
           onPress={() => {}}

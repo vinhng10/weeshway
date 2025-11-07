@@ -1,14 +1,15 @@
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { ImageBackground, ImageProps } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { ImageBackground, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface SongCardProps {
   title: string;
   artist: string;
-  imageUrl: string;
+  imageUrl: ImageProps["source"];
   onPlay?: any;
 }
 
@@ -20,13 +21,13 @@ export const SongCard: React.FunctionComponent<SongCardProps> = ({
 }) => {
   return (
     <ImageBackground
-      source={{ uri: imageUrl }}
+      source={imageUrl}
       style={styles.background}
       imageStyle={styles.backgroundImage}
     >
       <LinearGradient
         style={styles.overlay}
-        colors={["rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 0.8)"]}
+        colors={["rgba(255, 255, 255, 0.1)", "rgba(0, 0, 0, 0.9)"]}
         start={{ x: 0, y: 0.3 }}
         end={{ x: 0, y: 1 }}
       >

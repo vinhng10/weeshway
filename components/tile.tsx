@@ -1,12 +1,13 @@
 import { Avatar } from "@/components/avatar";
+import { ImageProps } from "expo-image";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import React, { ReactNode } from "react";
-import { ImageSourcePropType, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ThemedText } from "./themed-text";
 
 interface TileProps {
-  imageSource: ImageSourcePropType;
+  imageSource: ImageProps["source"];
   title: string;
   subtitle?: string;
   metadata?: string;

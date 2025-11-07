@@ -1,18 +1,14 @@
 import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { ImageBackground, ImageProps } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import {
-  ImageBackground,
-  ImageSourcePropType,
-  Pressable,
-  View,
-} from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface HeroProps {
-  source: ImageSourcePropType;
+  source: ImageProps["source"];
   title: string;
   subtitle: string;
   onShare?: () => void;

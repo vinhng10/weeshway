@@ -18,14 +18,14 @@ export default function ProfileScreen() {
   // Get user data from profile or session
   const userName = profile?.full_name || profile?.username || "John Smith";
   const userDescription = profile?.bio || "I dance & talk about stuff";
-  const avatarUrl = profile?.avatar_url || "https://via.placeholder.com/120";
+  const avatarUrl = profile?.avatar_url || "https://picsum.photos/200/300";
 
   return (
     <View style={styles.container}>
       {/* Profile Header */}
       <View style={styles.header}>
         <Avatar
-          source={{ uri: avatarUrl }}
+          source={avatarUrl}
           size="large"
           shape="circle"
           bordered
