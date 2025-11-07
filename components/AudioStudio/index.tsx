@@ -12,7 +12,7 @@ import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ControlBar } from "./ControlBar";
 import { DisplayArea } from "./DisplayArea";
@@ -243,13 +243,13 @@ export default function AudioStudio({
           <Text style={styles.emptyStateSubtitle}>
             Select a project from the list to start editing audio.
           </Text>
-          <TouchableOpacity
+          <Pressable
             style={[styles.createButton, styles.emptyCreateButton]}
             onPress={() => router.replace("/(tabs)/project")}
           >
             <Ionicons name="albums" size={20} color="#ffffff" />
             <Text style={styles.createButtonText}>Back to Projects</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     );
@@ -258,13 +258,10 @@ export default function AudioStudio({
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.studioHeader}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBackToProjects}
-        >
+        <Pressable style={styles.backButton} onPress={handleBackToProjects}>
           <Ionicons name="chevron-back" size={22} color="#ffffff" />
           <Text style={styles.backButtonText}>Projects</Text>
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.studioTitle}>{project.name}</Text>
         <View style={styles.headerSpacer} />
       </View>

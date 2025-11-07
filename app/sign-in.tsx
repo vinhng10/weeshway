@@ -2,10 +2,10 @@ import { Link } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -66,7 +66,7 @@ export default function SignIn() {
           autoCorrect={false}
         />
 
-        <TouchableOpacity
+        <Pressable
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSignIn}
           disabled={loading}
@@ -77,7 +77,7 @@ export default function SignIn() {
           ) : (
             <Text style={styles.buttonText}>Sign In</Text>
           )}
-        </TouchableOpacity>
+        </Pressable>
 
         <View style={styles.linkContainer}>
           <Text style={styles.linkText}>Don't have an account? </Text>

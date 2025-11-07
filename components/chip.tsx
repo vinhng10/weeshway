@@ -20,9 +20,11 @@ export const Chip: React.FunctionComponent<ChipProps> = ({
 
   return (
     <Pressable onPress={onPress} disabled={!onPress}>
-      <View style={styles.container}>
-        <ThemedText style={styles.label}>{label}</ThemedText>
-        {icon && <IconSymbol style={styles.icon} name={icon} size={16} />}
+      <View style={[styles.container, styles.color]}>
+        <ThemedText style={[styles.color, styles.contentSize]}>
+          {label}
+        </ThemedText>
+        {icon && <IconSymbol style={styles.color} name={icon} size={16} />}
       </View>
     </Pressable>
   );
@@ -47,19 +49,13 @@ const styles = StyleSheet.create((theme) => ({
         },
       },
       type: {
-        light: {
-          backgroundColor: "#FFFFFF",
-        },
-        dark: {
-          backgroundColor: theme.colors.foreground,
-        },
-        highlight: {
-          paddingHorizontal: 0,
-        },
+        light: {},
+        dark: {},
+        highlight: {},
       },
     },
   },
-  label: {
+  contentSize: {
     variants: {
       size: {
         default: {
@@ -70,19 +66,13 @@ const styles = StyleSheet.create((theme) => ({
         },
       },
       type: {
-        light: {
-          color: "#000000",
-        },
-        dark: {
-          color: "#FFFFFF",
-        },
-        highlight: {
-          color: "#FF5154",
-        },
+        light: {},
+        dark: {},
+        highlight: {},
       },
     },
   },
-  icon: {
+  color: {
     variants: {
       size: {
         default: {},
@@ -91,12 +81,15 @@ const styles = StyleSheet.create((theme) => ({
       type: {
         light: {
           color: "#000000",
+          backgroundColor: "#FFFFFF",
         },
         dark: {
           color: "#FFFFFF",
+          backgroundColor: theme.colors.foreground,
         },
         highlight: {
-          color: "#FF5154",
+          color: theme.colors.highlight,
+          paddingHorizontal: 0,
         },
       },
     },

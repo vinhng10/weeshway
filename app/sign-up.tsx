@@ -2,10 +2,10 @@ import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -93,7 +93,7 @@ export default function CreateAccountScreen() {
           autoCorrect={false}
         />
 
-        <TouchableOpacity
+        <Pressable
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSignUp}
           disabled={loading}
@@ -104,7 +104,7 @@ export default function CreateAccountScreen() {
           ) : (
             <Text style={styles.buttonText}>Create Account</Text>
           )}
-        </TouchableOpacity>
+        </Pressable>
 
         <View style={styles.linkContainer}>
           <Text style={styles.linkText}>Already have an account? </Text>

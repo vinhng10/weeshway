@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 interface IControlBarProps {
   type: "music" | "count";
@@ -28,7 +28,7 @@ export const ControlBar: React.FC<IControlBarProps> = ({
 }) => {
   return (
     <View style={styles.controlBar}>
-      <TouchableOpacity
+      <Pressable
         style={[styles.controlButton, styles.typeToggleButton]}
         onPress={onToggleType}
       >
@@ -37,25 +37,25 @@ export const ControlBar: React.FC<IControlBarProps> = ({
           size={26}
           color={type === "music" ? "#FFD700" : "#00BFFF"}
         />
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity style={styles.controlButton} onPress={onLoadAudio}>
+      <Pressable style={styles.controlButton} onPress={onLoadAudio}>
         <Ionicons name="folder-open" size={26} color="white" />
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity style={styles.controlButton} onPress={onTogglePlayback}>
+      <Pressable style={styles.controlButton} onPress={onTogglePlayback}>
         <Ionicons name={isPlaying ? "stop" : "play"} size={26} color="white" />
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity style={styles.controlButton} onPress={onSplit}>
+      <Pressable style={styles.controlButton} onPress={onSplit}>
         <Ionicons name="cut" size={26} color="white" />
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity style={styles.controlButton} onPress={onMerge}>
+      <Pressable style={styles.controlButton} onPress={onMerge}>
         <Ionicons name="git-merge" size={26} color="white" />
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity
+      <Pressable
         style={[
           styles.controlButton,
           wakeWordEnabled && styles.controlButtonActive,
@@ -67,7 +67,7 @@ export const ControlBar: React.FC<IControlBarProps> = ({
           size={26}
           color={wakeWordEnabled ? "#4CAF50" : "white"}
         />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };

@@ -37,6 +37,11 @@ const MAPPING = {
   "music.note": "music-note",
   sharedwithyou: "share",
   heart: "favorite",
+  "bell": "notifications",
+  "wallet.pass": "account-balance-wallet",
+  "shield.fill": "security",
+  "rectangle.portrait.and.arrow.right": "logout",
+  "chevron.right": "keyboard-arrow-right",
 } as IconMapping;
 
 /**
