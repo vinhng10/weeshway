@@ -24,12 +24,7 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       {/* Profile Header */}
       <View style={styles.header}>
-        <Avatar
-          source={avatarUrl}
-          size="large"
-          shape="circle"
-          bordered
-        />
+        <Avatar source={avatarUrl} size="large" shape="circle" bordered />
         <ThemedText type="h3">{userName}</ThemedText>
         <ThemedText dimmed>{userDescription}</ThemedText>
       </View>
@@ -42,34 +37,14 @@ export default function ProfileScreen() {
         <ProfileMenuItem
           icon="person.fill"
           label="Account"
-          onPress={() => {
-            // Navigate to account settings
-            console.log("Navigate to Account");
-          }}
+          onPress={() => {}}
         />
-        <ProfileMenuItem
-          icon="bell"
-          label="Notifications"
-          onPress={() => {
-            // Navigate to notifications
-            console.log("Navigate to Notifications");
-          }}
-        />
-        <ProfileMenuItem
-          icon="wallet.pass"
-          label="Wallet"
-          onPress={() => {
-            // Navigate to wallet
-            console.log("Navigate to Wallet");
-          }}
-        />
+        <ProfileMenuItem icon="bell" label="Notifications" onPress={() => {}} />
+        <ProfileMenuItem icon="wallet.pass" label="Wallet" onPress={() => {}} />
         <ProfileMenuItem
           icon="shield.fill"
           label="Data Privacy"
-          onPress={() => {
-            // Navigate to data privacy
-            console.log("Navigate to Data Privacy");
-          }}
+          onPress={() => {}}
         />
         <ProfileMenuItem
           icon="rectangle.portrait.and.arrow.right"

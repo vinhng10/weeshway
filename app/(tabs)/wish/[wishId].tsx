@@ -55,7 +55,7 @@ export default function Wish() {
             title={wish.title}
             subtitle={wish.artist}
             metadata={`${wish.style} • ${wish.level}`}
-            onPress={() => console.log("Navigate to class")}
+            onPress={() => {}}
           />
           <View style={styles.descriptionContainer}>
             <ThemedText>{wish.description}</ThemedText>

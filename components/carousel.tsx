@@ -47,7 +47,7 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({
           parallaxScrollingOffset: 45,
           parallaxAdjacentItemScale: 0.8,
         }}
-        onSnapToItem={(index: number) => console.log("current index:", index)}
+        onSnapToItem={(index: number) => {}}
         renderItem={({ item }: { item: ProjectType }) => (
           <View style={styles.carouselItem}>
             <ClassCard
@@ -73,11 +73,11 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({
 const styles = StyleSheet.create((theme) => ({
   carousel: {
     width: "100%",
+    justifyContent: "center",
   },
   carouselItem: {
     padding: theme.gap(1),
-    justifyContent: "center",
-    alignItems: "center",
+    alignSelf: "center",
   },
   dotContainer: {
     gap: theme.gap(1),

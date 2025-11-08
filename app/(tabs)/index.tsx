@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
 import React, { useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function HomeScreen() {
@@ -39,31 +39,7 @@ export default function HomeScreen() {
     { label: "Advanced", value: "advanced" },
   ];
 
-  const handleCreate = () => {
-    if (!projectName.trim()) {
-      Alert.alert("Validation Error", "Please enter a project name");
-      return;
-    }
-
-    Alert.alert("Success", "Project created successfully!", [
-      {
-        text: "OK",
-        onPress: () => {
-          // Reset form or navigate
-          console.log("Project created:", {
-            projectName,
-            visibility,
-            style,
-            level,
-            audioFile,
-            dateTime,
-            location,
-            projectDescription,
-          });
-        },
-      },
-    ]);
-  };
+  const handleCreate = () => {};
 
   return (
     <View style={styles.container}>
