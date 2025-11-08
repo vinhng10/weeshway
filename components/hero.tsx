@@ -1,10 +1,10 @@
 import { Header } from "@/components/header";
+import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ImageBackground, ImageProps } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface HeroProps {
@@ -39,20 +39,8 @@ export const Hero: React.FunctionComponent<HeroProps> = ({
             </ThemedText>
           </View>
           <View style={styles.buttonContainer}>
-            <Pressable style={styles.button} onPress={onShare}>
-              <IconSymbol
-                name="sharedwithyou"
-                size={24}
-                color="rgba(255, 255, 255, 0.6)"
-              />
-            </Pressable>
-            <Pressable style={styles.button} onPress={onPlay}>
-              <IconSymbol
-                name="play"
-                size={36}
-                color="rgba(255, 255, 255, 0.6)"
-              />
-            </Pressable>
+            <IconButton icon="sharedwithyou" iconSize={24} onPress={onShare} />
+            <IconButton icon="play" iconSize={36} onPress={onPlay} />
           </View>
         </View>
       </LinearGradient>
@@ -91,13 +79,5 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.gap(1),
-  },
-  button: {
-    width: theme.gap(6),
-    height: theme.gap(6),
-    borderRadius: 999,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
   },
 }));

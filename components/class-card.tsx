@@ -1,6 +1,7 @@
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
+import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ProjectType } from "@/types";
@@ -95,13 +96,11 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
             <View style={styles.bookButton}>
               <Button label="Book" onPress={() => onBook(data)} />
             </View>
-            <Pressable style={styles.playButton} onPress={() => onPlay(data)}>
-              <IconSymbol
-                name="play"
-                size={36}
-                color="rgba(255, 255, 255, 0.6)"
-              />
-            </Pressable>
+            <IconButton
+              icon="play"
+              iconSize={36}
+              onPress={() => onPlay(data)}
+            />
           </View>
         </LinearGradient>
       </ImageBackground>
@@ -164,13 +163,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   bookButton: {
     flex: 1,
-  },
-  playButton: {
-    height: theme.gap(6),
-    width: theme.gap(6),
-    borderRadius: 999,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
   },
 }));
