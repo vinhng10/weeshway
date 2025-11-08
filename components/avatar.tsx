@@ -23,12 +23,7 @@ export function Avatar({
   });
   return (
     <Pressable onPress={onPress}>
-      <Image
-        source={source}
-        style={[styles.avatar, style]}
-        contentFit="cover"
-        {...rest}
-      />
+      <Image source={source} style={[styles.avatar, style]} {...rest} />
     </Pressable>
   );
 }

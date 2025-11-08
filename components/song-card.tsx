@@ -64,6 +64,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "column",
     justifyContent: "flex-end",
     alignItems: "flex-start",
+    borderRadius: theme.gap(2),
   },
   song: {
     flex: 1,

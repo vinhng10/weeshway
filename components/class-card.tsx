@@ -122,6 +122,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "column",
     justifyContent: "space-between",
     alignItems: "center",
+    borderRadius: theme.gap(2),
   },
   topContainer: {
     width: "100%",
