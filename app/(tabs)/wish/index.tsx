@@ -2,11 +2,13 @@ import { AvatarGroup } from "@/components/avatar-group";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { ChipBar, Option } from "@/components/chip-bar";
+import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { wishes } from "@/mocks/wishes";
+import { WishType } from "@/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type WishStatusOption = "all" | "available" | "granted" | "waiting";
@@ -34,6 +36,33 @@ export default function Wishes() {
     });
   }, [activeOption]);
 
+  const renderTile = (data: WishType): React.ReactElement => (
+    <Tile
+      imageSource={data.imageUrl}
+      title={data.title}
+      subtitle={data.artist}
+      metadata={`${data.style} • ${data.level}`}
+      backgroundColor={data.status}
+      rightContent={
+        data.avatars &&
+        data.avatars.length > 0 && (
+          <>
+            <AvatarGroup max={2} avatars={data.avatars} />
+            <Chip type="light" label={data.status ?? ""} />
+          </>
+        )
+      }
+      onPress={() => router.push(`/(tabs)/wish/${data.id}`)}
+    />
+  );
+
+  const sections: SectionListData<WishType>[] = [
+    {
+      data: filteredWishes,
+      render: renderTile,
+    },
+  ];
+
   return (
     <View style={styles.container}>
       <ChipBar
@@ -42,31 +71,7 @@ export default function Wishes() {
         activeOption={activeOption}
         onPress={setActiveOption}
       />
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {filteredWishes.map((wish) => (
-          <Tile
-            imageSource={wish.imageUrl}
-            title={wish.title}
-            subtitle={wish.artist}
-            metadata={`${wish.style} • ${wish.level}`}
-            backgroundColor={wish.status}
-            rightContent={
-              wish.avatars &&
-              wish.avatars.length > 0 && (
-                <>
-                  <AvatarGroup max={2} avatars={wish.avatars} />
-                  <Chip type="light" label={wish.status ?? ""} />
-                </>
-              )
-            }
-            onPress={() => router.push(`/(tabs)/wish/${wish.id}`)}
-            key={wish.id}
-          />
-        ))}
-      </ScrollView>
+      <SectionListView sections={sections} />
       <Button
         stickyBottom
         label="Make A Wish"
@@ -83,9 +88,5 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-  },
-  scrollContainer: {
-    gap: theme.gap(1),
-    padding: theme.gap(2),
   },
 }));

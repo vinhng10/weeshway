@@ -1,13 +1,14 @@
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { ChipBar, Option } from "@/components/chip-bar";
-import { ThemedText } from "@/components/themed-text";
+import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { projects } from "@/mocks/projects";
+import { ProjectType } from "@/types";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { useState } from "react";
+import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type ProjectOption = "all" | "status" | "genre" | "style" | "level";
@@ -26,25 +27,46 @@ export default function Projects() {
   const thisWeekProjects = projects.slice(0, 2);
   const otherProjects = projects.slice(2);
 
-  const filteredUpcoming = useMemo(() => {
-    if (activeOption === "all") {
-      return otherProjects;
+  const renderTile = (data: ProjectType): React.ReactElement => {
+    let icon: IconSymbolName | undefined = undefined;
+    let label = "";
+    if (data.status === "public") {
+      icon = "heart";
+      label = data.likes.toString();
     }
-
-    if (activeOption === "genre") {
-      return otherProjects.filter((project) => project.genre);
+    if (data.status === "released") {
+      icon = "person.fill";
+      label = `${data.books} | ${data.spots}`;
     }
+    return (
+      <Tile
+        imageSource={data.backgroundImage}
+        title={data.songTitle}
+        subtitle={data.artist}
+        metadata={`${data.style} • ${data.level}`}
+        rightContent={
+          <>
+            <Chip type="highlight" icon={icon} label={label} />
+            <Chip type="light" label={data.status ?? ""} />
+          </>
+        }
+        onPress={() => router.push(`/(tabs)/project/${data.id}`)}
+      />
+    );
+  };
 
-    if (activeOption === "style") {
-      return otherProjects.filter((project) => project.style);
-    }
-
-    if (activeOption === "level") {
-      return otherProjects.filter((project) => project.level);
-    }
-
-    return otherProjects;
-  }, [activeOption]);
+  const sections: SectionListData<ProjectType>[] = [
+    {
+      title: "This Week",
+      data: thisWeekProjects,
+      render: renderTile,
+    },
+    {
+      title: "Projects",
+      data: otherProjects,
+      render: renderTile,
+    },
+  ];
 
   return (
     <View style={styles.container}>
@@ -54,78 +76,7 @@ export default function Projects() {
         activeOption={activeOption}
         onPress={setActiveOption}
       />
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.section}>
-          <ThemedText type="h4">This Week</ThemedText>
-          <View style={styles.list}>
-            {thisWeekProjects.map((project) => {
-              let icon: IconSymbolName | undefined = undefined;
-              let label = "";
-              if (project.status === "public") {
-                icon = "heart";
-                label = project.likes.toString();
-              }
-              if (project.status === "released") {
-                icon = "person.fill";
-                label = `${project.books} | ${project.spots}`;
-              }
-              return (
-                <Tile
-                  key={project.id}
-                  imageSource={project.backgroundImage}
-                  title={project.songTitle}
-                  subtitle={project.artist}
-                  metadata={`${project.style} • ${project.level}`}
-                  rightContent={
-                    <>
-                      <Chip type="highlight" icon={icon} label={label} />
-                      <Chip type="light" label={project.status ?? ""} />
-                    </>
-                  }
-                  onPress={() => router.push(`/(tabs)/project/${project.id}`)}
-                />
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <ThemedText type="h4">Projects</ThemedText>
-          <View style={styles.list}>
-            {otherProjects.map((project) => {
-              let icon: IconSymbolName | undefined = undefined;
-              let label = "";
-              if (project.status === "public") {
-                icon = "heart";
-                label = project.likes.toString();
-              }
-              if (project.status === "released") {
-                icon = "person.fill";
-                label = `${project.books} | ${project.spots}`;
-              }
-              return (
-                <Tile
-                  key={project.id}
-                  imageSource={project.backgroundImage}
-                  title={project.songTitle}
-                  subtitle={project.artist}
-                  metadata={`${project.style} • ${project.level}`}
-                  rightContent={
-                    <>
-                      <Chip type="highlight" icon={icon} label={label} />
-                      <Chip type="light" label={project.status ?? ""} />
-                    </>
-                  }
-                  onPress={() => router.push(`/(tabs)/project/${project.id}`)}
-                />
-              );
-            })}
-          </View>
-        </View>
-      </ScrollView>
+      <SectionListView sections={sections} />
 
       <Button
         stickyBottom
@@ -141,15 +92,5 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-  },
-  scrollContainer: {
-    gap: theme.gap(2),
-    padding: theme.gap(2),
-  },
-  section: {
-    gap: theme.gap(1),
-  },
-  list: {
-    gap: theme.gap(1),
   },
 }));

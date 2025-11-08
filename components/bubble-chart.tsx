@@ -11,6 +11,7 @@ import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
   SharedValue,
+  useAnimatedReaction,
   useDerivedValue,
   useFrameCallback,
   useSharedValue,
@@ -32,8 +33,6 @@ export interface BubbleData {
 
 interface BubbleChartProps {
   data: BubbleData[];
-  width: number;
-  height: number;
 }
 
 interface BubbleProps {
@@ -109,13 +108,14 @@ function Bubble({ bubble, offsetX, offsetY, scale }: BubbleProps) {
   );
 }
 
-export default function BubbleChart({ data, width, height }: BubbleChartProps) {
+export function BubbleChart({ data }: BubbleChartProps) {
+  const size = useSharedValue({ width: 0, height: 0 });
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
-  const offsetX = useSharedValue(width / 2);
-  const offsetY = useSharedValue(height / 2);
-  const savedOffsetX = useSharedValue(width / 2);
-  const savedOffsetY = useSharedValue(height / 2);
+  const offsetX = useSharedValue(0);
+  const offsetY = useSharedValue(0);
+  const savedOffsetX = useSharedValue(0);
+  const savedOffsetY = useSharedValue(0);
 
   // Create bubble shared values ONCE
   const bubblesRef = useRef<any[] | null>(null);
@@ -141,6 +141,19 @@ export default function BubbleChart({ data, width, height }: BubbleChartProps) {
     }));
   }
   const bubbles = bubblesRef.current;
+
+  // Initialize offsets when size changes
+  useAnimatedReaction(
+    () => size.value,
+    (currentSize) => {
+      if (currentSize.width > 0 && currentSize.height > 0) {
+        if (offsetX.value === 0 && offsetY.value === 0) {
+          offsetX.value = currentSize.width / 2;
+          offsetY.value = currentSize.height / 2;
+        }
+      }
+    }
+  );
 
   // Pan background (unchanged)
   const pan = Gesture.Pan()
@@ -263,8 +276,8 @@ export default function BubbleChart({ data, width, height }: BubbleChartProps) {
 
   return (
     <GestureDetector gesture={composed}>
-      <View style={[styles.container, { width, height }]}>
-        <Canvas style={{ flex: 1 }}>
+      <View style={[styles.container]}>
+        <Canvas style={{ flex: 1 }} onSize={size}>
           {bubbles.map((bubble, i) => (
             <Bubble
               key={i}
@@ -285,5 +298,8 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.foreground,
     borderRadius: theme.gap(2),
     overflow: "hidden",
+    alignSelf: "center",
+    aspectRatio: 1,
+    width: "100%",
   },
 }));

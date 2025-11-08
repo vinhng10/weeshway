@@ -1,0 +1,40 @@
+import { ThemedText } from "@/components/themed-text";
+import React from "react";
+import { SectionList, SectionListData, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+
+// Extend SectionListData to include a render function
+
+interface SectionListViewProps<ItemT> {
+  sections: ReadonlyArray<SectionListData<ItemT>>;
+}
+
+export function SectionListView<ItemT>({
+  sections,
+}: SectionListViewProps<ItemT>) {
+  return (
+    <SectionList
+      sections={sections}
+      keyExtractor={(item, i) => `${item}-${i}`}
+      renderItem={({ item, section }) => {
+        return section.render(item);
+      }}
+      renderSectionHeader={({ section: { title } }) =>
+        title && <ThemedText type="h4">{title}</ThemedText>
+      }
+      renderSectionFooter={() => <View style={styles.footer} />}
+      contentContainerStyle={styles.scrollContainer}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+}
+
+const styles = StyleSheet.create((theme) => ({
+  scrollContainer: {
+    gap: theme.gap(1),
+    padding: theme.gap(2),
+  },
+  footer: {
+    height: theme.gap(1),
+  },
+}));
