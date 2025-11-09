@@ -162,7 +162,7 @@ export default function Project() {
       <Button
         stickyBottom
         label="Studio"
-        onPress={() => router.push(`/(tabs)/project/studio`)}
+        onPress={() => router.push(`/(tabs)/project/${projectId}/studio`)}
       />
     </View>
   );
