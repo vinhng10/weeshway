@@ -1,38 +1,61 @@
 import { Pressable, View, type ViewProps } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 import { IconSymbol, type IconSymbolName } from "./ui/icon-symbol";
 
-export type IconButtonProps = {
-  icon: IconSymbolName;
-  onPress?: any;
-  iconSize?: number;
-  iconColor?: string;
-} & ViewProps;
+export type IconButtonProps = UnistylesVariants<typeof styles> &
+  ViewProps & {
+    icon: IconSymbolName;
+    onPress?: any;
+    iconSize?: number;
+  };
 
 export const IconButton: React.FunctionComponent<IconButtonProps> = ({
   icon,
   onPress,
   iconSize = 24,
-  iconColor = "rgba(255, 255, 255, 0.6)",
   style,
+  type,
   ...rest
 }) => {
+  styles.useVariants({ type });
+
   return (
     <Pressable onPress={onPress}>
-      <View style={[styles.button, style]} {...rest}>
-        <IconSymbol name={icon} size={iconSize} color={iconColor} />
+      <View style={[styles.container, style]} {...rest}>
+        <IconSymbol name={icon} size={iconSize} style={styles.color} />
       </View>
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create((theme) => ({
-  button: {
+  container: {
     width: theme.gap(6),
     height: theme.gap(6),
     borderRadius: 999,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
+    variants: {
+      type: {
+        default: {
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+        },
+        transparent: {
+          backgroundColor: "transparent",
+        },
+      },
+    },
+  },
+  color: {
+    variants: {
+      type: {
+        default: {
+          color: "rgba(255, 255, 255, 0.6)",
+        },
+        transparent: {
+          color: theme.colors.typography,
+        },
+      },
+    },
   },
 }));

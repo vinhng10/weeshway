@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
 import { projects } from "@/mocks/projects";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -159,7 +159,11 @@ export default function Project() {
       </ScrollView>
 
       {/* Create Button */}
-      <Button stickyBottom label="Studio" onPress={() => {}} />
+      <Button
+        stickyBottom
+        label="Studio"
+        onPress={() => router.push(`/(tabs)/project/studio`)}
+      />
     </View>
   );
 }

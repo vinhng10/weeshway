@@ -46,7 +46,7 @@ export default function TabLayout() {
           title: "Classes",
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="folder.fill" color={color} />
+            <IconSymbol size={28} name="circle.grid.2x2.fill" color={color} />
           ),
         }}
       />
@@ -66,7 +66,7 @@ export default function TabLayout() {
           title: "Projects",
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="folder.fill" color={color} />
+            <IconSymbol size={28} name="circle.grid.2x2.fill" color={color} />
           ),
         }}
       />
