@@ -1,5 +1,5 @@
 import { Chip } from "@/components/chip";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 
 export interface Option<T extends string = string> {
@@ -24,34 +24,34 @@ export const ChipBar = <T extends string = string>({
   styles.useVariants({ padding });
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        horizontal
-        contentContainerStyle={styles.scrollContainer}
-        showsHorizontalScrollIndicator={false}
-      >
-        {options.map((option) => {
-          const isActive = option.id === activeOption;
+    <ScrollView
+      horizontal
+      style={styles.scrollView}
+      contentContainerStyle={styles.scrollContainer}
+      showsHorizontalScrollIndicator={false}
+    >
+      {options.map((option) => {
+        const isActive = option.id === activeOption;
 
-          return (
-            <Chip
-              key={option.id}
-              size={"large"}
-              type={isActive ? "light" : "dark"}
-              label={option.label}
-              icon={option.hasDropdown ? "chevron.down" : undefined}
-              onPress={() => onPress?.(option.id)}
-            />
-          );
-        })}
-      </ScrollView>
-    </View>
+        return (
+          <Chip
+            key={option.id}
+            size={"large"}
+            type={isActive ? "light" : "dark"}
+            label={option.label}
+            icon={option.hasDropdown ? "chevron.down" : undefined}
+            onPress={() => onPress?.(option.id)}
+          />
+        );
+      })}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create((theme) => ({
-  container: {
-    width: "100%",
+  scrollView: {
+    flexGrow: 0,
+    flexShrink: 0,
   },
   scrollContainer: {
     gap: theme.gap(1),

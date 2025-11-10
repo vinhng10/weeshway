@@ -32,7 +32,7 @@ export default function WishBoard() {
       title={data.title}
       subtitle={data.artist}
       metadata={`${data.style} • ${data.level}`}
-      onPress={() => router.push(`/(tabs)/wish-board/${data.id}`)}
+      onPress={() => router.push(`/(teacher)/wish-board/${data.id}`)}
     />
   );
 

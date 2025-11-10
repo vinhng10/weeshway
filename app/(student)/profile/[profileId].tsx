@@ -15,7 +15,7 @@ import { StyleSheet } from "react-native-unistyles";
 export default function Profile() {
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
   const profile = users.find((p) => p.id === Number(profileId));
-  const classes = projects.filter((p) => p.instructor.id === Number(profileId));
+  const classes = projects.filter((p) => p.teacher.id === Number(profileId));
 
   const renderProfile = (data: UserType): React.ReactElement => (
     <View style={styles.header}>
@@ -50,14 +50,14 @@ export default function Profile() {
       metadata={`${data.style} • ${data.level}`}
       rightContent={
         <>
-          <Avatar source={data.instructor.imageUrl} shape="circle" bordered />
+          <Avatar source={data.teacher.imageUrl} shape="circle" bordered />
           <Chip
             type="highlight"
             label={`${data.spots - data.books} spots left`}
           />
         </>
       }
-      onPress={() => router.push(`/(tabs)/class/${data.id}`)}
+      onPress={() => router.push(`/(student)/class/${data.id}`)}
     />
   );
 

@@ -23,7 +23,7 @@ const CLASS_FILTERS: Option<ClassOption>[] = [
 export default function Classes() {
   const [activeOption, setActiveOption] = useState<ClassOption>("all");
 
-  const navigateToClass = (id: number) => router.push(`/(tabs)/class/${id}`);
+  const navigateToClass = (id: number) => router.push(`/(student)/class/${id}`);
 
   const renderCarousel = (data: ProjectType[]): React.ReactElement => (
     <Carousel
@@ -42,7 +42,7 @@ export default function Classes() {
       metadata={`${data.style} • ${data.level}`}
       rightContent={
         <>
-          <Avatar source={data.instructor.imageUrl} shape="circle" bordered />
+          <Avatar source={data.teacher.imageUrl} shape="circle" bordered />
           <Chip
             type="highlight"
             label={`${data.spots - data.books} spots left`}

@@ -1,14 +1,19 @@
 import { useAuth } from "@/app/ctx";
 import { Avatar } from "@/components/avatar";
+import { ChipBar } from "@/components/chip-bar";
 import { ProfileMenuItem } from "@/components/profile-menu-item";
 import { ThemedText } from "@/components/themed-text";
+import { useRole } from "@/hooks/useRole";
 import { useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function ProfileScreen() {
+export default function Profile() {
   const { profile, session, signOut } = useAuth();
   const router = useRouter();
+
+  const role = useRole((state) => state.role);
+  const setRole = useRole((state) => state.setRole);
 
   const handleSignOut = async () => {
     await signOut();
@@ -20,6 +25,11 @@ export default function ProfileScreen() {
   const userDescription = profile?.bio || "I dance & talk about stuff";
   const avatarUrl = profile?.avatar_url || "https://picsum.photos/200/300";
 
+  const roleOptions = [
+    { id: "student", label: "Student" },
+    { id: "teacher", label: "Teacher" },
+  ];
+
   return (
     <View style={styles.container}>
       {/* Profile Header */}
@@ -27,6 +37,12 @@ export default function ProfileScreen() {
         <Avatar source={avatarUrl} size="large" shape="circle" bordered />
         <ThemedText type="h3">{userName}</ThemedText>
         <ThemedText dimmed>{userDescription}</ThemedText>
+        <ChipBar
+          padding
+          options={roleOptions}
+          activeOption={role}
+          onPress={setRole}
+        />
       </View>
 
       {/* Menu Items */}

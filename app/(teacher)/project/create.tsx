@@ -3,22 +3,24 @@ import { ChipBar } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function HomeScreen() {
-  const [searchQuery, setSearchQuery] = useState("Levitating");
+export default function MakeAWish() {
+  // Initialize state with project data or defaults
+  const [searchQuery, setSearchQuery] = useState("");
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [visibility, setVisibility] = useState("private");
-  const [style, setStyle] = useState("hiphop");
-  const [level, setLevel] = useState("intermediate");
-  const [price, setPrice] = useState("$19.99");
-  const [spots, setSpots] = useState("25");
+  const [style, setStyle] = useState("Hip Hop");
+  const [level, setLevel] = useState("Beginner");
+  const [price, setPrice] = useState("$0.00");
+  const [spots, setSpots] = useState("0");
   const [audioFile, setAudioFile] = useState<string | undefined>();
-  const [dateTime, setDateTime] = useState("July 25, 19:00 - 20:30");
-  const [location, setLocation] = useState("Dance Studio Pro");
+  const [dateTime, setDateTime] = useState("");
+  const [location, setLocation] = useState("");
 
   const visibilityOptions = [
     { id: "private", label: "Private" },
@@ -27,24 +29,26 @@ export default function HomeScreen() {
   ];
 
   const styleOptions = [
-    { label: "Hip Hop", value: "hiphop" },
-    { label: "Ballet", value: "ballet" },
-    { label: "Contemporary", value: "contemporary" },
-    { label: "Jazz", value: "jazz" },
+    { label: "Hip Hop", value: "Hip Hop" },
+    { label: "Urban", value: "Urban" },
+    { label: "House", value: "House" },
+    { label: "Pop", value: "Pop" },
+    { label: "Ballet", value: "Ballet" },
+    { label: "Contemporary", value: "Contemporary" },
+    { label: "Jazz", value: "Jazz" },
   ];
 
   const levelOptions = [
-    { label: "Beginner", value: "beginner" },
-    { label: "Intermediate", value: "intermediate" },
-    { label: "Advanced", value: "advanced" },
+    { label: "Beginner", value: "Beginner" },
+    { label: "Intermediate", value: "Intermediate" },
+    { label: "Advanced", value: "Advanced" },
+    { label: "Open Level", value: "Open Level" },
   ];
-
-  const handleCreate = () => {};
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Header title="Create Project" />
+      <Header title="Project" />
 
       {/* Scrollable Content */}
       <ScrollView
@@ -149,7 +153,13 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Create Button */}
-      <Button stickyBottom label="Create" onPress={handleCreate} />
+      <Button
+        label="Create"
+        onPress={() => {
+          router.push("/(teacher)/project");
+        }}
+        stickyBottom
+      />
     </View>
   );
 }

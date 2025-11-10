@@ -40,15 +40,15 @@ export default function Class() {
         {/* Song Card */}
         <View style={styles.teacherContainer}>
           <Avatar
-            source={classData.instructor.imageUrl}
+            source={classData.teacher.imageUrl}
             size="large"
             shape="circle"
             bordered={true}
             onPress={() => {
-              router.push(`/(tabs)/profile/${classData.instructor.id}`);
+              router.push(`/(student)/profile/${classData.teacher.id}`);
             }}
           />
-          <ThemedText type="h3">{classData.instructor.name}</ThemedText>
+          <ThemedText type="h3">{classData.teacher.name}</ThemedText>
         </View>
 
         {/* Style and Level Selects */}

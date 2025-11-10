@@ -31,7 +31,7 @@ export type ItemType = {
 export type ProjectType = {
   id: number;
   status: "private" | "public" | "released" | "cancelled" | undefined;
-  instructor: UserType;
+  teacher: UserType;
   genre?: string;
   songTitle: string;
   artist: string;

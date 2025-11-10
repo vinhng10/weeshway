@@ -50,7 +50,7 @@ export default function Projects() {
             <Chip type="light" label={data.status ?? ""} />
           </>
         }
-        onPress={() => router.push(`/(tabs)/project/${data.id}`)}
+        onPress={() => router.push(`/(teacher)/project/${data.id}`)}
       />
     );
   };
@@ -81,7 +81,7 @@ export default function Projects() {
       <Button
         stickyBottom
         label="Create Project"
-        onPress={() => router.push("/(tabs)/project/create")}
+        onPress={() => router.push("/(teacher)/project/create")}
       />
     </View>
   );

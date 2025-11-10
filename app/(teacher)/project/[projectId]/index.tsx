@@ -3,24 +3,37 @@ import { ChipBar } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { projects } from "@/mocks/projects";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function MakeAWish() {
+export default function Project() {
+  const { projectId } = useLocalSearchParams<{ projectId: string }>();
+  const project = useMemo(
+    () => projects.find((p) => p.id === Number(projectId)),
+    [projectId]
+  );
+
   // Initialize state with project data or defaults
-  const [searchQuery, setSearchQuery] = useState("");
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [visibility, setVisibility] = useState("private");
-  const [style, setStyle] = useState("Hip Hop");
-  const [level, setLevel] = useState("Beginner");
-  const [price, setPrice] = useState("$0.00");
-  const [spots, setSpots] = useState("0");
+  const [searchQuery, setSearchQuery] = useState(project?.songTitle || "");
+  const [projectName, setProjectName] = useState(project?.songTitle || "");
+  const [projectDescription, setProjectDescription] = useState(
+    project?.description || ""
+  );
+  const [visibility, setVisibility] = useState(project?.status ?? "private");
+  const [style, setStyle] = useState(project?.style ?? "hiphop");
+  const [level, setLevel] = useState(project?.level ?? "intermediate");
+  const [price, setPrice] = useState(
+    project?.price ? `$${project.price.toFixed(2)}` : "$0.00"
+  );
+  const [spots, setSpots] = useState(project?.spots.toString() || "0");
   const [audioFile, setAudioFile] = useState<string | undefined>();
-  const [dateTime, setDateTime] = useState("");
-  const [location, setLocation] = useState("");
+  const [dateTime, setDateTime] = useState(
+    project ? `${project.date}, ${project.time}` : ""
+  );
+  const [location, setLocation] = useState(project?.studio ?? "");
 
   const visibilityOptions = [
     { id: "private", label: "Private" },
@@ -55,18 +68,11 @@ export default function MakeAWish() {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Search Input */}
-        <TextInput
-          placeholder="Search song..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-
         {/* Song Card */}
         <Tile
-          imageSource="https://i.scdn.co/image/ab67616d0000b2737d469421bb0b23b32b4851da"
-          title="Echoes of the Night"
-          subtitle="Liam Carter"
+          imageSource={project?.backgroundImage}
+          title={project?.songTitle ?? ""}
+          subtitle={project?.artist ?? ""}
           onPress={() => {}}
         />
 
@@ -154,11 +160,9 @@ export default function MakeAWish() {
 
       {/* Create Button */}
       <Button
-        label="Create"
-        onPress={() => {
-          router.push("/(tabs)/project");
-        }}
         stickyBottom
+        label="Studio"
+        onPress={() => router.push(`/(teacher)/project/${projectId}/studio`)}
       />
     </View>
   );

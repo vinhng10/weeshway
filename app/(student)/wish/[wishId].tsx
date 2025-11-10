@@ -43,7 +43,7 @@ export default function Wish() {
               onBook={() => {}}
               onPlay={() => {}}
               onPress={(data: ProjectType) =>
-                router.push(`/(tabs)/class/${data.id}`)
+                router.push(`/(student)/class/${data.id}`)
               }
             />
           </View>

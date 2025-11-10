@@ -40,12 +40,12 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
           {/* Top Container */}
           <View style={styles.topContainer}>
             <Avatar
-              source={data.instructor.imageUrl}
+              source={data.teacher.imageUrl}
               size="large"
               shape="circle"
               bordered={true}
             />
-            <ThemedText type="h3">{data.instructor.name}</ThemedText>
+            <ThemedText type="h3">{data.teacher.name}</ThemedText>
             <View style={styles.chipContainer}>
               <Chip label={data.style} type="light" />
               <Chip label={data.level} type="light" />
