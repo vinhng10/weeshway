@@ -48,12 +48,12 @@ const styles = StyleSheet.create((theme) => ({
       },
       size: {
         default: {
-          width: 40,
-          height: 40,
+          width: theme.gap(5),
+          height: theme.gap(5),
         },
         large: {
-          width: 80,
-          height: 80,
+          width: theme.gap(10),
+          height: theme.gap(10),
         },
       },
     },

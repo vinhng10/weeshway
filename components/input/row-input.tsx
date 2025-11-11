@@ -29,7 +29,7 @@ export const RowInput: React.FunctionComponent<RowInputProps> = ({
         <IconSymbol style={styles.icon} name={icon} size={24} />
       </View>
       <View style={styles.content}>
-        <ThemedText dimmed>{label}</ThemedText>
+        <ThemedText color="dimmed">{label}</ThemedText>
         <ThemedText type="h5">{value}</ThemedText>
       </View>
     </Pressable>

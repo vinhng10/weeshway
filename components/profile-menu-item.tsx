@@ -1,30 +1,32 @@
-import { ThemedText } from "@/components/themed-text";
+import { styles as textStyles, ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Pressable } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 
-interface ProfileMenuItemProps extends UnistylesVariants<typeof styles> {
+type ProfileMenuItemProps = {
   icon: string;
   label: string;
   onPress?: () => void;
   showChevron?: boolean;
-}
+} & UnistylesVariants<typeof textStyles>;
 
 export function ProfileMenuItem({
   icon,
   label,
   onPress,
-  color,
   showChevron = true,
+  color,
 }: ProfileMenuItemProps) {
-  styles.useVariants({ color });
+  textStyles.useVariants({
+    color,
+  });
 
   return (
     <Pressable style={styles.container} onPress={onPress}>
-      <IconSymbol style={styles.color} name={icon as any} size={24} />
-      <ThemedText style={[styles.color, styles.label]}>{label}</ThemedText>
+      <IconSymbol style={textStyles.color} name={icon as any} size={24} />
+      <ThemedText style={[textStyles.color, styles.label]}>{label}</ThemedText>
       {showChevron && (
-        <IconSymbol style={styles.color} name="chevron.right" size={20} />
+        <IconSymbol style={textStyles.color} name="chevron.right" size={20} />
       )}
     </Pressable>
   );
@@ -39,17 +41,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   label: {
     flex: 1,
-  },
-  color: {
-    variants: {
-      color: {
-        default: {
-          color: theme.colors.typography,
-        },
-        highlight: {
-          color: theme.colors.highlight,
-        },
-      },
-    },
   },
 }));

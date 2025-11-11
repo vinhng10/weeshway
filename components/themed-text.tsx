@@ -7,30 +7,51 @@ export function ThemedText({
   style,
   type,
   bold,
-  dimmed,
+  color,
   ...rest
 }: ThemedTextProps) {
   styles.useVariants({
     type,
     bold,
-    dimmed,
+    color,
   });
   return (
-    <Text
-      style={[styles.textFamily, styles.textColor, styles.textType, style]}
-      {...rest}
-    />
+    <Text style={[styles.family, styles.color, styles.type, style]} {...rest} />
   );
 }
 
 export const styles = StyleSheet.create((theme) => ({
-  textFamily: {
+  family: {
     fontFamily: theme.fontFamily,
   },
-  textColor: {
+  color: {
     color: theme.colors.typography,
+    variants: {
+      color: {
+        default: {
+          color: theme.colors.typography,
+        },
+        dimmed: {
+          color: theme.colors.dimmed,
+        },
+        highlight: {
+          color: theme.colors.highlight,
+        },
+      },
+      type: {
+        default: {},
+        h1: {},
+        h2: {},
+        h3: {},
+        h4: {},
+        h5: {},
+      },
+      bold: {
+        true: {},
+      },
+    },
   },
-  textType: {
+  type: {
     variants: {
       type: {
         default: {
@@ -63,10 +84,10 @@ export const styles = StyleSheet.create((theme) => ({
           fontWeight: 900,
         },
       },
-      dimmed: {
-        true: {
-          color: theme.colors.dimmed,
-        },
+      color: {
+        default: {},
+        dimmed: {},
+        highlight: {},
       },
     },
   },

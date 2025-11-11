@@ -36,7 +36,7 @@ export default function Profile() {
       <View style={styles.header}>
         <Avatar source={avatarUrl} size="large" shape="circle" bordered />
         <ThemedText type="h3">{userName}</ThemedText>
-        <ThemedText dimmed>{userDescription}</ThemedText>
+        <ThemedText color="dimmed">{userDescription}</ThemedText>
         <ChipBar
           padding
           options={roleOptions}

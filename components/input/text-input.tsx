@@ -12,7 +12,7 @@ export type TextInputProps = RNTextInputProps &
 export function TextInput({
   type,
   bold,
-  dimmed,
+  color,
   multiline,
   style,
   ...rest
@@ -20,13 +20,13 @@ export function TextInput({
   styles.useVariants({
     type,
     bold,
-    dimmed,
+    color,
     multiline,
   });
   textStyles.useVariants({
     type,
     bold,
-    dimmed,
+    color,
   });
 
   return (
@@ -34,12 +34,11 @@ export function TextInput({
       multiline={multiline}
       style={[
         styles.container,
-        textStyles.textFamily,
-        textStyles.textColor,
-        textStyles.textType,
+        textStyles.family,
+        textStyles.color,
+        textStyles.type,
         style,
       ]}
-      placeholderTextColor={dimmed ? "#999999" : "#666666"}
       {...rest}
     />
   );
@@ -63,8 +62,10 @@ const styles = StyleSheet.create((theme) => ({
       bold: {
         true: {},
       },
-      dimmed: {
-        true: {},
+      color: {
+        default: {},
+        dimmed: {},
+        highlight: {},
       },
       multiline: {
         true: {

@@ -24,7 +24,7 @@ export default function Profile() {
         {data.name}
       </ThemedText>
       <ThemedText
-        dimmed
+        color="dimmed"
         numberOfLines={2}
         ellipsizeMode="tail"
         style={styles.text}

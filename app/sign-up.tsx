@@ -1,15 +1,10 @@
+import { Button } from "@/components/button";
+import { TextInput } from "@/components/input";
+import { ThemedText } from "@/components/themed-text";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 import { useAuth } from "./ctx";
 
 export default function CreateAccountScreen() {
@@ -22,6 +17,8 @@ export default function CreateAccountScreen() {
   const router = useRouter();
 
   const handleSignUp = async () => {
+    if (loading) return;
+
     if (!email || !password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
@@ -42,7 +39,7 @@ export default function CreateAccountScreen() {
 
     try {
       await signUp(email, password);
-      router.replace("../(tabs)");
+      router.replace("/sign-in");
     } catch (error: any) {
       setError(error.message || "Failed to create account");
     } finally {
@@ -51,16 +48,24 @@ export default function CreateAccountScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Create Account</Text>
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <ThemedText type="h1" style={styles.title}>
+          Sign Up
+        </ThemedText>
 
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {error ? (
+          <ThemedText color="highlight" style={styles.error}>
+            {error}
+          </ThemedText>
+        ) : null}
 
         <TextInput
-          style={styles.input}
+          type="h5"
           placeholder="Email"
-          placeholderTextColor="#b5b5b5"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -70,9 +75,8 @@ export default function CreateAccountScreen() {
         />
 
         <TextInput
-          style={styles.input}
+          type="h5"
           placeholder="Password"
-          placeholderTextColor="#b5b5b5"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -82,9 +86,8 @@ export default function CreateAccountScreen() {
         />
 
         <TextInput
-          style={styles.input}
+          type="h5"
           placeholder="Confirm Password"
-          placeholderTextColor="#b5b5b5"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
@@ -93,105 +96,63 @@ export default function CreateAccountScreen() {
           autoCorrect={false}
         />
 
-        <Pressable
-          style={[styles.button, loading && styles.buttonDisabled]}
+        <Button
+          label={loading ? "Creating Account..." : "Create Account"}
           onPress={handleSignUp}
+          style={[styles.button]}
           disabled={loading}
-          activeOpacity={0.8}
-        >
-          {loading ? (
-            <ActivityIndicator color="#000000" size="small" />
-          ) : (
-            <Text style={styles.buttonText}>Create Account</Text>
-          )}
-        </Pressable>
+        />
 
-        <View style={styles.linkContainer}>
-          <Text style={styles.linkText}>Already have an account? </Text>
-          <Link href="../sign-in" style={styles.link}>
-            <Text style={styles.linkTextBold}>Sign In</Text>
+        <View style={styles.signin}>
+          <ThemedText type="h5" color="dimmed">
+            Already have an account?
+          </ThemedText>
+          <Link href="/sign-in">
+            <ThemedText type="h5" color="highlight">
+              Sign In
+            </ThemedText>
           </Link>
         </View>
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    backgroundColor: "#000000",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
+    backgroundColor: theme.colors.background,
   },
-  formContainer: {
-    width: "100%",
-    maxWidth: 400,
-    backgroundColor: "#1b1b1b",
-    borderRadius: 16,
-    padding: 32,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: theme.gap(2),
+    gap: theme.gap(2),
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#ffffff",
     textAlign: "center",
-    marginBottom: 32,
+    padding: theme.gap(4),
   },
   input: {
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: "#ffffff",
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    marginBottom: theme.gap(2),
   },
   button: {
-    backgroundColor: "#FFD700",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
+    marginTop: theme.gap(2),
   },
-  buttonDisabled: {
-    backgroundColor: "rgba(255, 215, 0, 0.5)",
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000000",
-  },
-  linkContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
-  },
-  linkText: {
-    fontSize: 16,
-    color: "#b5b5b5",
-  },
-  link: {
-    fontSize: 16,
-  },
-  linkTextBold: {
-    color: "#FFD700",
-    fontWeight: "bold",
-  },
-  errorText: {
-    color: "#FF6B6B",
-    fontSize: 14,
+  error: {
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: theme.gap(2),
     backgroundColor: "rgba(255, 107, 107, 0.1)",
-    padding: 12,
-    borderRadius: 8,
+    padding: theme.gap(2),
+    borderRadius: theme.gap(2),
     borderWidth: 1,
     borderColor: "rgba(255, 107, 107, 0.2)",
   },
-});
+  signin: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: theme.gap(4),
+    gap: theme.gap(1),
+  },
+}));

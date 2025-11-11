@@ -51,7 +51,7 @@ export const Tile: React.FunctionComponent<TileProps> = ({
               {title}
             </ThemedText>
             {subtitle && (
-              <ThemedText dimmed numberOfLines={1} ellipsizeMode="tail">
+              <ThemedText color="dimmed" numberOfLines={1} ellipsizeMode="tail">
                 {subtitle}
               </ThemedText>
             )}

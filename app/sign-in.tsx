@@ -1,15 +1,10 @@
+import { Button } from "@/components/button";
+import { TextInput } from "@/components/input";
+import { ThemedText } from "@/components/themed-text";
 import { Link } from "expo-router";
 import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 import { useAuth } from "./ctx";
 
 export default function SignIn() {
@@ -20,6 +15,8 @@ export default function SignIn() {
   const [error, setError] = useState("");
 
   const handleSignIn = async () => {
+    if (loading) return;
+
     if (!email || !password) {
       setError("Please enter both email and password");
       return;
@@ -38,16 +35,24 @@ export default function SignIn() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Sign In</Text>
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <ThemedText type="h1" style={styles.title}>
+          Sign In
+        </ThemedText>
 
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {error ? (
+          <ThemedText color="highlight" style={styles.error}>
+            {error}
+          </ThemedText>
+        ) : null}
 
         <TextInput
-          style={styles.input}
+          type="h5"
           placeholder="Email"
-          placeholderTextColor="#b5b5b5"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -56,9 +61,8 @@ export default function SignIn() {
         />
 
         <TextInput
-          style={styles.input}
+          type="h5"
           placeholder="Password"
-          placeholderTextColor="#b5b5b5"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -66,104 +70,63 @@ export default function SignIn() {
           autoCorrect={false}
         />
 
-        <Pressable
-          style={[styles.button, loading && styles.buttonDisabled]}
+        <Button
+          label={loading ? "Signing In..." : "Sign In"}
           onPress={handleSignIn}
+          style={[styles.button]}
           disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#000000" size="small" />
-          ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
-          )}
-        </Pressable>
+        />
 
-        <View style={styles.linkContainer}>
-          <Text style={styles.linkText}>Don't have an account? </Text>
-          <Link href="../sign-up" style={styles.link}>
-            <Text style={styles.linkTextBold}>Sign Up</Text>
+        <View style={styles.signup}>
+          <ThemedText type="h5" color="dimmed">
+            Don't have an account?
+          </ThemedText>
+          <Link href="/sign-up">
+            <ThemedText type="h5" color="highlight">
+              Sign Up
+            </ThemedText>
           </Link>
         </View>
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    backgroundColor: "#000000",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
+    backgroundColor: theme.colors.background,
   },
-  formContainer: {
-    width: "100%",
-    maxWidth: 400,
-    backgroundColor: "#1b1b1b",
-    borderRadius: 16,
-    padding: 32,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: theme.gap(2),
+    gap: theme.gap(2),
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#ffffff",
     textAlign: "center",
-    marginBottom: 32,
+    padding: theme.gap(4),
   },
   input: {
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: "#ffffff",
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    marginBottom: theme.gap(2),
   },
   button: {
-    backgroundColor: "#FFD700",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
+    marginTop: theme.gap(2),
   },
-  buttonDisabled: {
-    backgroundColor: "rgba(255, 215, 0, 0.5)",
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000000",
-  },
-  errorText: {
-    color: "#FF6B6B",
-    fontSize: 14,
+  error: {
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: theme.gap(2),
     backgroundColor: "rgba(255, 107, 107, 0.1)",
-    padding: 12,
-    borderRadius: 8,
+    padding: theme.gap(2),
+    borderRadius: theme.gap(2),
     borderWidth: 1,
     borderColor: "rgba(255, 107, 107, 0.2)",
   },
-  linkContainer: {
+  signup: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
+    alignItems: "center",
+    marginTop: theme.gap(4),
+    gap: theme.gap(1),
   },
-  linkText: {
-    fontSize: 16,
-    color: "#b5b5b5",
-  },
-  link: {
-    fontSize: 16,
-  },
-  linkTextBold: {
-    color: "#FFD700",
-    fontWeight: "bold",
-  },
-});
+}));

@@ -1,4 +1,4 @@
-import { Pressable, View, type ViewProps } from "react-native";
+import { Pressable, PressableProps, View, type ViewProps } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 import { ThemedText } from "./themed-text";
 
@@ -6,6 +6,7 @@ export type ButtonProps = {
   label: string;
   onPress(): void;
 } & ViewProps &
+  PressableProps &
   UnistylesVariants<typeof styles>;
 
 export const Button: React.FunctionComponent<ButtonProps> = ({
@@ -20,7 +21,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
   });
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPress={onPress} {...rest}>
       <View style={[styles.button, styles.position, style]} {...rest}>
         <ThemedText type="h4" style={styles.label}>
           {label}

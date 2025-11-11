@@ -34,7 +34,7 @@ export const SongCard: React.FunctionComponent<SongCardProps> = ({
         <View style={styles.container}>
           <View style={styles.song}>
             <ThemedText type="h2">{title}</ThemedText>
-            <ThemedText dimmed type="h3">
+            <ThemedText color="dimmed" type="h3">
               {artist}
             </ThemedText>
           </View>

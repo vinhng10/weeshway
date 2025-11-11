@@ -57,7 +57,7 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
             {/* Song Info */}
             <View style={styles.rowGroup}>
               <ThemedText type="h3">{data.songTitle}</ThemedText>
-              <ThemedText dimmed>{data.artist}</ThemedText>
+              <ThemedText color="dimmed">{data.artist}</ThemedText>
             </View>
 
             {/* Location and DateTime Info */}
@@ -84,7 +84,7 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
                     {data.date}, {data.time}
                   </ThemedText>
                 </View>
-                <ThemedText style={styles.highlight}>
+                <ThemedText color="highlight">
                   {data.spots - data.books} spots left
                 </ThemedText>
               </View>
@@ -150,9 +150,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.gap(0.5),
-  },
-  highlight: {
-    color: theme.colors.highlight,
   },
   bottomContainer: {
     width: "100%",

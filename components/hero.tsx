@@ -34,7 +34,7 @@ export const Hero: React.FunctionComponent<HeroProps> = ({
         <View style={styles.contentContainer}>
           <View style={styles.songInfo}>
             <ThemedText type="h2">{title}</ThemedText>
-            <ThemedText dimmed type="h3">
+            <ThemedText color="dimmed" type="h3">
               {subtitle}
             </ThemedText>
           </View>
