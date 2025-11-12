@@ -72,9 +72,9 @@ const styles = StyleSheet.create((theme, rt) => ({
     marginTop: rt.insets.top + theme.gap(1),
   },
   scrollContainer: {
-    flex: 1,
     gap: theme.gap(2),
     padding: theme.gap(2),
+    paddingBottom: theme.gap(16),
   },
   descriptionContainer: {
     height: theme.gap(12),

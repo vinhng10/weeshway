@@ -78,6 +78,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   scrollContainer: {
     gap: theme.gap(2),
     padding: theme.gap(2),
+    paddingBottom: theme.gap(16),
   },
   cardContainer: {
     width: theme.gap(42),
