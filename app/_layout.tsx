@@ -1,14 +1,21 @@
 import { Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
+import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
-import { AuthProvider, useAuth } from "./ctx";
 
 function RootNavigator() {
-  const { isLoggedIn } = useAuth();
+  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const initialize = useAuth((state) => state.initialize);
   const role = useRole((state) => state.role);
+
+  // Initialize auth store on mount
+  useEffect(() => {
+    const cleanup = initialize();
+    return cleanup;
+  }, [initialize]);
 
   return (
     <Stack>
@@ -34,9 +41,7 @@ function RootNavigator() {
 export default function Root() {
   return (
     <GestureHandlerRootView>
-      <AuthProvider>
-        <RootNavigator />
-      </AuthProvider>
+      <RootNavigator />
     </GestureHandlerRootView>
   );
 }

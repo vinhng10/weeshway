@@ -1,14 +1,14 @@
 import { Button } from "@/components/button";
 import { TextInput } from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
+import { useAuth } from "@/hooks/useAuth";
 import { Link } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useAuth } from "./ctx";
 
 export default function SignIn() {
-  const { signIn } = useAuth();
+  const signIn = useAuth((state) => state.signIn);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);

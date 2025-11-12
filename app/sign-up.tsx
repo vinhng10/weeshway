@@ -1,11 +1,11 @@
 import { Button } from "@/components/button";
 import { TextInput } from "@/components/input";
 import { ThemedText } from "@/components/themed-text";
+import { useAuth } from "@/hooks/useAuth";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useAuth } from "./ctx";
 
 export default function CreateAccountScreen() {
   const [email, setEmail] = useState("");
@@ -13,7 +13,7 @@ export default function CreateAccountScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { signUp } = useAuth();
+  const signUp = useAuth((state) => state.signUp);
   const router = useRouter();
 
   const handleSignUp = async () => {

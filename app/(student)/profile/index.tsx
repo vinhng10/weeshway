@@ -1,29 +1,41 @@
-import { useAuth } from "@/app/ctx";
 import { Avatar } from "@/components/avatar";
 import { ChipBar } from "@/components/chip-bar";
 import { ProfileMenuItem } from "@/components/profile-menu-item";
 import { ThemedText } from "@/components/themed-text";
+import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Profile() {
-  const { profile, session, signOut } = useAuth();
+  const profile = useAuth((state) => state.profile);
+  const signOut = useAuth((state) => state.signOut);
   const router = useRouter();
 
   const role = useRole((state) => state.role);
   const setRole = useRole((state) => state.setRole);
 
+  const handleAccount = () => {
+    router.push("/(student)/profile/account");
+  };
+
+  const handleNotifications = () => {
+    router.push("/(student)/profile/notifications");
+  };
+
+  const handleWallet = () => {
+    router.push("/(student)/profile/wallet");
+  };
+
+  const handleDataPrivacy = () => {
+    router.push("/(student)/profile/data-privacy");
+  };
+
   const handleSignOut = async () => {
     await signOut();
     router.replace("../sign-in");
   };
-
-  // Get user data from profile or session
-  const userName = profile?.full_name || profile?.username || "John Smith";
-  const userDescription = profile?.bio || "I dance & talk about stuff";
-  const avatarUrl = profile?.avatar_url || "https://picsum.photos/200/300";
 
   const roleOptions = [
     { id: "student", label: "Student" },
@@ -34,9 +46,14 @@ export default function Profile() {
     <View style={styles.container}>
       {/* Profile Header */}
       <View style={styles.header}>
-        <Avatar source={avatarUrl} size="large" shape="circle" bordered />
-        <ThemedText type="h3">{userName}</ThemedText>
-        <ThemedText color="dimmed">{userDescription}</ThemedText>
+        <Avatar
+          source={profile.avatar_url}
+          size="large"
+          shape="circle"
+          bordered
+        />
+        <ThemedText type="h3">{profile.full_name}</ThemedText>
+        <ThemedText color="dimmed">{profile.bio}</ThemedText>
         <ChipBar
           padding
           options={roleOptions}
@@ -53,14 +70,22 @@ export default function Profile() {
         <ProfileMenuItem
           icon="person.fill"
           label="Account"
-          onPress={() => {}}
+          onPress={handleAccount}
         />
-        <ProfileMenuItem icon="bell" label="Notifications" onPress={() => {}} />
-        <ProfileMenuItem icon="wallet.pass" label="Wallet" onPress={() => {}} />
+        <ProfileMenuItem
+          icon="bell"
+          label="Notifications"
+          onPress={handleNotifications}
+        />
+        <ProfileMenuItem
+          icon="wallet.pass"
+          label="Wallet"
+          onPress={handleWallet}
+        />
         <ProfileMenuItem
           icon="shield.fill"
           label="Data Privacy"
-          onPress={() => {}}
+          onPress={handleDataPrivacy}
         />
         <ProfileMenuItem
           icon="rectangle.portrait.and.arrow.right"
@@ -88,6 +113,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   scrollContainer: {
     paddingHorizontal: theme.gap(2),
+    paddingBottom: theme.gap(16),
     gap: theme.gap(1),
   },
 }));

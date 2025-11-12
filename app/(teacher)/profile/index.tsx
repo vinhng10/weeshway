@@ -1,15 +1,16 @@
-import { useAuth } from "@/app/ctx";
 import { Avatar } from "@/components/avatar";
 import { ChipBar } from "@/components/chip-bar";
 import { ProfileMenuItem } from "@/components/profile-menu-item";
 import { ThemedText } from "@/components/themed-text";
+import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Profile() {
-  const { profile, session, signOut } = useAuth();
+  const profile = useAuth((state) => state.profile);
+  const signOut = useAuth((state) => state.signOut);
   const router = useRouter();
 
   const role = useRole((state) => state.role);
@@ -88,6 +89,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   scrollContainer: {
     paddingHorizontal: theme.gap(2),
+    paddingBottom: theme.gap(16),
     gap: theme.gap(1),
   },
 }));
