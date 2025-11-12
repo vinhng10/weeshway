@@ -44,13 +44,13 @@ export default function Wish() {
         <View style={styles.row}>
           <BoxInput
             label="Style"
-            type="type"
+            type="text"
             value={wish.style}
             editable={false}
           />
           <BoxInput
             label="Level"
-            type="type"
+            type="text"
             value={wish.level}
             editable={false}
           />

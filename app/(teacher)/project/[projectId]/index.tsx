@@ -112,13 +112,13 @@ export default function Project() {
         <View style={styles.row}>
           <BoxInput
             label="Price"
-            type="type"
+            type="text"
             value={price}
             onValueChange={setPrice}
           />
           <BoxInput
             label="Spots"
-            type="type"
+            type="text"
             value={spots}
             onValueChange={setSpots}
           />

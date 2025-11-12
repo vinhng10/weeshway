@@ -16,7 +16,7 @@ interface BoxInputProps {
   options?: BoxInputOption[];
   onValueChange?: any;
   placeholder?: string;
-  type?: "select" | "type";
+  type: "text" | "select";
   editable?: boolean;
 }
 

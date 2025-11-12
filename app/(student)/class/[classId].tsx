@@ -55,13 +55,13 @@ export default function Class() {
         <View style={styles.row}>
           <BoxInput
             label="Style"
-            type="type"
+            type="text"
             value={classData.style}
             editable={false}
           />
           <BoxInput
             label="Level"
-            type="type"
+            type="text"
             value={classData.level}
             editable={false}
           />
@@ -71,13 +71,13 @@ export default function Class() {
         <View style={styles.row}>
           <BoxInput
             label="Price"
-            type="type"
+            type="text"
             value={`$${classData.price}`}
             editable={false}
           />
           <BoxInput
             label="Spots"
-            type="type"
+            type="text"
             value={`${classData.spots - classData.books}`}
             editable={false}
           />
