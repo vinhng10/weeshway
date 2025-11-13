@@ -1,26 +1,95 @@
 import { Chip } from "@/components/chip";
+import { OptionsModal } from "@/components/options-modal";
+import { useState } from "react";
 import { ScrollView } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 
-export interface Option<T extends string = string> {
-  id: T;
+export interface ChipBarItemProps {
   label: string;
-  hasDropdown?: boolean;
+  value?: string;
+  options: Record<string, string>;
+  onValueChange?: any;
+  modal: boolean;
 }
 
-interface ChipBarProps<T extends string = string>
-  extends UnistylesVariants<typeof styles> {
-  options: Option<T>[];
-  activeOption?: T;
-  onPress?: any;
-}
-
-export const ChipBar = <T extends string = string>({
+export const ChipBarItem = ({
+  label,
+  value,
   options,
-  activeOption,
-  onPress,
-  padding,
-}: ChipBarProps<T>) => {
+  onValueChange,
+  modal,
+}: ChipBarItemProps) => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
+  const handleOptionSelect = (selectedValue: string) => {
+    onValueChange?.(selectedValue);
+    handleCloseModal();
+  };
+
+  if (modal) {
+    // Modal mode: single chip with chevron down icon
+    const hasValue = value !== undefined && value !== null && value !== "";
+    // When an option is selected, text is the value prop
+    const chipLabel = hasValue ? value : label;
+    const chipColor = hasValue ? "light" : "dark";
+
+    return (
+      <>
+        <Chip
+          size={"large"}
+          color={chipColor}
+          label={chipLabel}
+          icon="chevron.down"
+          onPress={() => setModalVisible(true)}
+        />
+        {options && (
+          <OptionsModal
+            visible={modalVisible}
+            onClose={handleCloseModal}
+            onSelect={handleOptionSelect}
+            options={options}
+            title={label}
+          />
+        )}
+      </>
+    );
+  } else {
+    return (
+      <>
+        {Object.entries(options).map(([optionValue, optionLabel]) => {
+          const isActive = value === optionValue;
+          return (
+            <Chip
+              key={optionValue}
+              size={"large"}
+              color={isActive ? "light" : "dark"}
+              label={optionLabel}
+              onPress={() => onValueChange?.(optionValue)}
+            />
+          );
+        })}
+      </>
+    );
+  }
+};
+
+export interface ChipBarItem {
+  label: string;
+  value?: string;
+  options?: Record<string, string>;
+  onValueChange?: any;
+  modal: boolean;
+}
+
+interface ChipBarProps extends UnistylesVariants<typeof styles> {
+  items: ChipBarItem[];
+}
+
+export const ChipBar = ({ items, padding }: ChipBarProps) => {
   styles.useVariants({ padding });
 
   return (
@@ -30,20 +99,16 @@ export const ChipBar = <T extends string = string>({
       contentContainerStyle={styles.scrollContainer}
       showsHorizontalScrollIndicator={false}
     >
-      {options.map((option) => {
-        const isActive = option.id === activeOption;
-
-        return (
-          <Chip
-            key={option.id}
-            size={"large"}
-            color={isActive ? "light" : "dark"}
-            label={option.label}
-            icon={option.hasDropdown ? "chevron.down" : undefined}
-            onPress={() => onPress?.(option.id)}
-          />
-        );
-      })}
+      {items.map((item, index) => (
+        <ChipBarItem
+          key={item.label || index}
+          label={item.label}
+          value={item.value}
+          options={item.options}
+          onValueChange={item.onValueChange}
+          modal={item.modal}
+        />
+      ))}
     </ScrollView>
   );
 };

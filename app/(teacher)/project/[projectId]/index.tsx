@@ -1,9 +1,9 @@
 import { Button } from "@/components/button";
-import { ChipBar } from "@/components/chip-bar";
+import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
-import { DanceLevel, DanceStyle } from "@/constants/options";
+import { Level, ProjectStatus, Style } from "@/constants/options";
 import { projects } from "@/mocks/projects";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -23,44 +23,29 @@ export default function Project() {
   const [projectDescription, setProjectDescription] = useState(
     project?.description || ""
   );
-  const [visibility, setVisibility] = useState(project?.status);
-  const [style, setStyle] = useState<DanceStyle>(
-    (project?.style as DanceStyle) ?? DanceStyle.HipHop
+  const [status, setStatus] = useState<string>(
+    project?.status ?? ProjectStatus.Private
   );
-  const [level, setLevel] = useState<DanceLevel>(
-    (project?.level as DanceLevel) ?? DanceLevel.Intermediate
+  const [style, setStyle] = useState<Style>(project?.style as Style);
+  const [level, setLevel] = useState<Level>(project?.level as Level);
+  const [price, setPrice] = useState<string>(
+    `$${project?.price?.toFixed(2) ?? "$0.00"}`
   );
-  const [price, setPrice] = useState(
-    project?.price ? `$${project.price.toFixed(2)}` : "$0.00"
-  );
-  const [spots, setSpots] = useState(project?.spots.toString() || "0");
+  const [spots, setSpots] = useState<string>(project?.spots.toString() ?? "0");
   const [audioFile, setAudioFile] = useState<string | undefined>();
-  const [dateTime, setDateTime] = useState(
-    project ? `${project.date}, ${project.time}` : ""
+  const [dateTime, setDateTime] = useState<string>(
+    `${project?.date}, ${project?.time ?? ""}`
   );
-  const [location, setLocation] = useState(project?.studio ?? "");
+  const [location, setLocation] = useState<string>(project?.studio ?? "");
 
-  const visibilityOptions = [
-    { id: "private", label: "Private" },
-    { id: "public", label: "Public" },
-    { id: "release", label: "Release" },
-  ];
-
-  const styleOptions = [
-    { label: "Hip Hop", value: "Hip Hop" },
-    { label: "Urban", value: "Urban" },
-    { label: "House", value: "House" },
-    { label: "Pop", value: "Pop" },
-    { label: "Ballet", value: "Ballet" },
-    { label: "Contemporary", value: "Contemporary" },
-    { label: "Jazz", value: "Jazz" },
-  ];
-
-  const levelOptions = [
-    { label: "Beginner", value: "Beginner" },
-    { label: "Intermediate", value: "Intermediate" },
-    { label: "Advanced", value: "Advanced" },
-    { label: "Open Level", value: "Open Level" },
+  const filters: ChipBarItemProps[] = [
+    {
+      label: "Status",
+      value: status,
+      options: ProjectStatus,
+      modal: false,
+      onValueChange: setStatus,
+    },
   ];
 
   return (
@@ -89,11 +74,7 @@ export default function Project() {
         />
 
         {/* Toggle Button Group for Visibility */}
-        <ChipBar
-          options={visibilityOptions}
-          activeOption={visibility}
-          onPress={setVisibility}
-        />
+        <ChipBar items={filters} />
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
@@ -101,14 +82,14 @@ export default function Project() {
             label="Style"
             type="select"
             value={style}
-            options={DanceStyle}
+            options={Style}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={DanceLevel}
+            options={Level}
             onValueChange={setLevel}
           />
         </View>

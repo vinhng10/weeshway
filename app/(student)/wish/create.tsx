@@ -2,15 +2,15 @@ import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { BoxInput, TextInput } from "@/components/input";
 import { SongCard } from "@/components/song-card";
-import { DanceLevel, DanceStyle } from "@/constants/options";
+import { Level, Style } from "@/constants/options";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function MakeAWish() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [style, setStyle] = useState<DanceStyle>(DanceStyle.HipHop);
-  const [level, setLevel] = useState<DanceLevel>(DanceLevel.Beginner);
+  const [style, setStyle] = useState<Style>(Style.HipHop);
+  const [level, setLevel] = useState<Level>(Level.Beginner);
 
   return (
     <View style={styles.container}>
@@ -43,14 +43,14 @@ export default function MakeAWish() {
             label="Style"
             type="select"
             value={style}
-            options={DanceStyle}
+            options={Style}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={DanceLevel}
+            options={Level}
             onValueChange={setLevel}
           />
         </View>

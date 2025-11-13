@@ -41,10 +41,10 @@ export const OptionsModal: React.FunctionComponent<OptionsModalProps> = ({
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          {Object.entries(options).map(([value, label]) => {
+          {Object.entries(options).map(([key, value]) => {
             return (
-              <Pressable key={value} onPress={() => handleSelect(value)}>
-                <ThemedText type="h3">{label}</ThemedText>
+              <Pressable key={key} onPress={() => handleSelect(value)}>
+                <ThemedText type="h3">{value}</ThemedText>
               </Pressable>
             );
           })}

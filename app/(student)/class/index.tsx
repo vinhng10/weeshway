@@ -1,9 +1,10 @@
 import { Avatar } from "@/components/avatar";
 import { Carousel } from "@/components/carousel";
 import { Chip } from "@/components/chip";
-import { ChipBar, Option } from "@/components/chip-bar";
+import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
+import { Genre, Level, Style } from "@/constants/options";
 import { projects } from "@/mocks/projects";
 import { ProjectType } from "@/types";
 import { router } from "expo-router";
@@ -11,17 +12,34 @@ import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type ClassOption = "all" | "genre" | "style" | "level";
-
-const CLASS_FILTERS: Option<ClassOption>[] = [
-  { id: "all", label: "All" },
-  { id: "genre", label: "Genre", hasDropdown: true },
-  { id: "style", label: "Style", hasDropdown: true },
-  { id: "level", label: "Level", hasDropdown: true },
-];
-
 export default function Classes() {
-  const [activeOption, setActiveOption] = useState<ClassOption>("all");
+  const [genre, setGenre] = useState<string>("");
+  const [style, setStyle] = useState<string>("");
+  const [level, setLevel] = useState<string>("");
+
+  const filters: ChipBarItemProps[] = [
+    {
+      label: "Genre",
+      value: genre,
+      options: Genre,
+      modal: true,
+      onValueChange: setGenre,
+    },
+    {
+      label: "Style",
+      value: style,
+      options: Style,
+      modal: true,
+      onValueChange: setStyle,
+    },
+    {
+      label: "Level",
+      value: level,
+      options: Level,
+      modal: true,
+      onValueChange: setLevel,
+    },
+  ];
 
   const navigateToClass = (id: number) => router.push(`/(student)/class/${id}`);
 
@@ -68,12 +86,7 @@ export default function Classes() {
 
   return (
     <View style={styles.container}>
-      <ChipBar
-        padding
-        options={CLASS_FILTERS}
-        activeOption={activeOption}
-        onPress={setActiveOption}
-      />
+      <ChipBar padding items={filters} />
       <SectionListView sections={sections} />
     </View>
   );

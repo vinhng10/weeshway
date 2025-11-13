@@ -1,7 +1,8 @@
 import { Avatar } from "@/components/avatar";
-import { ChipBar } from "@/components/chip-bar";
+import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { ProfileMenuItem } from "@/components/profile-menu-item";
 import { ThemedText } from "@/components/themed-text";
+import { Role } from "@/constants/options";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useRouter } from "expo-router";
@@ -26,9 +27,14 @@ export default function Profile() {
   const userDescription = profile?.bio || "I dance & talk about stuff";
   const avatarUrl = profile?.avatar_url || "https://picsum.photos/200/300";
 
-  const roleOptions = [
-    { id: "student", label: "Student" },
-    { id: "teacher", label: "Teacher" },
+  const filters: ChipBarItemProps[] = [
+    {
+      label: "Role",
+      value: role,
+      options: Role,
+      modal: false,
+      onValueChange: setRole,
+    },
   ];
 
   return (
@@ -38,12 +44,7 @@ export default function Profile() {
         <Avatar source={avatarUrl} size="large" shape="circle" bordered />
         <ThemedText type="h3">{userName}</ThemedText>
         <ThemedText color="dimmed">{userDescription}</ThemedText>
-        <ChipBar
-          padding
-          options={roleOptions}
-          activeOption={role}
-          onPress={setRole}
-        />
+        <ChipBar padding items={filters} />
       </View>
 
       {/* Menu Items */}

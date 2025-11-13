@@ -27,9 +27,6 @@ export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Get the label from the enum based on the current value
-  const selectedLabel = options?.[value] ?? value ?? "";
-
   const handlePress = () => {
     if (type === "select" && editable) {
       setModalVisible(true);
@@ -56,9 +53,7 @@ export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
 
         {type === "select" ? (
           <View style={styles.valueContainer}>
-            <ThemedText type="h5">
-              {selectedLabel || placeholder || ""}
-            </ThemedText>
+            <ThemedText type="h5">{value || placeholder || ""}</ThemedText>
           </View>
         ) : (
           <TextInput

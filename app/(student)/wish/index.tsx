@@ -1,9 +1,10 @@
 import { AvatarGroup } from "@/components/avatar-group";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
-import { ChipBar, Option } from "@/components/chip-bar";
+import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
+import { WishStatus } from "@/constants/options";
 import { wishes } from "@/mocks/wishes";
 import { WishType } from "@/types";
 import { router } from "expo-router";
@@ -11,30 +12,37 @@ import { useMemo, useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type WishStatusOption = "all" | "available" | "granted" | "waiting";
-
-const STATUS_FILTERS: Option<WishStatusOption>[] = [
-  { id: "all", label: "All" },
-  { id: "available", label: "Class available" },
-  { id: "granted", label: "Granted" },
-  { id: "waiting", label: "Waiting" },
-];
-
 export default function Wishes() {
-  const [activeOption, setActiveOption] = useState<WishStatusOption>("all");
+  const [status, setStatus] = useState<string>("");
+
+  const filters: ChipBarItemProps[] = [
+    {
+      label: "Class available",
+      value: status,
+      modal: false,
+      options: WishStatus,
+      onValueChange: setStatus,
+    },
+  ];
 
   const filteredWishes = useMemo(() => {
-    if (activeOption === "all") {
+    if (status === "") {
       return wishes;
     }
 
     return wishes.filter((wish) => {
-      if (activeOption === "waiting") {
+      if (status === WishStatus.Waiting) {
         return wish.status === undefined;
       }
-      return wish.status === activeOption;
+      if (status === WishStatus.ClassAvailable) {
+        return wish.status === "available";
+      }
+      if (status === WishStatus.Granted) {
+        return wish.status === "granted";
+      }
+      return false;
     });
-  }, [activeOption]);
+  }, [status]);
 
   const renderTile = (data: WishType): React.ReactElement => (
     <Tile
@@ -65,12 +73,7 @@ export default function Wishes() {
 
   return (
     <View style={styles.container}>
-      <ChipBar
-        padding
-        options={STATUS_FILTERS}
-        activeOption={activeOption}
-        onPress={setActiveOption}
-      />
+      <ChipBar padding items={filters} />
       <SectionListView sections={sections} />
       <Button
         stickyBottom

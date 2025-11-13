@@ -1,9 +1,9 @@
 import { Button } from "@/components/button";
-import { ChipBar } from "@/components/chip-bar";
+import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
-import { DanceLevel, DanceStyle } from "@/constants/options";
+import { Level, ProjectStatus, Style } from "@/constants/options";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -14,36 +14,23 @@ export default function MakeAWish() {
   const [searchQuery, setSearchQuery] = useState("");
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const [visibility, setVisibility] = useState("Private");
-  const [style, setStyle] = useState<DanceStyle>(DanceStyle.HipHop);
-  const [level, setLevel] = useState<DanceLevel>(DanceLevel.Beginner);
+  const [status, setStatus] = useState<string>(ProjectStatus.Private);
+  const [style, setStyle] = useState<Style>(Style.HipHop);
+  const [level, setLevel] = useState<Level>(Level.Beginner);
   const [price, setPrice] = useState("$0.00");
   const [spots, setSpots] = useState("0");
   const [audioFile, setAudioFile] = useState<string | undefined>();
   const [dateTime, setDateTime] = useState("");
   const [location, setLocation] = useState("");
 
-  const visibilityOptions = [
-    { id: "private", label: "Private" },
-    { id: "public", label: "Public" },
-    { id: "release", label: "Release" },
-  ];
-
-  const styleOptions = [
-    { label: "Hip Hop", value: "Hip Hop" },
-    { label: "Urban", value: "Urban" },
-    { label: "House", value: "House" },
-    { label: "Pop", value: "Pop" },
-    { label: "Ballet", value: "Ballet" },
-    { label: "Contemporary", value: "Contemporary" },
-    { label: "Jazz", value: "Jazz" },
-  ];
-
-  const levelOptions = [
-    { label: "Beginner", value: "Beginner" },
-    { label: "Intermediate", value: "Intermediate" },
-    { label: "Advanced", value: "Advanced" },
-    { label: "Open Level", value: "Open Level" },
+  const filters: ChipBarItemProps[] = [
+    {
+      label: "Status",
+      value: status,
+      options: ProjectStatus,
+      modal: false,
+      onValueChange: setStatus,
+    },
   ];
 
   return (
@@ -79,11 +66,7 @@ export default function MakeAWish() {
         />
 
         {/* Toggle Button Group for Visibility */}
-        <ChipBar
-          options={visibilityOptions}
-          activeOption={visibility}
-          onPress={setVisibility}
-        />
+        <ChipBar items={filters} />
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
@@ -91,14 +74,14 @@ export default function MakeAWish() {
             label="Style"
             type="select"
             value={style}
-            options={DanceStyle}
+            options={Style}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={DanceLevel}
+            options={Level}
             onValueChange={setLevel}
           />
         </View>

@@ -1,9 +1,10 @@
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
-import { ChipBar, Option } from "@/components/chip-bar";
+import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
+import { Genre, Level, ProjectStatus, Style } from "@/constants/options";
 import { projects } from "@/mocks/projects";
 import { ProjectType } from "@/types";
 import { router } from "expo-router";
@@ -11,18 +12,42 @@ import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type ProjectOption = "all" | "status" | "genre" | "style" | "level";
-
-const PROJECT_FILTERS: Option<ProjectOption>[] = [
-  { id: "all", label: "All" },
-  { id: "status", label: "Status", hasDropdown: true },
-  { id: "genre", label: "Genre", hasDropdown: true },
-  { id: "style", label: "Style", hasDropdown: true },
-  { id: "level", label: "Level", hasDropdown: true },
-];
-
 export default function Projects() {
-  const [activeOption, setActiveOption] = useState<ProjectOption>("all");
+  const [status, setStatus] = useState<string>(ProjectStatus.Private);
+  const [genre, setGenre] = useState<string>("");
+  const [style, setStyle] = useState<string>("");
+  const [level, setLevel] = useState<string>("");
+
+  const filters: ChipBarItemProps[] = [
+    {
+      label: "Status",
+      value: status,
+      options: ProjectStatus,
+      modal: true,
+      onValueChange: setStatus,
+    },
+    {
+      label: "Genre",
+      value: genre,
+      options: Genre,
+      modal: true,
+      onValueChange: setGenre,
+    },
+    {
+      label: "Style",
+      value: style,
+      options: Style,
+      modal: true,
+      onValueChange: setStyle,
+    },
+    {
+      label: "Level",
+      value: level,
+      options: Level,
+      modal: true,
+      onValueChange: setLevel,
+    },
+  ];
 
   const thisWeekProjects = projects.slice(0, 2);
   const otherProjects = projects.slice(2);
@@ -70,12 +95,7 @@ export default function Projects() {
 
   return (
     <View style={styles.container}>
-      <ChipBar
-        padding
-        options={PROJECT_FILTERS}
-        activeOption={activeOption}
-        onPress={setActiveOption}
-      />
+      <ChipBar padding items={filters} />
       <SectionListView sections={sections} />
 
       <Button

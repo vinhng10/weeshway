@@ -1,7 +1,8 @@
 import { Avatar } from "@/components/avatar";
-import { ChipBar } from "@/components/chip-bar";
+import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { ProfileMenuItem } from "@/components/profile-menu-item";
 import { ThemedText } from "@/components/themed-text";
+import { Role } from "@/constants/options";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useRouter } from "expo-router";
@@ -37,9 +38,14 @@ export default function Profile() {
     router.replace("../sign-in");
   };
 
-  const roleOptions = [
-    { id: "student", label: "Student" },
-    { id: "teacher", label: "Teacher" },
+  const filters: ChipBarItemProps[] = [
+    {
+      label: "Role",
+      value: role,
+      options: Role,
+      modal: false,
+      onValueChange: setRole,
+    },
   ];
 
   return (
@@ -54,12 +60,7 @@ export default function Profile() {
         />
         <ThemedText type="h3">{profile.full_name}</ThemedText>
         <ThemedText color="dimmed">{profile.bio}</ThemedText>
-        <ChipBar
-          padding
-          options={roleOptions}
-          activeOption={role}
-          onPress={setRole}
-        />
+        <ChipBar padding items={filters} />
       </View>
 
       {/* Menu Items */}
