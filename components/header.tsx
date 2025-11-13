@@ -6,14 +6,18 @@ import { StyleSheet } from "react-native-unistyles";
 
 type HeaderProps = {
   title?: string;
+  onPress?: () => void;
 };
 
-export const Header: React.FunctionComponent<HeaderProps> = ({ title }) => {
+export const Header: React.FunctionComponent<HeaderProps> = ({
+  title,
+  onPress,
+}) => {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <Pressable onPress={() => router.back()} style={styles.backButton}>
+      <Pressable onPress={onPress ?? router.back} style={styles.backButton}>
         <IconSymbol name="chevron.left" size={32} color="#FFFFFF" />
       </Pressable>
       <ThemedText type="h4">{title}</ThemedText>

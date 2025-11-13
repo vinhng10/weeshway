@@ -3,6 +3,7 @@ import { ChipBar } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
+import { DanceLevel, DanceStyle } from "@/constants/options";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -13,9 +14,9 @@ export default function MakeAWish() {
   const [searchQuery, setSearchQuery] = useState("");
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const [visibility, setVisibility] = useState("private");
-  const [style, setStyle] = useState("Hip Hop");
-  const [level, setLevel] = useState("Beginner");
+  const [visibility, setVisibility] = useState("Private");
+  const [style, setStyle] = useState<DanceStyle>(DanceStyle.HipHop);
+  const [level, setLevel] = useState<DanceLevel>(DanceLevel.Beginner);
   const [price, setPrice] = useState("$0.00");
   const [spots, setSpots] = useState("0");
   const [audioFile, setAudioFile] = useState<string | undefined>();
@@ -90,14 +91,14 @@ export default function MakeAWish() {
             label="Style"
             type="select"
             value={style}
-            options={styleOptions}
+            options={DanceStyle}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={levelOptions}
+            options={DanceLevel}
             onValueChange={setLevel}
           />
         </View>

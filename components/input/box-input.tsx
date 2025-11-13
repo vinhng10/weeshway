@@ -1,19 +1,15 @@
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { OptionsModal } from "../options-modal";
 import { TextInput } from "./text-input";
-
-interface BoxInputOption {
-  label: string;
-  value: string;
-}
 
 interface BoxInputProps {
   label: string;
   value: string;
-  options?: BoxInputOption[];
+  options?: Record<string, string>; // 👈 The enum-like object
   onValueChange?: any;
   placeholder?: string;
   type: "text" | "select";
@@ -29,38 +25,64 @@ export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
   type,
   editable = true,
 }) => {
-  const selectedOption = options?.find((opt) => opt.value === value);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // Get the label from the enum based on the current value
+  const selectedLabel = options?.[value] ?? value ?? "";
+
+  const handlePress = () => {
+    if (type === "select" && editable) {
+      setModalVisible(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
 
   return (
-    <Pressable
-      style={styles.container}
-      onPress={onValueChange}
-      disabled={!editable}
-    >
-      <View style={styles.labelContainer}>
-        <ThemedText color="dimmed">{label}</ThemedText>
-        {type === "select" && (
-          <IconSymbol style={styles.icon} name="chevron.down" size={16} />
-        )}
-      </View>
-
-      {type === "select" ? (
-        <View style={styles.valueContainer}>
-          <ThemedText type="h5">
-            {selectedOption?.label || placeholder || ""}
-          </ThemedText>
+    <>
+      <Pressable
+        style={styles.container}
+        onPress={handlePress}
+        disabled={!editable || type === "text"}
+      >
+        <View style={styles.labelContainer}>
+          <ThemedText color="dimmed">{label}</ThemedText>
+          {type === "select" && (
+            <IconSymbol style={styles.icon} name="chevron.down" size={16} />
+          )}
         </View>
-      ) : (
-        <TextInput
-          type="h5"
-          value={value}
-          onChangeText={onValueChange}
-          placeholder={placeholder}
-          style={styles.textInput}
-          editable={editable}
+
+        {type === "select" ? (
+          <View style={styles.valueContainer}>
+            <ThemedText type="h5">
+              {selectedLabel || placeholder || ""}
+            </ThemedText>
+          </View>
+        ) : (
+          <TextInput
+            type="h5"
+            value={value}
+            onChangeText={onValueChange}
+            placeholder={placeholder}
+            style={styles.textInput}
+            editable={editable}
+          />
+        )}
+      </Pressable>
+
+      {/* Modal for select type */}
+      {type === "select" && options && (
+        <OptionsModal
+          visible={modalVisible}
+          onClose={handleCloseModal}
+          onSelect={onValueChange}
+          options={options}
+          title={label}
         />
       )}
-    </Pressable>
+    </>
   );
 };
 

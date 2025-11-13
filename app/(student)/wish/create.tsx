@@ -2,31 +2,15 @@ import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { BoxInput, TextInput } from "@/components/input";
 import { SongCard } from "@/components/song-card";
+import { DanceLevel, DanceStyle } from "@/constants/options";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function MakeAWish() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [style, setStyle] = useState("Hip Hop");
-  const [level, setLevel] = useState("Beginner");
-
-  const styleOptions = [
-    { label: "Hip Hop", value: "Hip Hop" },
-    { label: "Urban", value: "Urban" },
-    { label: "House", value: "House" },
-    { label: "Pop", value: "Pop" },
-    { label: "Ballet", value: "Ballet" },
-    { label: "Contemporary", value: "Contemporary" },
-    { label: "Jazz", value: "Jazz" },
-  ];
-
-  const levelOptions = [
-    { label: "Beginner", value: "Beginner" },
-    { label: "Intermediate", value: "Intermediate" },
-    { label: "Advanced", value: "Advanced" },
-    { label: "Open Level", value: "Open Level" },
-  ];
+  const [style, setStyle] = useState<DanceStyle>(DanceStyle.HipHop);
+  const [level, setLevel] = useState<DanceLevel>(DanceLevel.Beginner);
 
   return (
     <View style={styles.container}>
@@ -59,14 +43,14 @@ export default function MakeAWish() {
             label="Style"
             type="select"
             value={style}
-            options={styleOptions}
+            options={DanceStyle}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={levelOptions}
+            options={DanceLevel}
             onValueChange={setLevel}
           />
         </View>

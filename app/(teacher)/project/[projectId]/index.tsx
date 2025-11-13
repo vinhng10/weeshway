@@ -3,6 +3,7 @@ import { ChipBar } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
+import { DanceLevel, DanceStyle } from "@/constants/options";
 import { projects } from "@/mocks/projects";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -22,9 +23,13 @@ export default function Project() {
   const [projectDescription, setProjectDescription] = useState(
     project?.description || ""
   );
-  const [visibility, setVisibility] = useState(project?.status ?? "private");
-  const [style, setStyle] = useState(project?.style ?? "hiphop");
-  const [level, setLevel] = useState(project?.level ?? "intermediate");
+  const [visibility, setVisibility] = useState(project?.status);
+  const [style, setStyle] = useState<DanceStyle>(
+    (project?.style as DanceStyle) ?? DanceStyle.HipHop
+  );
+  const [level, setLevel] = useState<DanceLevel>(
+    (project?.level as DanceLevel) ?? DanceLevel.Intermediate
+  );
   const [price, setPrice] = useState(
     project?.price ? `$${project.price.toFixed(2)}` : "$0.00"
   );
@@ -96,14 +101,14 @@ export default function Project() {
             label="Style"
             type="select"
             value={style}
-            options={styleOptions}
+            options={DanceStyle}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={levelOptions}
+            options={DanceLevel}
             onValueChange={setLevel}
           />
         </View>
