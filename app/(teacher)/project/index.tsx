@@ -46,8 +46,8 @@ export default function Projects() {
         metadata={`${data.style} • ${data.level}`}
         rightContent={
           <>
-            <Chip type="highlight" icon={icon} label={label} />
-            <Chip type="light" label={data.status ?? ""} />
+            <Chip color="highlight" icon={icon} label={label} />
+            <Chip color="light" label={data.status ?? ""} />
           </>
         }
         onPress={() => router.push(`/(teacher)/project/${data.id}`)}

@@ -48,7 +48,7 @@ export default function Wishes() {
         data.avatars.length > 0 && (
           <>
             <AvatarGroup max={2} avatars={data.avatars} />
-            <Chip type="light" label={data.status ?? ""} />
+            <Chip color="light" label={data.status ?? ""} />
           </>
         )
       }

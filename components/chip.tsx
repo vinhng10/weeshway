@@ -12,11 +12,11 @@ type ChipProps = UnistylesVariants<typeof styles> & {
 export const Chip: React.FunctionComponent<ChipProps> = ({
   label,
   size,
-  type,
+  color,
   icon,
   onPress,
 }) => {
-  styles.useVariants({ type, size });
+  styles.useVariants({ color, size });
 
   return (
     <Pressable onPress={onPress} disabled={!onPress}>
@@ -48,7 +48,7 @@ const styles = StyleSheet.create((theme) => ({
           paddingVertical: theme.gap(1.2),
         },
       },
-      type: {
+      color: {
         light: {},
         dark: {},
         highlight: {},
@@ -65,7 +65,7 @@ const styles = StyleSheet.create((theme) => ({
           fontSize: 16,
         },
       },
-      type: {
+      color: {
         light: {},
         dark: {},
         highlight: {},
@@ -78,7 +78,7 @@ const styles = StyleSheet.create((theme) => ({
         default: {},
         large: {},
       },
-      type: {
+      color: {
         light: {
           color: "#000000",
           backgroundColor: "#FFFFFF",

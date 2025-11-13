@@ -47,8 +47,8 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
             />
             <ThemedText type="h3">{data.teacher.name}</ThemedText>
             <View style={styles.chipContainer}>
-              <Chip label={data.style} type="light" />
-              <Chip label={data.level} type="light" />
+              <Chip label={data.style} color="light" />
+              <Chip label={data.level} color="light" />
             </View>
           </View>
 

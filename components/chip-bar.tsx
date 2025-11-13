@@ -37,7 +37,7 @@ export const ChipBar = <T extends string = string>({
           <Chip
             key={option.id}
             size={"large"}
-            type={isActive ? "light" : "dark"}
+            color={isActive ? "light" : "dark"}
             label={option.label}
             icon={option.hasDropdown ? "chevron.down" : undefined}
             onPress={() => onPress?.(option.id)}

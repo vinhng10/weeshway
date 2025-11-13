@@ -44,7 +44,7 @@ export default function Classes() {
         <>
           <Avatar source={data.teacher.imageUrl} shape="circle" bordered />
           <Chip
-            type="highlight"
+            color="highlight"
             label={`${data.spots - data.books} spots left`}
           />
         </>
