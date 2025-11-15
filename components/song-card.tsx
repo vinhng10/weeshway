@@ -1,21 +1,21 @@
+import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ImageBackground, ImageProps } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface SongCardProps {
-  title: string;
-  artist: string;
+  name: string;
+  artistName: string;
   imageUrl: ImageProps["source"];
   onPlay?: any;
 }
 
 export const SongCard: React.FunctionComponent<SongCardProps> = ({
-  title,
-  artist,
+  name,
+  artistName,
   imageUrl,
   onPlay,
 }) => {
@@ -33,18 +33,12 @@ export const SongCard: React.FunctionComponent<SongCardProps> = ({
       >
         <View style={styles.container}>
           <View style={styles.song}>
-            <ThemedText type="h2">{title}</ThemedText>
+            <ThemedText type="h2">{name}</ThemedText>
             <ThemedText color="dimmed" type="h3">
-              {artist}
+              {artistName}
             </ThemedText>
           </View>
-          <Pressable style={styles.button} onPress={onPlay}>
-            <IconSymbol
-              name="play"
-              size={36}
-              color="rgba(255, 255, 255, 0.6)"
-            />
-          </Pressable>
+          <IconButton icon="play" iconSize={36} onPress={onPlay} />
         </View>
       </LinearGradient>
     </ImageBackground>
@@ -72,17 +66,8 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.gap(0.5),
   },
   container: {
-    width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-end",
-  },
-  button: {
-    height: theme.gap(6),
-    width: theme.gap(6),
-    borderRadius: 999,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
   },
 }));

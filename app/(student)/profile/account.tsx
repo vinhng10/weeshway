@@ -123,16 +123,10 @@ export default function Account() {
         showsVerticalScrollIndicator={false}
       >
         {/* Avatar Section */}
-        <View style={styles.avatarSection}>
+        <View style={styles.header}>
           <View style={styles.avatarContainer}>
             <Avatar
-              source={
-                avatarUri
-                  ? { uri: avatarUri }
-                  : profile?.avatar_url
-                  ? { uri: profile.avatar_url }
-                  : undefined
-              }
+              source={profile.avatar_url}
               size="large"
               shape="circle"
               bordered
@@ -151,20 +145,17 @@ export default function Account() {
             value={username}
             onChangeText={setUsername}
             placeholder="Username"
-            style={styles.input}
           />
           <TextInput
             value={fullName}
             onChangeText={setFullName}
             placeholder="Full Name"
-            style={styles.input}
           />
           <TextInput
             value={bio}
             onChangeText={setBio}
             placeholder="Bio"
             multiline
-            style={styles.input}
           />
         </View>
       </ScrollView>
@@ -189,10 +180,10 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
-  avatarSection: {
+  header: {
     alignItems: "center",
     marginTop: theme.gap(2),
-    marginBottom: theme.gap(4),
+    marginBottom: theme.gap(2),
   },
   avatarContainer: {
     position: "relative",
@@ -204,24 +195,14 @@ const styles = StyleSheet.create((theme, rt) => ({
     right: 0,
   },
   cameraIconContainer: {
-    width: theme.gap(4),
-    height: theme.gap(4),
-    borderRadius: theme.gap(1),
+    width: theme.gap(3),
+    height: theme.gap(3),
+    borderRadius: 999,
     backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
   },
-  photoHint: {
-    fontSize: 12,
-  },
   formSection: {
     gap: theme.gap(2),
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: theme.gap(0.5),
-  },
-  input: {
-    marginBottom: theme.gap(1),
   },
 }));

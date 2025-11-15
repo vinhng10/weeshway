@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import "react-native-reanimated";
 
 import { Role } from "@/constants/options";
@@ -42,7 +43,9 @@ function RootNavigator() {
 export default function Root() {
   return (
     <GestureHandlerRootView>
-      <RootNavigator />
+      <KeyboardProvider>
+        <RootNavigator />
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

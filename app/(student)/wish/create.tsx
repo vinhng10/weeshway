@@ -2,40 +2,88 @@ import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { BoxInput, TextInput } from "@/components/input";
 import { SongCard } from "@/components/song-card";
+import { SongSearch } from "@/components/song-search";
 import { Level, Style } from "@/constants/options";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/supabase";
+import { SongType } from "@/types";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function MakeAWish() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const profile = useAuth((state) => state.profile);
+  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const router = useRouter();
+
   const [style, setStyle] = useState<Style>(Style.HipHop);
   const [level, setLevel] = useState<Level>(Level.Beginner);
+  const [description, setDescription] = useState("");
+  const [song, setSong] = useState<SongType | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreate = async () => {
+    if (!isLoggedIn || !profile || !song) {
+      console.error("Error: User not logged in");
+      return;
+    }
+
+    setIsCreating(true);
+
+    try {
+      const { error } = await supabase.rpc("create_wish_with_song", {
+        p_song_data: {
+          id: song.id,
+          name: song.name,
+          artist_name: song.artistName,
+          artwork_url: song.artworkUrl,
+          preview_url: song.previewUrl,
+        },
+        p_wish_data: {
+          song_id: song.id,
+          style: style,
+          level: level,
+          description: description.trim(),
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Navigate back or show success message
+      router.back();
+    } catch (error: any) {
+      console.error("Error creating wish:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Header title="Make A Wish" />
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        {/* Search Input */}
-        <TextInput
-          placeholder="Search song..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        <SongSearch onSongPress={(song) => setSong(song)} />
 
         {/* Song Card */}
-        <View style={styles.cardContainer}>
-          <SongCard
-            title="Midnight Bloom"
-            artist="Liam Carter"
-            imageUrl="https://i.scdn.co/image/ab67616d0000b2737d469421bb0b23b32b4851da"
-            onPlay={() => {}}
-          />
-        </View>
+        {song && (
+          <View style={styles.cardContainer}>
+            <SongCard
+              name={song.name}
+              artistName={song.artistName}
+              imageUrl={{ uri: song.artworkUrl }}
+              onPlay={() => {}}
+            />
+          </View>
+        )}
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
@@ -60,10 +108,17 @@ export default function MakeAWish() {
           placeholder="What do you wish for?"
           multiline
           numberOfLines={4}
+          value={description}
+          onChangeText={setDescription}
         />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
-      <Button label="Create" onPress={() => {}} stickyBottom />
+      <Button
+        label={isCreating ? "Creating..." : "Create"}
+        onPress={handleCreate}
+        disabled={isCreating}
+        stickyBottom
+      />
     </View>
   );
 }

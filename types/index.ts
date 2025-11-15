@@ -5,7 +5,6 @@ export type WishType = {
   title: string;
   artist: string;
   imageUrl: string;
-  duration: string;
   style: string;
   level: string;
   description: string;
@@ -48,4 +47,13 @@ export type ProjectType = {
   likes: number;
   music: ItemType[];
   count: ItemType[];
+};
+
+export type SongType = {
+  id: string;
+  name: string;
+  artistName: string;
+  artworkUrl: string;
+  genreNames: string[];
+  previewUrl?: string;
 };
