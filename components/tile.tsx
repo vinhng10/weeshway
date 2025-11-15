@@ -1,4 +1,6 @@
 import { Avatar } from "@/components/avatar";
+import { IconButton } from "@/components/icon-button";
+import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { ImageProps } from "expo-image";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import React, { ReactNode } from "react";
@@ -13,6 +15,7 @@ interface TileProps {
   metadata?: string;
   backgroundColor?: "available" | "granted";
   rightContent?: ReactNode;
+  previewUrl?: string;
   onPress(): void;
 }
 
@@ -23,8 +26,19 @@ export const Tile: React.FunctionComponent<TileProps> = ({
   metadata,
   backgroundColor,
   rightContent,
+  previewUrl,
   onPress,
 }) => {
+  const isPlaying = useAudioPlayerStore((state) => state.isPlaying(previewUrl));
+  const play = useAudioPlayerStore((state) => state.play);
+  const pause = useAudioPlayerStore((state) => state.pause);
+
+  const handleAudioPlayer = (e?: any) => {
+    if (!previewUrl) return;
+    e?.stopPropagation?.();
+    isPlaying ? pause() : play(previewUrl);
+  };
+
   const getBackgroundColor = (): LinearGradientProps["colors"] => {
     switch (backgroundColor) {
       case "available":
@@ -45,7 +59,18 @@ export const Tile: React.FunctionComponent<TileProps> = ({
         end={{ x: 1, y: 0 }}
       >
         <View style={styles.leftContainer}>
-          <Avatar source={imageSource} size="large" shape="square" />
+          <View style={styles.avatarContainer}>
+            <Avatar source={imageSource} size="large" shape="square" />
+            {previewUrl && (
+              <View style={styles.playButtonOverlay}>
+                <IconButton
+                  icon={isPlaying ? "pause" : "play"}
+                  iconSize={24}
+                  onPress={handleAudioPlayer}
+                />
+              </View>
+            )}
+          </View>
           <View style={styles.textContainer}>
             <ThemedText type="h5" numberOfLines={1} ellipsizeMode="tail">
               {title}
@@ -101,5 +126,17 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "flex-start",
     gap: theme.gap(0.5),
     minWidth: 0,
+  },
+  avatarContainer: {
+    position: "relative",
+  },
+  playButtonOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
 }));

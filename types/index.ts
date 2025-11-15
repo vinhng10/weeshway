@@ -13,6 +13,14 @@ export type WishType = {
   classes?: ProjectType[];
 };
 
+export type WishType = {
+  id: number;
+  style: string;
+  level: string;
+  description: string;
+  songId: string;
+};
+
 export type UserType = {
   id: number;
   name: string;
@@ -56,4 +64,9 @@ export type SongType = {
   artworkUrl: string;
   genreNames: string[];
   previewUrl?: string;
+};
+
+// Utility type: WishType with song_id replaced by joined songs relation
+export type WishWithSongType = Omit<WishType, "songId"> & {
+  songs: SongType;
 };

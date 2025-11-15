@@ -76,12 +76,7 @@ export default function MakeAWish() {
         {/* Song Card */}
         {song && (
           <View style={styles.cardContainer}>
-            <SongCard
-              name={song.name}
-              artistName={song.artistName}
-              imageUrl={{ uri: song.artworkUrl }}
-              onPlay={() => {}}
-            />
+            <SongCard song={song} />
           </View>
         )}
 

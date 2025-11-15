@@ -1,17 +1,29 @@
+import { Role } from "@/constants/options";
+import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
+import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Stack } from "expo-router";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import "react-native-reanimated";
 
-import { Role } from "@/constants/options";
-import { useAuth } from "@/hooks/useAuth";
-import { useRole } from "@/hooks/useRole";
+const queryClient = new QueryClient();
 
 function RootNavigator() {
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
   const initialize = useAuth((state) => state.initialize);
   const role = useRole((state) => state.role);
+  const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
+  const player = useAudioPlayer();
+  const status = useAudioPlayerStatus(player);
+
+  // Initialize audio player on mount
+  useEffect(() => {
+    setPlayer(player, status);
+  }, [player, status, setPlayer]);
 
   // Initialize auth store on mount
   useEffect(() => {
@@ -44,7 +56,9 @@ export default function Root() {
   return (
     <GestureHandlerRootView>
       <KeyboardProvider>
-        <RootNavigator />
+        <QueryClientProvider client={queryClient}>
+          <RootNavigator />
+        </QueryClientProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
   );

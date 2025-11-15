@@ -1,27 +1,36 @@
 import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
-import { ImageBackground, ImageProps } from "expo-image";
+import { SongType } from "@/types";
+import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface SongCardProps {
-  name: string;
-  artistName: string;
-  imageUrl: ImageProps["source"];
-  onPlay?: any;
+  song: SongType;
 }
 
-export const SongCard: React.FunctionComponent<SongCardProps> = ({
-  name,
-  artistName,
-  imageUrl,
-  onPlay,
-}) => {
+export const SongCard: React.FunctionComponent<SongCardProps> = ({ song }) => {
+  const player = useAudioPlayer(song.previewUrl);
+  const status = useAudioPlayerStatus(player);
+
+  const handlePlay = () => {
+    if (!song.previewUrl) {
+      return;
+    }
+
+    if (player.playing) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  };
+
   return (
     <ImageBackground
-      source={imageUrl}
+      source={{ uri: song.artworkUrl }}
       style={styles.background}
       imageStyle={styles.backgroundImage}
     >
@@ -33,12 +42,16 @@ export const SongCard: React.FunctionComponent<SongCardProps> = ({
       >
         <View style={styles.container}>
           <View style={styles.song}>
-            <ThemedText type="h2">{name}</ThemedText>
+            <ThemedText type="h2">{song.name}</ThemedText>
             <ThemedText color="dimmed" type="h3">
-              {artistName}
+              {song.artistName}
             </ThemedText>
           </View>
-          <IconButton icon="play" iconSize={36} onPress={onPlay} />
+          <IconButton
+            icon={status.playing ? "pause" : "play"}
+            iconSize={36}
+            onPress={handlePlay}
+          />
         </View>
       </LinearGradient>
     </ImageBackground>
