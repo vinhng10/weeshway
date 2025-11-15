@@ -21,11 +21,12 @@ export default function Wishes() {
   const isFocused = useIsFocused();
 
   const { data, isPending, error } = useQuery({
-    queryKey: ["wishes"],
+    queryKey: ["wishes", profile?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
         .select(`*,songs (*)`)
+        .eq("user_id", profile.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

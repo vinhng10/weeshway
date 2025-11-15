@@ -1,23 +1,49 @@
-import { Carousel } from "@/components/carousel";
 import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
-import { wishes } from "@/mocks/wishes";
-import { ProjectType } from "@/types";
-import { router, useLocalSearchParams } from "expo-router";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/supabase";
+import { useQuery } from "@tanstack/react-query";
+import camelcaseKeys from "camelcase-keys";
+import { useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Wish() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
+  const profile = useAuth((state) => state.profile);
+  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
-  // Find the wish by ID
-  const wish = wishes.find((w) => w.id === Number(wishId));
+  const {
+    data: wish,
+    isPending,
+    error,
+  } = useQuery({
+    queryKey: ["wish", wishId, profile?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("wishes")
+        .select(`*,songs (*)`)
+        .eq("id", wishId)
+        .eq("user_id", profile.id)
+        .single();
 
-  if (!wish) {
+      if (error) throw error;
+      if (!data) return null;
+
+      const result = camelcaseKeys(data, { deep: true });
+      return result;
+    },
+    enabled: isLoggedIn && !!profile && !!wishId,
+  });
+
+  if (error || !wish) {
     return (
       <View style={styles.container}>
-        <ThemedText>Wish not found</ThemedText>
+        <Header title="Wish" />
+        <View style={styles.scrollContainer}>
+          <ThemedText>Wish not found</ThemedText>
+        </View>
       </View>
     );
   }
@@ -31,7 +57,8 @@ export default function Wish() {
         showsVerticalScrollIndicator={false}
       >
         {/* Top Classes Container */}
-        {wish.classes && wish.classes.length > 0 && (
+        {/* TODO: Add classes query when available */}
+        {/* {wish.classes && wish.classes.length > 0 && (
           <View style={styles.section}>
             <ThemedText type="h4">
               {wish.status === "available"
@@ -47,14 +74,15 @@ export default function Wish() {
               }
             />
           </View>
-        )}
+        )} */}
 
         <View style={styles.wishContainer}>
           <Tile
-            imageSource={wish.imageUrl}
-            title={wish.title}
-            subtitle={wish.artist}
+            imageSource={wish.songs.artworkUrl}
+            title={wish.songs.name}
+            subtitle={wish.songs.artistName}
             metadata={`${wish.style} • ${wish.level}`}
+            previewUrl={wish.songs.previewUrl}
             onPress={() => {}}
           />
           <View style={styles.descriptionContainer}>
