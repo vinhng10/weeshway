@@ -7,7 +7,7 @@ import { ThemedText } from "../themed-text";
 interface RowInputProps {
   label: string;
   icon: IconSymbolName;
-  value: string;
+  value?: string;
   editable?: boolean;
   onValueChange?: any;
 }

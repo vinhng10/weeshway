@@ -9,40 +9,36 @@ import { styles as textStyles } from "../themed-text";
 export type TextInputProps = RNTextInputProps &
   UnistylesVariants<typeof styles>;
 
-export function TextInput({
-  type,
-  bold,
-  color,
-  multiline,
-  style,
-  ...rest
-}: TextInputProps) {
-  styles.useVariants({
-    type,
-    bold,
-    color,
-    multiline,
-  });
-  textStyles.useVariants({
-    type,
-    bold,
-    color,
-  });
+export const TextInput = React.forwardRef<RNTextInput, TextInputProps>(
+  ({ type, bold, color, multiline, style, ...rest }, ref) => {
+    styles.useVariants({
+      type,
+      bold,
+      color,
+      multiline,
+    });
+    textStyles.useVariants({
+      type,
+      bold,
+      color,
+    });
 
-  return (
-    <RNTextInput
-      multiline={multiline}
-      style={[
-        styles.container,
-        textStyles.family,
-        textStyles.color,
-        textStyles.type,
-        style,
-      ]}
-      {...rest}
-    />
-  );
-}
+    return (
+      <RNTextInput
+        ref={ref}
+        multiline={multiline}
+        style={[
+          styles.container,
+          textStyles.family,
+          textStyles.color,
+          textStyles.type,
+          style,
+        ]}
+        {...rest}
+      />
+    );
+  }
+);
 
 const styles = StyleSheet.create((theme) => ({
   container: {

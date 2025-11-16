@@ -1,7 +1,12 @@
 import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
-import { BoxInput, RowInput, TextInput } from "@/components/input";
+import {
+  BoxInput,
+  DateTimeInput,
+  RowInput,
+  TextInput,
+} from "@/components/input";
 import { SongSearch } from "@/components/song-search";
 import { Tile } from "@/components/tile";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
@@ -17,14 +22,17 @@ export default function CreateProject() {
   const [song, setSong] = useState<SongType | null>(null);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const [status, setStatus] = useState<string>(ProjectStatusEnum.Private);
-  const [style, setStyle] = useState<StyleEnum>(StyleEnum.HipHop);
-  const [level, setLevel] = useState<LevelEnum>(LevelEnum.Beginner);
-  const [price, setPrice] = useState("$0.00");
-  const [spots, setSpots] = useState("0");
-  const [audioFile, setAudioFile] = useState<string | undefined>();
-  const [dateTime, setDateTime] = useState("");
-  const [location, setLocation] = useState("");
+  const [status, setStatus] = useState(ProjectStatusEnum.Private);
+  const [style, setStyle] = useState();
+  const [level, setLevel] = useState();
+  const [price, setPrice] = useState();
+  const [spots, setSpots] = useState();
+  const [audioFile, setAudioFile] = useState();
+  const [startDateTime, setStartDateTime] = useState<Date | undefined>(
+    undefined
+  );
+  const [endDateTime, setEndDateTime] = useState<Date | undefined>(undefined);
+  const [location, setLocation] = useState();
 
   const options: ChipBarItemProps[] = [
     {
@@ -70,7 +78,7 @@ export default function CreateProject() {
         {/* Toggle Button Group for Visibility */}
         <ChipBar items={options} />
 
-        {/* StyleEnum and LevelEnum Selects */}
+        {/* Style and Level Selects */}
         <View style={styles.row}>
           <BoxInput
             label="Style"
@@ -92,13 +100,13 @@ export default function CreateProject() {
         <View style={styles.row}>
           <BoxInput
             label="Price"
-            type="text"
+            type="float"
             value={price}
             onValueChange={setPrice}
           />
           <BoxInput
             label="Spots"
-            type="text"
+            type="int"
             value={spots}
             onValueChange={setSpots}
           />
@@ -108,16 +116,19 @@ export default function CreateProject() {
         <RowInput
           label="Audio File"
           icon="music.note"
-          value={audioFile || "No file selected"}
-          onValueChange={setAudioFile}
+          value={audioFile}
+          onValueChange={() => setAudioFile(undefined)}
         />
 
         {/* Date & Time Row */}
-        <RowInput
+        <DateTimeInput
           label="Date & Time"
-          icon="timer.circle.fill"
-          value={dateTime}
-          onValueChange={setDateTime}
+          startDateTime={startDateTime}
+          endDateTime={endDateTime}
+          onValueChange={(startTime: Date, endTime: Date) => {
+            setStartDateTime(startTime);
+            setEndDateTime(endTime);
+          }}
         />
 
         {/* Location Row */}
@@ -125,7 +136,7 @@ export default function CreateProject() {
           label="Location"
           icon="location.app.fill"
           value={location}
-          onValueChange={setLocation}
+          onValueChange={() => setLocation(undefined)}
         />
 
         {/* Project Description Input */}

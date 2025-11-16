@@ -21,14 +21,14 @@ export enum LevelEnum {
   Beginner = "Beginner",
   Intermediate = "Intermediate",
   Advanced = "Advanced",
-  OpenLevel = "Open LevelEnum",
+  OpenLevel = "Open Level",
 }
 
 export enum ProjectStatusEnum {
   Private = "Private",
   Public = "Public",
   Release = "Release",
-  Cancelled = "Cancelled",
+  Cancel = "Cancel",
 }
 
 export enum GenreEnum {
@@ -68,4 +68,29 @@ export enum WishStatusEnum {
 export enum RoleEnum {
   Student = "Student",
   Teacher = "Teacher",
+}
+
+export enum DayEnum {
+  Sunday = "Sunday",
+  Monday = "Monday",
+  Tuesday = "Tuesday",
+  Wednesday = "Wednesday",
+  Thursday = "Thursday",
+  Friday = "Friday",
+  Saturday = "Saturday",
+}
+
+export enum MonthEnum {
+  January = "January",
+  February = "February",
+  March = "March",
+  April = "April",
+  May = "May",
+  June = "June",
+  July = "July",
+  August = "August",
+  September = "September",
+  October = "October",
+  November = "November",
+  December = "December",
 }

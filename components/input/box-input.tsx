@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { OptionsModal } from "../options-modal";
@@ -8,11 +8,11 @@ import { TextInput } from "./text-input";
 
 interface BoxInputProps {
   label: string;
-  value: string;
-  options?: Record<string, string>; // 👈 The enum-like object
+  value?: string;
+  options?: Record<string, string>;
   onValueChange?: any;
   placeholder?: string;
-  type: "text" | "select";
+  type: "text" | "select" | "int" | "float";
   editable?: boolean;
 }
 
@@ -25,11 +25,18 @@ export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
   type,
   editable = true,
 }) => {
+  const keyboardType =
+    type === "int" || type === "float" ? "numeric" : "default";
   const [modalVisible, setModalVisible] = useState(false);
+  const textInputRef = useRef<any>(null);
 
   const handlePress = () => {
-    if (type === "select" && editable) {
+    if (!editable) return;
+
+    if (type === "select") {
       setModalVisible(true);
+    } else {
+      textInputRef.current?.focus();
     }
   };
 
@@ -37,12 +44,37 @@ export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
     setModalVisible(false);
   };
 
+  const handleTextChange = (text: string) => {
+    if (!onValueChange) return;
+
+    if (type === "int") {
+      const regex = /^\d*$/;
+      if (regex.test(text) || text === "") {
+        const parsed = text === "" ? "" : String(parseInt(text) || 0);
+        onValueChange(parsed);
+      }
+    } else if (type === "float") {
+      const regex = /^(\d*\.?\d*)$/;
+      if (regex.test(text) || text === "") {
+        // Allow trailing dot for better UX while typing
+        if (text.endsWith(".")) {
+          onValueChange(text);
+        } else {
+          const parsed = text === "" ? "" : String(parseFloat(text) || 0);
+          onValueChange(parsed);
+        }
+      }
+    } else {
+      onValueChange(text);
+    }
+  };
+
   return (
     <>
       <Pressable
         style={styles.container}
         onPress={handlePress}
-        disabled={!editable || type === "text"}
+        disabled={!editable}
       >
         <View style={styles.labelContainer}>
           <ThemedText color="dimmed">{label}</ThemedText>
@@ -53,21 +85,22 @@ export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
 
         {type === "select" ? (
           <View style={styles.valueContainer}>
-            <ThemedText type="h5">{value || placeholder || ""}</ThemedText>
+            <ThemedText type="h5">{value || ""}</ThemedText>
           </View>
         ) : (
           <TextInput
+            ref={textInputRef}
             type="h5"
             value={value}
-            onChangeText={onValueChange}
+            onChangeText={handleTextChange}
             placeholder={placeholder}
             style={styles.textInput}
             editable={editable}
+            keyboardType={keyboardType}
           />
         )}
       </Pressable>
 
-      {/* Modal for select type */}
       {type === "select" && options && (
         <OptionsModal
           visible={modalVisible}

@@ -40,6 +40,7 @@ const MAPPING = {
   "arrow.merge": "git-merge",
   "folder.fill": "folder",
   sparkles: "sparkles",
+  calendar: "calendar",
 } as IconMapping;
 
 /**
