@@ -1,4 +1,4 @@
-export enum Style {
+export enum StyleEnum {
   HipHop = "Hip Hop",
   Urban = "Urban",
   House = "House",
@@ -17,21 +17,21 @@ export enum Style {
   Bollywood = "Bollywood",
 }
 
-export enum Level {
+export enum LevelEnum {
   Beginner = "Beginner",
   Intermediate = "Intermediate",
   Advanced = "Advanced",
-  OpenLevel = "Open Level",
+  OpenLevel = "Open LevelEnum",
 }
 
-export enum ProjectStatus {
+export enum ProjectStatusEnum {
   Private = "Private",
   Public = "Public",
   Release = "Release",
   Cancelled = "Cancelled",
 }
 
-export enum Genre {
+export enum GenreEnum {
   Pop = "Pop",
   Rock = "Rock",
   HipHop = "Hip Hop",
@@ -59,13 +59,13 @@ export enum Genre {
   EDM = "EDM",
 }
 
-export enum WishStatus {
+export enum WishStatusEnum {
   ClassAvailable = "Class available",
   Granted = "Granted",
   Waiting = "Waiting",
 }
 
-export enum Role {
+export enum RoleEnum {
   Student = "Student",
   Teacher = "Teacher",
 }

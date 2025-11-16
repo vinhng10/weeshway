@@ -4,7 +4,7 @@ import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { Genre, Level, Style } from "@/constants/options";
+import { GenreEnum, LevelEnum, StyleEnum } from "@/constants";
 import { projects } from "@/mocks/projects";
 import { ProjectType } from "@/types";
 import { router } from "expo-router";
@@ -17,25 +17,25 @@ export default function Classes() {
   const [style, setStyle] = useState<string>("");
   const [level, setLevel] = useState<string>("");
 
-  const filters: ChipBarItemProps[] = [
+  const options: ChipBarItemProps[] = [
     {
       label: "Genre",
       value: genre,
-      options: Genre,
+      options: GenreEnum,
       modal: true,
       onValueChange: setGenre,
     },
     {
       label: "Style",
       value: style,
-      options: Style,
+      options: StyleEnum,
       modal: true,
       onValueChange: setStyle,
     },
     {
       label: "Level",
       value: level,
-      options: Level,
+      options: LevelEnum,
       modal: true,
       onValueChange: setLevel,
     },
@@ -86,7 +86,7 @@ export default function Classes() {
 
   return (
     <View style={styles.container}>
-      <ChipBar padding items={filters} />
+      <ChipBar padding items={options} />
       <SectionListView sections={sections} />
     </View>
   );

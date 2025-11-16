@@ -3,7 +3,7 @@ import { Header } from "@/components/header";
 import { BoxInput, TextInput } from "@/components/input";
 import { SongCard } from "@/components/song-card";
 import { SongSearch } from "@/components/song-search";
-import { Level, Style } from "@/constants/options";
+import { LevelEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
 import { SongType } from "@/types";
@@ -18,8 +18,8 @@ export default function MakeAWish() {
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
   const router = useRouter();
 
-  const [style, setStyle] = useState<Style>(Style.HipHop);
-  const [level, setLevel] = useState<Level>(Level.Beginner);
+  const [style, setStyle] = useState<StyleEnum>(StyleEnum.HipHop);
+  const [level, setLevel] = useState<LevelEnum>(LevelEnum.Beginner);
   const [description, setDescription] = useState("");
   const [song, setSong] = useState<SongType | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -86,14 +86,14 @@ export default function MakeAWish() {
             label="Style"
             type="select"
             value={style}
-            options={Style}
+            options={StyleEnum}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={Level}
+            options={LevelEnum}
             onValueChange={setLevel}
           />
         </View>

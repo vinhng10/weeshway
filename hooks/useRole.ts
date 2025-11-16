@@ -1,17 +1,17 @@
-import { Role } from "@/constants/options";
+import { RoleEnum } from "@/constants";
 import Storage from "expo-native-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 interface RoleState {
-  role: Role;
-  setRole: (role: Role) => void;
+  role: RoleEnum;
+  setRole: (role: RoleEnum) => void;
 }
 
 export const useRole = create<RoleState>()(
   persist(
     (set) => ({
-      role: Role.Student,
+      role: RoleEnum.Student,
       setRole: (role) => set(() => ({ role })),
     }),
     {

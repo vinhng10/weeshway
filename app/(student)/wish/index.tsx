@@ -2,7 +2,7 @@ import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { WishStatus } from "@/constants/options";
+import { WishStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
 import { WishWithSongType } from "@/types";
@@ -39,12 +39,12 @@ export default function Wishes() {
     enabled: isLoggedIn && !!profile,
   });
 
-  const filters: ChipBarItemProps[] = [
+  const options: ChipBarItemProps[] = [
     {
       label: "Class available",
       value: status,
       modal: false,
-      options: WishStatus,
+      options: WishStatusEnum,
       onValueChange: setStatus,
     },
   ];
@@ -78,7 +78,7 @@ export default function Wishes() {
 
   return (
     <View style={styles.container}>
-      <ChipBar padding items={filters} />
+      <ChipBar padding items={options} />
       <SectionListView sections={sections} />
       <Button
         stickyBottom

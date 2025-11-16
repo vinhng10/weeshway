@@ -2,7 +2,7 @@ import { BubbleChart } from "@/components/bubble-chart";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { Genre, Level, Style } from "@/constants/options";
+import { GenreEnum, LevelEnum, StyleEnum } from "@/constants";
 import { BubbleChartData, bubbleChartData } from "@/mocks/bubble-chart";
 import { wishes } from "@/mocks/wishes";
 import { WishType } from "@/types";
@@ -16,25 +16,25 @@ export default function WishBoard() {
   const [style, setStyle] = useState<string>("");
   const [level, setLevel] = useState<string>("");
 
-  const filters: ChipBarItemProps[] = [
+  const options: ChipBarItemProps[] = [
     {
       label: "Genre",
       value: genre,
-      options: Genre,
+      options: GenreEnum,
       modal: true,
       onValueChange: setGenre,
     },
     {
       label: "Style",
       value: style,
-      options: Style,
+      options: StyleEnum,
       modal: true,
       onValueChange: setStyle,
     },
     {
       label: "Level",
       value: level,
-      options: Level,
+      options: LevelEnum,
       modal: true,
       onValueChange: setLevel,
     },
@@ -61,7 +61,7 @@ export default function WishBoard() {
 
   return (
     <View style={styles.container}>
-      <ChipBar padding items={filters} />
+      <ChipBar padding items={options} />
       <SectionListView sections={sections} />
     </View>
   );

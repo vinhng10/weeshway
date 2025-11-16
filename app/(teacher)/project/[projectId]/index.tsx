@@ -3,7 +3,7 @@ import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
 import { Tile } from "@/components/tile";
-import { Level, ProjectStatus, Style } from "@/constants/options";
+import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { projects } from "@/mocks/projects";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -24,10 +24,10 @@ export default function Project() {
     project?.description || ""
   );
   const [status, setStatus] = useState<string>(
-    project?.status ?? ProjectStatus.Private
+    project?.status ?? ProjectStatusEnum.Private
   );
-  const [style, setStyle] = useState<Style>(project?.style as Style);
-  const [level, setLevel] = useState<Level>(project?.level as Level);
+  const [style, setStyle] = useState<StyleEnum>(project?.style as StyleEnum);
+  const [level, setLevel] = useState<LevelEnum>(project?.level as LevelEnum);
   const [price, setPrice] = useState<string>(
     `$${project?.price?.toFixed(2) ?? "$0.00"}`
   );
@@ -38,11 +38,11 @@ export default function Project() {
   );
   const [location, setLocation] = useState<string>(project?.studio ?? "");
 
-  const filters: ChipBarItemProps[] = [
+  const options: ChipBarItemProps[] = [
     {
       label: "Status",
       value: status,
-      options: ProjectStatus,
+      options: ProjectStatusEnum,
       modal: false,
       onValueChange: setStatus,
     },
@@ -74,22 +74,22 @@ export default function Project() {
         />
 
         {/* Toggle Button Group for Visibility */}
-        <ChipBar items={filters} />
+        <ChipBar items={options} />
 
-        {/* Style and Level Selects */}
+        {/* StyleEnum and LevelEnum Selects */}
         <View style={styles.row}>
           <BoxInput
             label="Style"
             type="select"
             value={style}
-            options={Style}
+            options={StyleEnum}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={Level}
+            options={LevelEnum}
             onValueChange={setLevel}
           />
         </View>

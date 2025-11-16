@@ -83,7 +83,7 @@ export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
   return (
     <>
       <TextInput
-        placeholder="What song do you want to dance?"
+        placeholder="What song are you looking for?"
         onPress={handleOpenModal}
         // editable={false}
       />

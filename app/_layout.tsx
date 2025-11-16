@@ -1,4 +1,4 @@
-import { Role } from "@/constants/options";
+import { RoleEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
@@ -40,12 +40,12 @@ function RootNavigator() {
       </Stack.Protected>
 
       {/* Screens for authenticated users with student role */}
-      <Stack.Protected guard={isLoggedIn && role === Role.Student}>
+      <Stack.Protected guard={isLoggedIn && role === RoleEnum.Student}>
         <Stack.Screen name="(student)" options={{ headerShown: false }} />
       </Stack.Protected>
 
       {/* Screens for authenticated users with teacher role */}
-      <Stack.Protected guard={isLoggedIn && role === Role.Teacher}>
+      <Stack.Protected guard={isLoggedIn && role === RoleEnum.Teacher}>
         <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>

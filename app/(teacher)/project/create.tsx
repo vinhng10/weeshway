@@ -2,32 +2,35 @@ import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
 import { BoxInput, RowInput, TextInput } from "@/components/input";
+import { SongSearch } from "@/components/song-search";
 import { Tile } from "@/components/tile";
-import { Level, ProjectStatus, Style } from "@/constants/options";
+import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
+import { SongType } from "@/types";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function MakeAWish() {
+export default function CreateProject() {
   // Initialize state with project data or defaults
-  const [searchQuery, setSearchQuery] = useState("");
+  const [song, setSong] = useState<SongType | null>(null);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const [status, setStatus] = useState<string>(ProjectStatus.Private);
-  const [style, setStyle] = useState<Style>(Style.HipHop);
-  const [level, setLevel] = useState<Level>(Level.Beginner);
+  const [status, setStatus] = useState<string>(ProjectStatusEnum.Private);
+  const [style, setStyle] = useState<StyleEnum>(StyleEnum.HipHop);
+  const [level, setLevel] = useState<LevelEnum>(LevelEnum.Beginner);
   const [price, setPrice] = useState("$0.00");
   const [spots, setSpots] = useState("0");
   const [audioFile, setAudioFile] = useState<string | undefined>();
   const [dateTime, setDateTime] = useState("");
   const [location, setLocation] = useState("");
 
-  const filters: ChipBarItemProps[] = [
+  const options: ChipBarItemProps[] = [
     {
       label: "Status",
       value: status,
-      options: ProjectStatus,
+      options: ProjectStatusEnum,
       modal: false,
       onValueChange: setStatus,
     },
@@ -39,24 +42,23 @@ export default function MakeAWish() {
       <Header title="Project" />
 
       {/* Scrollable Content */}
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        {/* Search Input */}
-        <TextInput
-          placeholder="Search song..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        {/* Song Search */}
+        <SongSearch onSongPress={(song) => setSong(song)} />
 
-        {/* Song Card */}
-        <Tile
-          imageSource="https://i.scdn.co/image/ab67616d0000b2737d469421bb0b23b32b4851da"
-          title="Echoes of the Night"
-          subtitle="Liam Carter"
-          onPress={() => {}}
-        />
+        {/* Song Tile */}
+        {song && (
+          <Tile
+            imageSource={song.artworkUrl}
+            title={song.name}
+            subtitle={song.artistName}
+            previewUrl={song.previewUrl}
+          />
+        )}
 
         {/* Project Name Input */}
         <TextInput
@@ -66,22 +68,22 @@ export default function MakeAWish() {
         />
 
         {/* Toggle Button Group for Visibility */}
-        <ChipBar items={filters} />
+        <ChipBar items={options} />
 
-        {/* Style and Level Selects */}
+        {/* StyleEnum and LevelEnum Selects */}
         <View style={styles.row}>
           <BoxInput
             label="Style"
             type="select"
             value={style}
-            options={Style}
+            options={StyleEnum}
             onValueChange={setStyle}
           />
           <BoxInput
             label="Level"
             type="select"
             value={level}
-            options={Level}
+            options={LevelEnum}
             onValueChange={setLevel}
           />
         </View>
@@ -134,7 +136,7 @@ export default function MakeAWish() {
           multiline
           numberOfLines={4}
         />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Create Button */}
       <Button

@@ -16,7 +16,7 @@ interface TileProps {
   backgroundColor?: "available" | "granted";
   rightContent?: ReactNode;
   previewUrl?: string;
-  onPress(): void;
+  onPress?(): void;
 }
 
 export const Tile: React.FunctionComponent<TileProps> = ({

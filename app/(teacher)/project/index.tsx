@@ -4,7 +4,12 @@ import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
-import { Genre, Level, ProjectStatus, Style } from "@/constants/options";
+import {
+  GenreEnum,
+  LevelEnum,
+  ProjectStatusEnum,
+  StyleEnum,
+} from "@/constants";
 import { projects } from "@/mocks/projects";
 import { ProjectType } from "@/types";
 import { router } from "expo-router";
@@ -13,37 +18,37 @@ import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Projects() {
-  const [status, setStatus] = useState<string>(ProjectStatus.Private);
+  const [status, setStatus] = useState<string>(ProjectStatusEnum.Private);
   const [genre, setGenre] = useState<string>("");
   const [style, setStyle] = useState<string>("");
   const [level, setLevel] = useState<string>("");
 
-  const filters: ChipBarItemProps[] = [
+  const options: ChipBarItemProps[] = [
     {
       label: "Status",
       value: status,
-      options: ProjectStatus,
+      options: ProjectStatusEnum,
       modal: true,
       onValueChange: setStatus,
     },
     {
       label: "Genre",
       value: genre,
-      options: Genre,
+      options: GenreEnum,
       modal: true,
       onValueChange: setGenre,
     },
     {
       label: "Style",
       value: style,
-      options: Style,
+      options: StyleEnum,
       modal: true,
       onValueChange: setStyle,
     },
     {
       label: "Level",
       value: level,
-      options: Level,
+      options: LevelEnum,
       modal: true,
       onValueChange: setLevel,
     },
@@ -95,7 +100,7 @@ export default function Projects() {
 
   return (
     <View style={styles.container}>
-      <ChipBar padding items={filters} />
+      <ChipBar padding items={options} />
       <SectionListView sections={sections} />
 
       <Button
