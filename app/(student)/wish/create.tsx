@@ -76,7 +76,7 @@ export default function MakeAWish() {
         {/* Song Card */}
         {song && (
           <View style={styles.cardContainer}>
-            <SongCard song={song} />
+            <SongCard data={song} />
           </View>
         )}
 

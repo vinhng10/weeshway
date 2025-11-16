@@ -4,6 +4,7 @@ import { Chip } from "@/components/chip";
 import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { ProjectType } from "@/types";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,16 +15,27 @@ import { StyleSheet } from "react-native-unistyles";
 interface CardProps {
   data: ProjectType;
   onBook?: any;
-  onPlay?: any;
   onPress?: any;
 }
 
 export const ClassCard: React.FunctionComponent<CardProps> = ({
   data,
   onBook,
-  onPlay,
   onPress,
 }) => {
+  const isPlaying = useAudioPlayerStore((state) =>
+    state.isPlaying(data.songs.previewUrl)
+  );
+  const play = useAudioPlayerStore((state) => state.play);
+  const pause = useAudioPlayerStore((state) => state.pause);
+
+  const handleAudioPlayer = (e?: any) => {
+    if (!data.songs.previewUrl) {
+      return;
+    }
+    e?.stopPropagation?.();
+    isPlaying ? pause() : play(data.songs.previewUrl);
+  };
   return (
     <Pressable onPress={() => onPress(data)}>
       <ImageBackground
@@ -97,9 +109,9 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
               <Button label="Book" onPress={() => onBook(data)} />
             </View>
             <IconButton
-              icon="play"
+              icon={isPlaying ? "pause" : "play"}
               iconSize={36}
-              onPress={() => onPlay(data)}
+              onPress={handleAudioPlayer}
             />
           </View>
         </LinearGradient>

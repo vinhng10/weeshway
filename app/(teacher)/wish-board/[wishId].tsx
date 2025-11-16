@@ -33,10 +33,13 @@ export default function Wish() {
         {/* Song Card */}
         <View style={styles.cardContainer}>
           <SongCard
-            name={wish.title}
-            artistName={wish.artist}
-            imageUrl={wish.imageUrl}
-            onPlay={() => {}}
+            data={{
+              id: wish.id.toString(),
+              name: wish.title,
+              artistName: wish.artist,
+              artworkUrl: wish.imageUrl,
+              genreNames: [],
+            }}
           />
         </View>
 

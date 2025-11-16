@@ -1,7 +1,7 @@
 import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
+import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { SongType } from "@/types";
-import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -9,28 +9,27 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface SongCardProps {
-  song: SongType;
+  data: SongType;
 }
 
-export const SongCard: React.FunctionComponent<SongCardProps> = ({ song }) => {
-  const player = useAudioPlayer(song.previewUrl);
-  const status = useAudioPlayerStatus(player);
+export const SongCard: React.FunctionComponent<SongCardProps> = ({ data }) => {
+  const isPlaying = useAudioPlayerStore((state) =>
+    state.isPlaying(data.previewUrl)
+  );
+  const play = useAudioPlayerStore((state) => state.play);
+  const pause = useAudioPlayerStore((state) => state.pause);
 
   const handlePlay = () => {
-    if (!song.previewUrl) {
+    if (!data.previewUrl) {
       return;
     }
 
-    if (player.playing) {
-      player.pause();
-    } else {
-      player.play();
-    }
+    isPlaying ? pause() : play(data.previewUrl);
   };
 
   return (
     <ImageBackground
-      source={{ uri: song.artworkUrl }}
+      source={{ uri: data.artworkUrl }}
       style={styles.background}
       imageStyle={styles.backgroundImage}
     >
@@ -42,13 +41,13 @@ export const SongCard: React.FunctionComponent<SongCardProps> = ({ song }) => {
       >
         <View style={styles.container}>
           <View style={styles.song}>
-            <ThemedText type="h2">{song.name}</ThemedText>
+            <ThemedText type="h2">{data.name}</ThemedText>
             <ThemedText color="dimmed" type="h3">
-              {song.artistName}
+              {data.artistName}
             </ThemedText>
           </View>
           <IconButton
-            icon={status.playing ? "pause" : "play"}
+            icon={isPlaying ? "pause" : "play"}
             iconSize={36}
             onPress={handlePlay}
           />
