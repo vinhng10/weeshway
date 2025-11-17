@@ -7,7 +7,7 @@ import { Tile } from "@/components/tile";
 import { Video } from "@/components/video";
 import { projects } from "@/mocks/projects";
 import { users } from "@/mocks/users";
-import { ProjectType, UserType } from "@/types";
+import { ProfileType, ProjectType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -17,11 +17,11 @@ export default function Profile() {
   const profile = users.find((p) => p.id === Number(profileId));
   const classes = projects.filter((p) => p.teacher.id === Number(profileId));
 
-  const renderProfile = (data: UserType): React.ReactElement => (
+  const renderProfile = (data: ProfileType): React.ReactElement => (
     <View style={styles.header}>
-      <Avatar source={data.imageUrl} size="large" shape="circle" bordered />
+      <Avatar source={data.avatarUrl} size="large" shape="circle" bordered />
       <ThemedText type="h3" style={styles.text}>
-        {data.name}
+        {data.fullName}
       </ThemedText>
       <ThemedText
         color="dimmed"
@@ -50,7 +50,7 @@ export default function Profile() {
       metadata={`${data.style} • ${data.level}`}
       rightContent={
         <>
-          <Avatar source={data.teacher.imageUrl} shape="circle" bordered />
+          <Avatar source={data.teacher.avatarUrl} shape="circle" bordered />
           <Chip
             color="highlight"
             label={`${data.spots - data.books} spots left`}
@@ -61,9 +61,9 @@ export default function Profile() {
     />
   );
 
-  const sections: SectionListData<ProjectType | UserType | string[]>[] = [
+  const sections: SectionListData<ProjectType | ProfileType | string[]>[] = [
     {
-      data: [profile as UserType],
+      data: [profile as ProfileType],
       render: renderProfile,
     },
     {

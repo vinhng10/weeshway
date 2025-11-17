@@ -1,10 +1,15 @@
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Image, type ImageProps } from "expo-image";
-import { Pressable } from "react-native";
+import {
+  launchImageLibraryAsync,
+  requestMediaLibraryPermissionsAsync,
+} from "expo-image-picker";
+import { Pressable, View } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 
 export type AvatarProps = ImageProps &
   UnistylesVariants<typeof styles> & {
-    onPress?: any;
+    onSourceChange?: (uri: string) => void;
   };
 
 export function Avatar({
@@ -13,7 +18,7 @@ export function Avatar({
   size,
   bordered,
   shape,
-  onPress,
+  onSourceChange,
   ...rest
 }: AvatarProps) {
   styles.useVariants({
@@ -21,9 +26,46 @@ export function Avatar({
     bordered,
     shape,
   });
+
+  const handleImagePicker = async () => {
+    if (!onSourceChange) {
+      return;
+    }
+
+    try {
+      // Request permissions
+      const { status } = await requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        console.error("Error requesting media library permissions:", status);
+        return;
+      }
+
+      // Launch image picker
+      const result = await launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        const uri = asset.uri;
+        onSourceChange(uri);
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+    }
+  };
+
   return (
-    <Pressable onPress={onPress}>
+    <Pressable style={styles.container} onPress={handleImagePicker}>
       <Image source={source} style={[styles.avatar, style]} {...rest} />
+      {onSourceChange && (
+        <View style={styles.cameraButton}>
+          <IconSymbol name="camera.fill" size={16} />
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -57,5 +99,21 @@ const styles = StyleSheet.create((theme) => ({
         },
       },
     },
+  },
+  container: {
+    position: "relative",
+    alignSelf: "center",
+    flexShrink: 0,
+  },
+  cameraButton: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: theme.gap(3),
+    height: theme.gap(3),
+    borderRadius: 999,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
   },
 }));

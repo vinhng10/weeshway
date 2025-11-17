@@ -1,13 +1,11 @@
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
+import { TextField } from "@/components/field";
 import { Header } from "@/components/header";
-import { TextInput } from "@/components/input/text-input";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/supabase";
-import * as ImagePicker from "expo-image-picker";
+import { supabase, uploadImage } from "@/supabase";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Account() {
@@ -16,42 +14,16 @@ export default function Account() {
   const session = useAuth((state) => state.session);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
-  const [username, setUsername] = useState(profile.username);
-  const [fullName, setFullName] = useState(profile.full_name);
-  const [bio, setBio] = useState(profile.bio);
-  const [avatarUri, setAvatarUri] = useState<string | null>(profile.avatar_url);
+  const [username, setUsername] = useState(profile?.username || "");
+  const [fullName, setFullName] = useState(profile?.fullName || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [avatarUri, setAvatarUri] = useState<string | null>(
+    profile?.avatarUrl || null
+  );
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleImagePicker = async () => {
-    try {
-      // Request permissions
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        console.error("Error requesting media library permissions:", status);
-        return;
-      }
-
-      // Launch image picker
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        const uri = asset.uri;
-        setAvatarUri(uri);
-      }
-    } catch (error) {
-      console.error("Error picking image:", error);
-    }
-  };
-
   const handleSave = async () => {
-    if (!isLoggedIn) {
+    if (!profile || !isLoggedIn) {
       console.error("Error: User not logged in");
       return;
     }
@@ -59,36 +31,10 @@ export default function Account() {
     setIsSaving(true);
 
     try {
-      let avatarUrl = profile.avatar_url;
+      let avatarUrl = profile?.avatarUrl;
 
-      if (avatarUri && avatarUri !== profile.avatar_url) {
-        const response = await fetch(avatarUri);
-        const blob = await response.blob();
-        const arrayBuffer = await new Response(blob).arrayBuffer();
-
-        // 2) Define bucket and path
-        const filePath = `${profile.id}/avatars/${Date.now()}.${
-          blob.type.split("/")[1]
-        }`;
-
-        // 3) Upload the file
-        const { error } = await supabase.storage
-          .from("images")
-          .upload(filePath, arrayBuffer, {
-            contentType: blob.type,
-            upsert: false,
-          });
-
-        if (error) {
-          throw error;
-        }
-
-        // 4) Build the public URL (or the path) to store in your profiles table
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("images").getPublicUrl(filePath);
-
-        avatarUrl = publicUrl;
+      if (avatarUri && avatarUri !== profile?.avatarUrl) {
+        avatarUrl = await uploadImage(avatarUri, `profiles/${profile.id}/avatars`);
       }
 
       // 5) Update profile
@@ -124,36 +70,33 @@ export default function Account() {
       >
         {/* Avatar Section */}
         <View style={styles.header}>
-          <View style={styles.avatarContainer}>
-            <Avatar
-              source={avatarUri}
-              size="large"
-              shape="circle"
-              bordered
-            />
-            <Pressable style={styles.cameraButton} onPress={handleImagePicker}>
-              <View style={styles.cameraIconContainer}>
-                <IconSymbol name="camera.fill" size={16} color="#000000" />
-              </View>
-            </Pressable>
-          </View>
+          <Avatar
+            source={avatarUri}
+            size="large"
+            shape="circle"
+            bordered
+            onSourceChange={setAvatarUri}
+          />
         </View>
 
         {/* Form Fields */}
         <View style={styles.formSection}>
-          <TextInput
+          <TextField
+            label="Username"
             value={username}
-            onChangeText={setUsername}
+            onValueChange={setUsername}
             placeholder="Username"
           />
-          <TextInput
+          <TextField
+            label="Full Name"
             value={fullName}
-            onChangeText={setFullName}
+            onValueChange={setFullName}
             placeholder="Full Name"
           />
-          <TextInput
+          <TextField
+            label="Bio"
             value={bio}
-            onChangeText={setBio}
+            onValueChange={setBio}
             placeholder="Bio"
             multiline
           />
@@ -184,23 +127,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     alignItems: "center",
     marginTop: theme.gap(2),
     marginBottom: theme.gap(2),
-  },
-  avatarContainer: {
-    position: "relative",
-    marginBottom: theme.gap(1),
-  },
-  cameraButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-  },
-  cameraIconContainer: {
-    width: theme.gap(3),
-    height: theme.gap(3),
-    borderRadius: 999,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
   },
   formSection: {
     gap: theme.gap(2),

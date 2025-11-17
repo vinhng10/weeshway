@@ -6,7 +6,7 @@ import { ThemedText } from "@/components/themed-text";
 import { projects } from "@/mocks/projects";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Class() {
@@ -38,18 +38,20 @@ export default function Class() {
         showsVerticalScrollIndicator={false}
       >
         {/* Song Card */}
-        <View style={styles.teacherContainer}>
+        <Pressable
+          style={styles.teacherContainer}
+          onPress={() => {
+            router.push(`/(student)/profile/${classData.teacher.id}`);
+          }}
+        >
           <Avatar
-            source={classData.teacher.imageUrl}
+            source={classData.teacher.avatarUrl}
             size="large"
             shape="circle"
             bordered={true}
-            onPress={() => {
-              router.push(`/(student)/profile/${classData.teacher.id}`);
-            }}
           />
-          <ThemedText type="h3">{classData.teacher.name}</ThemedText>
-        </View>
+          <ThemedText type="h3">{classData.teacher.fullName}</ThemedText>
+        </Pressable>
 
         {/* Style and Level Selects */}
         <View style={styles.row}>

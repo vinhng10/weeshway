@@ -1,10 +1,12 @@
 import { supabase } from "@/supabase";
+import { ProfileType } from "@/types";
 import { Session } from "@supabase/supabase-js";
+import camelcaseKeys from "camelcase-keys";
 import { create } from "zustand";
 
 interface AuthState {
   session: Session | null;
-  profile: any;
+  profile: ProfileType | null;
   isLoading: boolean;
   isLoggedIn: boolean;
   signIn: (email: string, password: string) => Promise<void>;
@@ -37,7 +39,7 @@ export const useAuth = create<AuthState>((set, get) => ({
         .eq("id", session.user.id)
         .single();
 
-      set({ profile: data, isLoading: false });
+      set({ profile: camelcaseKeys(data, { deep: true }), isLoading: false });
     } else {
       set({ profile: null, isLoading: false });
     }

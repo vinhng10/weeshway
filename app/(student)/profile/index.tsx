@@ -53,13 +53,13 @@ export default function Profile() {
       {/* Profile Header */}
       <View style={styles.header}>
         <Avatar
-          source={profile.avatar_url}
+          source={profile?.avatarUrl}
           size="large"
           shape="circle"
           bordered
         />
-        <ThemedText type="h3">{profile.full_name}</ThemedText>
-        <ThemedText color="dimmed">{profile.bio}</ThemedText>
+        <ThemedText type="h3">{profile?.fullName}</ThemedText>
+        <ThemedText color="dimmed">{profile?.bio}</ThemedText>
         <ChipBar padding items={options} />
       </View>
 

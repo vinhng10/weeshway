@@ -21,12 +21,13 @@ export type WishType = {
   songId: string;
 };
 
-export type UserType = {
+export type ProfileType = {
   id: number;
-  name: string;
-  bio: string;
-  imageUrl: string;
-  videoUrls: string[];
+  username?: string;
+  fullName?: string;
+  bio?: string;
+  avatarUrl?: string;
+  videoUrls?: string[];
 };
 
 export type ItemType = {
@@ -38,7 +39,7 @@ export type ItemType = {
 export type ProjectType = {
   id: number;
   status: "private" | "public" | "released" | "cancelled" | undefined;
-  teacher: UserType;
+  teacher: ProfileType;
   genre?: string;
   songTitle: string;
   artist: string;
@@ -64,6 +65,13 @@ export type SongType = {
   artworkUrl: string;
   genreNames: string[];
   previewUrl?: string;
+};
+
+export type LocationType = {
+  id: number;
+  name: string;
+  address: string;
+  imageUrl: string;
 };
 
 // Utility type: WishType with song_id replaced by joined songs relation

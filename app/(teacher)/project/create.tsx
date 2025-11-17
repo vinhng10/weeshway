@@ -7,10 +7,11 @@ import {
   RowInput,
   TextInput,
 } from "@/components/input";
+import { LocationInput } from "@/components/input/location-input";
 import { SongSearch } from "@/components/song-search";
 import { Tile } from "@/components/tile";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
-import { SongType } from "@/types";
+import { LocationType, SongType } from "@/types";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { View } from "react-native";
@@ -28,11 +29,9 @@ export default function CreateProject() {
   const [price, setPrice] = useState();
   const [spots, setSpots] = useState();
   const [audioFile, setAudioFile] = useState();
-  const [startDateTime, setStartDateTime] = useState<Date | undefined>(
-    undefined
-  );
+  const [startDateTime, setStartDateTime] = useState<Date | undefined>(undefined);
   const [endDateTime, setEndDateTime] = useState<Date | undefined>(undefined);
-  const [location, setLocation] = useState();
+  const [location, setLocation] = useState<LocationType | undefined>(undefined);
 
   const options: ChipBarItemProps[] = [
     {
@@ -132,11 +131,10 @@ export default function CreateProject() {
         />
 
         {/* Location Row */}
-        <RowInput
+        <LocationInput
           label="Location"
-          icon="location.app.fill"
           value={location}
-          onValueChange={() => setLocation(undefined)}
+          onValueChange={setLocation}
         />
 
         {/* Project Description Input */}

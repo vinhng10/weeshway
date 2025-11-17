@@ -2,13 +2,12 @@ import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { DayEnum, MonthEnum } from "@/constants";
 import React, { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
-import DatePicker from "react-native-date-picker";
 import { StyleSheet } from "react-native-unistyles";
+import { DateTimeField, formatDate, formatTime } from "@/components/field";
 
-interface RowInputProps {
+interface DateTimeProps {
   label: string;
   startDateTime?: Date;
   endDateTime?: Date;
@@ -24,29 +23,6 @@ interface DateTimeModalProps {
   endDateTime?: Date;
 }
 
-const formatDate = (
-  date: Date | undefined,
-  compact: boolean = false
-): string => {
-  if (!date) return "";
-  const dayOfWeek = Object.values(DayEnum)[date.getDay()];
-  const month = Object.values(MonthEnum)[date.getMonth()];
-  const day = date.getDate();
-  const year = date.getFullYear();
-  return compact
-    ? `${month.slice(0, 3)} ${day}`
-    : `${dayOfWeek.slice(0, 3)}, ${month.slice(0, 3)} ${day}, ${year}`;
-};
-
-const formatTime = (date: Date | undefined): string => {
-  if (!date) return "";
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const hoursStr = String(hours).padStart(2, "0");
-  const minutesStr = String(minutes).padStart(2, "0");
-  return `${hoursStr}:${minutesStr}`;
-};
-
 const DateTimeModal: React.FunctionComponent<DateTimeModalProps> = ({
   visible,
   onSave,
@@ -57,9 +33,6 @@ const DateTimeModal: React.FunctionComponent<DateTimeModalProps> = ({
   const [date, setDate] = useState(startDateTime ?? new Date());
   const [startTime, setStartTime] = useState(startDateTime ?? new Date());
   const [endTime, setEndTime] = useState(endDateTime ?? new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
   const handleSave = () => {
     // Combine date from date with time from startTime
@@ -97,93 +70,37 @@ const DateTimeModal: React.FunctionComponent<DateTimeModalProps> = ({
 
         <View style={modalStyles.content}>
           {/* Date Input */}
-          <View style={modalStyles.field}>
-            <ThemedText color="dimmed">Date</ThemedText>
-            <Pressable
-              style={modalStyles.input}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <ThemedText type="h5">{formatDate(date)}</ThemedText>
-              <IconSymbol name="calendar" size={20} color="#FFFFFF" />
-            </Pressable>
-          </View>
-
-          {/* Time Inputs */}
-          <View style={modalStyles.row}>
-            {/* Start Time Input */}
-            <View style={modalStyles.timeField}>
-              <ThemedText color="dimmed">Start Time</ThemedText>
-              <Pressable
-                style={modalStyles.input}
-                onPress={() => setShowStartTimePicker(true)}
-              >
-                <ThemedText type="h5">{formatTime(startTime)}</ThemedText>
-                <IconSymbol
-                  name="timer.circle.fill"
-                  size={20}
-                  color="#FFFFFF"
-                />
-              </Pressable>
-            </View>
-
-            {/* End Time Input */}
-            <View style={modalStyles.timeField}>
-              <ThemedText color="dimmed">End Time</ThemedText>
-              <Pressable
-                style={modalStyles.input}
-                onPress={() => setShowEndTimePicker(true)}
-              >
-                <ThemedText type="h5">{formatTime(endTime)}</ThemedText>
-                <IconSymbol
-                  name="timer.circle.fill"
-                  size={20}
-                  color="#FFFFFF"
-                />
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Date Picker */}
-          <DatePicker
-            modal
-            open={showDatePicker}
-            date={date}
+          <DateTimeField
+            label="Date"
+            value={date}
+            onValueChange={setDate}
+            icon="calendar"
             mode="date"
-            onConfirm={(datetime: Date) => {
-              setDate(datetime);
-              setShowDatePicker(false);
-            }}
-            onCancel={() => setShowDatePicker(false)}
             minimumDate={new Date()}
           />
 
-          {/* Start Time Picker */}
-          <DatePicker
-            modal
-            open={showStartTimePicker}
-            date={startTime}
-            mode="time"
-            onConfirm={(datetime: Date) => {
-              setStartTime(datetime);
-              setShowStartTimePicker(false);
-            }}
-            onCancel={() => setShowStartTimePicker(false)}
-            minimumDate={date}
-          />
-
-          {/* End Time Picker */}
-          <DatePicker
-            modal
-            open={showEndTimePicker}
-            date={endTime}
-            mode="time"
-            onConfirm={(datetime: Date) => {
-              setEndTime(datetime);
-              setShowEndTimePicker(false);
-            }}
-            onCancel={() => setShowEndTimePicker(false)}
-            minimumDate={startTime}
-          />
+          {/* Time Inputs */}
+          <View style={modalStyles.row}>
+            <View style={modalStyles.timeField}>
+              <DateTimeField
+                label="Start Time"
+                value={startTime}
+                onValueChange={setStartTime}
+                icon="timer.circle.fill"
+                mode="time"
+              />
+            </View>
+            <View style={modalStyles.timeField}>
+              <DateTimeField
+                label="End Time"
+                value={endTime}
+                onValueChange={setEndTime}
+                icon="timer.circle.fill"
+                mode="time"
+                minimumDate={startTime}
+              />
+            </View>
+          </View>
         </View>
       </View>
 
@@ -192,7 +109,7 @@ const DateTimeModal: React.FunctionComponent<DateTimeModalProps> = ({
   );
 };
 
-export const DateTimeInput: React.FunctionComponent<RowInputProps> = ({
+export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
   label,
   startDateTime,
   endDateTime,
@@ -271,9 +188,6 @@ const modalStyles = StyleSheet.create((theme) => ({
     gap: theme.gap(2),
     padding: theme.gap(2),
   },
-  field: {
-    gap: theme.gap(1),
-  },
   timeField: {
     flex: 1,
     gap: theme.gap(1),
@@ -281,13 +195,5 @@ const modalStyles = StyleSheet.create((theme) => ({
   row: {
     flexDirection: "row",
     gap: theme.gap(2),
-  },
-  input: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: theme.colors.foreground,
-    borderRadius: theme.gap(2),
-    padding: theme.gap(2),
   },
 }));
