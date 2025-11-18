@@ -96,14 +96,16 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
 
           <View style={styles.modalContent}>
             {/* Date Input */}
-            <DateTimeBoxInput
-              label="Date"
-              value={date}
-              onValueChange={setDate}
-              icon="calendar"
-              mode="date"
-              minimumDate={new Date()}
-            />
+            <View style={styles.row}>
+              <DateTimeBoxInput
+                label="Date"
+                value={date}
+                onValueChange={setDate}
+                icon="calendar"
+                mode="date"
+                minimumDate={new Date()}
+              />
+            </View>
 
             {/* Time Inputs */}
             <View style={styles.row}>

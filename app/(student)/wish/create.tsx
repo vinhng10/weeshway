@@ -25,8 +25,13 @@ export default function MakeAWish() {
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = async () => {
-    if (!isLoggedIn || !profile || !song) {
+    if (!isLoggedIn || !profile) {
       console.error("Error: User not logged in");
+      return;
+    }
+
+    if (!song) {
+      console.error("Error: Song is required");
       return;
     }
 

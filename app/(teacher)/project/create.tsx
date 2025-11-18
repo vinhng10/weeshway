@@ -11,6 +11,8 @@ import { LocationInput } from "@/components/input/location-input";
 import { SongSearch } from "@/components/song-search";
 import { Tile } from "@/components/tile";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/supabase";
 import { LocationType, SongType } from "@/types";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -19,20 +21,22 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function CreateProject() {
+  const profile = useAuth((state) => state.profile);
+  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+
   // Initialize state with project data or defaults
   const [song, setSong] = useState<SongType | null>(null);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [status, setStatus] = useState(ProjectStatusEnum.Private);
-  const [style, setStyle] = useState();
-  const [level, setLevel] = useState();
-  const [price, setPrice] = useState();
-  const [spots, setSpots] = useState();
-  const [startDateTime, setStartDateTime] = useState<Date | undefined>(
-    undefined
-  );
-  const [endDateTime, setEndDateTime] = useState<Date | undefined>(undefined);
-  const [location, setLocation] = useState<LocationType | undefined>(undefined);
+  const [style, setStyle] = useState<StyleEnum | undefined>();
+  const [level, setLevel] = useState<LevelEnum | undefined>();
+  const [price, setPrice] = useState<string | undefined>();
+  const [spots, setSpots] = useState<string | undefined>();
+  const [startDateTime, setStartDateTime] = useState<Date | undefined>();
+  const [endDateTime, setEndDateTime] = useState<Date | undefined>();
+  const [location, setLocation] = useState<LocationType | undefined>();
+  const [isCreating, setIsCreating] = useState(false);
 
   const options: ChipBarItemProps[] = [
     {
@@ -43,6 +47,54 @@ export default function CreateProject() {
       onValueChange: setStatus,
     },
   ];
+
+  const handleCreate = async () => {
+    if (!isLoggedIn || !profile) {
+      console.error("Error: User not logged in");
+      return;
+    }
+
+    if (!song) {
+      console.error("Error: Song is required");
+      return;
+    }
+
+    setIsCreating(true);
+
+    try {
+      const { data, error } = await supabase.rpc("create_project_with_song", {
+        p_song_data: {
+          id: song.id,
+          name: song.name,
+          artist_name: song.artistName,
+          artwork_url: song.artworkUrl,
+          preview_url: song.previewUrl,
+        },
+        p_project_data: {
+          name: projectName.trim(),
+          status: status,
+          style: style,
+          level: level,
+          price: price,
+          spots: spots,
+          description: projectDescription.trim(),
+          location_id: location?.id,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Navigate back to projects list
+      router.push(`/(teacher)/project/`);
+    } catch (error: any) {
+      console.error("Error creating project:", error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -130,10 +182,9 @@ export default function CreateProject() {
 
       {/* Create Button */}
       <Button
-        label="Create"
-        onPress={() => {
-          router.push("/(teacher)/project");
-        }}
+        label={isCreating ? "Creating..." : "Create"}
+        onPress={handleCreate}
+        disabled={isCreating}
         stickyBottom
       />
     </View>
