@@ -107,25 +107,21 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
 
             {/* Time Inputs */}
             <View style={styles.row}>
-              <View style={styles.column}>
-                <DateTimeBoxInput
-                  label="Start Time"
-                  value={startTime}
-                  onValueChange={setStartTime}
-                  icon="timer.circle.fill"
-                  mode="time"
-                />
-              </View>
-              <View style={styles.column}>
-                <DateTimeBoxInput
-                  label="End Time"
-                  value={endTime}
-                  onValueChange={setEndTime}
-                  icon="timer.circle.fill"
-                  mode="time"
-                  minimumDate={startTime}
-                />
-              </View>
+              <DateTimeBoxInput
+                label="Start Time"
+                value={startTime}
+                onValueChange={setStartTime}
+                icon="timer.circle.fill"
+                mode="time"
+              />
+              <DateTimeBoxInput
+                label="End Time"
+                value={endTime}
+                onValueChange={setEndTime}
+                icon="timer.circle.fill"
+                mode="time"
+                minimumDate={startTime}
+              />
             </View>
           </View>
         </View>
@@ -165,9 +161,6 @@ const styles = StyleSheet.create((theme) => ({
   modalContent: {
     gap: theme.gap(2),
     padding: theme.gap(2),
-  },
-  column: {
-    flex: 1,
   },
   row: {
     flexDirection: "row",

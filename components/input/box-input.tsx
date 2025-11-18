@@ -315,6 +315,7 @@ export const DateTimeBoxInput: React.FC<DateTimeBoxInputProps> = ({
 
 const styles = StyleSheet.create((theme) => ({
   container: {
+    flex: 1,
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start",

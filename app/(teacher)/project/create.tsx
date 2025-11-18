@@ -80,36 +80,24 @@ export default function CreateProject() {
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
-          <View style={styles.column}>
-            <SelectBoxInput
-              label="Style"
-              value={style}
-              options={StyleEnum}
-              onValueChange={setStyle}
-            />
-          </View>
-          <View style={styles.column}>
-            <SelectBoxInput
-              label="Level"
-              value={level}
-              options={LevelEnum}
-              onValueChange={setLevel}
-            />
-          </View>
+          <SelectBoxInput
+            label="Style"
+            value={style}
+            options={StyleEnum}
+            onValueChange={setStyle}
+          />
+          <SelectBoxInput
+            label="Level"
+            value={level}
+            options={LevelEnum}
+            onValueChange={setLevel}
+          />
         </View>
 
         {/* Price and Spots Info Fields */}
         <View style={styles.row}>
-          <View style={styles.column}>
-            <FloatBoxInput
-              label="Price"
-              value={price}
-              onValueChange={setPrice}
-            />
-          </View>
-          <View style={styles.column}>
-            <IntBoxInput label="Spots" value={spots} onValueChange={setSpots} />
-          </View>
+          <FloatBoxInput label="Price" value={price} onValueChange={setPrice} />
+          <IntBoxInput label="Spots" value={spots} onValueChange={setSpots} />
         </View>
 
         {/* Date & Time Row */}
@@ -166,8 +154,5 @@ const styles = StyleSheet.create((theme, rt) => ({
   row: {
     flexDirection: "row",
     gap: theme.gap(2),
-  },
-  column: {
-    flex: 1,
   },
 }));

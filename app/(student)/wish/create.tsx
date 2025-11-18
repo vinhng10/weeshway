@@ -1,6 +1,6 @@
 import { Button } from "@/components/button";
 import { Header } from "@/components/header";
-import { BoxInput, TextInput } from "@/components/input";
+import { SelectBoxInput, TextInput } from "@/components/input";
 import { SongCard } from "@/components/song-card";
 import { SongSearch } from "@/components/song-search";
 import { LevelEnum, StyleEnum } from "@/constants";
@@ -82,16 +82,14 @@ export default function MakeAWish() {
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
-          <BoxInput
+          <SelectBoxInput
             label="Style"
-            type="select"
             value={style}
             options={StyleEnum}
             onValueChange={setStyle}
           />
-          <BoxInput
+          <SelectBoxInput
             label="Level"
-            type="select"
             value={level}
             options={LevelEnum}
             onValueChange={setLevel}
