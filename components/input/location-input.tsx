@@ -1,14 +1,23 @@
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
-import { TextField } from "@/components/field";
 import { Header } from "@/components/header";
+import { TextBoxInput } from "@/components/input/box-input";
+import { TextInput } from "@/components/input/text-input";
 import { ThemedText } from "@/components/themed-text";
+import { Tile } from "@/components/tile";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { supabase, uploadImage } from "@/supabase";
 import { LocationType } from "@/types";
 import camelcaseKeys from "camelcase-keys";
-import React, { useState } from "react";
-import { Modal, Pressable, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Keyboard,
+  Modal,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface LocationProps {
@@ -18,39 +27,80 @@ interface LocationProps {
   onValueChange?: any;
 }
 
-interface LocationModalProps {
-  visible: boolean;
-  onSave: any;
-  onClose: any;
-  location?: LocationType;
-}
-
-const LocationModal: React.FunctionComponent<LocationModalProps> = ({
-  visible,
-  onSave,
-  onClose,
-  location,
+export const LocationInput: React.FunctionComponent<LocationProps> = ({
+  label,
+  value,
+  onValueChange,
+  editable = true,
 }) => {
-  const [isSaving, setIsSaving] = useState(false);
-  const [name, setName] = useState(location?.name || "");
-  const [address, setAddress] = useState(location?.address || "");
-  const [imageUrl, setImageUrl] = useState(location?.imageUrl || null);
+  const [visible, setVisible] = useState(false);
+  const [addLocationVisible, setAddLocationVisible] = useState(false);
+  const [query, setQuery] = useState("");
+  const [locations, setLocations] = useState<LocationType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSave = async () => {
-    try {
-      setIsSaving(true);
+  const [name, setName] = useState(value?.name || "");
+  const [address, setAddress] = useState(value?.address || "");
+  const [imageUrl, setImageUrl] = useState(value?.imageUrl || null);
 
-      let _imageUrl = location?.imageUrl;
-      if (!location?.imageUrl && imageUrl && imageUrl) {
-        _imageUrl = await uploadImage(imageUrl, `locations`);
+  useEffect(() => {
+    const searchLocations = async () => {
+      const trimmedQuery = query.trim();
+      if (!trimmedQuery) {
+        setLocations([]);
+        return;
       }
+
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .from("locations")
+        .select()
+        .textSearch("name", `'${trimmedQuery}'`);
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const camelCasedData = camelcaseKeys(data, { deep: true });
+        setLocations(camelCasedData as LocationType[]);
+      } else {
+        setLocations([]);
+      }
+      setLoading(false);
+    };
+
+    // Debounce the search
+    const timeoutId = setTimeout(() => {
+      searchLocations();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [query]);
+
+  const handleLocationPress = (location: LocationType) => {
+    Keyboard.dismiss();
+    if (onValueChange) {
+      onValueChange(location);
+    }
+    setVisible(false);
+  };
+
+  const handleAddNewLocation = async () => {
+    try {
+      // setIsSaving(true);
+
+      const url = imageUrl ? await uploadImage(imageUrl, `locations`) : null;
 
       const { data, error } = await supabase
         .from("locations")
         .insert({
           name: name.trim(),
           address: address.trim(),
-          image_url: _imageUrl,
+          image_url: url,
         })
         .select()
         .single();
@@ -59,74 +109,23 @@ const LocationModal: React.FunctionComponent<LocationModalProps> = ({
         throw error;
       }
 
-      onSave(camelcaseKeys(data, { deep: true }));
+      if (onValueChange) {
+        onValueChange(camelcaseKeys(data, { deep: true }));
+      }
     } catch (error: any) {
       console.error("Error updating profile:", error);
     } finally {
-      setIsSaving(false);
-      onClose();
+      // setIsSaving(false);
+      setQuery(name);
+      setAddLocationVisible(false);
     }
   };
-
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={modalStyles.container}>
-        <Header title="Location" onPress={onClose} />
-
-        <View style={modalStyles.content}>
-          <Avatar
-            source={imageUrl}
-            size="large"
-            shape="square"
-            bordered
-            onSourceChange={setImageUrl}
-          />
-
-          <TextField
-            label="Name"
-            value={name}
-            onValueChange={setName}
-            placeholder="Name"
-          />
-
-          <TextField
-            label="Address"
-            value={address}
-            onValueChange={setAddress}
-            placeholder="Address"
-          />
-        </View>
-      </View>
-
-      <Button
-        stickyBottom
-        label={isSaving ? "Saving..." : "Save"}
-        onPress={handleSave}
-        disabled={isSaving}
-      />
-    </Modal>
-  );
-};
-
-export const LocationInput: React.FunctionComponent<LocationProps> = ({
-  label,
-  value,
-  onValueChange,
-  editable = true,
-}) => {
-  const [modalVisible, setModalVisible] = useState(false);
 
   return (
     <>
       <Pressable
         style={styles.container}
-        onPress={() => setModalVisible(true)}
+        onPress={() => setVisible(true)}
         disabled={!editable}
       >
         <View style={styles.iconContainer}>
@@ -142,12 +141,115 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
         </View>
       </Pressable>
 
-      <LocationModal
-        visible={modalVisible}
-        onSave={onValueChange}
-        onClose={() => setModalVisible(false)}
-        location={value}
-      />
+      <Modal
+        visible={visible}
+        animationType="slide"
+        presentationStyle="overFullScreen"
+        transparent={true}
+        onRequestClose={() => setVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <Header title="Location" onPress={() => setVisible(false)} />
+
+          <View style={styles.searchContainer}>
+            <TextInput
+              placeholder="What location do you want to dance?"
+              value={query}
+              onChangeText={setQuery}
+              returnKeyType="search"
+              autoCapitalize="none"
+              autoFocus
+            />
+          </View>
+
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {loading && (
+              <View style={styles.messageContainer}>
+                <ActivityIndicator size="large" />
+              </View>
+            )}
+            {error && (
+              <View style={styles.messageContainer}>
+                <ThemedText color="highlight">{error}</ThemedText>
+              </View>
+            )}
+            {!loading &&
+              !error &&
+              query.length > 0 &&
+              locations.length === 0 && (
+                <View style={styles.messageContainer}>
+                  <ThemedText color="dimmed">No locations found</ThemedText>
+                </View>
+              )}
+            {!loading &&
+              !error &&
+              query.length > 0 &&
+              locations.map((location) => (
+                <Tile
+                  key={location.id}
+                  imageSource={{ uri: location.imageUrl }}
+                  title={location.name}
+                  subtitle={location.address}
+                  onPress={() => handleLocationPress(location)}
+                />
+              ))}
+          </ScrollView>
+
+          <Button
+            stickyBottom
+            label="Add Location"
+            onPress={() => setAddLocationVisible(true)}
+          />
+        </View>
+      </Modal>
+
+      <Modal
+        visible={addLocationVisible}
+        animationType="slide"
+        presentationStyle="overFullScreen"
+        transparent={true}
+        onRequestClose={() => setAddLocationVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <Header
+            title="Add Location"
+            onPress={() => setAddLocationVisible(false)}
+          />
+
+          <View style={styles.addLocationContainer}>
+            <Avatar
+              source={imageUrl}
+              size="large"
+              shape="square"
+              bordered
+              onSourceChange={setImageUrl}
+            />
+
+            <View style={styles.row}>
+              <TextBoxInput label="Name" value={name} onValueChange={setName} />
+            </View>
+
+            <View style={styles.row}>
+              <TextBoxInput
+                label="Address"
+                value={address}
+                onValueChange={setAddress}
+              />
+            </View>
+          </View>
+        </View>
+
+        <Button
+          stickyBottom
+          label={"Add"}
+          onPress={handleAddNewLocation}
+          // disabled={isSaving}
+        />
+      </Modal>
     </>
   );
 };
@@ -173,6 +275,11 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     gap: theme.gap(1),
   },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    opacity: 0.95,
+  },
   searchContainer: {
     padding: theme.gap(2),
   },
@@ -181,16 +288,19 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
-}));
-
-const modalStyles = StyleSheet.create((theme) => ({
-  container: {
+  messageContainer: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    opacity: 0.95,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  content: {
+  addLocationContainer: {
     gap: theme.gap(2),
     padding: theme.gap(2),
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: theme.gap(2),
   },
 }));

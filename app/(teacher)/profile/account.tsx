@@ -1,7 +1,7 @@
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
-import { TextField } from "@/components/field";
 import { Header } from "@/components/header";
+import { TextBoxInput } from "@/components/input/box-input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase, uploadImage } from "@/supabase";
 import { useState } from "react";
@@ -34,7 +34,10 @@ export default function Account() {
       let avatarUrl = profile?.avatarUrl;
 
       if (avatarUri && avatarUri !== profile?.avatarUrl) {
-        avatarUrl = await uploadImage(avatarUri, `profiles/${profile.id}/avatars`);
+        avatarUrl = await uploadImage(
+          avatarUri,
+          `profiles/${profile.id}/avatars`
+        );
       }
 
       // 5) Update profile
@@ -81,23 +84,20 @@ export default function Account() {
 
         {/* Form Fields */}
         <View style={styles.formSection}>
-          <TextField
+          <TextBoxInput
             label="Username"
             value={username}
             onValueChange={setUsername}
-            placeholder="Username"
           />
-          <TextField
+          <TextBoxInput
             label="Full Name"
             value={fullName}
             onValueChange={setFullName}
-            placeholder="Full Name"
           />
-          <TextField
+          <TextBoxInput
             label="Bio"
             value={bio}
             onValueChange={setBio}
-            placeholder="Bio"
             multiline
           />
         </View>

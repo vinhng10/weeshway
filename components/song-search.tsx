@@ -44,7 +44,7 @@ interface SongSearchProps {
 export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
   onSongPress,
 }) => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [query, setQuery] = useState("");
 
   const trimmedQuery = query.trim();
@@ -63,11 +63,11 @@ export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
   }, [trimmedQuery]);
 
   const handleOpenModal = () => {
-    setModalVisible(true);
+    setVisible(true);
   };
 
   const handleCloseModal = () => {
-    setModalVisible(false);
+    setVisible(false);
     setQuery("");
     Keyboard.dismiss();
   };
@@ -88,7 +88,7 @@ export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
       />
 
       <Modal
-        visible={modalVisible}
+        visible={visible}
         animationType="slide"
         presentationStyle="overFullScreen"
         transparent={true}

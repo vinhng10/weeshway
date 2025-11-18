@@ -1,129 +1,327 @@
 import { ThemedText } from "@/components/themed-text";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
+import { DayEnum, MonthEnum } from "@/constants";
 import React, { useRef, useState } from "react";
 import { Pressable, View } from "react-native";
+import DatePicker from "react-native-date-picker";
 import { StyleSheet } from "react-native-unistyles";
 import { OptionsModal } from "../options-modal";
 import { TextInput } from "./text-input";
 
-interface BoxInputProps {
+export const formatDate = (
+  date: Date | undefined,
+  compact: boolean = false
+): string => {
+  if (!date) return "";
+  const dayOfWeek = Object.values(DayEnum)[date.getDay()];
+  const month = Object.values(MonthEnum)[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+  return compact
+    ? `${month.slice(0, 3)} ${day}`
+    : `${dayOfWeek.slice(0, 3)}, ${month.slice(0, 3)} ${day}, ${year}`;
+};
+
+export const formatTime = (date: Date | undefined): string => {
+  if (!date) return "";
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const hoursStr = String(hours).padStart(2, "0");
+  const minutesStr = String(minutes).padStart(2, "0");
+  return `${hoursStr}:${minutesStr}`;
+};
+
+interface BoxInputBaseProps {
+  label: string;
+  icon?: IconSymbolName;
+  onPress?: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}
+
+const BaseBoxInput: React.FC<BoxInputBaseProps> = ({
+  label,
+  icon,
+  onPress,
+  disabled,
+  children,
+}) => {
+  return (
+    <Pressable
+      style={styles.container}
+      onPress={onPress}
+      disabled={disabled || !onPress}
+    >
+      <View style={styles.labelContainer}>
+        <ThemedText color="dimmed">{label}</ThemedText>
+        {icon && <IconSymbol style={styles.icon} name={icon} size={16} />}
+      </View>
+      {children}
+    </Pressable>
+  );
+};
+
+// Shared props for all BoxInput variants
+interface BaseBoxInputProps {
   label: string;
   value?: string;
-  options?: Record<string, string>;
   onValueChange?: any;
-  placeholder?: string;
-  type: "text" | "select" | "int" | "float";
   editable?: boolean;
 }
 
-export const BoxInput: React.FunctionComponent<BoxInputProps> = ({
+// TextBoxInput variant
+interface TextBoxInputProps extends BaseBoxInputProps {
+  placeholder?: string;
+  multiline?: boolean;
+}
+
+export const TextBoxInput: React.FC<TextBoxInputProps> = ({
   label,
   value,
-  options,
   onValueChange,
   placeholder,
-  type,
   editable = true,
+  multiline,
 }) => {
-  const keyboardType =
-    type === "int" || type === "float" ? "numeric" : "default";
-  const [modalVisible, setModalVisible] = useState(false);
   const textInputRef = useRef<any>(null);
 
   const handlePress = () => {
-    if (!editable) return;
-
-    if (type === "select") {
-      setModalVisible(true);
-    } else {
+    if (editable) {
       textInputRef.current?.focus();
     }
   };
 
+  return (
+    <BaseBoxInput label={label} onPress={handlePress} disabled={!editable}>
+      <TextInput
+        ref={textInputRef}
+        type="h5"
+        value={value}
+        onChangeText={onValueChange}
+        placeholder={placeholder}
+        style={styles.textInput}
+        editable={editable}
+        multiline={multiline}
+      />
+    </BaseBoxInput>
+  );
+};
+
+// SelectBoxInput variant
+interface SelectBoxInputProps extends BaseBoxInputProps {
+  options?: Record<string, string>;
+}
+
+export const SelectBoxInput: React.FC<SelectBoxInputProps> = ({
+  label,
+  value,
+  options,
+  onValueChange,
+  editable = true,
+}) => {
+  const [visible, setVisible] = useState(false);
+
+  const handlePress = () => {
+    if (editable) {
+      setVisible(true);
+    }
+  };
+
   const handleCloseModal = () => {
-    setModalVisible(false);
+    setVisible(false);
+  };
+
+  const handleSelect = (selectedValue: string) => {
+    if (onValueChange) {
+      onValueChange(selectedValue);
+    }
+  };
+
+  return (
+    <BaseBoxInput
+      label={label}
+      icon="chevron.down"
+      onPress={handlePress}
+      disabled={!editable}
+    >
+      <View style={styles.valueContainer}>
+        <ThemedText type="h5">{value || ""}</ThemedText>
+      </View>
+      {options && onValueChange && (
+        <OptionsModal
+          visible={visible}
+          onClose={handleCloseModal}
+          onSelect={handleSelect}
+          options={options}
+          title={label}
+        />
+      )}
+    </BaseBoxInput>
+  );
+};
+
+// IntBoxInput variant
+interface IntBoxInputProps extends BaseBoxInputProps {
+  placeholder?: string;
+}
+
+export const IntBoxInput: React.FC<IntBoxInputProps> = ({
+  label,
+  value,
+  onValueChange,
+  placeholder,
+  editable = true,
+}) => {
+  const textInputRef = useRef<any>(null);
+
+  const handlePress = () => {
+    if (editable) {
+      textInputRef.current?.focus();
+    }
   };
 
   const handleTextChange = (text: string) => {
     if (!onValueChange) return;
 
-    if (type === "int") {
-      const regex = /^\d*$/;
-      if (regex.test(text) || text === "") {
-        const parsed = text === "" ? "" : String(parseInt(text) || 0);
-        onValueChange(parsed);
-      }
-    } else if (type === "float") {
-      const regex = /^(\d*\.?\d*)$/;
-      if (regex.test(text) || text === "") {
-        // Allow trailing dot for better UX while typing
-        if (text.endsWith(".")) {
-          onValueChange(text);
-        } else {
-          const parsed = text === "" ? "" : String(parseFloat(text) || 0);
-          onValueChange(parsed);
-        }
-      }
-    } else {
-      onValueChange(text);
+    const regex = /^\d*$/;
+    if (regex.test(text) || text === "") {
+      const parsed = text === "" ? "" : String(parseInt(text) || 0);
+      onValueChange(parsed);
     }
   };
 
   return (
-    <>
-      <Pressable
-        style={styles.container}
-        onPress={handlePress}
-        disabled={!editable}
-      >
-        <View style={styles.labelContainer}>
-          <ThemedText color="dimmed">{label}</ThemedText>
-          {type === "select" && (
-            <IconSymbol style={styles.icon} name="chevron.down" size={16} />
-          )}
-        </View>
+    <BaseBoxInput label={label} onPress={handlePress} disabled={!editable}>
+      <TextInput
+        ref={textInputRef}
+        type="h5"
+        value={value}
+        onChangeText={handleTextChange}
+        placeholder={placeholder}
+        style={styles.textInput}
+        editable={editable}
+        keyboardType="numeric"
+      />
+    </BaseBoxInput>
+  );
+};
 
-        {type === "select" ? (
-          <View style={styles.valueContainer}>
-            <ThemedText type="h5">{value || ""}</ThemedText>
-          </View>
-        ) : (
-          <TextInput
-            ref={textInputRef}
-            type="h5"
-            value={value}
-            onChangeText={handleTextChange}
-            placeholder={placeholder}
-            style={styles.textInput}
-            editable={editable}
-            keyboardType={keyboardType}
-          />
-        )}
-      </Pressable>
+// FloatBoxInput variant
+interface FloatBoxInputProps extends BaseBoxInputProps {
+  placeholder?: string;
+}
 
-      {type === "select" && options && (
-        <OptionsModal
-          visible={modalVisible}
-          onClose={handleCloseModal}
-          onSelect={onValueChange}
-          options={options}
-          title={label}
-        />
-      )}
-    </>
+export const FloatBoxInput: React.FC<FloatBoxInputProps> = ({
+  label,
+  value,
+  onValueChange,
+  placeholder,
+  editable = true,
+}) => {
+  const textInputRef = useRef<any>(null);
+
+  const handlePress = () => {
+    if (editable) {
+      textInputRef.current?.focus();
+    }
+  };
+
+  const handleTextChange = (text: string) => {
+    if (!onValueChange) return;
+
+    const regex = /^(\d*\.?\d*)$/;
+    if (regex.test(text) || text === "") {
+      // Allow trailing dot for better UX while typing
+      if (text.endsWith(".")) {
+        onValueChange(text);
+      } else {
+        const parsed = text === "" ? "" : String(parseFloat(text) || 0);
+        onValueChange(parsed);
+      }
+    }
+  };
+
+  return (
+    <BaseBoxInput label={label} onPress={handlePress} disabled={!editable}>
+      <TextInput
+        ref={textInputRef}
+        type="h5"
+        value={value}
+        onChangeText={handleTextChange}
+        placeholder={placeholder}
+        style={styles.textInput}
+        editable={editable}
+        keyboardType="numeric"
+      />
+    </BaseBoxInput>
+  );
+};
+
+// DateTimeBoxInput variant
+interface DateTimeBoxInputProps {
+  label: string;
+  value: Date;
+  onValueChange: (date: Date) => void;
+  icon: IconSymbolName;
+  mode: "date" | "time" | "datetime";
+  minimumDate?: Date;
+  editable?: boolean;
+}
+
+export const DateTimeBoxInput: React.FC<DateTimeBoxInputProps> = ({
+  label,
+  value,
+  onValueChange,
+  icon,
+  mode,
+  minimumDate,
+  editable = true,
+}) => {
+  const formatFunction = mode === "date" ? formatDate : formatTime;
+  const [open, setOpen] = useState(false);
+
+  const handlePress = () => {
+    if (editable) {
+      setOpen(true);
+    }
+  };
+
+  return (
+    <BaseBoxInput
+      label={label}
+      icon={icon}
+      onPress={handlePress}
+      disabled={!editable}
+    >
+      <View style={styles.valueContainer}>
+        <ThemedText type="h5">{formatFunction(value)}</ThemedText>
+      </View>
+
+      <DatePicker
+        modal
+        open={open}
+        date={value}
+        mode={mode}
+        onConfirm={(datetime: Date) => {
+          onValueChange(datetime);
+          setOpen(false);
+        }}
+        onCancel={() => setOpen(false)}
+        minimumDate={minimumDate}
+      />
+    </BaseBoxInput>
   );
 };
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    flex: 1,
     flexDirection: "column",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: theme.gap(1),
-    backgroundColor: theme.colors.foreground,
     borderRadius: theme.gap(2),
     padding: theme.gap(1.5),
+    backgroundColor: theme.colors.foreground,
   },
   labelContainer: {
     flexDirection: "row",
@@ -132,14 +330,15 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.gap(0.5),
   },
   valueContainer: {
-    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    width: "100%",
   },
   icon: {
     color: theme.colors.dimmed,
   },
   textInput: {
-    textAlign: "center",
     padding: 0,
   },
 }));

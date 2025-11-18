@@ -19,15 +19,15 @@ export const ChipBarItem = ({
   onValueChange,
   modal,
 }: ChipBarItemProps) => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-  const handleCloseModal = () => {
-    setModalVisible(false);
+  const handleModal = () => {
+    setVisible(!visible);
   };
 
   const handleOptionSelect = (selectedValue: string) => {
     onValueChange?.(selectedValue);
-    handleCloseModal();
+    setVisible(false);
   };
 
   if (modal) {
@@ -44,12 +44,12 @@ export const ChipBarItem = ({
           color={chipColor}
           label={chipLabel}
           icon="chevron.down"
-          onPress={() => setModalVisible(true)}
+          onPress={handleModal}
         />
         {options && (
           <OptionsModal
-            visible={modalVisible}
-            onClose={handleCloseModal}
+            visible={visible}
+            onClose={handleModal}
             onSelect={handleOptionSelect}
             options={options}
             title={label}
@@ -77,16 +77,8 @@ export const ChipBarItem = ({
   }
 };
 
-export interface ChipBarItem {
-  label: string;
-  value?: string;
-  options?: Record<string, string>;
-  onValueChange?: any;
-  modal: boolean;
-}
-
 interface ChipBarProps extends UnistylesVariants<typeof styles> {
-  items: ChipBarItem[];
+  items: ChipBarItemProps[];
 }
 
 export const ChipBar = ({ items, padding }: ChipBarProps) => {

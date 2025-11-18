@@ -1,11 +1,15 @@
 import { Button } from "@/components/button";
 import { Header } from "@/components/header";
+import {
+  DateTimeBoxInput,
+  formatDate,
+  formatTime,
+} from "@/components/input/box-input";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import React, { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { DateTimeField, formatDate, formatTime } from "@/components/field";
 
 interface DateTimeProps {
   label: string;
@@ -15,24 +19,21 @@ interface DateTimeProps {
   onValueChange?: any;
 }
 
-interface DateTimeModalProps {
-  visible: boolean;
-  onSave: any;
-  onClose: any;
-  startDateTime?: Date;
-  endDateTime?: Date;
-}
-
-const DateTimeModal: React.FunctionComponent<DateTimeModalProps> = ({
-  visible,
-  onSave,
-  onClose,
+export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
+  label,
   startDateTime,
   endDateTime,
+  onValueChange,
+  editable = true,
 }) => {
+  const [visible, setVisible] = useState(false);
   const [date, setDate] = useState(startDateTime ?? new Date());
   const [startTime, setStartTime] = useState(startDateTime ?? new Date());
   const [endTime, setEndTime] = useState(endDateTime ?? new Date());
+
+  const handleModal = () => {
+    setVisible(!visible);
+  };
 
   const handleSave = () => {
     // Combine date from date with time from startTime
@@ -53,76 +54,15 @@ const DateTimeModal: React.FunctionComponent<DateTimeModalProps> = ({
       endTime.getMinutes()
     );
 
-    onSave(finalStartTime, finalEndTime);
-    onClose();
+    onValueChange(finalStartTime, finalEndTime);
+    setVisible(false);
   };
-
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={modalStyles.container}>
-        <Header title="Date & Time" onPress={onClose} />
-
-        <View style={modalStyles.content}>
-          {/* Date Input */}
-          <DateTimeField
-            label="Date"
-            value={date}
-            onValueChange={setDate}
-            icon="calendar"
-            mode="date"
-            minimumDate={new Date()}
-          />
-
-          {/* Time Inputs */}
-          <View style={modalStyles.row}>
-            <View style={modalStyles.timeField}>
-              <DateTimeField
-                label="Start Time"
-                value={startTime}
-                onValueChange={setStartTime}
-                icon="timer.circle.fill"
-                mode="time"
-              />
-            </View>
-            <View style={modalStyles.timeField}>
-              <DateTimeField
-                label="End Time"
-                value={endTime}
-                onValueChange={setEndTime}
-                icon="timer.circle.fill"
-                mode="time"
-                minimumDate={startTime}
-              />
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <Button stickyBottom label="Save" onPress={handleSave} />
-    </Modal>
-  );
-};
-
-export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
-  label,
-  startDateTime,
-  endDateTime,
-  onValueChange,
-  editable = true,
-}) => {
-  const [modalVisible, setModalVisible] = useState(false);
 
   return (
     <>
       <Pressable
         style={styles.container}
-        onPress={() => setModalVisible(true)}
+        onPress={handleModal}
         disabled={!editable}
       >
         <View style={styles.iconContainer}>
@@ -144,13 +84,54 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
         </View>
       </Pressable>
 
-      <DateTimeModal
-        visible={modalVisible}
-        onSave={onValueChange}
-        onClose={() => setModalVisible(false)}
-        startDateTime={new Date()}
-        endDateTime={new Date()}
-      />
+      <Modal
+        visible={visible}
+        animationType="slide"
+        presentationStyle="overFullScreen"
+        transparent={true}
+        onRequestClose={handleModal}
+      >
+        <View style={styles.modalContainer}>
+          <Header title="Date & Time" onPress={handleModal} />
+
+          <View style={styles.modalContent}>
+            {/* Date Input */}
+            <DateTimeBoxInput
+              label="Date"
+              value={date}
+              onValueChange={setDate}
+              icon="calendar"
+              mode="date"
+              minimumDate={new Date()}
+            />
+
+            {/* Time Inputs */}
+            <View style={styles.row}>
+              <View style={styles.column}>
+                <DateTimeBoxInput
+                  label="Start Time"
+                  value={startTime}
+                  onValueChange={setStartTime}
+                  icon="timer.circle.fill"
+                  mode="time"
+                />
+              </View>
+              <View style={styles.column}>
+                <DateTimeBoxInput
+                  label="End Time"
+                  value={endTime}
+                  onValueChange={setEndTime}
+                  icon="timer.circle.fill"
+                  mode="time"
+                  minimumDate={startTime}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <Button stickyBottom label="Save" onPress={handleSave} />
+      </Modal>
     </>
   );
 };
@@ -176,21 +157,17 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     gap: theme.gap(1),
   },
-}));
-
-const modalStyles = StyleSheet.create((theme) => ({
-  container: {
+  modalContainer: {
     flex: 1,
     backgroundColor: theme.colors.background,
     opacity: 0.95,
   },
-  content: {
+  modalContent: {
     gap: theme.gap(2),
     padding: theme.gap(2),
   },
-  timeField: {
+  column: {
     flex: 1,
-    gap: theme.gap(1),
   },
   row: {
     flexDirection: "row",

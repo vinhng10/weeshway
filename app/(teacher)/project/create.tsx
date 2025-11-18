@@ -1,12 +1,12 @@
 import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
+import { DateTimeInput, RowInput, TextInput } from "@/components/input";
 import {
-  BoxInput,
-  DateTimeInput,
-  RowInput,
-  TextInput,
-} from "@/components/input";
+  FloatBoxInput,
+  IntBoxInput,
+  SelectBoxInput,
+} from "@/components/input/box-input";
 import { LocationInput } from "@/components/input/location-input";
 import { SongSearch } from "@/components/song-search";
 import { Tile } from "@/components/tile";
@@ -29,7 +29,9 @@ export default function CreateProject() {
   const [price, setPrice] = useState();
   const [spots, setSpots] = useState();
   const [audioFile, setAudioFile] = useState();
-  const [startDateTime, setStartDateTime] = useState<Date | undefined>(undefined);
+  const [startDateTime, setStartDateTime] = useState<Date | undefined>(
+    undefined
+  );
   const [endDateTime, setEndDateTime] = useState<Date | undefined>(undefined);
   const [location, setLocation] = useState<LocationType | undefined>(undefined);
 
@@ -79,36 +81,36 @@ export default function CreateProject() {
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
-          <BoxInput
-            label="Style"
-            type="select"
-            value={style}
-            options={StyleEnum}
-            onValueChange={setStyle}
-          />
-          <BoxInput
-            label="Level"
-            type="select"
-            value={level}
-            options={LevelEnum}
-            onValueChange={setLevel}
-          />
+          <View style={styles.column}>
+            <SelectBoxInput
+              label="Style"
+              value={style}
+              options={StyleEnum}
+              onValueChange={setStyle}
+            />
+          </View>
+          <View style={styles.column}>
+            <SelectBoxInput
+              label="Level"
+              value={level}
+              options={LevelEnum}
+              onValueChange={setLevel}
+            />
+          </View>
         </View>
 
         {/* Price and Spots Info Fields */}
         <View style={styles.row}>
-          <BoxInput
-            label="Price"
-            type="float"
-            value={price}
-            onValueChange={setPrice}
-          />
-          <BoxInput
-            label="Spots"
-            type="int"
-            value={spots}
-            onValueChange={setSpots}
-          />
+          <View style={styles.column}>
+            <FloatBoxInput
+              label="Price"
+              value={price}
+              onValueChange={setPrice}
+            />
+          </View>
+          <View style={styles.column}>
+            <IntBoxInput label="Spots" value={spots} onValueChange={setSpots} />
+          </View>
         </View>
 
         {/* Audio File Selector */}
@@ -172,8 +174,9 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     gap: theme.gap(2),
+  },
+  column: {
+    flex: 1,
   },
 }));
