@@ -1,7 +1,7 @@
 import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
-import { DateTimeInput, RowInput, TextInput } from "@/components/input";
+import { DateTimeInput, TextInput } from "@/components/input";
 import {
   FloatBoxInput,
   IntBoxInput,
@@ -28,7 +28,6 @@ export default function CreateProject() {
   const [level, setLevel] = useState();
   const [price, setPrice] = useState();
   const [spots, setSpots] = useState();
-  const [audioFile, setAudioFile] = useState();
   const [startDateTime, setStartDateTime] = useState<Date | undefined>(
     undefined
   );
@@ -112,14 +111,6 @@ export default function CreateProject() {
             <IntBoxInput label="Spots" value={spots} onValueChange={setSpots} />
           </View>
         </View>
-
-        {/* Audio File Selector */}
-        <RowInput
-          label="Audio File"
-          icon="music.note"
-          value={audioFile}
-          onValueChange={() => setAudioFile(undefined)}
-        />
 
         {/* Date & Time Row */}
         <DateTimeInput

@@ -1,10 +1,12 @@
 import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
-import { BoxInput, RowInput, TextInput } from "@/components/input";
+import { DateTimeInput, FloatBoxInput, IntBoxInput, SelectBoxInput, TextInput } from "@/components/input";
+import { LocationInput } from "@/components/input/location-input";
 import { Tile } from "@/components/tile";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { projects } from "@/mocks/projects";
+import { LocationType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -32,11 +34,11 @@ export default function Project() {
     `$${project?.price?.toFixed(2) ?? "$0.00"}`
   );
   const [spots, setSpots] = useState<string>(project?.spots.toString() ?? "0");
-  const [audioFile, setAudioFile] = useState<string | undefined>();
-  const [dateTime, setDateTime] = useState<string>(
-    `${project?.date}, ${project?.time ?? ""}`
+  const [startDateTime, setStartDateTime] = useState<Date | undefined>(
+    undefined
   );
-  const [location, setLocation] = useState<string>(project?.studio ?? "");
+  const [endDateTime, setEndDateTime] = useState<Date | undefined>(undefined);
+  const [location, setLocation] = useState<LocationType | undefined>(undefined);
 
   const options: ChipBarItemProps[] = [
     {
@@ -78,16 +80,14 @@ export default function Project() {
 
         {/* StyleEnum and LevelEnum Selects */}
         <View style={styles.row}>
-          <BoxInput
+          <SelectBoxInput
             label="Style"
-            type="select"
             value={style}
             options={StyleEnum}
             onValueChange={setStyle}
           />
-          <BoxInput
+          <SelectBoxInput
             label="Level"
-            type="select"
             value={level}
             options={LevelEnum}
             onValueChange={setLevel}
@@ -96,40 +96,32 @@ export default function Project() {
 
         {/* Price and Spots Info Fields */}
         <View style={styles.row}>
-          <BoxInput
+          <FloatBoxInput
             label="Price"
-            type="text"
             value={price}
             onValueChange={setPrice}
           />
-          <BoxInput
+          <IntBoxInput
             label="Spots"
-            type="text"
             value={spots}
             onValueChange={setSpots}
           />
         </View>
 
-        {/* Audio File Selector */}
-        <RowInput
-          label="Audio File"
-          icon="music.note"
-          value={audioFile || "No file selected"}
-          onValueChange={setAudioFile}
-        />
-
         {/* Date & Time Row */}
-        <RowInput
+        <DateTimeInput
           label="Date & Time"
-          icon="timer.circle.fill"
-          value={dateTime}
-          onValueChange={setDateTime}
+          startDateTime={startDateTime}
+          endDateTime={endDateTime}
+          onValueChange={(startTime: Date, endTime: Date) => {
+            setStartDateTime(startTime);
+            setEndDateTime(endTime);
+          }}
         />
 
         {/* Location Row */}
-        <RowInput
+        <LocationInput
           label="Location"
-          icon="location.app.fill"
           value={location}
           onValueChange={setLocation}
         />

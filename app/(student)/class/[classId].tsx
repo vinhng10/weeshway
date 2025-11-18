@@ -1,7 +1,14 @@
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
 import { Hero } from "@/components/hero";
-import { BoxInput, RowInput, TextInput } from "@/components/input";
+import {
+  DateTimeInput,
+  FloatBoxInput,
+  IntBoxInput,
+  TextBoxInput,
+  TextInput,
+} from "@/components/input";
+import { LocationInput } from "@/components/input/location-input";
 import { ThemedText } from "@/components/themed-text";
 import { projects } from "@/mocks/projects";
 import { router, useLocalSearchParams } from "expo-router";
@@ -55,15 +62,13 @@ export default function Class() {
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
-          <BoxInput
+          <TextBoxInput
             label="Style"
-            type="text"
             value={classData.style}
             editable={false}
           />
-          <BoxInput
+          <TextBoxInput
             label="Level"
-            type="text"
             value={classData.level}
             editable={false}
           />
@@ -71,35 +76,28 @@ export default function Class() {
 
         {/* Price and Spots Info Fields */}
         <View style={styles.row}>
-          <BoxInput
+          <FloatBoxInput
             label="Price"
-            type="text"
             value={`$${classData.price}`}
             editable={false}
           />
-          <BoxInput
+          <IntBoxInput
             label="Spots"
-            type="text"
             value={`${classData.spots - classData.books}`}
             editable={false}
           />
         </View>
 
         {/* Date & Time Row */}
-        <RowInput
+        <DateTimeInput
           label="Date & Time"
-          icon="timer.circle.fill"
-          value={`${classData.date}, ${classData.time}`}
+          startDateTime={undefined}
+          endDateTime={undefined}
           editable={false}
         />
 
         {/* Location Row */}
-        <RowInput
-          label="Location"
-          icon="location.app.fill"
-          value={classData.studio}
-          editable={false}
-        />
+        <LocationInput label="Location" value={undefined} editable={false} />
 
         {/* Project Description Input */}
         <TextInput
