@@ -7,6 +7,7 @@ import { LevelEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
 import { SongType } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -17,6 +18,7 @@ export default function MakeAWish() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [style, setStyle] = useState<StyleEnum>(StyleEnum.HipHop);
   const [level, setLevel] = useState<LevelEnum>(LevelEnum.Beginner);
@@ -57,6 +59,9 @@ export default function MakeAWish() {
       if (error) {
         throw error;
       }
+
+      // Invalidate wishes queries to refresh the list
+      await queryClient.invalidateQueries({ queryKey: ["wishes"] });
 
       // Navigate back or show success message
       router.back();

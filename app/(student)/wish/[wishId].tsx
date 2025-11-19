@@ -19,13 +19,13 @@ export default function Wish() {
     isPending,
     error,
   } = useQuery({
-    queryKey: ["wish", wishId, profile?.id],
+    queryKey: ["wishes", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
-        .select(`*,songs (*)`)
+        .select(`*, songs(*)`)
         .eq("id", wishId)
-        .eq("user_id", profile.id)
+        .eq("user_id", profile?.id)
         .single();
 
       if (error) throw error;

@@ -5,15 +5,16 @@ import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
-import { ProjectType } from "@/types";
+import { ProjectEnrichedType } from "@/types";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { formatDate, formatTime } from "./input";
 
 interface CardProps {
-  data: ProjectType;
+  data: ProjectEnrichedType;
   onBook?: any;
   onPress?: any;
 }
@@ -30,16 +31,14 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
   const pause = useAudioPlayerStore((state) => state.pause);
 
   const handleAudioPlayer = (e?: any) => {
-    if (!data.songs.previewUrl) {
-      return;
-    }
+    if (!data.songs.previewUrl) return;
     e?.stopPropagation?.();
     isPlaying ? pause() : play(data.songs.previewUrl);
   };
   return (
     <Pressable onPress={() => onPress(data)}>
       <ImageBackground
-        source={data.backgroundImage}
+        source={data.songs.artworkUrl}
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >
@@ -52,15 +51,15 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
           {/* Top Container */}
           <View style={styles.topContainer}>
             <Avatar
-              source={data.teacher.imageUrl}
+              source={data.profiles.avatarUrl}
               size="large"
               shape="circle"
               bordered={true}
             />
-            <ThemedText type="h3">{data.teacher.name}</ThemedText>
+            <ThemedText type="h3">{data.profiles.fullName}</ThemedText>
             <View style={styles.chipContainer}>
-              <Chip label={data.style} color="light" />
-              <Chip label={data.level} color="light" />
+              {data.style && <Chip label={data.style} color="light" />}
+              {data.level && <Chip label={data.level} color="light" />}
             </View>
           </View>
 
@@ -68,8 +67,8 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
           <View style={styles.middleContainer}>
             {/* Song Info */}
             <View style={styles.rowGroup}>
-              <ThemedText type="h3">{data.songTitle}</ThemedText>
-              <ThemedText color="dimmed">{data.artist}</ThemedText>
+              <ThemedText type="h3">{data.songs.name}</ThemedText>
+              <ThemedText color="dimmed">{data.songs.artistName}</ThemedText>
             </View>
 
             {/* Location and DateTime Info */}
@@ -81,9 +80,9 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
                     size={16}
                     color="#FFFFFF"
                   />
-                  <ThemedText>{data.studio}</ThemedText>
+                  <ThemedText>{data.locations?.name}</ThemedText>
                 </View>
-                <ThemedText>${data.price.toFixed(2)}</ThemedText>
+                <ThemedText>${data.price?.toFixed(2)}</ThemedText>
               </View>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
@@ -93,11 +92,18 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
                     color="#FFFFFF"
                   />
                   <ThemedText>
-                    {data.date}, {data.time}
+                    {data.startAt && data.endAt
+                      ? `${formatDate(
+                          new Date(data.startAt),
+                          true
+                        )}, ${formatTime(
+                          new Date(data.startAt)
+                        )} - ${formatTime(new Date(data.endAt))}`
+                      : ""}
                   </ThemedText>
                 </View>
                 <ThemedText color="highlight">
-                  {data.spots - data.books} spots left
+                  {data.spots ? data.spots - 10 : 0} spots left
                 </ThemedText>
               </View>
             </View>

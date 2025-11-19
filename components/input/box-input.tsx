@@ -145,7 +145,7 @@ export const SelectBoxInput: React.FC<SelectBoxInputProps> = ({
       disabled={!editable}
     >
       <View style={styles.valueContainer}>
-        <ThemedText type="h5">{value || ""}</ThemedText>
+        <ThemedText type="h5">{value}</ThemedText>
       </View>
       {options && onValueChange && (
         <OptionsModal

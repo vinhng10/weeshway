@@ -1,29 +1,33 @@
 import { Header } from "@/components/header";
 import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
-import { ImageBackground, ImageProps } from "expo-image";
+import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
+import { SongType } from "@/types";
+import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface HeroProps {
-  source: ImageProps["source"];
-  title: string;
-  subtitle: string;
+  data: SongType;
   onShare?: () => void;
-  onPlay?: () => void;
 }
 
-export const Hero: React.FunctionComponent<HeroProps> = ({
-  source,
-  title,
-  subtitle,
-  onShare,
-  onPlay,
-}) => {
+export const Hero: React.FunctionComponent<HeroProps> = ({ data, onShare }) => {
+  const isPlaying = useAudioPlayerStore((state) =>
+    state.isPlaying(data.previewUrl)
+  );
+  const play = useAudioPlayerStore((state) => state.play);
+  const pause = useAudioPlayerStore((state) => state.pause);
+
+  const handleAudioPlayer = () => {
+    if (!data.previewUrl) return;
+    isPlaying ? pause() : play(data.previewUrl);
+  };
+
   return (
-    <ImageBackground source={source} style={styles.background}>
+    <ImageBackground source={data.artworkUrl} style={styles.background}>
       <LinearGradient
         style={styles.overlay}
         colors={["rgba(0, 0, 0, 0.3)", "#0C0C0C"]}
@@ -33,14 +37,18 @@ export const Hero: React.FunctionComponent<HeroProps> = ({
         <Header />
         <View style={styles.contentContainer}>
           <View style={styles.songInfo}>
-            <ThemedText type="h2">{title}</ThemedText>
+            <ThemedText type="h2">{data.name}</ThemedText>
             <ThemedText color="dimmed" type="h3">
-              {subtitle}
+              {data.artistName}
             </ThemedText>
           </View>
           <View style={styles.buttonContainer}>
             <IconButton icon="sharedwithyou" iconSize={24} onPress={onShare} />
-            <IconButton icon="play" iconSize={36} onPress={onPlay} />
+            <IconButton
+              icon={isPlaying ? "pause" : "play"}
+              iconSize={36}
+              onPress={handleAudioPlayer}
+            />
           </View>
         </View>
       </LinearGradient>

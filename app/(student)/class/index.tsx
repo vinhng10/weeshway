@@ -4,27 +4,49 @@ import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { GenreEnum, LevelEnum, StyleEnum } from "@/constants";
-import { projects } from "@/mocks/projects";
-import { ProjectType } from "@/types";
+import { LevelEnum, StyleEnum } from "@/constants";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/supabase";
+import { ProjectEnrichedType } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import camelcaseKeys from "camelcase-keys";
 import { router } from "expo-router";
 import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Classes() {
-  const [genre, setGenre] = useState<string>("");
-  const [style, setStyle] = useState<string>("");
-  const [level, setLevel] = useState<string>("");
+  const [style, setStyle] = useState<StyleEnum | undefined>();
+  const [level, setLevel] = useState<LevelEnum | undefined>();
+  const profile = useAuth((state) => state.profile);
+  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+
+  const { data, isPending, error } = useQuery<ProjectEnrichedType[]>({
+    queryKey: ["projects", style, level],
+    queryFn: async () => {
+      let query = supabase
+        .from("projects")
+        .select(`*, profiles(*), songs(*), locations(*)`);
+
+      if (style) {
+        query = query.eq("style", style);
+      }
+      if (level) {
+        query = query.eq("level", level);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      if (!data) return [];
+
+      const result = camelcaseKeys(data, { deep: true });
+      return result;
+    },
+    enabled: isLoggedIn && !!profile,
+  });
 
   const options: ChipBarItemProps[] = [
-    {
-      label: "Genre",
-      value: genre,
-      options: GenreEnum,
-      modal: true,
-      onValueChange: setGenre,
-    },
     {
       label: "Style",
       value: style,
@@ -43,43 +65,41 @@ export default function Classes() {
 
   const navigateToClass = (id: number) => router.push(`/(student)/class/${id}`);
 
-  const renderCarousel = (data: ProjectType[]): React.ReactElement => (
+  const renderCarousel = (data: ProjectEnrichedType[]): React.ReactElement => (
     <Carousel
       data={data}
       onBook={() => {}}
-      onPlay={() => {}}
-      onPress={(data: ProjectType) => navigateToClass(data.id)}
+      onPress={(data: ProjectEnrichedType) => navigateToClass(data.id)}
     />
   );
 
-  const renderTile = (data: ProjectType): React.ReactElement => (
+  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
     <Tile
-      imageSource={data.backgroundImage}
-      title={data.songTitle}
-      subtitle={data.artist}
+      imageSource={data.songs.artworkUrl}
+      title={data.songs.name}
+      subtitle={data.songs.artistName}
       metadata={`${data.style} • ${data.level}`}
       rightContent={
         <>
-          <Avatar source={data.teacher.imageUrl} shape="circle" bordered />
-          <Chip
-            color="highlight"
-            label={`${data.spots - data.books} spots left`}
-          />
+          <Avatar source={data.profiles.avatarUrl} shape="circle" bordered />
+          <Chip color="highlight" label={`${data.spots} spots left`} />
         </>
       }
       onPress={() => navigateToClass(data.id)}
     />
   );
 
-  const sections: SectionListData<ProjectType | ProjectType[]>[] = [
+  const sections: SectionListData<
+    ProjectEnrichedType | ProjectEnrichedType[]
+  >[] = [
     {
       title: "You might like",
-      data: [projects.slice(0, 3)],
+      data: [data?.slice(0, 3) ?? []],
       render: renderCarousel,
     },
     {
       title: "Upcoming",
-      data: projects.slice(3),
+      data: data?.slice(3) ?? [],
       render: renderTile,
     },
   ];

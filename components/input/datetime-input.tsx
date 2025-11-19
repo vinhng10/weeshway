@@ -13,23 +13,23 @@ import { StyleSheet } from "react-native-unistyles";
 
 interface DateTimeProps {
   label: string;
-  startDateTime?: Date;
-  endDateTime?: Date;
+  startAt?: Date;
+  endAt?: Date;
   editable?: boolean;
   onValueChange?: any;
 }
 
 export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
   label,
-  startDateTime,
-  endDateTime,
+  startAt,
+  endAt,
   onValueChange,
   editable = true,
 }) => {
   const [visible, setVisible] = useState(false);
-  const [date, setDate] = useState(startDateTime ?? new Date());
-  const [startTime, setStartTime] = useState(startDateTime ?? new Date());
-  const [endTime, setEndTime] = useState(endDateTime ?? new Date());
+  const [date, setDate] = useState(startAt ?? new Date());
+  const [startTime, setStartTime] = useState(startAt ?? new Date());
+  const [endTime, setEndTime] = useState(endAt ?? new Date());
 
   const handleModal = () => {
     setVisible(!visible);
@@ -75,10 +75,10 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
         <View style={styles.content}>
           <ThemedText color="dimmed">{label}</ThemedText>
           <ThemedText type="h5">
-            {startDateTime && endDateTime
-              ? `${formatDate(startDateTime, true)}, ${formatTime(
-                  startDateTime
-                )} - ${formatTime(endDateTime)}`
+            {startAt && endAt
+              ? `${formatDate(startAt, true)}, ${formatTime(
+                  startAt
+                )} - ${formatTime(endAt)}`
               : ""}
           </ThemedText>
         </View>

@@ -14,6 +14,7 @@ import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
 import { LocationType, SongType } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { View } from "react-native";
@@ -23,18 +24,19 @@ import { StyleSheet } from "react-native-unistyles";
 export default function CreateProject() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const queryClient = useQueryClient();
 
   // Initialize state with project data or defaults
-  const [song, setSong] = useState<SongType | null>(null);
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [status, setStatus] = useState(ProjectStatusEnum.Private);
+  const [name, setName] = useState<string | undefined>();
+  const [description, setDescription] = useState<string | undefined>();
+  const [status, setStatus] = useState<ProjectStatusEnum | undefined>();
   const [style, setStyle] = useState<StyleEnum | undefined>();
   const [level, setLevel] = useState<LevelEnum | undefined>();
   const [price, setPrice] = useState<string | undefined>();
   const [spots, setSpots] = useState<string | undefined>();
-  const [startDateTime, setStartDateTime] = useState<Date | undefined>();
-  const [endDateTime, setEndDateTime] = useState<Date | undefined>();
+  const [startAt, setStartAt] = useState<Date | undefined>();
+  const [endAt, setEndAt] = useState<Date | undefined>();
+  const [song, setSong] = useState<SongType | undefined>();
   const [location, setLocation] = useState<LocationType | undefined>();
   const [isCreating, setIsCreating] = useState(false);
 
@@ -71,13 +73,15 @@ export default function CreateProject() {
           preview_url: song.previewUrl,
         },
         p_project_data: {
-          name: projectName.trim(),
+          name: name?.trim(),
           status: status,
           style: style,
           level: level,
           price: price,
           spots: spots,
-          description: projectDescription.trim(),
+          description: description?.trim(),
+          start_at: startAt,
+          end_at: endAt,
           location_id: location?.id,
         },
       });
@@ -85,6 +89,11 @@ export default function CreateProject() {
       if (error) {
         throw error;
       }
+
+      // Invalidate and refetch the project query
+      await queryClient.invalidateQueries({
+        queryKey: ["projects"],
+      });
 
       // Navigate back to projects list
       router.push(`/(teacher)/project/`);
@@ -123,8 +132,8 @@ export default function CreateProject() {
         {/* Project Name Input */}
         <TextInput
           placeholder="Project name..."
-          value={projectName}
-          onChangeText={setProjectName}
+          value={name}
+          onChangeText={setName}
         />
 
         {/* Toggle Button Group for Visibility */}
@@ -155,11 +164,11 @@ export default function CreateProject() {
         {/* Date & Time Row */}
         <DateTimeInput
           label="Date & Time"
-          startDateTime={startDateTime}
-          endDateTime={endDateTime}
+          startAt={startAt}
+          endAt={endAt}
           onValueChange={(startTime: Date, endTime: Date) => {
-            setStartDateTime(startTime);
-            setEndDateTime(endTime);
+            setStartAt(startTime);
+            setEndAt(endTime);
           }}
         />
 
@@ -173,8 +182,8 @@ export default function CreateProject() {
         {/* Project Description Input */}
         <TextInput
           placeholder="Project description ..."
-          value={projectDescription}
-          onChangeText={setProjectDescription}
+          value={description}
+          onChangeText={setDescription}
           multiline
           numberOfLines={4}
         />

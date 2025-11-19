@@ -4,24 +4,53 @@ import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
-import {
-  GenreEnum,
-  LevelEnum,
-  ProjectStatusEnum,
-  StyleEnum,
-} from "@/constants";
-import { projects } from "@/mocks/projects";
-import { ProjectType } from "@/types";
+import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/supabase";
+import { ProjectEnrichedType } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import camelcaseKeys from "camelcase-keys";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Projects() {
-  const [status, setStatus] = useState<string>(ProjectStatusEnum.Private);
-  const [genre, setGenre] = useState<string>("");
-  const [style, setStyle] = useState<string>("");
-  const [level, setLevel] = useState<string>("");
+  const [status, setStatus] = useState<ProjectStatusEnum | undefined>();
+  const [style, setStyle] = useState<StyleEnum | undefined>();
+  const [level, setLevel] = useState<LevelEnum | undefined>();
+  const profile = useAuth((state) => state.profile);
+  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+
+  const { data, isPending, error } = useQuery({
+    queryKey: ["projects", status, style, level],
+    queryFn: async () => {
+      let query = supabase
+        .from("projects")
+        .select(`*, songs(*)`)
+        .eq("user_id", profile?.id)
+        .order("created_at", { ascending: false });
+
+      if (status) {
+        query = query.eq("status", status);
+      }
+      if (style) {
+        query = query.eq("style", style);
+      }
+      if (level) {
+        query = query.eq("level", level);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      if (!data) return [];
+
+      const result = camelcaseKeys(data, { deep: true });
+      return result;
+    },
+    enabled: isLoggedIn && !!profile,
+  });
 
   const options: ChipBarItemProps[] = [
     {
@@ -30,13 +59,6 @@ export default function Projects() {
       options: ProjectStatusEnum,
       modal: true,
       onValueChange: setStatus,
-    },
-    {
-      label: "Genre",
-      value: genre,
-      options: GenreEnum,
-      modal: true,
-      onValueChange: setGenre,
     },
     {
       label: "Style",
@@ -54,30 +76,40 @@ export default function Projects() {
     },
   ];
 
-  const thisWeekProjects = projects.slice(0, 2);
-  const otherProjects = projects.slice(2);
+  // Filter projects by date for "This Week" section
+  const { thisWeekProjects, otherProjects } = useMemo(() => {
+    if (!data || isPending || error) {
+      return { thisWeekProjects: [], otherProjects: [] };
+    }
 
-  const renderTile = (data: ProjectType): React.ReactElement => {
+    return {
+      thisWeekProjects: data.slice(0, 2),
+      otherProjects: data.slice(2),
+    };
+  }, [data, isPending, error]);
+
+  const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
     let icon: IconSymbolName | undefined = undefined;
     let label = "";
-    if (data.status === "public") {
+    if (data.status === ProjectStatusEnum.Public) {
       icon = "heart";
-      label = data.likes.toString();
+      label = `10`;
     }
-    if (data.status === "released") {
+    if (data.status === ProjectStatusEnum.Release) {
       icon = "person.fill";
-      label = `${data.books} | ${data.spots}`;
+      label = `${data.spots}`;
     }
     return (
       <Tile
-        imageSource={data.backgroundImage}
-        title={data.songTitle}
-        subtitle={data.artist}
+        imageSource={data.songs.artworkUrl}
+        title={data.songs.name ?? data.name}
+        subtitle={data.songs.artistName ?? ""}
         metadata={`${data.style} • ${data.level}`}
+        previewUrl={data.songs.previewUrl}
         rightContent={
           <>
-            <Chip color="highlight" icon={icon} label={label} />
-            <Chip color="light" label={data.status ?? ""} />
+            {icon && <Chip color="highlight" icon={icon} label={label} />}
+            <Chip color="light" label={data.status} />
           </>
         }
         onPress={() => router.push(`/(teacher)/project/${data.id}`)}
@@ -85,7 +117,7 @@ export default function Projects() {
     );
   };
 
-  const sections: SectionListData<ProjectType>[] = [
+  const sections: SectionListData<ProjectEnrichedType>[] = [
     {
       title: "This Week",
       data: thisWeekProjects,

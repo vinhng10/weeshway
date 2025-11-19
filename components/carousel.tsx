@@ -1,5 +1,5 @@
 import { ClassCard } from "@/components/class-card";
-import { ProjectType } from "@/types";
+import { ProjectEnrichedType } from "@/types";
 import * as React from "react";
 import { View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
@@ -10,16 +10,14 @@ import RNCarousel, {
 import { StyleSheet } from "react-native-unistyles";
 
 interface CarouselProps {
-  data: any[];
+  data: ProjectEnrichedType[];
   onBook?: any;
-  onPlay?: any;
   onPress?: any;
 }
 
 export const Carousel: React.FunctionComponent<CarouselProps> = ({
   data,
   onBook,
-  onPlay,
   onPress,
 }) => {
   const ref = React.useRef<ICarouselInstance>(null);
@@ -48,14 +46,9 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({
           parallaxAdjacentItemScale: 0.8,
         }}
         onSnapToItem={(index: number) => {}}
-        renderItem={({ item }: { item: ProjectType }) => (
+        renderItem={({ item }: { item: ProjectEnrichedType }) => (
           <View style={styles.carouselItem}>
-            <ClassCard
-              data={item}
-              onBook={onBook}
-              onPlay={onPlay}
-              onPress={onPress}
-            />
+            <ClassCard data={item} onBook={onBook} onPress={onPress} />
           </View>
         )}
       />

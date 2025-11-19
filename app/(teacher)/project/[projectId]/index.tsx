@@ -1,44 +1,82 @@
 import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
-import { DateTimeInput, FloatBoxInput, IntBoxInput, SelectBoxInput, TextInput } from "@/components/input";
+import {
+  DateTimeInput,
+  FloatBoxInput,
+  IntBoxInput,
+  SelectBoxInput,
+  TextInput,
+} from "@/components/input";
 import { LocationInput } from "@/components/input/location-input";
 import { Tile } from "@/components/tile";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
-import { projects } from "@/mocks/projects";
-import { LocationType } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/supabase";
+import { LocationType, ProjectEnrichedType, SongType } from "@/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import camelcaseKeys from "camelcase-keys";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Project() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  const project = useMemo(
-    () => projects.find((p) => p.id === Number(projectId)),
-    [projectId]
-  );
+  const profile = useAuth((state) => state.profile);
+  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const queryClient = useQueryClient();
+
+  const { data, isPending, error } = useQuery<ProjectEnrichedType>({
+    queryKey: ["projects", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select(`*, songs(*), locations(*)`)
+        .eq("id", projectId)
+        .eq("user_id", profile?.id)
+        .single();
+
+      if (error) throw error;
+      if (!data) return null;
+
+      const result = camelcaseKeys(data, { deep: true });
+      return result;
+    },
+    enabled: isLoggedIn && !!profile && !!projectId,
+  });
 
   // Initialize state with project data or defaults
-  const [searchQuery, setSearchQuery] = useState(project?.songTitle || "");
-  const [projectName, setProjectName] = useState(project?.songTitle || "");
-  const [projectDescription, setProjectDescription] = useState(
-    project?.description || ""
-  );
-  const [status, setStatus] = useState<string>(
-    project?.status ?? ProjectStatusEnum.Private
-  );
-  const [style, setStyle] = useState<StyleEnum>(project?.style as StyleEnum);
-  const [level, setLevel] = useState<LevelEnum>(project?.level as LevelEnum);
-  const [price, setPrice] = useState<string>(
-    `$${project?.price?.toFixed(2) ?? "$0.00"}`
-  );
-  const [spots, setSpots] = useState<string>(project?.spots.toString() ?? "0");
-  const [startDateTime, setStartDateTime] = useState<Date | undefined>(
-    undefined
-  );
-  const [endDateTime, setEndDateTime] = useState<Date | undefined>(undefined);
-  const [location, setLocation] = useState<LocationType | undefined>(undefined);
+  const [name, setName] = useState<string | undefined>();
+  const [description, setDescription] = useState<string | undefined>();
+  const [status, setStatus] = useState<ProjectStatusEnum | undefined>();
+  const [style, setStyle] = useState<StyleEnum | undefined>();
+  const [level, setLevel] = useState<LevelEnum | undefined>();
+  const [price, setPrice] = useState<string | undefined>();
+  const [spots, setSpots] = useState<string | undefined>();
+  const [startAt, setStartAt] = useState<Date | undefined>();
+  const [endAt, setEndAt] = useState<Date | undefined>();
+  const [song, setSong] = useState<SongType | undefined>();
+  const [location, setLocation] = useState<LocationType | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Update state when project data is loaded
+  useEffect(() => {
+    if (data) {
+      setName(data.name);
+      setDescription(data.description);
+      setStatus(data.status);
+      setStyle(data.style);
+      setLevel(data.level);
+      setPrice(data.price?.toString());
+      setSpots(data.spots?.toString());
+      setStartAt(data.startAt ? new Date(data.startAt) : undefined);
+      setEndAt(data.endAt ? new Date(data.endAt) : undefined);
+      setSong(data.songs);
+      setLocation(data.locations);
+    }
+  }, [data]);
 
   const options: ChipBarItemProps[] = [
     {
@@ -50,29 +88,79 @@ export default function Project() {
     },
   ];
 
+  const handleSave = async () => {
+    if (!isLoggedIn || !profile || !projectId || !data) {
+      console.error("Error: User not logged in or project ID missing");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({
+          id: data.id,
+          name: name,
+          status: status,
+          style: style,
+          level: level,
+          price: price,
+          spots: spots,
+          start_at: startAt,
+          end_at: endAt,
+          description: description,
+          location_id: location?.id,
+        })
+        .eq("id", projectId)
+        .eq("user_id", profile.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Invalidate and refetch the project query
+      await queryClient.invalidateQueries({
+        queryKey: ["projects"],
+      });
+
+      // Navigate back to projects list
+      router.push(`/(teacher)/project/`);
+    } catch (error: any) {
+      console.error("Error updating project:", error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <Header title="Project" />
 
       {/* Scrollable Content */}
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Song Card */}
-        <Tile
-          imageSource={project?.backgroundImage}
-          title={project?.songTitle ?? ""}
-          subtitle={project?.artist ?? ""}
-          onPress={() => {}}
-        />
+        {song && (
+          <Tile
+            imageSource={song.artworkUrl}
+            title={song.name}
+            subtitle={song.artistName}
+            previewUrl={song.previewUrl}
+            onPress={() => {}}
+          />
+        )}
 
         {/* Project Name Input */}
         <TextInput
           placeholder="Project name..."
-          value={projectName}
-          onChangeText={setProjectName}
+          value={name}
+          onChangeText={setName}
         />
 
         {/* Toggle Button Group for Visibility */}
@@ -96,26 +184,18 @@ export default function Project() {
 
         {/* Price and Spots Info Fields */}
         <View style={styles.row}>
-          <FloatBoxInput
-            label="Price"
-            value={price}
-            onValueChange={setPrice}
-          />
-          <IntBoxInput
-            label="Spots"
-            value={spots}
-            onValueChange={setSpots}
-          />
+          <FloatBoxInput label="Price" value={price} onValueChange={setPrice} />
+          <IntBoxInput label="Spots" value={spots} onValueChange={setSpots} />
         </View>
 
         {/* Date & Time Row */}
         <DateTimeInput
           label="Date & Time"
-          startDateTime={startDateTime}
-          endDateTime={endDateTime}
+          startAt={startAt}
+          endAt={endAt}
           onValueChange={(startTime: Date, endTime: Date) => {
-            setStartDateTime(startTime);
-            setEndDateTime(endTime);
+            setStartAt(startTime);
+            setEndAt(endTime);
           }}
         />
 
@@ -129,18 +209,19 @@ export default function Project() {
         {/* Project Description Input */}
         <TextInput
           placeholder="Project description ..."
-          value={projectDescription}
-          onChangeText={setProjectDescription}
+          value={description}
+          onChangeText={setDescription}
           multiline
           numberOfLines={4}
         />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
-      {/* Create Button */}
+      {/* Save Changes Button */}
       <Button
         stickyBottom
-        label="Studio"
-        onPress={() => router.push(`/(teacher)/project/${projectId}/studio`)}
+        label={isSaving ? "Saving..." : "Save Changes"}
+        onPress={handleSave}
+        disabled={isSaving}
       />
     </View>
   );

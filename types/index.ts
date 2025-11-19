@@ -1,28 +1,16 @@
-import { ImageSourcePropType } from "react-native";
+import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 
 export type WishType = {
   id: number;
-  title: string;
-  artist: string;
-  imageUrl: string;
-  style: string;
-  level: string;
-  description: string;
-  status: "available" | "granted" | undefined;
-  avatars?: ImageSourcePropType[];
-  classes?: ProjectType[];
-};
-
-export type WishType = {
-  id: number;
-  style: string;
-  level: string;
-  description: string;
+  userId: string;
+  style?: string;
+  level?: string;
+  description?: string;
   songId: string;
 };
 
 export type ProfileType = {
-  id: number;
+  id: string; // uid type for browser
   username?: string;
   fullName?: string;
   bio?: string;
@@ -38,24 +26,17 @@ export type ItemType = {
 
 export type ProjectType = {
   id: number;
-  status: "private" | "public" | "released" | "cancelled" | undefined;
-  teacher: ProfileType;
-  genre?: string;
-  songTitle: string;
-  artist: string;
-  style: string;
-  level: string;
-  studio: string;
-  date: string;
-  time: string;
-  price: number;
-  spots: number;
-  books: number;
-  backgroundImage: string;
+  userId: string;
+  name?: string;
+  status: ProjectStatusEnum;
+  style?: StyleEnum;
+  level?: LevelEnum;
+  price?: number;
+  spots?: number;
+  startAt?: Date;
+  endAt?: Date;
   description?: string;
-  likes: number;
-  music: ItemType[];
-  count: ItemType[];
+  locationId?: number;
 };
 
 export type SongType = {
@@ -75,6 +56,15 @@ export type LocationType = {
 };
 
 // Utility type: WishType with song_id replaced by joined songs relation
-export type WishWithSongType = Omit<WishType, "songId"> & {
+export type WishEnrichedType = Omit<WishType, "songId"> & {
   songs: SongType;
+};
+
+export type ProjectEnrichedType = Omit<
+  ProjectType,
+  "userId" | "songId" | "locationId"
+> & {
+  profiles: ProfileType;
+  songs: SongType;
+  locations?: LocationType;
 };

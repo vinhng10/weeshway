@@ -5,8 +5,7 @@ import { Tile } from "@/components/tile";
 import { WishStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
-import { WishWithSongType } from "@/types";
-import { useIsFocused } from "@react-navigation/native";
+import { WishEnrichedType } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 import { router } from "expo-router";
@@ -15,18 +14,17 @@ import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Wishes() {
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState<WishStatusEnum | undefined>();
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
-  const isFocused = useIsFocused();
 
   const { data, isPending, error } = useQuery({
-    queryKey: ["wishes", profile?.id],
+    queryKey: ["wishes", status],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
         .select(`*,songs (*)`)
-        .eq("user_id", profile.id)
+        .eq("user_id", profile?.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -35,7 +33,6 @@ export default function Wishes() {
       const result = camelcaseKeys(data, { deep: true });
       return result;
     },
-    subscribed: isFocused,
     enabled: isLoggedIn && !!profile,
   });
 
@@ -49,7 +46,7 @@ export default function Wishes() {
     },
   ];
 
-  const renderTile = (data: WishWithSongType): React.ReactElement => (
+  const renderTile = (data: WishEnrichedType): React.ReactElement => (
     <Tile
       imageSource={data.songs.artworkUrl}
       title={data.songs.name}
@@ -69,7 +66,7 @@ export default function Wishes() {
     />
   );
 
-  const sections: SectionListData<WishWithSongType>[] = [
+  const sections: SectionListData<WishEnrichedType>[] = [
     {
       data: isPending || error ? [] : data,
       render: renderTile,
