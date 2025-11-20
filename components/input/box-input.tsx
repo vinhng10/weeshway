@@ -144,9 +144,7 @@ export const SelectBoxInput: React.FC<SelectBoxInputProps> = ({
       onPress={handlePress}
       disabled={!editable}
     >
-      <View style={styles.valueContainer}>
-        <ThemedText type="h5">{value}</ThemedText>
-      </View>
+      <ThemedText type="h5">{value}</ThemedText>
       {options && onValueChange && (
         <OptionsModal
           visible={visible}
@@ -293,10 +291,7 @@ export const DateTimeBoxInput: React.FC<DateTimeBoxInputProps> = ({
       onPress={handlePress}
       disabled={!editable}
     >
-      <View style={styles.valueContainer}>
-        <ThemedText type="h5">{formatFunction(value)}</ThemedText>
-      </View>
-
+      <ThemedText type="h5">{formatFunction(value)}</ThemedText>
       <DatePicker
         modal
         open={open}
@@ -329,12 +324,6 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     alignItems: "center",
     gap: theme.gap(0.5),
-  },
-  valueContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
   },
   icon: {
     color: theme.colors.dimmed,

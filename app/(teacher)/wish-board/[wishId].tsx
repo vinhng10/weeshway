@@ -35,9 +35,9 @@ export default function Wish() {
           <SongCard
             data={{
               id: wish.id.toString(),
-              name: wish.title,
-              artistName: wish.artist,
-              artworkUrl: wish.imageUrl,
+              name: wish.songs.name,
+              artistName: wish.songs.artistName,
+              artworkUrl: wish.songs.artworkUrl,
               genreNames: [],
             }}
           />
@@ -90,8 +90,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     gap: theme.gap(2),
   },
 }));

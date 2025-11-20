@@ -59,7 +59,7 @@ export function Avatar({
   };
 
   return (
-    <Pressable style={styles.container} onPress={handleImagePicker}>
+    <Pressable onPress={handleImagePicker}>
       <Image source={source} style={[styles.avatar, style]} {...rest} />
       {onSourceChange && (
         <View style={styles.cameraButton}>
@@ -99,11 +99,6 @@ const styles = StyleSheet.create((theme) => ({
         },
       },
     },
-  },
-  container: {
-    position: "relative",
-    alignSelf: "center",
-    flexShrink: 0,
   },
   cameraButton: {
     position: "absolute",

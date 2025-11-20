@@ -94,12 +94,12 @@ export default function Classes() {
   >[] = [
     {
       title: "You might like",
-      data: [data?.slice(0, 3) ?? []],
+      data: [data?.slice(0, 2) ?? []],
       render: renderCarousel,
     },
     {
       title: "Upcoming",
-      data: data?.slice(3) ?? [],
+      data: data?.slice(2) ?? [],
       render: renderTile,
     },
   ];

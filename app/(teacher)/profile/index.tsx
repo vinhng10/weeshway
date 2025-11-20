@@ -22,15 +22,15 @@ export default function Profile() {
   };
 
   const handleNotifications = () => {
-    router.push("/(teacher)/profile/notifications");
+    // router.push("/(teacher)/profile/notifications");
   };
 
   const handleWallet = () => {
-    router.push("/(student)/profile/wallet");
+    // router.push("/(student)/profile/wallet");
   };
 
   const handleDataPrivacy = () => {
-    router.push("/(teacher)/profile/data-privacy");
+    // router.push("/(teacher)/profile/data-privacy");
   };
 
   const handleSignOut = async () => {

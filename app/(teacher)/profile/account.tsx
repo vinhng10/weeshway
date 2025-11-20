@@ -3,7 +3,7 @@ import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { TextBoxInput } from "@/components/input/box-input";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase, uploadImage } from "@/supabase";
+import { supabase, uploadMedia } from "@/supabase";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -34,7 +34,7 @@ export default function Account() {
       let avatarUrl = profile?.avatarUrl;
 
       if (avatarUri && avatarUri !== profile?.avatarUrl) {
-        avatarUrl = await uploadImage(
+        avatarUrl = await uploadMedia(
           avatarUri,
           `profiles/${profile.id}/avatars`
         );

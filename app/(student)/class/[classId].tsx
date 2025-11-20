@@ -73,7 +73,7 @@ export default function Class() {
         <Pressable
           style={styles.teacherContainer}
           onPress={() => {
-            router.push(`/(student)/profile/${data.profiles.id}`);
+            router.push(`/(student)/class/teacher/${data.profiles.id}`);
           }}
         >
           <Avatar
@@ -149,8 +149,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     gap: theme.gap(2),
   },
   teacherContainer: {

@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import React from "react";
 import { useUnistyles } from "react-native-unistyles";
 
-export default function ClassLayout() {
+export default function TeacherProfileLayout() {
   const { theme } = useUnistyles();
 
   return (
@@ -20,19 +20,7 @@ export default function ClassLayout() {
       }}
     >
       <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="[classId]"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="teacher"
+        name="[profileId]"
         options={{
           headerShown: false,
         }}

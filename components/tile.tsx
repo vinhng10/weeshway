@@ -88,9 +88,7 @@ export const Tile: React.FunctionComponent<TileProps> = ({
           </View>
         </View>
 
-        <View style={styles.rightContainer}>
-          {rightContent ? rightContent : <></>}
-        </View>
+        <View style={styles.rightContainer}>{rightContent}</View>
       </LinearGradient>
     </Pressable>
   );

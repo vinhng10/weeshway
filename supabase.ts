@@ -14,23 +14,23 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
 });
 
 /**
- * Uploads an avatar image to Supabase storage.
- * @param imageUri - The image URI (local or remote) to upload
- * @param pathPrefix - The path prefix for the file (e.g., "avatars", "locations")
- * @returns The public URL of the uploaded image
+ * Uploads media (image or video) to Supabase storage.
+ * @param mediaUri - The media URI (local or remote) to upload
+ * @param pathPrefix - The path prefix for the file (e.g., "profiles/{userId}/avatars", "profiles/{userId}/videos", "locations")
+ * @returns The public URL of the uploaded media
  */
-export async function uploadImage(
-  imageUri: string,
+export async function uploadMedia(
+  mediaUri: string,
   pathPrefix: string
 ): Promise<string> {
-  // 1) Fetch the image
-  const response = await fetch(imageUri);
+  // 1) Fetch the media
+  const response = await fetch(mediaUri);
   const blob = await response.blob();
   const arrayBuffer = await new Response(blob).arrayBuffer();
 
   // 2) Define bucket and path
-  const bucket = "images";
-  const fileExtension = blob.type.split("/")[1] || "jpg";
+  const bucket = "media";
+  const fileExtension = blob.type.split("/")[1];
   const filePath = `${pathPrefix}/${Date.now()}.${fileExtension}`;
 
   // 3) Upload the file

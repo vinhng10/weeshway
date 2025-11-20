@@ -6,7 +6,7 @@ import { TextInput } from "@/components/input/text-input";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { supabase, uploadImage } from "@/supabase";
+import { supabase, uploadMedia } from "@/supabase";
 import { LocationType } from "@/types";
 import camelcaseKeys from "camelcase-keys";
 import React, { useEffect, useState } from "react";
@@ -93,7 +93,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     try {
       // setIsSaving(true);
 
-      const url = imageUrl ? await uploadImage(imageUrl, `locations`) : null;
+      const url = imageUrl ? await uploadMedia(imageUrl, `locations`) : null;
 
       const { data, error } = await supabase
         .from("locations")
@@ -221,13 +221,15 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
           />
 
           <View style={styles.addLocationContainer}>
-            <Avatar
-              source={imageUrl}
-              size="large"
-              shape="square"
-              bordered
-              onSourceChange={setImageUrl}
-            />
+            <View style={styles.row}>
+              <Avatar
+                source={imageUrl}
+                size="large"
+                shape="square"
+                bordered
+                onSourceChange={setImageUrl}
+              />
+            </View>
 
             <View style={styles.row}>
               <TextBoxInput label="Name" value={name} onValueChange={setName} />
@@ -294,13 +296,12 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   addLocationContainer: {
+    alignItems: "center",
     gap: theme.gap(2),
     padding: theme.gap(2),
   },
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     gap: theme.gap(2),
   },
 }));
