@@ -26,12 +26,6 @@ export default function ProfileLayout() {
         }}
       />
       <Stack.Screen
-        name="[profileId]"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
         name="account"
         options={{
           headerShown: false,

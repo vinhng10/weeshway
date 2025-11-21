@@ -4,31 +4,29 @@ import { Header } from "@/components/header";
 import { SectionListView } from "@/components/section-list";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
+import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { Video } from "@/components/video";
+import { ProjectStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
-import { ProfileType, ProjectEnrichedType } from "@/types";
+import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type TeacherProfileWithProjects = ProfileType & {
-  projects?: ProjectEnrichedType[];
-};
-
 export default function TeacherProfile() {
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
-  const { data, isPending, error } = useQuery<TeacherProfileWithProjects>({
-    queryKey: ["teacherProfile", profileId],
+  const { data, isPending, error } = useQuery<ProfileEnrichedType>({
+    queryKey: ["profiles", profileId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select(`*, projects(*, songs(*), locations(*))`)
+        .select(`*, projects(*, songs(*))`)
         .eq("id", profileId)
         .single();
 
@@ -41,10 +39,7 @@ export default function TeacherProfile() {
     enabled: isLoggedIn && !!profile && !!profileId,
   });
 
-  const teacherProfile = data;
-  const classes = data?.projects || [];
-
-  const renderProfile = (data: ProfileType): React.ReactElement => (
+  const renderProfile = (data: ProfileEnrichedType): React.ReactElement => (
     <View style={styles.header}>
       <Avatar source={data.avatarUrl} size="large" shape="circle" bordered />
       <ThemedText type="h3" style={styles.text}>
@@ -70,6 +65,16 @@ export default function TeacherProfile() {
   );
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
+    let icon: IconSymbolName | undefined = undefined;
+    let label = "";
+    if (data.status === ProjectStatusEnum.Public) {
+      icon = "heart";
+      label = `10`;
+    }
+    if (data.status === ProjectStatusEnum.Release) {
+      icon = "person.fill";
+      label = `${data.spots}`;
+    }
     return (
       <Tile
         imageSource={data.songs?.artworkUrl}
@@ -77,14 +82,7 @@ export default function TeacherProfile() {
         subtitle={data.songs?.artistName}
         metadata={`${data.style} • ${data.level}`}
         rightContent={
-          <>
-            <Avatar
-              source={teacherProfile?.avatarUrl}
-              shape="circle"
-              bordered
-            />
-            <Chip color="highlight" label={`${data.spots || 0} spots left`} />
-          </>
+          <>{icon && <Chip color="highlight" icon={icon} label={label} />}</>
         }
         onPress={() => router.push(`/(student)/class/${data.id}`)}
       />
@@ -99,7 +97,7 @@ export default function TeacherProfile() {
     );
   }
 
-  if (error || !teacherProfile) {
+  if (error || !data) {
     return (
       <View style={styles.container}>
         <Header title="Profile" />
@@ -109,19 +107,19 @@ export default function TeacherProfile() {
   }
 
   const sections: SectionListData<
-    ProjectEnrichedType | ProfileType | string[]
+    ProfileEnrichedType | ProjectEnrichedType | string[]
   >[] = [
     {
-      data: [teacherProfile],
+      data: [data],
       render: renderProfile,
     },
     {
-      data: [teacherProfile.videoUrls || []],
+      data: [data.videoUrls || []],
       render: renderVideos,
     },
     {
       title: "Classes",
-      data: classes || [],
+      data: data?.projects || [],
       render: renderTile,
     },
   ];

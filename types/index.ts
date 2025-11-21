@@ -68,3 +68,7 @@ export type ProjectEnrichedType = Omit<
   songs: SongType;
   locations?: LocationType;
 };
+
+export type ProfileEnrichedType = ProfileType & {
+  projects?: ProjectEnrichedType[];
+};
