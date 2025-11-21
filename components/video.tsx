@@ -7,7 +7,7 @@ import { ActivityIndicator, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface VideoProps {
-  source: string;
+  source: string | null;
 }
 
 export function Video({ source }: VideoProps) {
@@ -48,16 +48,16 @@ export function Video({ source }: VideoProps) {
 
   return (
     <Pressable onPress={handlePress} disabled={isLoading}>
-      {isLoading ? (
-        <View style={[styles.container, styles.indicator]}>
+      <View style={[styles.container, styles.indicator]}>
+        {source && isLoading ? (
           <ActivityIndicator size="small" color="#666" />
-        </View>
-      ) : (
-        thumbnailUri && (
-          <Image source={{ uri: thumbnailUri }} style={styles.container} />
-        )
-      )}
-      {shouldLoadPlayer && (
+        ) : (
+          thumbnailUri && (
+            <Image source={{ uri: thumbnailUri }} style={styles.container} />
+          )
+        )}
+      </View>
+      {source && shouldLoadPlayer && (
         <VideoPlayerComponent
           uri={source}
           videoRef={videoRef}

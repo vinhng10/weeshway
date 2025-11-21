@@ -41,6 +41,8 @@ const MAPPING = {
   "folder.fill": "folder",
   sparkles: "sparkles",
   calendar: "calendar",
+  plus: "add",
+  xmark: "close",
 } as IconMapping;
 
 /**
