@@ -112,7 +112,7 @@ export default function Projects() {
             <Chip color="light" label={data.status} />
           </>
         }
-        onPress={() => router.push(`/(teacher)/project/${data.id}`)}
+        onPress={() => router.push(`/(tabs)/project/${data.id}`)}
       />
     );
   };
@@ -138,7 +138,7 @@ export default function Projects() {
       <Button
         stickyBottom
         label="Create Project"
-        onPress={() => router.push("/(teacher)/project/create")}
+        onPress={() => router.push("/(tabs)/project/create")}
       />
     </View>
   );

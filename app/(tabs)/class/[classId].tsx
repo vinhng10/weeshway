@@ -73,7 +73,7 @@ export default function Class() {
         <Pressable
           style={styles.teacherContainer}
           onPress={() => {
-            router.push(`/(student)/class/teacher/${data.profiles.id}`);
+            router.push(`/(tabs)/class/teacher/${data.profiles.id}`);
           }}
         >
           <Avatar

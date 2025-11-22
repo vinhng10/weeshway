@@ -18,19 +18,19 @@ export default function Profile() {
   const setRole = useRole((state) => state.setRole);
 
   const handleAccount = () => {
-    router.push("/(student)/profile/account");
+    router.push("/(tabs)/profile/account");
   };
 
   const handleNotifications = () => {
-    // router.push("/(student)/profile/notifications");
+    // router.push("/(tabs)/profile/notifications");
   };
 
   const handleWallet = () => {
-    // router.push("/(student)/profile/wallet");
+    // router.push("/(tabs)/profile/wallet");
   };
 
   const handleDataPrivacy = () => {
-    // router.push("/(student)/profile/data-privacy");
+    // router.push("/(tabs)/profile/data-privacy");
   };
 
   const handleSignOut = async () => {

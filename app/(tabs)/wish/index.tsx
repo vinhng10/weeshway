@@ -62,7 +62,7 @@ export default function Wishes() {
       //     </>
       //   )
       // }
-      onPress={() => router.push(`/(student)/wish/${data.id}`)}
+      onPress={() => router.push(`/(tabs)/wish/${data.id}`)}
     />
   );
 
@@ -81,7 +81,7 @@ export default function Wishes() {
         stickyBottom
         label="Make A Wish"
         onPress={() => {
-          router.push("/(student)/wish/create");
+          router.push("/(tabs)/wish/create");
         }}
       />
     </View>

@@ -63,7 +63,7 @@ export default function Classes() {
     },
   ];
 
-  const navigateToClass = (id: number) => router.push(`/(student)/class/${id}`);
+  const navigateToClass = (id: number) => router.push(`/(tabs)/class/${id}`);
 
   const renderCarousel = (data: ProjectEnrichedType[]): React.ReactElement => (
     <Carousel

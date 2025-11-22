@@ -84,7 +84,7 @@ export default function TeacherProfile() {
         rightContent={
           <>{icon && <Chip color="highlight" icon={icon} label={label} />}</>
         }
-        onPress={() => router.push(`/(student)/class/${data.id}`)}
+        onPress={() => router.push(`/(tabs)/class/${data.id}`)}
       />
     );
   };

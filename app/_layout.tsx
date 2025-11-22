@@ -1,7 +1,5 @@
-import { RoleEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { useAuth } from "@/hooks/useAuth";
-import { useRole } from "@/hooks/useRole";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Stack } from "expo-router";
@@ -15,7 +13,6 @@ const queryClient = new QueryClient();
 function RootNavigator() {
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
   const initialize = useAuth((state) => state.initialize);
-  const role = useRole((state) => state.role);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const player = useAudioPlayer();
   const status = useAudioPlayerStatus(player);
@@ -39,14 +36,9 @@ function RootNavigator() {
         <Stack.Screen name="sign-up" options={{ headerShown: false }} />
       </Stack.Protected>
 
-      {/* Screens for authenticated users with student role */}
-      <Stack.Protected guard={isLoggedIn && role === RoleEnum.Student}>
-        <Stack.Screen name="(student)" options={{ headerShown: false }} />
-      </Stack.Protected>
-
-      {/* Screens for authenticated users with teacher role */}
-      <Stack.Protected guard={isLoggedIn && role === RoleEnum.Teacher}>
-        <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
+      {/* Screens for authenticated users */}
+      <Stack.Protected guard={isLoggedIn}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
   );

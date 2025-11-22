@@ -96,7 +96,7 @@ export default function CreateProject() {
       });
 
       // Navigate back to projects list
-      router.push(`/(teacher)/project/`);
+      router.push(`/(tabs)/project/`);
     } catch (error: any) {
       console.error("Error creating project:", error);
       // You might want to show an error message to the user here
