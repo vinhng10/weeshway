@@ -57,16 +57,16 @@ export type LocationType = {
 
 // Utility type: WishType with song_id replaced by joined songs relation
 export type WishEnrichedType = Omit<WishType, "songId"> & {
-  songs: SongType;
+  song: SongType;
 };
 
 export type ProjectEnrichedType = Omit<
   ProjectType,
   "userId" | "songId" | "locationId"
 > & {
-  profiles: ProfileType;
-  songs: SongType;
-  locations?: LocationType;
+  profile: ProfileType;
+  song: SongType;
+  location?: LocationType;
 };
 
 export type ProfileEnrichedType = ProfileType & {

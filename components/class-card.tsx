@@ -25,20 +25,20 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
   onPress,
 }) => {
   const isPlaying = useAudioPlayerStore((state) =>
-    state.isPlaying(data.songs.previewUrl)
+    state.isPlaying(data.song.previewUrl)
   );
   const play = useAudioPlayerStore((state) => state.play);
   const pause = useAudioPlayerStore((state) => state.pause);
 
   const handleAudioPlayer = (e?: any) => {
-    if (!data.songs.previewUrl) return;
+    if (!data.song.previewUrl) return;
     e?.stopPropagation?.();
-    isPlaying ? pause() : play(data.songs.previewUrl);
+    isPlaying ? pause() : play(data.song.previewUrl);
   };
   return (
     <Pressable onPress={() => onPress(data)}>
       <ImageBackground
-        source={data.songs.artworkUrl}
+        source={data.song.artworkUrl}
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >
@@ -51,12 +51,12 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
           {/* Top Container */}
           <View style={styles.topContainer}>
             <Avatar
-              source={data.profiles.avatarUrl}
+              source={data.profile.avatarUrl}
               size="large"
               shape="circle"
               bordered={true}
             />
-            <ThemedText type="h3">{data.profiles.fullName}</ThemedText>
+            <ThemedText type="h3">{data.profile.fullName}</ThemedText>
             <View style={styles.chipContainer}>
               {data.style && <Chip label={data.style} color="light" />}
               {data.level && <Chip label={data.level} color="light" />}
@@ -67,8 +67,8 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
           <View style={styles.middleContainer}>
             {/* Song Info */}
             <View style={styles.rowGroup}>
-              <ThemedText type="h3">{data.songs.name}</ThemedText>
-              <ThemedText color="dimmed">{data.songs.artistName}</ThemedText>
+              <ThemedText type="h3">{data.song.name}</ThemedText>
+              <ThemedText color="dimmed">{data.song.artistName}</ThemedText>
             </View>
 
             {/* Location and DateTime Info */}
@@ -80,7 +80,7 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
                     size={16}
                     color="#FFFFFF"
                   />
-                  <ThemedText>{data.locations?.name}</ThemedText>
+                  <ThemedText>{data.location?.name}</ThemedText>
                 </View>
                 <ThemedText>${data.price?.toFixed(2)}</ThemedText>
               </View>

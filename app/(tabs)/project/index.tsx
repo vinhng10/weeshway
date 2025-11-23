@@ -22,12 +22,12 @@ export default function Projects() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
-  const { data, isPending, error } = useQuery({
+  const { data, isPending, error } = useQuery<ProjectEnrichedType[]>({
     queryKey: ["projects", status, style, level],
     queryFn: async () => {
       let query = supabase
         .from("projects")
-        .select(`*, songs(*)`)
+        .select(`*, song:songs(*)`)
         .eq("user_id", profile?.id)
         .order("created_at", { ascending: false });
 
@@ -91,21 +91,21 @@ export default function Projects() {
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
     let icon: IconSymbolName | undefined = undefined;
     let label = "";
-    if (data.status === ProjectStatusEnum.Public) {
+    if (data.status === ProjectStatusEnum.Draft) {
       icon = "heart";
       label = `10`;
     }
     if (data.status === ProjectStatusEnum.Release) {
       icon = "person.fill";
-      label = `${data.spots}`;
+      label = `5 | ${data.spots}`;
     }
     return (
       <Tile
-        imageSource={data.songs.artworkUrl}
-        title={data.songs.name ?? data.name}
-        subtitle={data.songs.artistName ?? ""}
+        imageSource={data.song.artworkUrl}
+        title={data.song.name ?? data.name}
+        subtitle={data.song.artistName ?? ""}
         metadata={`${data.style} • ${data.level}`}
-        previewUrl={data.songs.previewUrl}
+        previewUrl={data.song.previewUrl}
         rightContent={
           <>
             {icon && <Chip color="highlight" icon={icon} label={label} />}

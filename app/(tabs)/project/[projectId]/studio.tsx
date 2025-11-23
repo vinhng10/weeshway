@@ -1,6 +1,5 @@
 import { Header } from "@/components/header";
 import { ControlBar, DisplayArea, Track } from "@/components/studio";
-import { projects } from "@/mocks/projects";
 import { ItemType } from "@/types";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";

@@ -30,7 +30,7 @@ export default function Class() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select(`*, profiles(*), songs(*), locations(*)`)
+        .select(`*, profile:profiles(*), song:songs(*), location:locations(*)`)
         .eq("id", classId)
         .single();
 
@@ -62,7 +62,7 @@ export default function Class() {
   return (
     <View style={styles.container}>
       {/* Hero Section with Song Image */}
-      <Hero data={data.songs} onShare={() => {}} />
+      <Hero data={data.song} onShare={() => {}} />
 
       {/* Scrollable Content */}
       <ScrollView
@@ -73,16 +73,16 @@ export default function Class() {
         <Pressable
           style={styles.teacherContainer}
           onPress={() => {
-            router.push(`/(tabs)/class/teacher/${data.profiles.id}`);
+            router.push(`/(tabs)/class/teacher/${data.profile.id}`);
           }}
         >
           <Avatar
-            source={data.profiles.avatarUrl}
+            source={data.profile.avatarUrl}
             size="large"
             shape="circle"
             bordered={true}
           />
-          <ThemedText type="h3">{data.profiles.fullName}</ThemedText>
+          <ThemedText type="h3">{data.profile.fullName}</ThemedText>
         </Pressable>
 
         {/* Style and Level Selects */}
@@ -116,7 +116,7 @@ export default function Class() {
         {/* Location Row */}
         <LocationInput
           label="Location"
-          value={data.locations}
+          value={data.location}
           editable={false}
         />
 

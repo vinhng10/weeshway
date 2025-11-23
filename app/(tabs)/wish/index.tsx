@@ -23,7 +23,7 @@ export default function Wishes() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
-        .select(`*,songs (*)`)
+        .select(`*, song:songs(*)`)
         .eq("user_id", profile?.id)
         .order("created_at", { ascending: false });
 
@@ -48,11 +48,11 @@ export default function Wishes() {
 
   const renderTile = (data: WishEnrichedType): React.ReactElement => (
     <Tile
-      imageSource={data.songs.artworkUrl}
-      title={data.songs.name}
-      subtitle={data.songs.artistName}
+      imageSource={data.song.artworkUrl}
+      title={data.song.name}
+      subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
-      previewUrl={data.songs.previewUrl}
+      previewUrl={data.song.previewUrl}
       // rightContent={
       //   data.avatars &&
       //   data.avatars.length > 0 && (

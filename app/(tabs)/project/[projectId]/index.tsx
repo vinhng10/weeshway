@@ -33,7 +33,7 @@ export default function Project() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select(`*, songs(*), locations(*)`)
+        .select(`*, song:songs(*), location:locations(*)`)
         .eq("id", projectId)
         .eq("user_id", profile?.id)
         .single();
@@ -73,8 +73,8 @@ export default function Project() {
       setSpots(data.spots?.toString());
       setStartAt(data.startAt ? new Date(data.startAt) : undefined);
       setEndAt(data.endAt ? new Date(data.endAt) : undefined);
-      setSong(data.songs);
-      setLocation(data.locations);
+      setSong(data.song);
+      setLocation(data.location);
     }
   }, [data]);
 

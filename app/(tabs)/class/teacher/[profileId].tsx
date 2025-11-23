@@ -26,7 +26,7 @@ export default function TeacherProfile() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select(`*, projects(*, songs(*))`)
+        .select(`*, projects(*, song:songs(*))`)
         .eq("id", profileId)
         .single();
 
@@ -67,7 +67,7 @@ export default function TeacherProfile() {
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
     let icon: IconSymbolName | undefined = undefined;
     let label = "";
-    if (data.status === ProjectStatusEnum.Public) {
+    if (data.status === ProjectStatusEnum.Draft) {
       icon = "heart";
       label = `10`;
     }
@@ -77,9 +77,9 @@ export default function TeacherProfile() {
     }
     return (
       <Tile
-        imageSource={data.songs?.artworkUrl}
-        title={data.songs?.name || data.name || ""}
-        subtitle={data.songs?.artistName}
+        imageSource={data.song.artworkUrl}
+        title={data.song.name || data.name || ""}
+        subtitle={data.song.artistName}
         metadata={`${data.style} • ${data.level}`}
         rightContent={
           <>{icon && <Chip color="highlight" icon={icon} label={label} />}</>

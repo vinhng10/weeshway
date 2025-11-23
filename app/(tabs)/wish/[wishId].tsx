@@ -3,6 +3,7 @@ import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
+import { WishEnrichedType } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 import { useLocalSearchParams } from "expo-router";
@@ -15,15 +16,15 @@ export default function Wish() {
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const {
-    data: wish,
+    data,
     isPending,
     error,
-  } = useQuery({
+  } = useQuery<WishEnrichedType>({
     queryKey: ["wishes", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
-        .select(`*, songs(*)`)
+        .select(`*, song:songs(*)`)
         .eq("id", wishId)
         .eq("user_id", profile?.id)
         .single();
@@ -37,7 +38,7 @@ export default function Wish() {
     enabled: isLoggedIn && !!profile && !!wishId,
   });
 
-  if (error || !wish) {
+  if (error || !data) {
     return (
       <View style={styles.container}>
         <Header title="Wish" />
@@ -78,15 +79,15 @@ export default function Wish() {
 
         <View style={styles.wishContainer}>
           <Tile
-            imageSource={wish.songs.artworkUrl}
-            title={wish.songs.name}
-            subtitle={wish.songs.artistName}
-            metadata={`${wish.style} • ${wish.level}`}
-            previewUrl={wish.songs.previewUrl}
+            imageSource={data.song.artworkUrl}
+            title={data.song.name}
+            subtitle={data.song.artistName}
+            metadata={`${data.style} • ${data.level}`}
+            previewUrl={data.song.previewUrl}
             onPress={() => {}}
           />
           <View style={styles.descriptionContainer}>
-            <ThemedText>{wish.description}</ThemedText>
+            <ThemedText>{data.description}</ThemedText>
           </View>
         </View>
       </ScrollView>

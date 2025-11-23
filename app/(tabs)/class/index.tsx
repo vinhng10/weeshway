@@ -26,7 +26,7 @@ export default function Classes() {
     queryFn: async () => {
       let query = supabase
         .from("projects")
-        .select(`*, profiles(*), songs(*), locations(*)`);
+        .select(`*, profile:profiles(*), song:songs(*), location:locations(*)`);
 
       if (style) {
         query = query.eq("style", style);
@@ -75,13 +75,13 @@ export default function Classes() {
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
     <Tile
-      imageSource={data.songs.artworkUrl}
-      title={data.songs.name}
-      subtitle={data.songs.artistName}
+      imageSource={data.song.artworkUrl}
+      title={data.song.name}
+      subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
       rightContent={
         <>
-          <Avatar source={data.profiles.avatarUrl} shape="circle" bordered />
+          <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
           <Chip color="highlight" label={`${data.spots} spots left`} />
         </>
       }
