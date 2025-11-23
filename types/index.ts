@@ -55,15 +55,20 @@ export type LocationType = {
   imageUrl: string;
 };
 
+export type RecommendationType = {
+  id: number;
+  wishId: number;
+  projectId: number;
+  score: number;
+  createdAt: Date;
+};
+
 // Utility type: WishType with song_id replaced by joined songs relation
-export type WishEnrichedType = Omit<WishType, "songId"> & {
+export type WishEnrichedType = WishType & {
   song: SongType;
 };
 
-export type ProjectEnrichedType = Omit<
-  ProjectType,
-  "userId" | "songId" | "locationId"
-> & {
+export type ProjectEnrichedType = ProjectType & {
   profile: ProfileType;
   song: SongType;
   location?: LocationType;
@@ -71,4 +76,8 @@ export type ProjectEnrichedType = Omit<
 
 export type ProfileEnrichedType = ProfileType & {
   projects?: ProjectEnrichedType[];
+};
+
+export type RecommendationEnrichedType = RecommendationType & {
+  project: ProjectEnrichedType;
 };

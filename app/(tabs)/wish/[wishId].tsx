@@ -1,12 +1,17 @@
+import { Carousel } from "@/components/carousel";
 import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
-import { WishEnrichedType } from "@/types";
+import {
+  ProjectEnrichedType,
+  RecommendationEnrichedType,
+  WishEnrichedType,
+} from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -15,11 +20,7 @@ export default function Wish() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
-  const {
-    data,
-    isPending,
-    error,
-  } = useQuery<WishEnrichedType>({
+  const { data, isPending, error } = useQuery<WishEnrichedType>({
     queryKey: ["wishes", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -31,6 +32,28 @@ export default function Wish() {
 
       if (error) throw error;
       if (!data) return null;
+
+      const result = camelcaseKeys(data, { deep: true });
+      return result;
+    },
+    enabled: isLoggedIn && !!profile && !!wishId,
+  });
+
+  const {
+    data: recommendations,
+    isPending: isRecommendationsPending,
+    error: recommendationsError,
+  } = useQuery<RecommendationEnrichedType[]>({
+    queryKey: ["recommendations", wishId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("recommendations")
+        .select("*")
+        .eq("wish_id", wishId)
+        .order("score", { ascending: false });
+
+      if (error) throw error;
+      if (!data) return [];
 
       const result = camelcaseKeys(data, { deep: true });
       return result;
@@ -59,23 +82,20 @@ export default function Wish() {
       >
         {/* Top Classes Container */}
         {/* TODO: Add classes query when available */}
-        {/* {wish.classes && wish.classes.length > 0 && (
+        {recommendations && recommendations.length > 0 && (
           <View style={styles.section}>
-            <ThemedText type="h4">
-              {wish.status === "available"
-                ? "Your top classes"
-                : "Granted classes"}
-            </ThemedText>
+            <ThemedText type="h4">Classes</ThemedText>
             <Carousel
-              data={wish.classes}
+              data={recommendations.map(
+                (recommendation) => recommendation.project
+              )}
               onBook={() => {}}
-              onPlay={() => {}}
-              onPress={(data: ProjectType) =>
+              onPress={(data: ProjectEnrichedType) =>
                 router.push(`/(tabs)/class/${data.id}`)
               }
             />
           </View>
-        )} */}
+        )}
 
         <View style={styles.wishContainer}>
           <Tile
