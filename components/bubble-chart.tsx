@@ -17,6 +17,7 @@ import {
   useSharedValue,
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
+import { scheduleOnRN } from "react-native-worklets";
 
 // Predefined color palette for bubbles
 const BUBBLE_COLORS = [
@@ -26,13 +27,14 @@ const BUBBLE_COLORS = [
   { color: "rgba(16, 164, 142, 0.95)", stroke: "rgb(14, 142, 123)" },
 ];
 
-export interface BubbleData {
+export interface BubbleType {
   label: string;
   value: number;
 }
 
 interface BubbleChartProps {
-  data: BubbleData[];
+  data: BubbleType[];
+  onBubbleTap?: (bubbleData: BubbleType) => void;
 }
 
 interface BubbleProps {
@@ -108,7 +110,7 @@ function Bubble({ bubble, offsetX, offsetY, scale }: BubbleProps) {
   );
 }
 
-export function BubbleChart({ data }: BubbleChartProps) {
+export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
   const size = useSharedValue({ width: 0, height: 0 });
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
@@ -155,7 +157,7 @@ export function BubbleChart({ data }: BubbleChartProps) {
     }
   );
 
-  // Pan background (unchanged)
+  // Pan background
   const pan = Gesture.Pan()
     .onStart(() => {
       "worklet";
@@ -170,7 +172,7 @@ export function BubbleChart({ data }: BubbleChartProps) {
       }
     });
 
-  // Pinch zoom (unchanged)
+  // Pinch zoom
   const pinch = Gesture.Pinch()
     .onStart(() => {
       "worklet";
@@ -181,9 +183,10 @@ export function BubbleChart({ data }: BubbleChartProps) {
       scale.value = Math.min(5, Math.max(0.5, savedScale.value * e.scale));
     });
 
-  // Drag bubble — FIXED: store pointer & bubble starts, use startScale when converting delta
+  // Drag bubble
   const drag = Gesture.Pan()
     .maxPointers(1)
+    .minDistance(10)
     .onBegin((e) => {
       "worklet";
       // compute world pointer pos for hit test
@@ -222,12 +225,36 @@ export function BubbleChart({ data }: BubbleChartProps) {
         }
       });
     })
-    .onEnd(() => {
+    .onFinalize(() => {
       "worklet";
       bubbles.forEach((b) => (b.dragging.value = false));
     });
 
-  const composed = Gesture.Simultaneous(pinch, pan, drag);
+  // Tap bubble
+  const tap = Gesture.Tap().onEnd((e) => {
+    "worklet";
+    if (!onBubbleTap) return;
+    // Convert screen coordinates to world coords
+    const wx = (e.x - offsetX.value) / scale.value;
+    const wy = (e.y - offsetY.value) / scale.value;
+
+    // Hit testing bubbles
+    for (let b of bubbles) {
+      const dx = wx - b.x.value;
+      const dy = wy - b.y.value;
+      const distSq = dx * dx + dy * dy;
+      if (distSq <= b.radius * b.radius) {
+        scheduleOnRN(onBubbleTap, { label: b.label, value: b.value });
+        break;
+      }
+    }
+  });
+
+  const composed = Gesture.Simultaneous(
+    pinch,
+    pan,
+    Gesture.Exclusive(drag, tap)
+  );
 
   // Physics
   useFrameCallback(() => {

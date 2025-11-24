@@ -1,4 +1,4 @@
-import { BubbleChart } from "@/components/bubble-chart";
+import { BubbleChart, BubbleType } from "@/components/bubble-chart";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
@@ -44,7 +44,6 @@ export default function WishBoard() {
     },
     enabled: isLoggedIn && !!profile,
   });
-  // console.log(data);
 
   // Generate bubble chart data from wishes grouped by style
   const bubbleChartData = useMemo((): BubbleChartData[] => {
@@ -79,8 +78,21 @@ export default function WishBoard() {
     },
   ];
 
-  const renderBubbleChart = (data: BubbleChartData[]): React.ReactElement => (
-    <BubbleChart data={data} />
+  const handleBubbleTap = (bubbleData: BubbleType) => {
+    // Find the matching StyleEnum value from the bubble's label
+    const styleValue = Object.values(StyleEnum).find(
+      (value) => value === bubbleData.label
+    ) as StyleEnum | undefined;
+
+    if (styleValue) {
+      // If the same style is already selected, clear the filter
+      // Otherwise, set the new style filter
+      setStyle(style === styleValue ? undefined : styleValue);
+    }
+  };
+
+  const renderBubbleChart = (data: BubbleType[]): React.ReactElement => (
+    <BubbleChart data={data} onBubbleTap={handleBubbleTap} />
   );
 
   const renderTile = (data: WishEnrichedType): React.ReactElement => (
@@ -94,7 +106,7 @@ export default function WishBoard() {
     />
   );
 
-  const sections: SectionListData<BubbleChartData[] | WishEnrichedType>[] = [
+  const sections: SectionListData<BubbleType[] | WishEnrichedType>[] = [
     { title: "Explore", data: [bubbleChartData], render: renderBubbleChart },
     {
       title: "Wishes",
