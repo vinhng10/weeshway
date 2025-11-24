@@ -10,6 +10,7 @@ import {
 } from "@/components/input";
 import { LocationInput } from "@/components/input/location-input";
 import { ThemedText } from "@/components/themed-text";
+import { ProjectStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
@@ -131,7 +132,11 @@ export default function Class() {
       </ScrollView>
 
       {/* Book Button */}
-      <Button stickyBottom label="Book" onPress={() => {}} />
+      <Button
+        stickyBottom
+        label={data.status === ProjectStatusEnum.Release ? "Book" : "Wish"}
+        onPress={() => {}}
+      />
     </View>
   );
 }

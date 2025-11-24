@@ -35,7 +35,7 @@ interface BoxInputBaseProps {
   label: string;
   icon?: IconSymbolName;
   onPress?: () => void;
-  disabled?: boolean;
+  editable?: boolean;
   children: React.ReactNode;
 }
 
@@ -43,14 +43,14 @@ const BaseBoxInput: React.FC<BoxInputBaseProps> = ({
   label,
   icon,
   onPress,
-  disabled,
+  editable,
   children,
 }) => {
   return (
     <Pressable
       style={styles.container}
       onPress={onPress}
-      disabled={disabled || !onPress}
+      disabled={!editable || !onPress}
     >
       <View style={styles.labelContainer}>
         <ThemedText color="dimmed">{label}</ThemedText>
@@ -92,7 +92,7 @@ export const TextBoxInput: React.FC<TextBoxInputProps> = ({
   };
 
   return (
-    <BaseBoxInput label={label} onPress={handlePress} disabled={!editable}>
+    <BaseBoxInput label={label} onPress={handlePress} editable={editable}>
       <TextInput
         ref={textInputRef}
         type="h5"
@@ -142,7 +142,7 @@ export const SelectBoxInput: React.FC<SelectBoxInputProps> = ({
       label={label}
       icon="chevron.down"
       onPress={handlePress}
-      disabled={!editable}
+      editable={editable}
     >
       <ThemedText type="h5">{value}</ThemedText>
       {options && onValueChange && (
@@ -189,7 +189,7 @@ export const IntBoxInput: React.FC<IntBoxInputProps> = ({
   };
 
   return (
-    <BaseBoxInput label={label} onPress={handlePress} disabled={!editable}>
+    <BaseBoxInput label={label} onPress={handlePress} editable={editable}>
       <TextInput
         ref={textInputRef}
         type="h5"
@@ -240,7 +240,7 @@ export const FloatBoxInput: React.FC<FloatBoxInputProps> = ({
   };
 
   return (
-    <BaseBoxInput label={label} onPress={handlePress} disabled={!editable}>
+    <BaseBoxInput label={label} onPress={handlePress} editable={editable}>
       <TextInput
         ref={textInputRef}
         type="h5"
@@ -289,7 +289,7 @@ export const DateTimeBoxInput: React.FC<DateTimeBoxInputProps> = ({
       label={label}
       icon={icon}
       onPress={handlePress}
-      disabled={!editable}
+      editable={editable}
     >
       <ThemedText type="h5">{formatFunction(value)}</ThemedText>
       <DatePicker

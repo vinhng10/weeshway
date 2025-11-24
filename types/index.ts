@@ -68,6 +68,11 @@ export type WishEnrichedType = WishType & {
   song: SongType;
 };
 
+export type WishRecommendationEnrichedType = WishType & {
+  song: SongType;
+  recommendations: RecommendationEnrichedType[];
+};
+
 export type ProjectEnrichedType = ProjectType & {
   profile: ProfileType;
   song: SongType;

@@ -4,6 +4,7 @@ import { Chip } from "@/components/chip";
 import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { ProjectStatusEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { ProjectEnrichedType } from "@/types";
 import { ImageBackground } from "expo-image";
@@ -112,7 +113,12 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
           {/* Bottom Container */}
           <View style={styles.bottomContainer}>
             <View style={styles.bookButton}>
-              <Button label="Book" onPress={() => onBook(data)} />
+              <Button
+                label={
+                  data.status === ProjectStatusEnum.Release ? "Book" : "Wish"
+                }
+                onPress={() => onBook(data)}
+              />
             </View>
             <IconButton
               icon={isPlaying ? "pause" : "play"}

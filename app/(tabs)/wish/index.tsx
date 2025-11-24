@@ -1,11 +1,13 @@
+import { AvatarGroup } from "@/components/avatar-group";
 import { Button } from "@/components/button";
+import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { WishStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
-import { WishEnrichedType } from "@/types";
+import { WishRecommendationEnrichedType } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 import { router } from "expo-router";
@@ -18,23 +20,29 @@ export default function Wishes() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
-  const { data, isPending, error } = useQuery({
-    queryKey: ["wishes", status],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("wishes")
-        .select(`*, song:songs(*)`)
-        .eq("user_id", profile?.id)
-        .order("created_at", { ascending: false });
+  const { data, isPending, error } = useQuery<WishRecommendationEnrichedType[]>(
+    {
+      queryKey: ["wishes", "recommendations"],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("wishes")
+          .select(
+            `*, 
+            song:songs(*), 
+            recommendations:recommendations(*)`
+          )
+          .eq("user_id", profile?.id);
 
-      if (error) throw error;
-      if (!data) return [];
+        if (error) throw error;
+        if (!data) return [];
 
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
-    },
-    enabled: isLoggedIn && !!profile,
-  });
+        // Use camelcaseKeys to normalize keys to camelCase
+        const result = camelcaseKeys(data, { deep: true });
+        return result;
+      },
+      enabled: isLoggedIn && !!profile,
+    }
+  );
 
   const options: ChipBarItemProps[] = [
     {
@@ -46,27 +54,38 @@ export default function Wishes() {
     },
   ];
 
-  const renderTile = (data: WishEnrichedType): React.ReactElement => (
+  const renderTile = (
+    data: WishRecommendationEnrichedType
+  ): React.ReactElement => (
     <Tile
       imageSource={data.song.artworkUrl}
       title={data.song.name}
       subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
-      // rightContent={
-      //   data.avatars &&
-      //   data.avatars.length > 0 && (
-      //     <>
-      //       <AvatarGroup max={2} avatars={data.avatars} />
-      //       <Chip color="light" label={data.status ?? ""} />
-      //     </>
-      //   )
-      // }
+      rightContent={
+        data.recommendations &&
+        data.recommendations.length > 0 && (
+          <>
+            <AvatarGroup
+              max={2}
+              avatars={[
+                ...new Set(
+                  data.recommendations
+                    .map((r) => r.project.profile.avatarUrl)
+                    .filter((url): url is string => url !== undefined)
+                ),
+              ]}
+            />
+            <Chip color="light" label={""} />
+          </>
+        )
+      }
       onPress={() => router.push(`/(tabs)/wish/${data.id}`)}
     />
   );
 
-  const sections: SectionListData<WishEnrichedType>[] = [
+  const sections: SectionListData<WishRecommendationEnrichedType>[] = [
     {
       data: isPending || error ? [] : data,
       render: renderTile,

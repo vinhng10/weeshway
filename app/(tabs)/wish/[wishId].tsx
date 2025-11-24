@@ -4,11 +4,7 @@ import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
-import {
-  ProjectEnrichedType,
-  RecommendationEnrichedType,
-  WishEnrichedType,
-} from "@/types";
+import { ProjectEnrichedType, WishRecommendationEnrichedType } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 import { router, useLocalSearchParams } from "expo-router";
@@ -20,12 +16,16 @@ export default function Wish() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
-  const { data, isPending, error } = useQuery<WishEnrichedType>({
-    queryKey: ["wishes", wishId],
+  const { data, isPending, error } = useQuery<WishRecommendationEnrichedType>({
+    queryKey: ["wishes", "recommendations", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
-        .select(`*, song:songs(*)`)
+        .select(
+          `*, 
+            song:songs(*), 
+            recommendations:recommendations(*)`
+        )
         .eq("id", wishId)
         .eq("user_id", profile?.id)
         .single();
@@ -33,28 +33,7 @@ export default function Wish() {
       if (error) throw error;
       if (!data) return null;
 
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
-    },
-    enabled: isLoggedIn && !!profile && !!wishId,
-  });
-
-  const {
-    data: recommendations,
-    isPending: isRecommendationsPending,
-    error: recommendationsError,
-  } = useQuery<RecommendationEnrichedType[]>({
-    queryKey: ["recommendations", wishId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("recommendations")
-        .select("*")
-        .eq("wish_id", wishId)
-        .order("score", { ascending: false });
-
-      if (error) throw error;
-      if (!data) return [];
-
+      // Use camelcaseKeys to normalize keys to camelCase
       const result = camelcaseKeys(data, { deep: true });
       return result;
     },
@@ -81,12 +60,11 @@ export default function Wish() {
         showsVerticalScrollIndicator={false}
       >
         {/* Top Classes Container */}
-        {/* TODO: Add classes query when available */}
-        {recommendations && recommendations.length > 0 && (
+        {data.recommendations && data.recommendations.length > 0 && (
           <View style={styles.section}>
             <ThemedText type="h4">Classes</ThemedText>
             <Carousel
-              data={recommendations.map(
+              data={data.recommendations.map(
                 (recommendation) => recommendation.project
               )}
               onBook={() => {}}

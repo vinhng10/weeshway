@@ -1,25 +1,15 @@
-import {
-  Text,
-  View,
-  type ImageSourcePropType,
-  type ViewProps,
-} from "react-native";
+import { ImageSource } from "expo-image";
+import { Text, View, type ViewProps } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 import { Avatar } from "./avatar";
 
 export type AvatarGroupProps = ViewProps &
   UnistylesVariants<typeof styles> & {
-    avatars: ImageSourcePropType[];
+    avatars: ImageSource[] | string[];
     max?: number;
   };
 
-export function AvatarGroup({
-  style,
-  avatars,
-  max,
-  size,
-  ...rest
-}: AvatarGroupProps) {
+export function AvatarGroup({ avatars, max, size, ...rest }: AvatarGroupProps) {
   styles.useVariants({
     size,
   });
@@ -30,7 +20,7 @@ export function AvatarGroup({
   const overflowCount = max && avatars.length > max ? avatars.length - max : 0;
 
   return (
-    <View style={[styles.container, style]} {...rest}>
+    <View style={styles.container} {...rest}>
       {avatarsToShow.map((source, index) => (
         <View
           key={index}

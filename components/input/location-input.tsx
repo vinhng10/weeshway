@@ -43,6 +43,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
   const [name, setName] = useState(value?.name || "");
   const [address, setAddress] = useState(value?.address || "");
   const [imageUrl, setImageUrl] = useState(value?.imageUrl || null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const searchLocations = async () => {
@@ -91,7 +92,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
 
   const handleAddNewLocation = async () => {
     try {
-      // setIsSaving(true);
+      setIsSaving(true);
 
       const url = imageUrl ? await uploadMedia(imageUrl, `locations`) : null;
 
@@ -115,7 +116,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     } catch (error: any) {
       console.error("Error updating profile:", error);
     } finally {
-      // setIsSaving(false);
+      setIsSaving(false);
       setQuery(name);
       setAddLocationVisible(false);
     }
@@ -249,7 +250,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
           stickyBottom
           label={"Add"}
           onPress={handleAddNewLocation}
-          // disabled={isSaving}
+          disabled={isSaving}
         />
       </Modal>
     </>
