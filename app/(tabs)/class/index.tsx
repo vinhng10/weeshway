@@ -5,11 +5,9 @@ import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { LevelEnum, StyleEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import camelcaseKeys from "camelcase-keys";
 import { router } from "expo-router";
 import { useState } from "react";
 import { SectionListData, View } from "react-native";
@@ -18,8 +16,6 @@ import { StyleSheet } from "react-native-unistyles";
 export default function Classes() {
   const [style, setStyle] = useState<StyleEnum | undefined>();
   const [level, setLevel] = useState<LevelEnum | undefined>();
-  const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const { data, isPending, error } = useQuery<ProjectEnrichedType[]>({
     queryKey: ["projects", style, level],
@@ -38,12 +34,9 @@ export default function Classes() {
       const { data, error } = await query;
 
       if (error) throw error;
-      if (!data) return [];
 
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
+      return data;
     },
-    enabled: isLoggedIn && !!profile,
   });
 
   const options: ChipBarItemProps[] = [

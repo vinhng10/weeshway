@@ -6,10 +6,9 @@ import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { WishStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { WishRecommendationEnrichedType } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import camelcaseKeys from "camelcase-keys";
 import { router } from "expo-router";
 import { useState } from "react";
 import { SectionListData, View } from "react-native";
@@ -18,7 +17,6 @@ import { StyleSheet } from "react-native-unistyles";
 export default function Wishes() {
   const [status, setStatus] = useState<WishStatusEnum | undefined>();
   const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const { data, isPending, error } = useQuery<WishRecommendationEnrichedType[]>(
     {
@@ -34,13 +32,8 @@ export default function Wishes() {
           .eq("user_id", profile?.id);
 
         if (error) throw error;
-        if (!data) return [];
-
-        // Use camelcaseKeys to normalize keys to camelCase
-        const result = camelcaseKeys(data, { deep: true });
-        return result;
+        return data;
       },
-      enabled: isLoggedIn && !!profile,
     }
   );
 

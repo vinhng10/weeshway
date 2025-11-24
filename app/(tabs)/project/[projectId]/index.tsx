@@ -12,10 +12,10 @@ import { LocationInput } from "@/components/input/location-input";
 import { Tile } from "@/components/tile";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { LocationType, ProjectEnrichedType, SongType } from "@/types";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import camelcaseKeys from "camelcase-keys";
+import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
@@ -39,12 +39,9 @@ export default function Project() {
         .single();
 
       if (error) throw error;
-      if (!data) return null;
-
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
+      return data;
     },
-    enabled: isLoggedIn && !!profile && !!projectId,
+    enabled: !!projectId,
   });
 
   // Initialize state with project data or defaults
@@ -115,9 +112,7 @@ export default function Project() {
         .eq("id", projectId)
         .eq("user_id", profile.id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       // Invalidate and refetch the project query
       await queryClient.invalidateQueries({

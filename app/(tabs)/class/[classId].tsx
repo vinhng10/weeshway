@@ -11,11 +11,9 @@ import {
 import { LocationInput } from "@/components/input/location-input";
 import { ThemedText } from "@/components/themed-text";
 import { ProjectStatusEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import camelcaseKeys from "camelcase-keys";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
@@ -23,8 +21,6 @@ import { StyleSheet } from "react-native-unistyles";
 
 export default function Class() {
   const { classId } = useLocalSearchParams<{ classId: string }>();
-  const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const { data, isPending, error } = useQuery<ProjectEnrichedType>({
     queryKey: ["projects", classId],
@@ -36,12 +32,9 @@ export default function Class() {
         .single();
 
       if (error) throw error;
-      if (!data) return null;
-
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
+      return data;
     },
-    enabled: isLoggedIn && !!profile && !!classId,
+    enabled: !!classId,
   });
 
   if (isPending) {

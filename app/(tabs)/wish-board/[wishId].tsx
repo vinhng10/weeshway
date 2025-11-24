@@ -3,22 +3,18 @@ import { Header } from "@/components/header";
 import { TextBoxInput, TextInput } from "@/components/input";
 import { SongCard } from "@/components/song-card";
 import { ThemedText } from "@/components/themed-text";
-import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import camelcaseKeys from "camelcase-keys";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Wish() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
-  const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const { data, isPending, error } = useQuery<WishEnrichedType>({
-    queryKey: ["wishes", wishId],
+    queryKey: ["wishes", "board", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
@@ -27,13 +23,9 @@ export default function Wish() {
         .single();
 
       if (error) throw error;
-      if (!data) return null;
-
-      // Use camelcaseKeys to normalize keys to camelCase
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
+      return data;
     },
-    enabled: isLoggedIn && !!profile && !!wishId,
+    enabled: !!wishId,
   });
 
   if (error || !data) {

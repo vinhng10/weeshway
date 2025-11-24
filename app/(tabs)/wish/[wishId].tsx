@@ -2,19 +2,15 @@ import { Carousel } from "@/components/carousel";
 import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
-import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType, WishRecommendationEnrichedType } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import camelcaseKeys from "camelcase-keys";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Wish() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
-  const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const { data, isPending, error } = useQuery<WishRecommendationEnrichedType>({
     queryKey: ["wishes", "recommendations", wishId],
@@ -24,20 +20,16 @@ export default function Wish() {
         .select(
           `*, 
             song:songs(*), 
-            recommendations:recommendations(*)`
+            recommendations:recommendations(*)
+        `
         )
         .eq("id", wishId)
-        .eq("user_id", profile?.id)
         .single();
 
       if (error) throw error;
-      if (!data) return null;
-
-      // Use camelcaseKeys to normalize keys to camelCase
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
+      return data;
     },
-    enabled: isLoggedIn && !!profile && !!wishId,
+    enabled: !!wishId,
   });
 
   if (error || !data) {

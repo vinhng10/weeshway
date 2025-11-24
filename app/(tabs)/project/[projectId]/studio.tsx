@@ -1,10 +1,9 @@
 import { Header } from "@/components/header";
 import { ControlBar, DisplayArea, Track } from "@/components/studio";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { ItemType, ProjectEnrichedType } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import camelcaseKeys from "camelcase-keys";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
@@ -13,7 +12,6 @@ import { StyleSheet } from "react-native-unistyles";
 export default function Studio() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const { data: project } = useQuery<ProjectEnrichedType>({
     queryKey: ["projects", projectId, "studio"],
@@ -26,12 +24,9 @@ export default function Studio() {
         .single();
 
       if (error) throw error;
-      if (!data) return null;
-
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
+      return data;
     },
-    enabled: isLoggedIn && !!profile && !!projectId,
+    enabled: !!projectId,
   });
 
   const [songItems, setSongItems] = useState<ItemType[]>([]);

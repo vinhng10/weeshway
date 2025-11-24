@@ -7,19 +7,15 @@ import { Tile } from "@/components/tile";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { Video } from "@/components/video";
 import { ProjectStatusEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
-import { useQuery } from "@tanstack/react-query";
-import camelcaseKeys from "camelcase-keys";
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function TeacherProfile() {
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
-  const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const { data, isPending, error } = useQuery<ProfileEnrichedType>({
     queryKey: ["profiles", profileId],
@@ -31,12 +27,9 @@ export default function TeacherProfile() {
         .single();
 
       if (error) throw error;
-      if (!data) return null;
-
-      const result = camelcaseKeys(data, { deep: true });
-      return result;
+      return data;
     },
-    enabled: isLoggedIn && !!profile && !!profileId,
+    enabled: !!profileId,
   });
 
   const renderProfile = (data: ProfileEnrichedType): React.ReactElement => (
