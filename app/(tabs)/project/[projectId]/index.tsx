@@ -216,13 +216,20 @@ export default function Project() {
         />
       </KeyboardAwareScrollView>
 
-      {/* Save Changes Button */}
-      <Button
-        stickyBottom
-        label={isSaving ? "Saving..." : "Save Changes"}
-        onPress={handleSave}
-        disabled={isSaving}
-      />
+      {/* Save Changes Buttons */}
+      <View style={[styles.buttonContainer, styles.row]}>
+        <Button
+          label={isSaving ? "Saving..." : "Save Changes"}
+          onPress={handleSave}
+          disabled={isSaving}
+          style={styles.saveButton}
+        />
+        <Button
+          label={"Studio"}
+          onPress={() => router.push(`/(tabs)/project/${projectId}/studio`)}
+          style={styles.studioButton}
+        />
+      </View>
     </View>
   );
 }
@@ -241,5 +248,17 @@ const styles = StyleSheet.create((theme, rt) => ({
   row: {
     flexDirection: "row",
     gap: theme.gap(2),
+  },
+  buttonContainer: {
+    position: "absolute",
+    bottom: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
+  },
+  saveButton: {
+    flex: 1,
+  },
+  studioButton: {
+    flex: 1,
+    backgroundColor: theme.colors.primary,
   },
 }));

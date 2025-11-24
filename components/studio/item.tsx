@@ -43,12 +43,12 @@ const styles = StyleSheet.create((theme) => ({
     variants: {
       selected: {
         false: {
-          borderColor: "#313131",
+          borderColor: theme.colors.tint,
           backgroundColor: theme.colors.foreground,
         },
         true: {
-          borderColor: "#FFFFFF",
-          backgroundColor: "#558200",
+          borderColor: theme.colors.activeTint,
+          backgroundColor: theme.colors.primary,
         },
       },
     },

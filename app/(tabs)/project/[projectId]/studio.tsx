@@ -1,36 +1,53 @@
 import { Header } from "@/components/header";
 import { ControlBar, DisplayArea, Track } from "@/components/studio";
-import { ItemType } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/supabase";
+import { ItemType, ProjectEnrichedType } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import camelcaseKeys from "camelcase-keys";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Studio() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  const project = useMemo(
-    () => projects.find((p) => p.id === Number(projectId)),
-    [projectId]
-  );
+  const profile = useAuth((state) => state.profile);
+  const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
-  const [musicItems, setMusicItems] = useState<ItemType[]>(
-    project?.music ?? []
-  );
-  const [countItems, setCountItems] = useState<ItemType[]>(
-    project?.count ?? []
-  );
+  const { data: project } = useQuery<ProjectEnrichedType>({
+    queryKey: ["projects", projectId, "studio"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select(`*, song:songs(song_url)`)
+        .eq("id", projectId)
+        .eq("user_id", profile?.id)
+        .single();
+
+      if (error) throw error;
+      if (!data) return null;
+
+      const result = camelcaseKeys(data, { deep: true });
+      return result;
+    },
+    enabled: isLoggedIn && !!profile && !!projectId,
+  });
+
+  const [songItems, setSongItems] = useState<ItemType[]>([]);
+  const [countItems, setCountItems] = useState<ItemType[]>([]);
 
   useEffect(() => {
-    if (project?.music) {
-      setMusicItems(project.music);
+    if (project?.songItems) {
+      setSongItems(project.songItems);
     }
-    if (project?.count) {
-      setCountItems(project.count);
+    if (project?.countItems) {
+      setCountItems(project.countItems);
     }
-  }, [projectId, project?.music, project?.count]);
+  }, [project?.songItems, project?.countItems]);
 
-  const handleMusicItemPress = (index: number) => {
-    setMusicItems((prevItems) => {
+  const handleSongItemPress = (index: number) => {
+    setSongItems((prevItems) => {
       const newItems = [...prevItems];
       newItems[index] = {
         ...newItems[index],
@@ -60,7 +77,7 @@ export default function Studio() {
         <DisplayArea recognizing={true} transcript={""} />
 
         <ControlBar
-          type="music"
+          type="song"
           isPlaying={false}
           wakeWordEnabled={false}
           onLoadAudio={() => {}}
@@ -72,7 +89,7 @@ export default function Studio() {
         />
 
         <View style={styles.tracksContainer}>
-          <Track items={musicItems} onItemPress={handleMusicItemPress} />
+          <Track items={songItems} onItemPress={handleSongItemPress} />
           <Track items={countItems} onItemPress={handleCountItemPress} />
         </View>
       </View>

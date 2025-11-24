@@ -36,7 +36,11 @@ export type ProjectType = {
   startAt?: Date;
   endAt?: Date;
   description?: string;
+  songId?: string;
   locationId?: number;
+  songItems?: ItemType[];
+  countItems?: ItemType[];
+  countUrl?: string;
 };
 
 export type SongType = {
@@ -46,6 +50,7 @@ export type SongType = {
   artworkUrl: string;
   genreNames: string[];
   previewUrl?: string;
+  songUrl?: string;
 };
 
 export type LocationType = {

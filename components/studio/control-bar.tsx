@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface ControlBarProps {
-  type: "music" | "count";
+  type: "song" | "count";
   isPlaying: boolean;
   wakeWordEnabled: boolean;
   onLoadAudio: any;
@@ -26,7 +26,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onToggleWakeWord,
   onToggleType,
 }) => {
-  const typeIcon = type === "music" ? "music.note" : "list.number";
+  const typeIcon = type === "song" ? "music.note" : "list.number";
 
   return (
     <View style={styles.container}>

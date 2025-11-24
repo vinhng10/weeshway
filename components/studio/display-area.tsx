@@ -48,7 +48,7 @@ const styles = StyleSheet.create((theme) => ({
     height: theme.gap(10),
   },
   button: {
-    backgroundColor: "#00BCD4",
+    backgroundColor: theme.colors.primary,
   },
   transcriptContainer: {
     position: "absolute",
