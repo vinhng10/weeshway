@@ -28,13 +28,12 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
   const isPlaying = useAudioPlayerStore((state) =>
     state.isPlaying(data.song.previewUrl)
   );
-  const play = useAudioPlayerStore((state) => state.play);
-  const pause = useAudioPlayerStore((state) => state.pause);
+  const toggle = useAudioPlayerStore((state) => state.toggle);
 
   const handleAudioPlayer = (e?: any) => {
     if (!data.song.previewUrl) return;
     e?.stopPropagation?.();
-    isPlaying ? pause() : play(data.song.previewUrl);
+    toggle(data.song.previewUrl);
   };
   return (
     <Pressable onPress={() => onPress(data)}>

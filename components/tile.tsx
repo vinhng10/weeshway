@@ -30,13 +30,12 @@ export const Tile: React.FunctionComponent<TileProps> = ({
   onPress,
 }) => {
   const isPlaying = useAudioPlayerStore((state) => state.isPlaying(previewUrl));
-  const play = useAudioPlayerStore((state) => state.play);
-  const pause = useAudioPlayerStore((state) => state.pause);
+  const toggle = useAudioPlayerStore((state) => state.toggle);
 
   const handleAudioPlayer = (e?: any) => {
     if (!previewUrl) return;
     e?.stopPropagation?.();
-    isPlaying ? pause() : play(previewUrl);
+    toggle(previewUrl);
   };
 
   const getBackgroundColor = (): LinearGradientProps["colors"] => {

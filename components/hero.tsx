@@ -18,12 +18,11 @@ export const Hero: React.FunctionComponent<HeroProps> = ({ data, onShare }) => {
   const isPlaying = useAudioPlayerStore((state) =>
     state.isPlaying(data.previewUrl)
   );
-  const play = useAudioPlayerStore((state) => state.play);
-  const pause = useAudioPlayerStore((state) => state.pause);
+  const toggle = useAudioPlayerStore((state) => state.toggle);
 
   const handleAudioPlayer = () => {
     if (!data.previewUrl) return;
-    isPlaying ? pause() : play(data.previewUrl);
+    toggle(data.previewUrl);
   };
 
   return (

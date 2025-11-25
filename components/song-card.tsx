@@ -16,15 +16,11 @@ export const SongCard: React.FunctionComponent<SongCardProps> = ({ data }) => {
   const isPlaying = useAudioPlayerStore((state) =>
     state.isPlaying(data.previewUrl)
   );
-  const play = useAudioPlayerStore((state) => state.play);
-  const pause = useAudioPlayerStore((state) => state.pause);
+  const toggle = useAudioPlayerStore((state) => state.toggle);
 
   const handlePlay = () => {
-    if (!data.previewUrl) {
-      return;
-    }
-
-    isPlaying ? pause() : play(data.previewUrl);
+    if (!data.previewUrl) return;
+    toggle(data.previewUrl);
   };
 
   return (
