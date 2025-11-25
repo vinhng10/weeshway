@@ -37,6 +37,7 @@ yarn-error.*
 *.tsbuildinfo
 
 .vscode
+.idea
 *.ipynb
 app-example
 android
