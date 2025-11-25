@@ -97,7 +97,6 @@ export default function Project() {
       const { error } = await supabase
         .from("projects")
         .update({
-          id: data.id,
           name: name,
           status: status,
           style: style,
@@ -109,8 +108,7 @@ export default function Project() {
           description: description,
           location_id: location?.id,
         })
-        .eq("id", projectId)
-        .eq("user_id", profile.id);
+        .eq("id", projectId);
 
       if (error) throw error;
 

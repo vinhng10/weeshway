@@ -1,8 +1,8 @@
 import { ThemedText } from "@/components/themed-text";
+import { PIXELS_PER_SECOND } from "@/constants";
 import { ItemType } from "@/types";
 import { Pressable } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
-import { PIXELS_PER_SECOND } from "../../mocks/project-backup/types";
 
 type ItemProps = UnistylesVariants<typeof styles> & {
   index: number;

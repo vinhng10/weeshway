@@ -1,66 +1,54 @@
 import { Header } from "@/components/header";
 import { ControlBar, DisplayArea, Track } from "@/components/studio";
-import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@/hooks/useQuery";
-import { supabase } from "@/supabase";
-import { ItemType, ProjectEnrichedType } from "@/types";
+import { StudioItemEnum } from "@/constants";
+import { createStudioStore } from "@/hooks/useStudioStore";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Studio() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  const profile = useAuth((state) => state.profile);
-
-  const { data: project } = useQuery<ProjectEnrichedType>({
-    queryKey: ["projects", projectId, "studio"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select(`*, song:songs(song_url)`)
-        .eq("id", projectId)
-        .eq("user_id", profile?.id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!projectId,
-  });
-
-  const [songItems, setSongItems] = useState<ItemType[]>([]);
-  const [countItems, setCountItems] = useState<ItemType[]>([]);
+  const useStudioStore = useMemo(
+    () => createStudioStore(Number(projectId)),
+    [projectId]
+  );
+  const {
+    songItems,
+    countItems,
+    toggle,
+    split,
+    merge,
+    syncToServer,
+    syncFromServer,
+  } = useStudioStore();
+  const [currentType, setCurrentType] = useState<StudioItemEnum>(
+    StudioItemEnum.Song
+  );
 
   useEffect(() => {
-    if (project?.songItems) {
-      setSongItems(project.songItems);
-    }
-    if (project?.countItems) {
-      setCountItems(project.countItems);
-    }
-  }, [project?.songItems, project?.countItems]);
+    syncFromServer();
+    return () => {
+      syncToServer();
+    };
+  }, []);
 
-  const handleSongItemPress = (index: number) => {
-    setSongItems((prevItems) => {
-      const newItems = [...prevItems];
-      newItems[index] = {
-        ...newItems[index],
-        selected: !newItems[index].selected,
-      };
-      return newItems;
-    });
+  const handleItemPress = (index: number) => {
+    toggle(currentType, index);
   };
 
-  const handleCountItemPress = (index: number) => {
-    setCountItems((prevItems) => {
-      const newItems = [...prevItems];
-      newItems[index] = {
-        ...newItems[index],
-        selected: !newItems[index].selected,
-      };
-      return newItems;
-    });
+  const handleSplit = () => {
+    split(currentType, 5);
+  };
+
+  const handleMerge = () => {
+    merge(currentType);
+  };
+
+  const handleToggleType = () => {
+    setCurrentType((prev) =>
+      prev === StudioItemEnum.Song ? StudioItemEnum.Count : StudioItemEnum.Song
+    );
   };
 
   return (
@@ -72,20 +60,20 @@ export default function Studio() {
         <DisplayArea recognizing={true} transcript={""} />
 
         <ControlBar
-          type="song"
+          type={currentType}
           isPlaying={false}
           wakeWordEnabled={false}
           onLoadAudio={() => {}}
           onTogglePlayback={() => {}}
-          onSplit={() => {}}
-          onMerge={() => {}}
+          onSplit={handleSplit}
+          onMerge={handleMerge}
           onToggleWakeWord={() => {}}
-          onToggleType={() => {}}
+          onToggleType={handleToggleType}
         />
 
         <View style={styles.tracksContainer}>
-          <Track items={songItems} onItemPress={handleSongItemPress} />
-          <Track items={countItems} onItemPress={handleCountItemPress} />
+          <Track items={songItems} onItemPress={handleItemPress} />
+          <Track items={countItems} onItemPress={handleItemPress} />
         </View>
       </View>
     </View>

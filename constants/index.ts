@@ -1,3 +1,5 @@
+export const PIXELS_PER_SECOND = 30;
+
 export enum StyleEnum {
   Bachata = "Bachata",
   Ballet = "Ballet",
@@ -69,4 +71,9 @@ export enum MonthEnum {
   October = "October",
   November = "November",
   December = "December",
+}
+
+export enum StudioItemEnum {
+  Song = "song",
+  Count = "count",
 }

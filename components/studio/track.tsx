@@ -1,10 +1,10 @@
+import { Item } from "@/components/studio/item";
 import { ThemedText } from "@/components/themed-text";
+import { PIXELS_PER_SECOND } from "@/constants";
 import { ItemType } from "@/types";
 import React from "react";
 import { Dimensions, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { PIXELS_PER_SECOND } from "../../mocks/project-backup/types";
-import { Item } from "@/components/studio/item";
 
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
@@ -79,15 +79,12 @@ export const Track = ({
     <View style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <Spacer />
-
         <View>
           <Ticks duration={duration} />
           <Items items={items} onItemPress={onItemPress} />
         </View>
-
         <Spacer />
       </ScrollView>
-
       <Cursor />
     </View>
   );
