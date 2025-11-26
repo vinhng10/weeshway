@@ -3,7 +3,13 @@ import { ThemedText } from "@/components/themed-text";
 import { PIXELS_PER_SECOND } from "@/constants";
 import { ItemType } from "@/types";
 import React from "react";
-import { Dimensions, ScrollView, View } from "react-native";
+import {
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  View,
+} from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 const formatTime = (seconds: number): string => {
@@ -70,14 +76,27 @@ const Items = ({
 export const Track = ({
   items,
   onItemPress,
+  onScrollEnd,
 }: {
   items: ItemType[];
   onItemPress: (index: number) => void;
+  onScrollEnd?: (time: number) => void;
 }) => {
   const duration = items[items.length - 1]?.endTime ?? 0;
+
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (!onScrollEnd) return;
+    const playbackTime = event.nativeEvent.contentOffset.x / PIXELS_PER_SECOND;
+    onScrollEnd(playbackTime);
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleScrollEnd}
+      >
         <Spacer />
         <View>
           <Ticks duration={duration} />

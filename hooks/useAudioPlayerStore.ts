@@ -2,9 +2,9 @@ import { type AudioPlayer, type AudioStatus } from "expo-audio";
 import { create } from "zustand";
 
 interface AudioPlayerState {
-  player: AudioPlayer | null;
-  status: AudioStatus | null;
-  currentSource: string | null;
+  player?: AudioPlayer;
+  status?: AudioStatus;
+  currentSource?: string;
   setPlayer: (player: AudioPlayer, status: AudioStatus) => void;
   replace: (source: string) => void;
   play: (source: string) => void;
@@ -14,9 +14,9 @@ interface AudioPlayerState {
 }
 
 export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
-  player: null,
-  status: null,
-  currentSource: null,
+  player: undefined,
+  status: undefined,
+  currentSource: undefined,
   setPlayer: (player: AudioPlayer, status: AudioStatus) => {
     set({ player, status });
   },

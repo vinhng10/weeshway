@@ -8,6 +8,8 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 interface StudioState {
+  songUrl?: string,
+  countUrl?: string,
   songItems: ItemType[];
   countItems: ItemType[];
 
@@ -25,6 +27,8 @@ export const createStudioStore = (projectId: number) =>
   create<StudioState>()(
     persist(
       immer((set, get) => ({
+        songUrl: undefined,
+        countUrl: undefined,
         songItems: [],
         countItems: [],
 
@@ -105,6 +109,8 @@ export const createStudioStore = (projectId: number) =>
             if (data) {
               const result = camelcaseKeys(data, { deep: true });
               set((state) => {
+                state.songUrl = result.song.previewUrl;
+                state.countUrl = result.countUrl;
                 state.songItems = result.songItems || [];
                 state.countItems = result.countItems || [];
               });
