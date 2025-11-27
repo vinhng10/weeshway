@@ -8,9 +8,10 @@ type ItemProps = UnistylesVariants<typeof styles> & {
   index: number;
   item: ItemType;
   onPress: () => void;
+  disabled?: boolean;
 };
 
-export const Item = ({ index, item, onPress }: ItemProps) => {
+export const Item = ({ index, item, onPress, disabled }: ItemProps) => {
   const width = (item.endTime - item.startTime) * PIXELS_PER_SECOND;
   styles.useVariants({
     selected: item.selected,
@@ -26,6 +27,7 @@ export const Item = ({ index, item, onPress }: ItemProps) => {
         },
       ]}
       onPress={onPress}
+      disabled={disabled}
     >
       <ThemedText type="h3">{index + 1}</ThemedText>
     </Pressable>

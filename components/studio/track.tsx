@@ -4,7 +4,7 @@ import { PIXELS_PER_SECOND, StudioItemEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import type { StudioStoreHook } from "@/hooks/useStudioStore";
 import React, { useCallback, useEffect } from "react";
-import { Dimensions, View } from "react-native";
+import { Dimensions, Pressable, View } from "react-native";
 import Animated, {
   cancelAnimation,
   Easing,
@@ -30,6 +30,8 @@ const formatTime = (seconds: number): string => {
 type TrackProps = {
   type: StudioItemEnum;
   useStudioStore: StudioStoreHook;
+  disabled?: boolean;
+  onPress?: any;
 };
 
 const { width } = Dimensions.get("window");
@@ -42,7 +44,7 @@ const Spacer = () => {
   return <View style={styles.spacer} />;
 };
 
-export const Track = ({ type, useStudioStore }: TrackProps) => {
+export const Track = ({ type, useStudioStore, disabled, onPress }: TrackProps) => {
   const { source, items, time, setTime, toggle } = useStudioStore(
     useShallow((state) => ({
       source: state.studio[type].source,
@@ -110,13 +112,18 @@ export const Track = ({ type, useStudioStore }: TrackProps) => {
     },
   });
 
+  styles.useVariants({
+    disabled: disabled,
+  });
+
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={onPress}>
       <Animated.ScrollView
         ref={ref}
         horizontal
         showsHorizontalScrollIndicator={false}
         onScroll={scrollHandler}
+        scrollEnabled={!disabled}
       >
         <Spacer />
         <View>
@@ -138,6 +145,7 @@ export const Track = ({ type, useStudioStore }: TrackProps) => {
                 index={index}
                 item={item}
                 onPress={() => toggle(type, index)}
+                disabled={disabled}
               />
             ))}
           </View>
@@ -145,13 +153,20 @@ export const Track = ({ type, useStudioStore }: TrackProps) => {
         <Spacer />
       </Animated.ScrollView>
       <Cursor />
-    </View>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create((theme) => ({
   container: {
     height: theme.gap(11),
+    variants: {
+      disabled: {
+        true: {
+          opacity: 0.2,
+        },
+      },
+    },
   },
   spacer: {
     width: width / 2,

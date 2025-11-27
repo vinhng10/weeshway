@@ -77,13 +77,17 @@ export default function Studio() {
     merge(currentType);
   };
 
-  const handleToggleType = useCallback(() => {
-    const next = nextType[currentType];
-    setCurrentType(next);
-    replace(studio[next].source);
-    player?.seekTo(getTime(next));
-    pause();
-  }, [studio, currentType]);
+  const handleToggleType = useCallback(
+    (type: StudioItemEnum) => {
+      if (type === currentType) return;
+      const next = nextType[currentType];
+      setCurrentType(next);
+      replace(studio[next].source);
+      player?.seekTo(getTime(next));
+      pause();
+    },
+    [studio, currentType]
+  );
 
   const handleTogglePlayback = () => {
     const currentSource = studio[currentType].source;
@@ -100,9 +104,7 @@ export default function Studio() {
         <DisplayArea recognizing={true} transcript={""} />
 
         <ControlBar
-          type={currentType}
           isPlaying={status?.playing ?? false}
-          onToggleType={handleToggleType}
           onLoadAudio={() => {}}
           onTogglePlayback={handleTogglePlayback}
           onSplit={handleSplit}
@@ -112,8 +114,18 @@ export default function Studio() {
         />
 
         <View style={styles.tracksContainer}>
-          <Track type={StudioItemEnum.Song} useStudioStore={useStudioStore} />
-          <Track type={StudioItemEnum.Count} useStudioStore={useStudioStore} />
+          <Track
+            type={StudioItemEnum.Song}
+            useStudioStore={useStudioStore}
+            disabled={currentType !== StudioItemEnum.Song}
+            onPress={() => handleToggleType(StudioItemEnum.Song)}
+          />
+          <Track
+            type={StudioItemEnum.Count}
+            useStudioStore={useStudioStore}
+            disabled={currentType !== StudioItemEnum.Count}
+            onPress={() => handleToggleType(StudioItemEnum.Count)}
+          />
         </View>
       </View>
     </View>
