@@ -8,8 +8,8 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 interface StudioState {
-  songUrl?: string,
-  countUrl?: string,
+  songUrl?: string;
+  countUrl?: string;
   songItems: ItemType[];
   countItems: ItemType[];
 
@@ -83,7 +83,6 @@ export const createStudioStore = (projectId: number) =>
         syncToServer: async () => {
           try {
             const { songItems, countItems } = get();
-
             const { error } = await supabase
               .from("projects")
               .update({
@@ -91,7 +90,6 @@ export const createStudioStore = (projectId: number) =>
                 count_items: countItems,
               })
               .eq("id", projectId);
-
             if (error) throw error;
           } catch (error) {}
         },
@@ -110,9 +108,8 @@ export const createStudioStore = (projectId: number) =>
               const result = camelcaseKeys(data, { deep: true });
               set((state) => {
                 state.songUrl = result.song.previewUrl;
-                state.countUrl = result.countUrl;
-                state.songItems = result.songItems || [];
-                state.countItems = result.countItems || [];
+                state.songItems = result.songItems;
+                state.countItems = result.countItems;
               });
             }
           } catch (error) {}

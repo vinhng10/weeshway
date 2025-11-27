@@ -1,11 +1,12 @@
 import { Header } from "@/components/header";
 import { ControlBar, DisplayArea, Track } from "@/components/studio";
-import { StudioItemEnum } from "@/constants";
+import { PIXELS_PER_SECOND, StudioItemEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { createStudioStore } from "@/hooks/useStudioStore";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
 
@@ -38,22 +39,32 @@ export default function Studio() {
       syncFromServer: state.syncFromServer,
     }))
   );
-  const player = useAudioPlayerStore((state) => state.player);
   const {
+    player,
+    replace,
+    status,
     toggle: toggleAudio,
     pause,
-    status,
   } = useAudioPlayerStore(
     useShallow((state) => ({
+      player: state.player,
+      replace: state.replace,
+      status: state.status,
       toggle: state.toggle,
       pause: state.pause,
-      status: state.status,
     }))
   );
   const [currentType, setCurrentType] = useState<StudioItemEnum>(
     StudioItemEnum.Song
   );
-  const [currentTime, setCurrentTime] = useState<number>(0);
+  const songOffset = useSharedValue(0);
+  const countOffset = useSharedValue(0);
+
+  const getTime = (type: StudioItemEnum) => {
+    const offset =
+      type === StudioItemEnum.Song ? songOffset.value : countOffset.value;
+    return offset / PIXELS_PER_SECOND;
+  };
 
   useEffect(() => {
     syncFromServer();
@@ -63,34 +74,37 @@ export default function Studio() {
     };
   }, []);
 
-  const handleItemPress = (index: number) => {
-    toggle(currentType, index);
-  };
-
-  const handleScrollEnd = (time: number) => {
-    setCurrentTime(time);
-    player?.seekTo(time);
-  };
+  useEffect(() => {
+    if (!songUrl || !countUrl) return;
+    replace(currentType === StudioItemEnum.Song ? songUrl : countUrl);
+  }, [songUrl, countUrl]);
 
   const handleSplit = () => {
-    split(currentType, currentTime);
+    split(currentType, getTime(currentType));
   };
 
   const handleMerge = () => {
     merge(currentType);
   };
 
-  const handleToggleType = () => {
-    setCurrentType((prev) =>
-      prev === StudioItemEnum.Song ? StudioItemEnum.Count : StudioItemEnum.Song
-    );
-  };
+  const handleToggleType = useCallback(() => {
+    if (currentType === StudioItemEnum.Song) {
+      setCurrentType(StudioItemEnum.Count);
+      replace(countUrl);
+      player?.seekTo(getTime(StudioItemEnum.Count));
+    } else {
+      setCurrentType(StudioItemEnum.Song);
+      replace(songUrl);
+      player?.seekTo(getTime(StudioItemEnum.Song));
+    }
+    pause();
+  }, [songUrl, countUrl]);
 
   const handleTogglePlayback = () => {
     const currentSource =
       currentType === StudioItemEnum.Song ? songUrl : countUrl;
     if (!currentSource) return;
-    toggleAudio(currentSource);
+    toggleAudio(currentSource, false);
   };
 
   return (
@@ -104,25 +118,29 @@ export default function Studio() {
         <ControlBar
           type={currentType}
           isPlaying={status?.playing ?? false}
-          wakeWordEnabled={false}
+          onToggleType={handleToggleType}
           onLoadAudio={() => {}}
           onTogglePlayback={handleTogglePlayback}
           onSplit={handleSplit}
           onMerge={handleMerge}
+          wakeWordEnabled={false}
           onToggleWakeWord={() => {}}
-          onToggleType={handleToggleType}
         />
 
         <View style={styles.tracksContainer}>
           <Track
+            type={StudioItemEnum.Song}
+            source={songUrl}
+            offset={songOffset}
             items={songItems}
-            onItemPress={handleItemPress}
-            onScrollEnd={handleScrollEnd}
+            onItemPress={toggle}
           />
           <Track
+            type={StudioItemEnum.Count}
+            source={countUrl}
+            offset={countOffset}
             items={countItems}
-            onItemPress={handleItemPress}
-            onScrollEnd={handleScrollEnd}
+            onItemPress={toggle}
           />
         </View>
       </View>

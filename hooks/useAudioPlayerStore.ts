@@ -6,11 +6,11 @@ interface AudioPlayerState {
   status?: AudioStatus;
   currentSource?: string;
   setPlayer: (player: AudioPlayer, status: AudioStatus) => void;
-  replace: (source: string) => void;
-  play: (source: string) => void;
+  replace: (source?: string) => void;
+  play: (source: string, fromBeginning?: boolean) => void;
   pause: () => void;
   isPlaying: (source?: string) => boolean;
-  toggle: (source?: string) => void;
+  toggle: (source?: string, fromBeginning?: boolean) => void;
 }
 
 export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
@@ -20,14 +20,14 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   setPlayer: (player: AudioPlayer, status: AudioStatus) => {
     set({ player, status });
   },
-  replace: (source: string) => {
+  replace: (source?: string) => {
     const { player } = get();
-    if (player) {
+    if (player && source) {
       player.replace(source);
       set({ currentSource: source });
     }
   },
-  play: (source: string) => {
+  play: (source: string, fromBeginning = true) => {
     const { player, status, currentSource } = get();
     if (!player || !status || !source) return;
 
@@ -36,7 +36,9 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
       set({ currentSource: source });
     }
 
-    player.seekTo(0);
+    if (fromBeginning) {
+      player.seekTo(0);
+    }
     player.play();
   },
   pause: () => {
@@ -48,12 +50,12 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
     if (currentSource !== source) return false;
     // Return true if actually playing OR if loading (not yet loaded)
     // This shows pause icon immediately when switching sources
-    return status?.playing === true || status?.isLoaded === false;
+    return status?.playing === true;
   },
-  toggle: (source?: string) => {
+  toggle: (source?: string, fromBeginning = true) => {
     const { isPlaying, play, pause, currentSource } = get();
     const targetSource = source ?? currentSource;
     if (!targetSource) return;
-    isPlaying(targetSource) ? pause() : play(targetSource);
+    isPlaying(targetSource) ? pause() : play(targetSource, fromBeginning);
   },
 }));

@@ -1,16 +1,23 @@
 import { Item } from "@/components/studio/item";
 import { ThemedText } from "@/components/themed-text";
-import { PIXELS_PER_SECOND } from "@/constants";
+import { PIXELS_PER_SECOND, StudioItemEnum } from "@/constants";
+import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { ItemType } from "@/types";
-import React from "react";
-import {
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  View,
-} from "react-native";
+import React, { useCallback, useEffect } from "react";
+import { Dimensions, View } from "react-native";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  scrollTo,
+  SharedValue,
+  useAnimatedRef,
+  useAnimatedScrollHandler,
+  useDerivedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
+import { scheduleOnRN } from "react-native-worklets";
+import { useShallow } from "zustand/react/shallow";
 
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
@@ -18,6 +25,14 @@ const formatTime = (seconds: number): string => {
   return `${mins.toString().padStart(2, "0")}:${secs
     .toString()
     .padStart(2, "0")}`;
+};
+
+type TrackProps = {
+  type: StudioItemEnum;
+  source?: string;
+  offset: SharedValue<number>;
+  items: ItemType[];
+  onItemPress: (type: StudioItemEnum, index: number) => void;
 };
 
 const { width } = Dimensions.get("window");
@@ -30,80 +45,103 @@ const Spacer = () => {
   return <View style={styles.spacer} />;
 };
 
-const Ticks = ({
-  duration,
-  interval = 5,
-}: {
-  duration: number;
-  interval?: number;
-}) => {
-  return (
-    <View style={[styles.tickRow]}>
-      {Array.from({ length: Math.ceil(duration / interval) }, (_, index) => {
-        const time = index * interval;
-        const left = time * PIXELS_PER_SECOND;
-        return (
-          <ThemedText key={index} style={[styles.tick, { left }]}>
-            {formatTime(time)}
-          </ThemedText>
-        );
-      })}
-    </View>
-  );
-};
-
-const Items = ({
-  items,
-  onItemPress,
-}: {
-  items: ItemType[];
-  onItemPress: (index: number) => void;
-}) => {
-  return (
-    <View style={[styles.itemRow]}>
-      {items.map((item, index) => (
-        <Item
-          key={index}
-          index={index}
-          item={item}
-          onPress={() => onItemPress(index)}
-        />
-      ))}
-    </View>
-  );
-};
-
 export const Track = ({
+  type,
+  source,
+  offset,
   items,
   onItemPress,
-  onScrollEnd,
-}: {
-  items: ItemType[];
-  onItemPress: (index: number) => void;
-  onScrollEnd?: (time: number) => void;
-}) => {
+}: TrackProps) => {
   const duration = items[items.length - 1]?.endTime ?? 0;
+  const ref = useAnimatedRef<Animated.ScrollView>();
+  const { player, isPlaying, currentSource } = useAudioPlayerStore(
+    useShallow((state) => ({
+      player: state.player,
+      status: state.status,
+      isPlaying: state.isPlaying(source),
+      currentSource: state.currentSource,
+    }))
+  );
 
-  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (!onScrollEnd) return;
-    const playbackTime = event.nativeEvent.contentOffset.x / PIXELS_PER_SECOND;
-    onScrollEnd(playbackTime);
-  };
+  const seekTo = useCallback(
+    (time: number) => {
+      if (!player || currentSource !== source) return;
+      player.seekTo(time);
+    },
+    [source, currentSource]
+  );
+
+  useEffect(() => {
+    seekTo(0);
+  }, []);
+
+  // Use derived value to scroll whenever position changes
+  useDerivedValue(() => {
+    scrollTo(ref, offset.value, 0, false);
+  });
+
+  // Sync scroll position with player
+  useEffect(() => {
+    if (!isPlaying || duration <= 0) return;
+
+    // Use the current scroll position to calculate the remaining time
+    const currentTime = offset.value / PIXELS_PER_SECOND;
+    const remainingTime = duration - currentTime;
+    const targetPosition = duration * PIXELS_PER_SECOND;
+
+    // Animate from current scroll position to the end of the track
+    offset.value = withTiming(targetPosition, {
+      duration: remainingTime * 1000,
+      easing: Easing.linear,
+    });
+
+    return () => {
+      cancelAnimation(offset);
+    };
+  }, [isPlaying]);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onMomentumEnd: (event) => {
+      offset.value = event.contentOffset.x;
+      const time = event.contentOffset.x / PIXELS_PER_SECOND;
+      scheduleOnRN(seekTo, time);
+    },
+  });
 
   return (
     <View style={styles.container}>
-      <ScrollView
+      <Animated.ScrollView
+        ref={ref}
         horizontal
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleScrollEnd}
+        onScroll={scrollHandler}
       >
         <Spacer />
         <View>
-          <Ticks duration={duration} />
-          <Items items={items} onItemPress={onItemPress} />
+          <View style={[styles.tickRow]}>
+            {Array.from({ length: Math.ceil(duration / 5) }, (_, index) => {
+              const time = index * 5;
+              const left = time * PIXELS_PER_SECOND;
+              return (
+                <ThemedText key={index} style={[styles.tick, { left }]}>
+                  {formatTime(time)}
+                </ThemedText>
+              );
+            })}
+          </View>
+          <View style={[styles.itemRow]}>
+            {items.map((item, index) => (
+              <Item
+                key={index}
+                index={index}
+                item={item}
+                onPress={() => onItemPress(type, index)}
+              />
+            ))}
+          </View>
         </View>
         <Spacer />
-      </ScrollView>
+      </Animated.ScrollView>
       <Cursor />
     </View>
   );

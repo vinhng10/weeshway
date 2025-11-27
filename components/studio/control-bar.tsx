@@ -45,7 +45,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
       />
 
       <IconButton
-        icon={isPlaying ? "stop" : "play"}
+        icon={isPlaying ? "pause" : "play"}
         onPress={onTogglePlayback}
         iconSize={26}
         type="transparent"
