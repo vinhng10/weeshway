@@ -40,10 +40,6 @@ const Cursor = () => {
   return <View style={styles.cursor} />;
 };
 
-const Spacer = () => {
-  return <View style={styles.spacer} />;
-};
-
 export const Track = ({
   type,
   useStudioStore,
@@ -116,7 +112,7 @@ export const Track = ({
   });
 
   return (
-    <Pressable style={styles.container} onPress={onPress}>
+    <View style={styles.container}>
       <Animated.ScrollView
         ref={ref}
         horizontal
@@ -124,8 +120,7 @@ export const Track = ({
         onScroll={scrollHandler}
         scrollEnabled={!disabled}
       >
-        <Spacer />
-        <View>
+        <Pressable onPress={onPress} style={styles.scrollContent}>
           <View style={[styles.tickRow]}>
             {Array.from({ length: Math.ceil(duration / 5) }, (_, index) => {
               const time = index * 5;
@@ -148,11 +143,10 @@ export const Track = ({
               />
             ))}
           </View>
-        </View>
-        <Spacer />
+        </Pressable>
       </Animated.ScrollView>
       <Cursor />
-    </Pressable>
+    </View>
   );
 };
 
@@ -167,8 +161,8 @@ const styles = StyleSheet.create((theme) => ({
       },
     },
   },
-  spacer: {
-    width: width / 2,
+  scrollContent: {
+    paddingHorizontal: width / 2,
   },
   tickRow: {
     height: theme.gap(3),
