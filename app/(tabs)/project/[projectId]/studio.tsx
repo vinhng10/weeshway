@@ -15,15 +15,17 @@ export default function Studio() {
     () => createStudioStore(Number(projectId)),
     [projectId]
   );
-  const { studio, split, merge, syncToServer, syncFromServer } = useStudioStore(
-    useShallow((state) => ({
-      studio: state.studio,
-      split: state.split,
-      merge: state.merge,
-      syncToServer: state.syncToServer,
-      syncFromServer: state.syncFromServer,
-    }))
-  );
+  const { studio, split, merge, reset, syncToServer, syncFromServer } =
+    useStudioStore(
+      useShallow((state) => ({
+        studio: state.studio,
+        split: state.split,
+        merge: state.merge,
+        reset: state.reset,
+        syncToServer: state.syncToServer,
+        syncFromServer: state.syncFromServer,
+      }))
+    );
   const {
     player,
     replace,
@@ -47,14 +49,11 @@ export default function Studio() {
     [StudioItemEnum.Count]: StudioItemEnum.Song,
   };
 
-  const getTime = (type: StudioItemEnum) => {
-    return studio[type].time ?? 0;
-  };
-
   useEffect(() => {
     syncFromServer();
     return () => {
       pause();
+      reset();
       syncToServer();
     };
   }, []);
@@ -70,7 +69,7 @@ export default function Studio() {
   }, [status?.didJustFinish]);
 
   const handleSplit = () => {
-    split(currentType, getTime(currentType));
+    split(currentType, studio[currentType].time);
   };
 
   const handleMerge = () => {
@@ -83,7 +82,7 @@ export default function Studio() {
       const next = nextType[currentType];
       setCurrentType(next);
       replace(studio[next].source);
-      player?.seekTo(getTime(next));
+      player?.seekTo(studio[next].time);
       pause();
     },
     [studio, currentType]

@@ -44,7 +44,12 @@ const Spacer = () => {
   return <View style={styles.spacer} />;
 };
 
-export const Track = ({ type, useStudioStore, disabled, onPress }: TrackProps) => {
+export const Track = ({
+  type,
+  useStudioStore,
+  disabled,
+  onPress,
+}: TrackProps) => {
   const { source, items, time, setTime, toggle } = useStudioStore(
     useShallow((state) => ({
       source: state.studio[type].source,
@@ -66,19 +71,14 @@ export const Track = ({ type, useStudioStore, disabled, onPress }: TrackProps) =
     }))
   );
 
-  const seekTo = useCallback(
+  const sync = useCallback(
     (o: number) => {
       const time = o / PIXELS_PER_SECOND;
       setTime(type, time);
-      if (!player || currentSource !== source) return;
-      player.seekTo(time);
+      player?.seekTo(time);
     },
-    [source, currentSource, player]
+    [player]
   );
-
-  useEffect(() => {
-    seekTo(0);
-  }, []);
 
   // Use derived value to scroll whenever position changes
   useDerivedValue(() => {
@@ -101,14 +101,14 @@ export const Track = ({ type, useStudioStore, disabled, onPress }: TrackProps) =
 
     return () => {
       cancelAnimation(offset);
-      seekTo(offset.value);
+      sync(offset.value);
     };
   }, [isPlaying]);
 
   const scrollHandler = useAnimatedScrollHandler({
     onMomentumEnd: (event) => {
       offset.value = event.contentOffset.x;
-      scheduleOnRN(seekTo, event.contentOffset.x);
+      scheduleOnRN(sync, event.contentOffset.x);
     },
   });
 

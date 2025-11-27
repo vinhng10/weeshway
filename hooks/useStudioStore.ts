@@ -23,6 +23,7 @@ interface StudioState {
   split: (type: StudioItemEnum, time: number) => void;
   merge: (type: StudioItemEnum) => void;
   setTime: (type: StudioItemEnum, time: number) => void;
+  reset: () => void;
   syncToServer: () => Promise<void>;
   syncFromServer: () => Promise<void>;
 }
@@ -95,6 +96,18 @@ export const createStudioStore = (projectId: number) =>
         setTime: (type, time) =>
           set((state) => {
             state.studio[type].time = time;
+          }),
+
+        reset: () =>
+          set((state) => {
+            state.studio.song.time = 0;
+            state.studio.count.time = 0;
+            state.studio.song.items.forEach((item) => {
+              item.selected = false;
+            });
+            state.studio.count.items.forEach((item) => {
+              item.selected = false;
+            });
           }),
 
         syncToServer: async () => {
