@@ -2,17 +2,17 @@ import { Item } from "@/components/studio/item";
 import { ThemedText } from "@/components/themed-text";
 import { PIXELS_PER_SECOND, StudioItemEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
-import { ItemType } from "@/types";
+import type { StudioStoreHook } from "@/hooks/useStudioStore";
 import React, { useCallback, useEffect } from "react";
 import { Dimensions, View } from "react-native";
 import Animated, {
   cancelAnimation,
   Easing,
   scrollTo,
-  SharedValue,
   useAnimatedRef,
   useAnimatedScrollHandler,
   useDerivedValue,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
@@ -29,10 +29,7 @@ const formatTime = (seconds: number): string => {
 
 type TrackProps = {
   type: StudioItemEnum;
-  source?: string;
-  offset: SharedValue<number>;
-  items: ItemType[];
-  onItemPress: (type: StudioItemEnum, index: number) => void;
+  useStudioStore: StudioStoreHook;
 };
 
 const { width } = Dimensions.get("window");
@@ -45,15 +42,19 @@ const Spacer = () => {
   return <View style={styles.spacer} />;
 };
 
-export const Track = ({
-  type,
-  source,
-  offset,
-  items,
-  onItemPress,
-}: TrackProps) => {
+export const Track = ({ type, useStudioStore }: TrackProps) => {
+  const { source, items, time, setTime, toggle } = useStudioStore(
+    useShallow((state) => ({
+      source: state.studio[type].source,
+      items: state.studio[type].items,
+      time: state.studio[type].time,
+      setTime: state.setTime,
+      toggle: state.toggle,
+    }))
+  );
   const duration = items[items.length - 1]?.endTime ?? 0;
   const ref = useAnimatedRef<Animated.ScrollView>();
+  const offset = useSharedValue(time * PIXELS_PER_SECOND);
   const { player, isPlaying, currentSource } = useAudioPlayerStore(
     useShallow((state) => ({
       player: state.player,
@@ -64,11 +65,13 @@ export const Track = ({
   );
 
   const seekTo = useCallback(
-    (time: number) => {
+    (o: number) => {
+      const time = o / PIXELS_PER_SECOND;
+      setTime(type, time);
       if (!player || currentSource !== source) return;
       player.seekTo(time);
     },
-    [source, currentSource]
+    [source, currentSource, player]
   );
 
   useEffect(() => {
@@ -80,7 +83,6 @@ export const Track = ({
     scrollTo(ref, offset.value, 0, false);
   });
 
-  // Sync scroll position with player
   useEffect(() => {
     if (!isPlaying || duration <= 0) return;
 
@@ -97,14 +99,14 @@ export const Track = ({
 
     return () => {
       cancelAnimation(offset);
+      seekTo(offset.value);
     };
   }, [isPlaying]);
 
   const scrollHandler = useAnimatedScrollHandler({
     onMomentumEnd: (event) => {
       offset.value = event.contentOffset.x;
-      const time = event.contentOffset.x / PIXELS_PER_SECOND;
-      scheduleOnRN(seekTo, time);
+      scheduleOnRN(seekTo, event.contentOffset.x);
     },
   });
 
@@ -135,7 +137,7 @@ export const Track = ({
                 key={index}
                 index={index}
                 item={item}
-                onPress={() => onItemPress(type, index)}
+                onPress={() => toggle(type, index)}
               />
             ))}
           </View>

@@ -1,12 +1,11 @@
 import { Header } from "@/components/header";
 import { ControlBar, DisplayArea, Track } from "@/components/studio";
-import { PIXELS_PER_SECOND, StudioItemEnum } from "@/constants";
+import { StudioItemEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { createStudioStore } from "@/hooks/useStudioStore";
 import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
 
@@ -16,23 +15,9 @@ export default function Studio() {
     () => createStudioStore(Number(projectId)),
     [projectId]
   );
-  const {
-    songUrl,
-    countUrl,
-    songItems,
-    countItems,
-    toggle,
-    split,
-    merge,
-    syncToServer,
-    syncFromServer,
-  } = useStudioStore(
+  const { studio, split, merge, syncToServer, syncFromServer } = useStudioStore(
     useShallow((state) => ({
-      songUrl: state.songUrl,
-      countUrl: state.countUrl,
-      songItems: state.songItems,
-      countItems: state.countItems,
-      toggle: state.toggle,
+      studio: state.studio,
       split: state.split,
       merge: state.merge,
       syncToServer: state.syncToServer,
@@ -57,13 +42,13 @@ export default function Studio() {
   const [currentType, setCurrentType] = useState<StudioItemEnum>(
     StudioItemEnum.Song
   );
-  const songOffset = useSharedValue(0);
-  const countOffset = useSharedValue(0);
+  const nextType = {
+    [StudioItemEnum.Song]: StudioItemEnum.Count,
+    [StudioItemEnum.Count]: StudioItemEnum.Song,
+  };
 
   const getTime = (type: StudioItemEnum) => {
-    const offset =
-      type === StudioItemEnum.Song ? songOffset.value : countOffset.value;
-    return offset / PIXELS_PER_SECOND;
+    return studio[type].time ?? 0;
   };
 
   useEffect(() => {
@@ -75,9 +60,14 @@ export default function Studio() {
   }, []);
 
   useEffect(() => {
-    if (!songUrl || !countUrl) return;
-    replace(currentType === StudioItemEnum.Song ? songUrl : countUrl);
-  }, [songUrl, countUrl]);
+    if (!studio.song.source || !studio.count.source) return;
+    replace(studio[currentType].source);
+  }, [studio.song.source, studio.count.source]);
+
+  useEffect(() => {
+    if (!status?.didJustFinish) return;
+    pause();
+  }, [status?.didJustFinish]);
 
   const handleSplit = () => {
     split(currentType, getTime(currentType));
@@ -88,21 +78,15 @@ export default function Studio() {
   };
 
   const handleToggleType = useCallback(() => {
-    if (currentType === StudioItemEnum.Song) {
-      setCurrentType(StudioItemEnum.Count);
-      replace(countUrl);
-      player?.seekTo(getTime(StudioItemEnum.Count));
-    } else {
-      setCurrentType(StudioItemEnum.Song);
-      replace(songUrl);
-      player?.seekTo(getTime(StudioItemEnum.Song));
-    }
+    const next = nextType[currentType];
+    setCurrentType(next);
+    replace(studio[next].source);
+    player?.seekTo(getTime(next));
     pause();
-  }, [songUrl, countUrl]);
+  }, [studio, currentType]);
 
   const handleTogglePlayback = () => {
-    const currentSource =
-      currentType === StudioItemEnum.Song ? songUrl : countUrl;
+    const currentSource = studio[currentType].source;
     if (!currentSource) return;
     toggleAudio(currentSource, false);
   };
@@ -128,20 +112,8 @@ export default function Studio() {
         />
 
         <View style={styles.tracksContainer}>
-          <Track
-            type={StudioItemEnum.Song}
-            source={songUrl}
-            offset={songOffset}
-            items={songItems}
-            onItemPress={toggle}
-          />
-          <Track
-            type={StudioItemEnum.Count}
-            source={countUrl}
-            offset={countOffset}
-            items={countItems}
-            onItemPress={toggle}
-          />
+          <Track type={StudioItemEnum.Song} useStudioStore={useStudioStore} />
+          <Track type={StudioItemEnum.Count} useStudioStore={useStudioStore} />
         </View>
       </View>
     </View>

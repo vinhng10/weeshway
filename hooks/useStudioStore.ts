@@ -7,34 +7,46 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
+type TrackState = {
+  source?: string;
+  items: ItemType[];
+  time: number;
+};
+
 interface StudioState {
-  songUrl?: string;
-  countUrl?: string;
-  songItems: ItemType[];
-  countItems: ItemType[];
+  studio: {
+    song: TrackState;
+    count: TrackState;
+  };
 
   toggle: (type: StudioItemEnum, index: number) => void;
   split: (type: StudioItemEnum, time: number) => void;
   merge: (type: StudioItemEnum) => void;
+  setTime: (type: StudioItemEnum, time: number) => void;
   syncToServer: () => Promise<void>;
   syncFromServer: () => Promise<void>;
 }
-
-const getItemsKey = (type: StudioItemEnum): "songItems" | "countItems" =>
-  `${type}Items`;
 
 export const createStudioStore = (projectId: number) =>
   create<StudioState>()(
     persist(
       immer((set, get) => ({
-        songUrl: undefined,
-        countUrl: undefined,
-        songItems: [],
-        countItems: [],
+        studio: {
+          song: {
+            source: undefined,
+            items: [],
+            time: 0,
+          },
+          count: {
+            source: undefined,
+            items: [],
+            time: 0,
+          },
+        },
 
         toggle: (type, index) =>
           set((state) => {
-            const items = state[getItemsKey(type)];
+            const items = state.studio[type].items;
             if (items?.[index]) {
               items[index].selected = !items[index].selected;
             }
@@ -42,7 +54,7 @@ export const createStudioStore = (projectId: number) =>
 
         split: (type, time) =>
           set((state) => {
-            const items = state[getItemsKey(type)];
+            const items = state.studio[type].items;
             if (!items) return;
 
             const idx = items.findIndex(
@@ -61,7 +73,7 @@ export const createStudioStore = (projectId: number) =>
 
         merge: (type) =>
           set((state) => {
-            const items = state[getItemsKey(type)];
+            const items = state.studio[type].items;
             if (!items) return;
 
             const selected = items
@@ -80,14 +92,19 @@ export const createStudioStore = (projectId: number) =>
             });
           }),
 
+        setTime: (type, time) =>
+          set((state) => {
+            state.studio[type].time = time;
+          }),
+
         syncToServer: async () => {
           try {
-            const { songItems, countItems } = get();
+            const { studio } = get();
             const { error } = await supabase
               .from("projects")
               .update({
-                song_items: songItems,
-                count_items: countItems,
+                song_items: studio.song.items,
+                count_items: studio.count.items,
               })
               .eq("id", projectId);
             if (error) throw error;
@@ -107,9 +124,11 @@ export const createStudioStore = (projectId: number) =>
             if (data) {
               const result = camelcaseKeys(data, { deep: true });
               set((state) => {
-                state.songUrl = result.song.previewUrl;
-                state.songItems = result.songItems;
-                state.countItems = result.countItems;
+                state.studio.song.source = result.song.previewUrl;
+                state.studio.count.source =
+                  "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/2f/cb/7f/2fcb7f4a-1f8e-5f4c-2b61-b0b62261e4eb/mzaf_6330452069109107949.plus.aac.ep.m4a";
+                state.studio.song.items = result.songItems;
+                state.studio.count.items = result.countItems;
               });
             }
           } catch (error) {}
@@ -121,3 +140,5 @@ export const createStudioStore = (projectId: number) =>
       }
     )
   );
+
+export type StudioStoreHook = ReturnType<typeof createStudioStore>;
