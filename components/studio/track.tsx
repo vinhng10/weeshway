@@ -62,12 +62,11 @@ export const Track = ({
   const duration = items[items.length - 1]?.endTime ?? 0;
   const ref = useAnimatedRef<Animated.ScrollView>();
   const offset = useSharedValue(time * PIXELS_PER_SECOND);
-  const { player, isPlaying, currentSource } = useAudioPlayerStore(
+  const { player, isPlaying } = useAudioPlayerStore(
     useShallow((state) => ({
       player: state.player,
       status: state.status,
       isPlaying: state.isPlaying(source),
-      currentSource: state.currentSource,
     }))
   );
 

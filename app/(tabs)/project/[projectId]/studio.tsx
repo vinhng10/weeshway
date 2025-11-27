@@ -88,11 +88,9 @@ export default function Studio() {
     [studio, currentType]
   );
 
-  const handleTogglePlayback = () => {
-    const currentSource = studio[currentType].source;
-    if (!currentSource) return;
-    toggleAudio(currentSource, false);
-  };
+  const handleTogglePlayback = useCallback(() => {
+    toggleAudio(studio[currentType].source, false);
+  }, [studio, currentType]);
 
   return (
     <View style={styles.container}>
