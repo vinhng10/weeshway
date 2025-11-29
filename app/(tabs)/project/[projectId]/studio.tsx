@@ -1,16 +1,23 @@
 import { Header } from "@/components/header";
 import { ControlBar, DisplayArea, Track } from "@/components/studio";
+import { TrackRef } from "@/components/studio/track";
 import { StudioItemEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { createStudioStore } from "@/hooks/useStudioStore";
 import { useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
 
 export default function Studio() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
+  const songRef = useRef<TrackRef>(null);
+  const countRef = useRef<TrackRef>(null);
+  const trackRefs = {
+    [StudioItemEnum.Song]: songRef,
+    [StudioItemEnum.Count]: countRef,
+  };
   const useStudioStore = useMemo(
     () => createStudioStore(Number(projectId)),
     [projectId]
@@ -26,28 +33,24 @@ export default function Studio() {
         syncFromServer: state.syncFromServer,
       }))
     );
+  const [currentType, setCurrentType] = useState<StudioItemEnum>(
+    StudioItemEnum.Song
+  );
   const {
     player,
     replace,
-    status,
+    isPlaying,
     toggle: toggleAudio,
     pause,
   } = useAudioPlayerStore(
     useShallow((state) => ({
       player: state.player,
       replace: state.replace,
-      status: state.status,
+      isPlaying: state.isPlaying(studio[currentType].source),
       toggle: state.toggle,
       pause: state.pause,
     }))
   );
-  const [currentType, setCurrentType] = useState<StudioItemEnum>(
-    StudioItemEnum.Song
-  );
-  const nextType = {
-    [StudioItemEnum.Song]: StudioItemEnum.Count,
-    [StudioItemEnum.Count]: StudioItemEnum.Song,
-  };
 
   useEffect(() => {
     syncFromServer();
@@ -63,34 +66,29 @@ export default function Studio() {
     replace(studio[currentType].source);
   }, [studio.song.source, studio.count.source]);
 
-  useEffect(() => {
-    if (!status?.didJustFinish) return;
-    pause();
-  }, [status?.didJustFinish]);
-
   const handleSplit = () => {
-    split(currentType, studio[currentType].time);
+    if (!player) return;
+    split(currentType, player.currentTime);
   };
 
   const handleMerge = () => {
     merge(currentType);
   };
 
-  const handleToggleType = useCallback(
-    (type: StudioItemEnum) => {
-      if (type === currentType) return;
-      const next = nextType[currentType];
-      setCurrentType(next);
-      replace(studio[next].source);
-      player?.seekTo(studio[next].time);
-      pause();
-    },
-    [studio, currentType]
-  );
-
-  const handleTogglePlayback = useCallback(() => {
+  const handleTogglePlayback = useCallback(async () => {
+    if (!trackRefs[currentType].current) return;
+    await trackRefs[currentType].current.handleAutoScroll();
     toggleAudio(studio[currentType].source, false);
   }, [studio, currentType]);
+
+  const handleTrackPress = useCallback((type: StudioItemEnum) => {
+    Object.entries(trackRefs).forEach(([trackType, ref]) => {
+      if (trackType !== type && ref.current) {
+        ref.current.cancelAnimation();
+      }
+    });
+    setCurrentType(type);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -101,7 +99,7 @@ export default function Studio() {
         <DisplayArea recognizing={true} transcript={""} />
 
         <ControlBar
-          isPlaying={status?.playing ?? false}
+          isPlaying={isPlaying}
           onLoadAudio={() => {}}
           onTogglePlayback={handleTogglePlayback}
           onSplit={handleSplit}
@@ -112,16 +110,18 @@ export default function Studio() {
 
         <View style={styles.tracksContainer}>
           <Track
+            ref={songRef}
             type={StudioItemEnum.Song}
             useStudioStore={useStudioStore}
             disabled={currentType !== StudioItemEnum.Song}
-            onPress={() => handleToggleType(StudioItemEnum.Song)}
+            onPress={handleTrackPress}
           />
           <Track
+            ref={countRef}
             type={StudioItemEnum.Count}
             useStudioStore={useStudioStore}
             disabled={currentType !== StudioItemEnum.Count}
-            onPress={() => handleToggleType(StudioItemEnum.Count)}
+            onPress={handleTrackPress}
           />
         </View>
       </View>

@@ -10,7 +10,6 @@ import { immer } from "zustand/middleware/immer";
 type TrackState = {
   source?: string;
   items: ItemType[];
-  time: number;
 };
 
 interface StudioState {
@@ -22,7 +21,6 @@ interface StudioState {
   toggle: (type: StudioItemEnum, index: number) => void;
   split: (type: StudioItemEnum, time: number) => void;
   merge: (type: StudioItemEnum) => void;
-  setTime: (type: StudioItemEnum, time: number) => void;
   reset: () => void;
   syncToServer: () => Promise<void>;
   syncFromServer: () => Promise<void>;
@@ -36,24 +34,23 @@ export const createStudioStore = (projectId: number) =>
           song: {
             source: undefined,
             items: [],
-            time: 0,
           },
           count: {
             source: undefined,
             items: [],
-            time: 0,
           },
         },
 
-        toggle: (type, index) =>
+        toggle: (type, index) => {
           set((state) => {
             const items = state.studio[type].items;
             if (items?.[index]) {
               items[index].selected = !items[index].selected;
             }
-          }),
+          });
+        },
 
-        split: (type, time) =>
+        split: (type, time) => {
           set((state) => {
             const items = state.studio[type].items;
             if (!items) return;
@@ -70,9 +67,10 @@ export const createStudioStore = (projectId: number) =>
               { startTime: item.startTime, endTime: time, selected: false },
               { startTime: time, endTime: item.endTime, selected: false }
             );
-          }),
+          });
+        },
 
-        merge: (type) =>
+        merge: (type) => {
           set((state) => {
             const items = state.studio[type].items;
             if (!items) return;
@@ -91,24 +89,19 @@ export const createStudioStore = (projectId: number) =>
               endTime: items[last].endTime,
               selected: true,
             });
-          }),
+          });
+        },
 
-        setTime: (type, time) =>
+        reset: () => {
           set((state) => {
-            state.studio[type].time = time;
-          }),
-
-        reset: () =>
-          set((state) => {
-            state.studio.song.time = 0;
-            state.studio.count.time = 0;
             state.studio.song.items.forEach((item) => {
               item.selected = false;
             });
             state.studio.count.items.forEach((item) => {
               item.selected = false;
             });
-          }),
+          });
+        },
 
         syncToServer: async () => {
           try {

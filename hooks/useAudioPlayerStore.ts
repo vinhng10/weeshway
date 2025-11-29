@@ -10,6 +10,7 @@ interface AudioPlayerState {
   play: (source: string, fromBeginning?: boolean) => void;
   pause: () => void;
   isPlaying: (source?: string) => boolean;
+  isLoaded: (source?: string) => boolean;
   toggle: (source?: string, fromBeginning?: boolean) => void;
 }
 
@@ -28,8 +29,8 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
     }
   },
   play: (source: string, fromBeginning = true) => {
-    const { player, status, currentSource } = get();
-    if (!player || !status || !source) return;
+    const { player, currentSource } = get();
+    if (!player || !source) return;
 
     if (currentSource !== source) {
       player.replace(source);
@@ -48,9 +49,12 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   isPlaying: (source?: string) => {
     const { currentSource, status } = get();
     if (currentSource !== source) return false;
-    // Return true if actually playing OR if loading (not yet loaded)
-    // This shows pause icon immediately when switching sources
     return status?.playing === true;
+  },
+  isLoaded: (source?: string) => {
+    const { currentSource, status } = get();
+    if (currentSource !== source) return false;
+    return status?.isLoaded === true;
   },
   toggle: (source?: string, fromBeginning = true) => {
     const { isPlaying, play, pause, currentSource } = get();

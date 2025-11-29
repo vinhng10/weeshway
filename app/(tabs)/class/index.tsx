@@ -72,6 +72,7 @@ export default function Classes() {
       title={data.song.name}
       subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
+      previewUrl={data.song.previewUrl}
       rightContent={
         <>
           <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
