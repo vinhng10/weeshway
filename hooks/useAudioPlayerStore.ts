@@ -5,7 +5,9 @@ interface AudioPlayerState {
   player?: AudioPlayer;
   status?: AudioStatus;
   currentSource?: string;
+  shouldPlay: boolean;
   setPlayer: (player: AudioPlayer, status: AudioStatus) => void;
+  setShouldPlay: (shouldPlay: boolean) => void;
   replace: (source?: string) => void;
   play: (source: string, fromBeginning?: boolean) => void;
   pause: () => void;
@@ -18,8 +20,12 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   player: undefined,
   status: undefined,
   currentSource: undefined,
+  shouldPlay: false,
   setPlayer: (player: AudioPlayer, status: AudioStatus) => {
     set({ player, status });
+  },
+  setShouldPlay: (shouldPlay: boolean) => {
+    set({ shouldPlay });
   },
   replace: (source?: string) => {
     const { player } = get();

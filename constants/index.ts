@@ -1,4 +1,5 @@
 export const PIXELS_PER_SECOND = 30;
+export const TICK_INTERVAL = 5;
 
 export enum StyleEnum {
   Bachata = "Bachata",
@@ -73,7 +74,7 @@ export enum MonthEnum {
   December = "December",
 }
 
-export enum StudioItemEnum {
+export enum TrackEnum {
   Song = "song",
   Count = "count",
 }

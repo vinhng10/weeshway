@@ -1,4 +1,4 @@
-import { StudioItemEnum } from "@/constants";
+import { TrackEnum } from "@/constants";
 import { supabase } from "@/supabase";
 import { ItemType } from "@/types";
 import camelcaseKeys from "camelcase-keys";
@@ -14,13 +14,16 @@ type TrackState = {
 
 interface StudioState {
   studio: {
+    activeTrack: TrackEnum;
     song: TrackState;
     count: TrackState;
   };
 
-  toggle: (type: StudioItemEnum, index: number) => void;
-  split: (type: StudioItemEnum, time: number) => void;
-  merge: (type: StudioItemEnum) => void;
+  setActive: (type: TrackEnum) => void;
+  isActive: (type: TrackEnum) => boolean;
+  toggle: (index: number) => void;
+  split: (time: number) => void;
+  merge: () => void;
   reset: () => void;
   syncToServer: () => Promise<void>;
   syncFromServer: () => Promise<void>;
@@ -31,6 +34,7 @@ export const createStudioStore = (projectId: number) =>
     persist(
       immer((set, get) => ({
         studio: {
+          activeTrack: TrackEnum.Song,
           song: {
             source: undefined,
             items: [],
@@ -41,18 +45,30 @@ export const createStudioStore = (projectId: number) =>
           },
         },
 
-        toggle: (type, index) => {
+        setActive: (type) => {
           set((state) => {
-            const items = state.studio[type].items;
+            state.studio.activeTrack = type;
+          });
+        },
+
+        isActive: (type) => {
+          return get().studio.activeTrack === type;
+        },
+
+        toggle: (index) => {
+          set((state) => {
+            const track = state.studio.activeTrack;
+            const items = state.studio[track].items;
             if (items?.[index]) {
               items[index].selected = !items[index].selected;
             }
           });
         },
 
-        split: (type, time) => {
+        split: (time) => {
           set((state) => {
-            const items = state.studio[type].items;
+            const track = state.studio.activeTrack;
+            const items = state.studio[track].items;
             if (!items) return;
 
             const idx = items.findIndex(
@@ -70,9 +86,10 @@ export const createStudioStore = (projectId: number) =>
           });
         },
 
-        merge: (type) => {
+        merge: () => {
           set((state) => {
-            const items = state.studio[type].items;
+            const track = state.studio.activeTrack;
+            const items = state.studio[track].items;
             if (!items) return;
 
             const selected = items
@@ -94,6 +111,7 @@ export const createStudioStore = (projectId: number) =>
 
         reset: () => {
           set((state) => {
+            state.studio.activeTrack = TrackEnum.Song;
             state.studio.song.items.forEach((item) => {
               item.selected = false;
             });

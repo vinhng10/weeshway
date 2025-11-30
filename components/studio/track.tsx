@@ -1,9 +1,11 @@
+// Track.tsx - Fixed version
 import { Item } from "@/components/studio/item";
 import { ThemedText } from "@/components/themed-text";
-import { PIXELS_PER_SECOND, StudioItemEnum } from "@/constants";
+import { PIXELS_PER_SECOND, TICK_INTERVAL, TrackEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import type { StudioStoreHook } from "@/hooks/useStudioStore";
-import React, { forwardRef, useCallback, useImperativeHandle } from "react";
+import { ItemType } from "@/types";
+import React, { useEffect, useMemo } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import Animated, {
   cancelAnimation,
@@ -20,6 +22,8 @@ import { StyleSheet } from "react-native-unistyles";
 import { scheduleOnRN } from "react-native-worklets";
 import { useShallow } from "zustand/react/shallow";
 
+const { width } = Dimensions.get("window");
+
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
@@ -28,204 +32,191 @@ const formatTime = (seconds: number): string => {
     .padStart(2, "0")}`;
 };
 
-type TrackProps = {
-  type: StudioItemEnum;
-  useStudioStore: StudioStoreHook;
-  disabled?: boolean;
-  onPress?: any;
+const timeToOffset = (time: number) => {
+  "worklet";
+  return time * PIXELS_PER_SECOND;
 };
 
-const { width } = Dimensions.get("window");
+const offsetToTime = (offset: number) => {
+  "worklet";
+  return offset / PIXELS_PER_SECOND;
+};
 
-export type TrackRef = {
-  handleAutoScroll: () => Promise<void>;
-  cancelAnimation: () => void;
+type TrackProps = {
+  type: TrackEnum;
+  useStudioStore: StudioStoreHook;
 };
 
 const Cursor = () => <View style={styles.cursor} />;
 
-const Track = forwardRef<TrackRef, TrackProps>(
-  ({ type, useStudioStore, disabled, onPress }, ref) => {
-    styles.useVariants({ disabled });
-    const { source, items, toggle } = useStudioStore(
-      useShallow((state) => ({
-        source: state.studio[type].source,
-        items: state.studio[type].items,
-        toggle: state.toggle,
-      }))
-    );
-    const { player, isPlaying, pause, replace } = useAudioPlayerStore(
+export default function Track({ type, useStudioStore }: TrackProps) {
+  const { source, items, toggle, isActive, setActive } = useStudioStore(
+    useShallow((state) => ({
+      source: state.studio[type].source,
+      items: state.studio[type].items,
+      toggle: state.toggle,
+      isActive: state.isActive(type),
+      setActive: state.setActive,
+    }))
+  );
+
+  const { player, pause, replace, shouldPlay, setShouldPlay } =
+    useAudioPlayerStore(
       useShallow((state) => ({
         player: state.player,
-        isPlaying: state.isPlaying(source),
         pause: state.pause,
         replace: state.replace,
+        shouldPlay: state.shouldPlay,
+        setShouldPlay: state.setShouldPlay,
       }))
     );
-    const duration = items[items.length - 1]?.endTime ?? 0;
-    const scrollRef = useAnimatedRef<Animated.ScrollView>();
-    const offset = useSharedValue(0);
 
-    useDerivedValue(() => scrollTo(scrollRef, offset.value, 0, false));
+  styles.useVariants({ disabled: !isActive });
 
-    const sync = useCallback(
-      async (value: { time: number } | { offset: number }) => {
-        const time =
-          "time" in value ? value.time : value.offset / PIXELS_PER_SECOND;
-        await player?.seekTo(time);
-        offset.value = time * PIXELS_PER_SECOND;
-      },
-      [player, offset]
-    );
+  const duration = useMemo(
+    () => items[items.length - 1]?.endTime ?? 0,
+    [items]
+  );
 
-    const createItemAnimation = useCallback(
-      (item: any, isLast: boolean) => {
-        const duration = (item.endTime - item.startTime) * 1000;
-        const targetOffset = item.endTime * PIXELS_PER_SECOND;
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const offset = useSharedValue(0);
 
-        return withTiming(
-          targetOffset,
-          { duration, easing: Easing.linear },
-          isLast
-            ? () => {
-                "worklet";
+  useDerivedValue(() => scrollTo(scrollRef, offset.value, 0, false));
+
+  const sync = async (time: number) => {
+    await player?.seekTo(time);
+    offset.value = timeToOffset(time);
+  };
+
+  const createAnimations = (selectedItems: ItemType[]) => {
+    return selectedItems.flatMap((item, i) => {
+      const isLast = i === selectedItems.length - 1;
+      const duration = (item.endTime - item.startTime) * 1000;
+      const targetOffset = timeToOffset(item.endTime);
+
+      const itemAnimation = withTiming(
+        targetOffset,
+        { duration, easing: Easing.linear },
+        isLast
+          ? (finished) => {
+              "worklet";
+              if (finished) {
                 scheduleOnRN(pause);
-                scheduleOnRN(sync, { offset: offset.value });
+                scheduleOnRN(setShouldPlay, false);
               }
-            : undefined
-        );
-      },
-      [pause, sync, offset]
-    );
+            }
+          : undefined
+      );
 
-    const createGapAnimation = useCallback(
-      (nextStartTime: number) => {
+      const nextItem = selectedItems[i + 1];
+      const hasGap = nextItem && item.endTime < nextItem.startTime;
+
+      if (hasGap) {
+        const nextStartTime = nextItem.startTime;
         const seek = async () => {
           await player?.seekTo(nextStartTime);
         };
-        return withTiming(
-          nextStartTime * PIXELS_PER_SECOND,
+        const gapAnimation = withTiming(
+          timeToOffset(nextStartTime),
           { duration: 0, easing: Easing.linear },
           () => {
             "worklet";
             scheduleOnRN(seek);
           }
         );
-      },
-      [player]
-    );
+        return [itemAnimation, gapAnimation];
+      }
 
-    const playSelectedItems = useCallback(
-      async (selectedItems: any[]) => {
-        await sync({ time: selectedItems[0].startTime });
-
-        const animations = selectedItems.flatMap((item, i) => {
-          const isLast = i === selectedItems.length - 1;
-          const nextItem = selectedItems[i + 1];
-          const hasGap = nextItem && item.endTime < nextItem.startTime;
-
-          return [
-            createItemAnimation(item, isLast),
-            ...(hasGap ? [createGapAnimation(nextItem.startTime)] : []),
-          ];
-        });
-
-        offset.value = withSequence(...animations);
-      },
-      [sync, createItemAnimation, createGapAnimation, offset]
-    );
-
-    const playFromCurrent = useCallback(() => {
-      const currentTime = offset.value / PIXELS_PER_SECOND;
-      const remainingTime = duration - currentTime;
-
-      offset.value = withTiming(duration * PIXELS_PER_SECOND, {
-        duration: remainingTime * 1000,
-        easing: Easing.linear,
-      });
-    }, [offset, duration]);
-
-    const handlePress = async () => {
-      pause();
-      onPress(type);
-      replace(source);
-      await sync({ offset: offset.value });
-    };
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        handleAutoScroll: async () => {
-          if (isPlaying) {
-            cancelAnimation(offset);
-            await sync({ offset: offset.value });
-          } else {
-            const selectedItems = items
-              .filter((item) => item.selected)
-              .sort((a, b) => a.startTime - b.startTime);
-
-            if (selectedItems.length > 0) {
-              await playSelectedItems(selectedItems);
-            } else {
-              playFromCurrent();
-            }
-          }
-        },
-        cancelAnimation: () => {
-          cancelAnimation(offset);
-        },
-      }),
-      [isPlaying, items, offset, sync, playSelectedItems, playFromCurrent]
-    );
-
-    const scrollHandler = useAnimatedScrollHandler({
-      onMomentumEnd: (event) =>
-        scheduleOnRN(sync, { offset: event.contentOffset.x }),
+      return [itemAnimation];
     });
+  };
 
-    return (
-      <View style={styles.container}>
-        <Animated.ScrollView
-          ref={scrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          onScroll={scrollHandler}
-          scrollEnabled={!disabled}
-        >
-          <Pressable onPress={handlePress} style={styles.scrollContent}>
-            <View style={styles.tickRow}>
-              {Array.from({ length: Math.ceil(duration / 5) }, (_, i) => {
-                const time = i * 5;
+  // Handle playback state changes from parent
+  useEffect(() => {
+    if (!isActive || !shouldPlay) {
+      cancelAnimation(offset);
+      return;
+    }
+
+    // Start playback - use the ref to get latest items
+    (async () => {
+      const selectedItems = items
+        .filter((item) => item.selected)
+        .sort((a, b) => a.startTime - b.startTime);
+
+      if (selectedItems.length > 0) {
+        await sync(selectedItems[0].startTime);
+        offset.value = withSequence(...createAnimations(selectedItems));
+      } else {
+        const currentTime = offsetToTime(offset.value);
+        const remainingTime = duration - currentTime;
+        offset.value = withTiming(timeToOffset(duration), {
+          duration: remainingTime * 1000,
+          easing: Easing.linear,
+        });
+      }
+    })();
+  }, [shouldPlay, isActive]);
+
+  const handlePress = async () => {
+    if (isActive) return;
+    setShouldPlay(false);
+    pause();
+    setActive(type);
+    replace(source);
+    await sync(offsetToTime(offset.value));
+  };
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onMomentumEnd: (event) => {
+      const time = offsetToTime(event.contentOffset.x);
+      scheduleOnRN(sync, time);
+    },
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.ScrollView
+        ref={scrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEnabled={isActive}
+      >
+        <Pressable onPress={handlePress} style={styles.scrollContent}>
+          <View style={styles.tickRow}>
+            {Array.from(
+              { length: Math.ceil(duration / TICK_INTERVAL) },
+              (_, i) => {
+                const time = i * TICK_INTERVAL;
                 return (
                   <ThemedText
                     key={i}
-                    style={[styles.tick, { left: time * PIXELS_PER_SECOND }]}
+                    style={[styles.tick, { left: timeToOffset(time) }]}
                   >
                     {formatTime(time)}
                   </ThemedText>
                 );
-              })}
-            </View>
-            <View style={styles.itemRow}>
-              {items.map((item, i) => (
-                <Item
-                  key={i}
-                  index={i}
-                  item={item}
-                  onPress={() => toggle(type, i)}
-                  disabled={disabled}
-                />
-              ))}
-            </View>
-          </Pressable>
-        </Animated.ScrollView>
-        <Cursor />
-      </View>
-    );
-  }
-);
-
-export default Track;
+              }
+            )}
+          </View>
+          <View style={styles.itemRow}>
+            {items.map((item, i) => (
+              <Item
+                key={i}
+                index={i}
+                item={item}
+                onPress={() => toggle(i)}
+                disabled={!isActive}
+              />
+            ))}
+          </View>
+        </Pressable>
+      </Animated.ScrollView>
+      <Cursor />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create((theme) => ({
   container: {
