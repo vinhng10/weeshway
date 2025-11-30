@@ -175,7 +175,7 @@ export default function Track({ type, useStudioStore }: TrackProps) {
   });
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={styles.container}>
       <Animated.ScrollView
         ref={scrollRef}
         horizontal
@@ -184,7 +184,7 @@ export default function Track({ type, useStudioStore }: TrackProps) {
         scrollEnabled={isActive}
       >
         <Pressable onPress={handlePress} style={styles.scrollContent}>
-          <View style={styles.tickRow}>
+          <Animated.View style={styles.tickRow}>
             {Array.from(
               { length: Math.ceil(duration / TICK_INTERVAL) },
               (_, i) => {
@@ -199,8 +199,8 @@ export default function Track({ type, useStudioStore }: TrackProps) {
                 );
               }
             )}
-          </View>
-          <View style={styles.itemRow}>
+          </Animated.View>
+          <Animated.View style={styles.itemRow}>
             {items.map((item, i) => (
               <Item
                 key={i}
@@ -210,11 +210,11 @@ export default function Track({ type, useStudioStore }: TrackProps) {
                 disabled={!isActive}
               />
             ))}
-          </View>
+          </Animated.View>
         </Pressable>
       </Animated.ScrollView>
       <Cursor />
-    </View>
+    </Animated.View>
   );
 }
 
