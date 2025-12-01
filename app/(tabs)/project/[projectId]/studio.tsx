@@ -18,17 +18,25 @@ export default function Studio() {
     [projectId]
   );
 
-  const { studio, split, merge, reset, syncToServer, syncFromServer } =
-    useStudioStore(
-      useShallow((state) => ({
-        studio: state.studio,
-        split: state.split,
-        merge: state.merge,
-        reset: state.reset,
-        syncToServer: state.syncToServer,
-        syncFromServer: state.syncFromServer,
-      }))
-    );
+  const {
+    studio,
+    split,
+    merge,
+    reset,
+    initialize,
+    syncToServer,
+    syncFromServer,
+  } = useStudioStore(
+    useShallow((state) => ({
+      studio: state.studio,
+      split: state.split,
+      merge: state.merge,
+      reset: state.reset,
+      initialize: state.initialize,
+      syncToServer: state.syncToServer,
+      syncFromServer: state.syncFromServer,
+    }))
+  );
 
   const activeSource = studio[studio.activeTrack].source;
 
@@ -39,6 +47,7 @@ export default function Studio() {
     pause,
     shouldPlay,
     setShouldPlay,
+    pickAndLoadAudio,
   } = useAudioPlayerStore(
     useShallow((state) => ({
       player: state.player,
@@ -47,6 +56,7 @@ export default function Studio() {
       pause: state.pause,
       shouldPlay: state.shouldPlay,
       setShouldPlay: state.setShouldPlay,
+      pickAndLoadAudio: state.pickAndLoadAudio,
     }))
   );
 
@@ -73,6 +83,20 @@ export default function Studio() {
     toggleAudio(activeSource, false);
   };
 
+  const handleLoadAudio = async () => {
+    try {
+      // Pick and load audio file (handles file picking, copying, and audio player replacement)
+      const trackState = await pickAndLoadAudio();
+
+      if (trackState) {
+        // Save the new source and items to the studio store
+        initialize(trackState);
+      }
+    } catch (error) {
+      console.error("Error picking audio file:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Header title="Studio" />
@@ -82,7 +106,7 @@ export default function Studio() {
 
         <ControlBar
           isPlaying={isPlaying}
-          onLoadAudio={() => {}}
+          onLoadAudio={handleLoadAudio}
           onTogglePlayback={handleTogglePlayback}
           onSplit={handleSplit}
           onMerge={handleMerge}

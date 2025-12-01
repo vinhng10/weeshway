@@ -7,7 +7,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-type TrackState = {
+export type TrackState = {
   source?: string;
   items: ItemType[];
 };
@@ -25,6 +25,7 @@ interface StudioState {
   split: (time: number) => void;
   merge: () => void;
   reset: () => void;
+  initialize: (trackState: TrackState) => void;
   syncToServer: () => Promise<void>;
   syncFromServer: () => Promise<void>;
 }
@@ -121,6 +122,13 @@ export const createStudioStore = (projectId: number) =>
           });
         },
 
+        initialize: (trackState) => {
+          set((state) => {
+            const track = state.studio.activeTrack;
+            state.studio[track] = trackState;
+          });
+        },
+
         syncToServer: async () => {
           try {
             const { studio } = get();
@@ -148,9 +156,9 @@ export const createStudioStore = (projectId: number) =>
             if (data) {
               const result = camelcaseKeys(data, { deep: true });
               set((state) => {
-                state.studio.song.source = result.song.previewUrl;
-                state.studio.count.source =
-                  "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/2f/cb/7f/2fcb7f4a-1f8e-5f4c-2b61-b0b62261e4eb/mzaf_6330452069109107949.plus.aac.ep.m4a";
+                // state.studio.song.source = result.song.previewUrl;
+                // state.studio.count.source =
+                //   "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/2f/cb/7f/2fcb7f4a-1f8e-5f4c-2b61-b0b62261e4eb/mzaf_6330452069109107949.plus.aac.ep.m4a";
                 state.studio.song.items = result.songItems;
                 state.studio.count.items = result.countItems;
               });

@@ -1,4 +1,7 @@
+import { TrackState } from "@/hooks/useStudioStore";
 import { type AudioPlayer, type AudioStatus } from "expo-audio";
+import * as DocumentPicker from "expo-document-picker";
+import { Directory, File, Paths } from "expo-file-system";
 import { create } from "zustand";
 
 interface AudioPlayerState {
@@ -14,6 +17,7 @@ interface AudioPlayerState {
   isPlaying: (source?: string) => boolean;
   isLoaded: (source?: string) => boolean;
   toggle: (source?: string, fromBeginning?: boolean) => void;
+  pickAndLoadAudio: () => Promise<TrackState | null>;
 }
 
 export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
@@ -67,5 +71,45 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
     const targetSource = source ?? currentSource;
     if (!targetSource) return;
     isPlaying(targetSource) ? pause() : play(targetSource, fromBeginning);
+  },
+  pickAndLoadAudio: async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: "audio/*" });
+      if (result.canceled || !result.assets[0]) return null;
+
+      const sourceFile = new File(result.assets[0].uri);
+      const appDir = new Directory(Paths.document, "audio_files");
+
+      if (!appDir.exists) appDir.create({ intermediates: true });
+
+      const destFile = new File(
+        appDir,
+        `${sourceFile.md5}.${sourceFile.extension}`
+      );
+      if (!destFile.exists) sourceFile.copy(destFile);
+
+      const { player } = get();
+      player?.replace(destFile.uri);
+      set({ currentSource: destFile.uri });
+
+      // Poll for duration
+      let duration = 0;
+      for (let i = 0; i < 10; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        const { status } = get();
+        if (status?.duration && status.duration > 0) {
+          duration = status.duration;
+          break;
+        }
+      }
+
+      return {
+        source: destFile.uri,
+        items: [{ startTime: 0, endTime: duration, selected: false }],
+      };
+    } catch (error) {
+      console.error("Error picking and loading audio file:", error);
+      return null;
+    }
   },
 }));
