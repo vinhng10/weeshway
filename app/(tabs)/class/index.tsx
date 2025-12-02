@@ -5,8 +5,7 @@ import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { LevelEnum, StyleEnum } from "@/constants";
-import { useQuery } from "@/hooks/useQuery";
-import { supabase } from "@/supabase";
+import { useInfiniteQuery } from "@/hooks/useInfiniteQuery";
 import { ProjectEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -17,27 +16,22 @@ export default function Classes() {
   const [style, setStyle] = useState<StyleEnum | undefined>();
   const [level, setLevel] = useState<LevelEnum | undefined>();
 
-  const { data, isPending, error } = useQuery<ProjectEnrichedType[]>({
-    queryKey: ["projects", style, level],
-    queryFn: async () => {
-      let query = supabase
-        .from("projects")
-        .select(`*, profile:profiles(*), song:songs(*), location:locations(*)`);
-
-      if (style) {
-        query = query.eq("style", style);
-      }
-      if (level) {
-        query = query.eq("level", level);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      return data;
-    },
-  });
+  const { data, isLoading, error, hasNextPage, fetchNextPage } =
+    useInfiniteQuery<ProjectEnrichedType>({
+      queryKey: ["projects", style, level],
+      tableName: "projects",
+      columns: `*, profile:profiles(*), song:songs(*), location:locations(*)`,
+      pageSize: 10,
+      trailingQuery: (query) => {
+        if (style) {
+          query = query.eq("style", style);
+        }
+        if (level) {
+          query = query.eq("level", level);
+        }
+        return query;
+      },
+    });
 
   const options: ChipBarItemProps[] = [
     {
@@ -88,12 +82,12 @@ export default function Classes() {
   >[] = [
     {
       title: "You might like",
-      data: [data?.slice(0, 2) ?? []],
+      data: isLoading || error ? [[]] : [data.slice(0, 2)],
       render: renderCarousel,
     },
     {
       title: "Upcoming",
-      data: data?.slice(2) ?? [],
+      data: isLoading || error ? [] : data.slice(2),
       render: renderTile,
     },
   ];
@@ -101,7 +95,11 @@ export default function Classes() {
   return (
     <View style={styles.container}>
       <ChipBar padding items={options} />
-      <SectionListView sections={sections} />
+      <SectionListView
+        sections={sections}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
     </View>
   );
 }

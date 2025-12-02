@@ -7,10 +7,14 @@ import { StyleSheet } from "react-native-unistyles";
 
 interface SectionListViewProps<ItemT> {
   sections: ReadonlyArray<SectionListData<ItemT>>;
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void;
 }
 
 export function SectionListView<ItemT>({
   sections,
+  hasNextPage,
+  fetchNextPage,
 }: SectionListViewProps<ItemT>) {
   return (
     <SectionList
@@ -25,6 +29,10 @@ export function SectionListView<ItemT>({
       renderSectionFooter={() => <View style={styles.footer} />}
       contentContainerStyle={styles.scrollContainer}
       showsVerticalScrollIndicator={false}
+      onEndReached={() => {
+        if (hasNextPage && fetchNextPage) fetchNextPage();
+      }}
+      onEndReachedThreshold={0.5}
     />
   );
 }

@@ -6,8 +6,7 @@ import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { WishStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@/hooks/useQuery";
-import { supabase } from "@/supabase";
+import { useInfiniteQuery } from "@/hooks/useInfiniteQuery";
 import { WishRecommendationEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -18,24 +17,16 @@ export default function Wishes() {
   const [status, setStatus] = useState<WishStatusEnum | undefined>();
   const profile = useAuth((state) => state.profile);
 
-  const { data, isPending, error } = useQuery<WishRecommendationEnrichedType[]>(
-    {
+  const { data, isLoading, error, hasNextPage, fetchNextPage } =
+    useInfiniteQuery<WishRecommendationEnrichedType>({
       queryKey: ["wishes", "recommendations"],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("wishes")
-          .select(
-            `*, 
-            song:songs(*), 
-            recommendations:recommendations(*)`
-          )
-          .eq("user_id", profile?.id);
-
-        if (error) throw error;
-        return data;
-      },
-    }
-  );
+      tableName: "wishes",
+      columns: `*, 
+      song:songs(*), 
+      recommendations:recommendations(*)`,
+      pageSize: 10,
+      trailingQuery: (query) => query.eq("user_id", profile?.id),
+    });
 
   const options: ChipBarItemProps[] = [
     {
@@ -80,7 +71,7 @@ export default function Wishes() {
 
   const sections: SectionListData<WishRecommendationEnrichedType>[] = [
     {
-      data: isPending || error ? [] : data,
+      data: isLoading || error ? [] : data,
       render: renderTile,
     },
   ];
@@ -88,7 +79,11 @@ export default function Wishes() {
   return (
     <View style={styles.container}>
       <ChipBar padding items={options} />
-      <SectionListView sections={sections} />
+      <SectionListView
+        sections={sections}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
       <Button
         stickyBottom
         label="Make A Wish"
