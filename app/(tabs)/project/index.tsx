@@ -6,8 +6,7 @@ import { Tile } from "@/components/tile";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@/hooks/useQuery";
-import { supabase } from "@/supabase";
+import { useInfiniteQuery } from "@/hooks/useInfiniteQuery";
 import { ProjectEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
@@ -20,31 +19,30 @@ export default function Projects() {
   const [level, setLevel] = useState<LevelEnum | undefined>();
   const profile = useAuth((state) => state.profile);
 
-  const { data, isPending, error } = useQuery<ProjectEnrichedType[]>({
-    queryKey: ["projects", status, style, level],
-    queryFn: async () => {
-      let query = supabase
-        .from("projects")
-        .select(`*, song:songs(*)`)
-        .eq("user_id", profile?.id)
-        .order("created_at", { ascending: false });
+  const { data, isLoading, error, hasNextPage, fetchNextPage } =
+    useInfiniteQuery<ProjectEnrichedType>({
+      queryKey: ["projects", status, style, level],
+      tableName: "projects",
+      columns: `*, song:songs(*)`,
+      pageSize: 10,
+      trailingQuery: (query) => {
+        let builder = query
+          .eq("user_id", profile?.id)
+          .order("created_at", { ascending: false });
 
-      if (status) {
-        query = query.eq("status", status);
-      }
-      if (style) {
-        query = query.eq("style", style);
-      }
-      if (level) {
-        query = query.eq("level", level);
-      }
+        if (status) {
+          builder = builder.eq("status", status);
+        }
+        if (style) {
+          builder = builder.eq("style", style);
+        }
+        if (level) {
+          builder = builder.eq("level", level);
+        }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return data;
-    },
-  });
+        return builder;
+      },
+    });
 
   const options: ChipBarItemProps[] = [
     {
@@ -72,7 +70,7 @@ export default function Projects() {
 
   // Filter projects by date for "This Week" section
   const { thisWeekProjects, otherProjects } = useMemo(() => {
-    if (!data || isPending || error) {
+    if (!data || isLoading || error) {
       return { thisWeekProjects: [], otherProjects: [] };
     }
 
@@ -80,7 +78,7 @@ export default function Projects() {
       thisWeekProjects: data.slice(0, 2),
       otherProjects: data.slice(2),
     };
-  }, [data, isPending, error]);
+  }, [data, isLoading, error]);
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
     let icon: IconSymbolName | undefined = undefined;
@@ -127,7 +125,11 @@ export default function Projects() {
   return (
     <View style={styles.container}>
       <ChipBar padding items={options} />
-      <SectionListView sections={sections} />
+      <SectionListView
+        sections={sections}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
 
       <Button
         stickyBottom
