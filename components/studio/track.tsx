@@ -60,7 +60,7 @@ export default function Track({ type, useStudioStore }: TrackProps) {
     }))
   );
 
-  const { player, pause, replace, shouldPlay, setShouldPlay } =
+  const { player, pause, replace, shouldPlay, setShouldPlay, didJustFinish } =
     useAudioPlayerStore(
       useShallow((state) => ({
         player: state.player,
@@ -68,6 +68,7 @@ export default function Track({ type, useStudioStore }: TrackProps) {
         replace: state.replace,
         shouldPlay: state.shouldPlay,
         setShouldPlay: state.setShouldPlay,
+        didJustFinish: state.didJustFinish(source),
       }))
     );
 
@@ -131,6 +132,22 @@ export default function Track({ type, useStudioStore }: TrackProps) {
     });
   };
 
+  const handlePress = async () => {
+    if (isActive) return;
+    setShouldPlay(false);
+    pause();
+    setActive(type);
+    replace(source);
+    await sync(offsetToTime(offset.value));
+  };
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onMomentumEnd: (event) => {
+      const time = offsetToTime(event.contentOffset.x);
+      scheduleOnRN(sync, time);
+    },
+  });
+
   // Handle playback state changes from parent
   useEffect(() => {
     if (!isActive || !shouldPlay) {
@@ -158,21 +175,20 @@ export default function Track({ type, useStudioStore }: TrackProps) {
     })();
   }, [shouldPlay, isActive]);
 
-  const handlePress = async () => {
-    if (isActive) return;
+  useEffect(() => {
+    if (didJustFinish) {
+      setShouldPlay(false);
+      pause();
+    }
+  }, [didJustFinish]);
+
+  useEffect(() => {
+    if (!isActive) return;
     setShouldPlay(false);
     pause();
-    setActive(type);
     replace(source);
-    await sync(offsetToTime(offset.value));
-  };
-
-  const scrollHandler = useAnimatedScrollHandler({
-    onMomentumEnd: (event) => {
-      const time = offsetToTime(event.contentOffset.x);
-      scheduleOnRN(sync, time);
-    },
-  });
+    sync(0);
+  }, [source]);
 
   return (
     <Animated.View style={styles.container}>

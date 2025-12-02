@@ -16,6 +16,7 @@ interface AudioPlayerState {
   pause: () => void;
   isPlaying: (source?: string) => boolean;
   isLoaded: (source?: string) => boolean;
+  didJustFinish: (source?: string) => boolean;
   toggle: (source?: string, fromBeginning?: boolean) => void;
   pickAndLoadAudio: () => Promise<TrackState | null>;
 }
@@ -65,6 +66,11 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
     const { currentSource, status } = get();
     if (currentSource !== source) return false;
     return status?.isLoaded === true;
+  },
+  didJustFinish: (source?: string) => {
+    const { currentSource, status } = get();
+    if (currentSource !== source) return false;
+    return status?.didJustFinish === true;
   },
   toggle: (source?: string, fromBeginning = true) => {
     const { isPlaying, play, pause, currentSource } = get();

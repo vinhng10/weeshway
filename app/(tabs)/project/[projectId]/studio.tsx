@@ -48,6 +48,7 @@ export default function Studio() {
     shouldPlay,
     setShouldPlay,
     pickAndLoadAudio,
+    didJustFinish,
   } = useAudioPlayerStore(
     useShallow((state) => ({
       player: state.player,
@@ -57,13 +58,16 @@ export default function Studio() {
       shouldPlay: state.shouldPlay,
       setShouldPlay: state.setShouldPlay,
       pickAndLoadAudio: state.pickAndLoadAudio,
+      didJustFinish: state.didJustFinish(activeSource),
     }))
   );
 
   useEffect(() => {
     syncFromServer();
     return () => {
+      setShouldPlay(false);
       pause();
+      player?.seekTo(0);
       reset();
       syncToServer();
     };
@@ -79,6 +83,7 @@ export default function Studio() {
   };
 
   const handleTogglePlayback = () => {
+    if (didJustFinish) return;
     setShouldPlay(!shouldPlay);
     toggleAudio(activeSource, false);
   };
