@@ -4,7 +4,6 @@ import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { LevelEnum, StyleEnum } from "@/constants";
 import { useQuery } from "@/hooks/useQuery";
-import { BubbleChartData } from "@/mocks/bubble-chart";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { router } from "expo-router";
@@ -37,7 +36,7 @@ export default function WishBoard() {
   });
 
   // Generate bubble chart data from wishes grouped by style
-  const bubbleChartData = useMemo((): BubbleChartData[] => {
+  const bubbleChartData = useMemo((): BubbleType[] => {
     if (!data) return [];
 
     const styleCounts = new Map<string, number>();

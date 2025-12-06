@@ -71,6 +71,7 @@ export default function CreateProject() {
           artist_name: song.artistName,
           artwork_url: song.artworkUrl,
           preview_url: song.previewUrl,
+          genre: song.genreNames[0],
         },
         p_project_data: {
           name: name?.trim(),
