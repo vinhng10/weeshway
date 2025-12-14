@@ -15,10 +15,6 @@ const sql = postgres(
 const jobSchema = z.object({
   jobId: z.number(),
   id: z.string(),
-  schema: z.string(),
-  table: z.string(),
-  contentFunction: z.string(),
-  embeddingColumn: z.string(),
 });
 
 const failedJobSchema = jobSchema.extend({
@@ -30,7 +26,7 @@ type FailedJob = z.infer<typeof failedJobSchema>;
 
 type Row = {
   id: string;
-  content: unknown;
+  preview_url: string;
 };
 
 const QUEUE_NAME = "embedding_jobs";
@@ -126,7 +122,7 @@ Deno.serve(async (req) => {
 /**
  * Generates an embedding for the given text.
  */
-async function generateEmbedding(text: string) {
+async function generateEmbedding(url: string) {
   // simulate async embedding generation
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -138,40 +134,46 @@ async function generateEmbedding(text: string) {
  * Processes an embedding job.
  */
 async function processJob(job: Job) {
-  const { jobId, id, schema, table, contentFunction, embeddingColumn } = job;
+  const { jobId, id } = job;
 
-  // Fetch content for the schema/table/row combination
+  // Fetch song data from the public.songs
   const [row]: [Row] = await sql`
     select
       id,
-      ${sql(contentFunction)}(t) as content
+      preview_url
     from
-      ${sql(schema)}.${sql(table)} t
+      public.songs
     where
       id = ${id}
   `;
 
   if (!row) {
-    throw new Error(`row not found: ${schema}.${table}/${id}`);
+    throw new Error(`row not found: public.songs/${id}`);
   }
 
-  if (typeof row.content !== "string") {
-    throw new Error(
-      `invalid content - expected string: ${schema}.${table}/${id}`
-    );
-  }
+  // Generate embedding from the song url
+  const embedding = await generateEmbedding(row.preview_url);
 
-  const embedding = await generateEmbedding(row.content);
+  // Find nearest cluster centroid
+  const [result] = await sql`
+    select public.find_nearest_centroid(${JSON.stringify(
+      embedding
+    )}) as centroid_id
+  `;
+  const centroidId = result.centroid_id ? Number(result.centroid_id) : null;
 
+  // Update the song row with the embedding and nearest centroid
   await sql`
     update
-      ${sql(schema)}.${sql(table)}
+      public.songs
     set
-      ${sql(embeddingColumn)} = ${JSON.stringify(embedding)}
+      embedding = ${JSON.stringify(embedding)},
+      centroid_id = ${centroidId}
     where
       id = ${id}
   `;
 
+  // Dequeue the job
   await sql`
     select public.dequeue_embedding(${QUEUE_NAME}, ${jobId}::bigint)
   `;
