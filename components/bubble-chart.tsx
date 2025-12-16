@@ -6,7 +6,7 @@ import {
   TextAlign,
   useFonts,
 } from "@shopify/react-native-skia";
-import React, { useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
@@ -28,7 +28,7 @@ const BUBBLE_COLORS = [
 ];
 
 export interface BubbleType {
-  label: string;
+  label: number;
   value: number;
 }
 
@@ -37,21 +37,32 @@ interface BubbleChartProps {
   onBubbleTap?: (bubbleData: BubbleType) => void;
 }
 
+interface BubbleData {
+  label: number;
+  value: number;
+  color: { color: string; stroke: string };
+  radius: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  dragging: boolean;
+  pointerStartX: number;
+  pointerStartY: number;
+  startX: number;
+  startY: number;
+  startScale: number;
+}
+
 interface BubbleProps {
-  bubble: {
-    x: SharedValue<number>;
-    y: SharedValue<number>;
-    radius: number;
-    color: { color: string; stroke: string };
-    label: string;
-    value: number;
-  };
+  index: number;
+  bubbles: SharedValue<BubbleData[]>;
   offsetX: SharedValue<number>;
   offsetY: SharedValue<number>;
   scale: SharedValue<number>;
 }
 
-function Bubble({ bubble, offsetX, offsetY, scale }: BubbleProps) {
+function Bubble({ index, bubbles, offsetX, offsetY, scale }: BubbleProps) {
   const width = 100;
   const fontMgr = useFonts({
     MomoTrustDisplay: [require("@/assets/fonts/MomoTrustDisplay-Regular.ttf")],
@@ -69,38 +80,42 @@ function Bubble({ bubble, offsetX, offsetY, scale }: BubbleProps) {
       fontFamilies: ["MomoTrustDisplay"],
       fontSize: 12,
     };
+    // Use initial bubble data for text that doesn't change
+    const { label, value } = bubbles.value[index];
     const para = Skia.ParagraphBuilder.Make(paragraphStyle, fontMgr)
       .pushStyle(textStyle)
-      .addText(`${bubble.label}\n`)
-      .addText(`${bubble.value} wishes`)
+      .addText(`${value} wishes`)
       .build();
 
     para.layout(width);
     return para;
-  }, [fontMgr, bubble.label]);
+  }, [fontMgr, index]);
 
+  // Access bubble properties directly from the array to ensure reactivity
   const cx = useDerivedValue(
-    () => offsetX.value + bubble.x.value * scale.value
+    () => offsetX.value + bubbles.value[index].x * scale.value
   );
   const cy = useDerivedValue(
-    () => offsetY.value + bubble.y.value * scale.value
+    () => offsetY.value + bubbles.value[index].y * scale.value
   );
-  const r = useDerivedValue(() => bubble.radius * scale.value);
+  const r = useDerivedValue(() => bubbles.value[index].radius * scale.value);
 
-  const pw = paragraph ? paragraph.getLongestLine() : 0;
   const ph = paragraph ? paragraph.getHeight() : 0;
   const px = useDerivedValue(() => cx.value - width / 2);
   const py = useDerivedValue(() => cy.value - ph / 2);
 
+  // Get color values (these don't change, so we can access them once)
+  const { color, stroke } = bubbles.value[index].color;
+
   return (
     paragraph && (
       <>
-        <Circle cx={cx} cy={cy} r={r} color={Skia.Color(bubble.color.color)} />
+        <Circle cx={cx} cy={cy} r={r} color={Skia.Color(color)} />
         <Circle
           cx={cx}
           cy={cy}
           r={r}
-          color={Skia.Color(bubble.color.stroke)}
+          color={Skia.Color(stroke)}
           style="stroke"
           strokeWidth={2}
         />
@@ -119,30 +134,24 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
   const savedOffsetX = useSharedValue(0);
   const savedOffsetY = useSharedValue(0);
 
-  // Create bubble shared values ONCE
-  const bubblesRef = useRef<any[] | null>(null);
-  if (!bubblesRef.current) {
-    bubblesRef.current = data.map((d) => ({
+  // Single shared value containing all bubble data
+  const bubbles = useSharedValue<BubbleData[]>(
+    data.map((d) => ({
       ...d,
       color: BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)],
       radius: Math.sqrt(d.value) * 15,
-      x: useSharedValue((Math.random() - 0.5) * 200),
-      y: useSharedValue((Math.random() - 0.5) * 200),
-      vx: useSharedValue(0),
-      vy: useSharedValue(0),
-      dragging: useSharedValue(false),
-      // NEW: values to support stable dragging
-      // pointerStart = screen coords where drag started
-      pointerStartX: useSharedValue(0),
-      pointerStartY: useSharedValue(0),
-      // start bubble world coords at drag start
-      startX: useSharedValue(0),
-      startY: useSharedValue(0),
-      // scale at drag start (so zooming during drag doesn't change mapping)
-      startScale: useSharedValue(1),
-    }));
-  }
-  const bubbles = bubblesRef.current;
+      x: (Math.random() - 0.5) * 200,
+      y: (Math.random() - 0.5) * 200,
+      vx: 0,
+      vy: 0,
+      dragging: false,
+      pointerStartX: 0,
+      pointerStartY: 0,
+      startX: 0,
+      startY: 0,
+      startScale: 1,
+    }))
+  );
 
   // Initialize offsets when size changes
   useAnimatedReaction(
@@ -166,7 +175,7 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
     })
     .onUpdate((e) => {
       "worklet";
-      if (!bubbles.some((b) => b.dragging.value)) {
+      if (!bubbles.value.some((b) => b.dragging)) {
         offsetX.value = savedOffsetX.value + e.translationX;
         offsetY.value = savedOffsetY.value + e.translationY;
       }
@@ -193,41 +202,53 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
       const wx = (e.x - offsetX.value) / scale.value;
       const wy = (e.y - offsetY.value) / scale.value;
 
-      bubbles.forEach((b) => {
-        const dx = wx - b.x.value;
-        const dy = wy - b.y.value;
-        if (Math.sqrt(dx * dx + dy * dy) < b.radius) {
-          // save drag start state
-          b.dragging.value = true;
-          b.pointerStartX.value = e.x;
-          b.pointerStartY.value = e.y;
-          b.startX.value = b.x.value;
-          b.startY.value = b.y.value;
-          b.startScale.value = scale.value; // important
-        }
+      bubbles.modify((bubblesArray) => {
+        "worklet";
+        bubblesArray.forEach((b) => {
+          const dx = wx - b.x;
+          const dy = wy - b.y;
+          if (Math.sqrt(dx * dx + dy * dy) < b.radius) {
+            // save drag start state
+            b.dragging = true;
+            b.pointerStartX = e.x;
+            b.pointerStartY = e.y;
+            b.startX = b.x;
+            b.startY = b.y;
+            b.startScale = scale.value;
+          }
+        });
+        return bubblesArray;
       });
     })
     .onUpdate((e) => {
       "worklet";
-      bubbles.forEach((b) => {
-        if (b.dragging.value) {
-          // compute screen delta since drag start
-          const dxScreen = e.x - b.pointerStartX.value;
-          const dyScreen = e.y - b.pointerStartY.value;
-          // convert screen delta to world delta using the scale at drag start
-          const dxWorld = dxScreen / (b.startScale.value || 1);
-          const dyWorld = dyScreen / (b.startScale.value || 1);
+      bubbles.modify((bubblesArray) => {
+        "worklet";
+        bubblesArray.forEach((b) => {
+          if (b.dragging) {
+            // compute screen delta since drag start
+            const dxScreen = e.x - b.pointerStartX;
+            const dyScreen = e.y - b.pointerStartY;
+            // convert screen delta to world delta using the scale at drag start
+            const dxWorld = dxScreen / (b.startScale || 1);
+            const dyWorld = dyScreen / (b.startScale || 1);
 
-          b.x.value = b.startX.value + dxWorld;
-          b.y.value = b.startY.value + dyWorld;
-          b.vx.value = 0;
-          b.vy.value = 0;
-        }
+            b.x = b.startX + dxWorld;
+            b.y = b.startY + dyWorld;
+            b.vx = 0;
+            b.vy = 0;
+          }
+        });
+        return bubblesArray;
       });
     })
     .onFinalize(() => {
       "worklet";
-      bubbles.forEach((b) => (b.dragging.value = false));
+      bubbles.modify((bubblesArray) => {
+        "worklet";
+        bubblesArray.forEach((b) => (b.dragging = false));
+        return bubblesArray;
+      });
     });
 
   // Tap bubble
@@ -239,9 +260,9 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
     const wy = (e.y - offsetY.value) / scale.value;
 
     // Hit testing bubbles
-    for (let b of bubbles) {
-      const dx = wx - b.x.value;
-      const dy = wy - b.y.value;
+    for (let b of bubbles.value) {
+      const dx = wx - b.x;
+      const dy = wy - b.y;
       const distSq = dx * dx + dy * dy;
       if (distSq <= b.radius * b.radius) {
         scheduleOnRN(onBubbleTap, { label: b.label, value: b.value });
@@ -258,46 +279,51 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
 
   // Physics
   useFrameCallback(() => {
+    "worklet";
     const gravity = 0.4;
     const damping = 0.85;
 
-    for (let i = 0; i < bubbles.length; i++) {
-      const b = bubbles[i];
-      if (!b.dragging.value) {
-        const dx = -b.x.value;
-        const dy = -b.y.value;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    bubbles.modify((bubblesArray) => {
+      "worklet";
+      for (let i = 0; i < bubblesArray.length; i++) {
+        const b = bubblesArray[i];
+        if (!b.dragging) {
+          const dx = -b.x;
+          const dy = -b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
 
-        b.vx.value += (dx / dist) * gravity;
-        b.vy.value += (dy / dist) * gravity;
-        b.vx.value *= damping;
-        b.vy.value *= damping;
+          b.vx += (dx / dist) * gravity;
+          b.vy += (dy / dist) * gravity;
+          b.vx *= damping;
+          b.vy *= damping;
 
-        b.x.value += b.vx.value;
-        b.y.value += b.vy.value;
-      }
+          b.x += b.vx;
+          b.y += b.vy;
+        }
 
-      // collisions - allow more overlap by reducing minDist threshold
-      for (let j = i + 1; j < bubbles.length; j++) {
-        const o = bubbles[j];
-        const dx = o.x.value - b.x.value;
-        const dy = o.y.value - b.y.value;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        // Allow bubbles to overlap by up to 40% before collision detection
-        const minDist = (b.radius + o.radius) * 0.9;
+        // collisions - allow more overlap by reducing minDist threshold
+        for (let j = i + 1; j < bubblesArray.length; j++) {
+          const o = bubblesArray[j];
+          const dx = o.x - b.x;
+          const dy = o.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          // Allow bubbles to overlap by up to 40% before collision detection
+          const minDist = (b.radius + o.radius) * 0.9;
 
-        if (dist < minDist) {
-          const overlap = (minDist - dist) / 2;
-          const nx = dx / dist;
-          const ny = dy / dist;
+          if (dist < minDist) {
+            const overlap = (minDist - dist) / 2;
+            const nx = dx / dist;
+            const ny = dy / dist;
 
-          b.x.value -= nx * overlap;
-          b.y.value -= ny * overlap;
-          o.x.value += nx * overlap;
-          o.y.value += ny * overlap;
+            b.x -= nx * overlap;
+            b.y -= ny * overlap;
+            o.x += nx * overlap;
+            o.y += ny * overlap;
+          }
         }
       }
-    }
+      return bubblesArray;
+    });
     return true;
   });
 
@@ -305,10 +331,11 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
     <GestureDetector gesture={composed}>
       <View style={[styles.container]}>
         <Canvas style={{ flex: 1 }} onSize={size}>
-          {bubbles.map((bubble, i) => (
+          {data.map((_, i) => (
             <Bubble
               key={i}
-              bubble={bubble}
+              index={i}
+              bubbles={bubbles}
               offsetX={offsetX}
               offsetY={offsetY}
               scale={scale}

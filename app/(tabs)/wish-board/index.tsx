@@ -3,53 +3,54 @@ import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { LevelEnum, StyleEnum } from "@/constants";
+import { useInfiniteQuery } from "@/hooks/useInfiniteQuery";
 import { useQuery } from "@/hooks/useQuery";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function WishBoard() {
   const [style, setStyle] = useState<StyleEnum | undefined>();
   const [level, setLevel] = useState<LevelEnum | undefined>();
+  const [centroidId, setCentroidId] = useState<number | undefined>();
 
-  const { data, isPending, error } = useQuery<WishEnrichedType[]>({
-    queryKey: ["wishes", "board", style, level],
+  const { data: bubbles } = useQuery<BubbleType[]>({
+    queryKey: ["bubbles", style, level],
     queryFn: async () => {
-      let query = supabase.from("wishes").select(`*, song:songs(*)`);
+      const { data, error } = await supabase.rpc("get_wish_clusters", {
+        filter_style: style,
+        filter_level: level,
+      });
+      if (error) throw error;
+      return data;
+    },
+  });
 
-      // Apply filters
+  const {
+    data: wishes,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery<WishEnrichedType>({
+    queryKey: ["wishes", style, level, centroidId],
+    tableName: "wishes",
+    columns: `*, song:songs!inner(*)`,
+    pageSize: 10,
+    trailingQuery: (query) => {
       if (style) {
         query = query.eq("style", style);
       }
       if (level) {
         query = query.eq("level", level);
       }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return data;
+      if (centroidId) {
+        query = query.eq("song.centroid_id", centroidId);
+      }
+      return query;
     },
   });
-
-  // Generate bubble chart data from wishes grouped by style
-  const bubbleChartData = useMemo((): BubbleType[] => {
-    if (!data) return [];
-
-    const styleCounts = new Map<string, number>();
-    data.forEach((wish) => {
-      const wishStyle = wish.style || "Other";
-      styleCounts.set(wishStyle, (styleCounts.get(wishStyle) || 0) + 1);
-    });
-
-    return Array.from(styleCounts.entries()).map(([label, value]) => ({
-      label,
-      value,
-    }));
-  }, [data]);
 
   const options: ChipBarItemProps[] = [
     {
@@ -69,15 +70,10 @@ export default function WishBoard() {
   ];
 
   const handleBubbleTap = (bubbleData: BubbleType) => {
-    // Find the matching StyleEnum value from the bubble's label
-    const styleValue = Object.values(StyleEnum).find(
-      (value) => value === bubbleData.label
-    ) as StyleEnum | undefined;
-
-    if (styleValue) {
-      // If the same style is already selected, clear the filter
-      // Otherwise, set the new style filter
-      setStyle(style === styleValue ? undefined : styleValue);
+    if (centroidId !== bubbleData.label) {
+      setCentroidId(bubbleData.label);
+    } else {
+      setCentroidId(undefined);
     }
   };
 
@@ -97,10 +93,14 @@ export default function WishBoard() {
   );
 
   const sections: SectionListData<BubbleType[] | WishEnrichedType>[] = [
-    { title: "Explore", data: [bubbleChartData], render: renderBubbleChart },
+    {
+      title: "Explore",
+      data: bubbles && bubbles.length > 0 ? [bubbles] : [[]], // Ensure consistent structure
+      render: renderBubbleChart,
+    },
     {
       title: "Wishes",
-      data: isPending || error ? [] : data || [],
+      data: wishes ?? [],
       render: renderTile,
     },
   ];
@@ -108,7 +108,11 @@ export default function WishBoard() {
   return (
     <View style={styles.container}>
       <ChipBar padding items={options} />
-      <SectionListView sections={sections} />
+      <SectionListView
+        sections={sections}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
     </View>
   );
 }
