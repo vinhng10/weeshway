@@ -40,12 +40,12 @@ interface BubbleChartProps {
 interface BubbleData {
   label: number;
   value: number;
-  color: { color: string; stroke: string };
   radius: number;
   x: number;
   y: number;
   vx: number;
   vy: number;
+  selected: boolean;
   dragging: boolean;
   pointerStartX: number;
   pointerStartY: number;
@@ -105,7 +105,7 @@ function Bubble({ index, bubbles, offsetX, offsetY, scale }: BubbleProps) {
   const py = useDerivedValue(() => cy.value - ph / 2);
 
   // Get color values (these don't change, so we can access them once)
-  const { color, stroke } = bubbles.value[index].color;
+  const { color, stroke } = BUBBLE_COLORS[index % BUBBLE_COLORS.length];
 
   return (
     paragraph && (
@@ -115,7 +115,7 @@ function Bubble({ index, bubbles, offsetX, offsetY, scale }: BubbleProps) {
           cx={cx}
           cy={cy}
           r={r}
-          color={Skia.Color(stroke)}
+          color={Skia.Color(bubbles.value[index].selected ? "#FFFFFF" : stroke)}
           style="stroke"
           strokeWidth={2}
         />
@@ -138,12 +138,12 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
   const bubbles = useSharedValue<BubbleData[]>(
     data.map((d) => ({
       ...d,
-      color: BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)],
       radius: Math.sqrt(d.value) * 15,
       x: (Math.random() - 0.5) * 200,
       y: (Math.random() - 0.5) * 200,
       vx: 0,
       vy: 0,
+      selected: false,
       dragging: false,
       pointerStartX: 0,
       pointerStartY: 0,
@@ -260,15 +260,21 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
     const wy = (e.y - offsetY.value) / scale.value;
 
     // Hit testing bubbles
-    for (let b of bubbles.value) {
-      const dx = wx - b.x;
-      const dy = wy - b.y;
-      const distSq = dx * dx + dy * dy;
-      if (distSq <= b.radius * b.radius) {
-        scheduleOnRN(onBubbleTap, { label: b.label, value: b.value });
-        break;
+    bubbles.modify((bubblesArray) => {
+      "worklet";
+      for (let b of bubblesArray) {
+        const dx = wx - b.x;
+        const dy = wy - b.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq <= b.radius * b.radius) {
+          b.selected = !b.selected;
+          scheduleOnRN(onBubbleTap, { label: b.label, value: b.value });
+        } else {
+          b.selected = false;
+        }
       }
-    }
+      return bubblesArray;
+    });
   });
 
   const composed = Gesture.Simultaneous(
