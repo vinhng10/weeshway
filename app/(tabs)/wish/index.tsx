@@ -22,18 +22,16 @@ function WishesContent() {
     useSuspenseInfiniteQuery<WishRecommendationEnrichedType>({
       queryKey: ["wishes", "recommendations"],
       tableName: "wishes",
-      columns: `*, 
-      song:songs(*), 
-      recommendations:recommendations(*)`,
+      columns: `*, song:songs(*), recommendations:recommendations(*)`,
       pageSize: 10,
       trailingQuery: (query) => query.eq("user_id", profile?.id),
     });
 
   const options: ChipBarItemProps[] = [
     {
-      label: "Class available",
+      label: "Status",
       value: status,
-      modal: false,
+      modal: true,
       options: WishStatusEnum,
       onValueChange: setStatus,
     },
@@ -72,6 +70,7 @@ function WishesContent() {
 
   const sections: SectionListData<WishRecommendationEnrichedType>[] = [
     {
+      title: "Wishes",
       data: data,
       render: renderTile,
     },

@@ -78,7 +78,7 @@ function ProjectsContent() {
   }, [data]);
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
-    let icon: IconSymbolName | undefined = undefined;
+    let icon: IconSymbolName | undefined;
     let label = "";
     if (data.status === ProjectStatusEnum.Draft) {
       icon = "heart";

@@ -23,8 +23,8 @@ export function SectionListView<ItemT>({
       renderItem={({ item, section }) => {
         return section.render(item);
       }}
-      renderSectionHeader={({ section: { title } }) =>
-        title && <ThemedText type="h4">{title}</ThemedText>
+      renderSectionHeader={({ section: { title, data } }) =>
+        title && data.length > 0 && <ThemedText type="h4">{title}</ThemedText>
       }
       renderSectionFooter={() => <View style={styles.footer} />}
       contentContainerStyle={styles.scrollContainer}

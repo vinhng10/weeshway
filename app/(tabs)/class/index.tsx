@@ -5,8 +5,12 @@ import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { LevelEnum, StyleEnum } from "@/constants";
+import { IconSymbolName } from "@/components/ui/icon-symbol";
+import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
+import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
+import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -14,27 +18,68 @@ import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassesContent() {
+  const [status, setStatus] = useState<ProjectStatusEnum | undefined>();
   const [style, setStyle] = useState<StyleEnum | undefined>();
   const [level, setLevel] = useState<LevelEnum | undefined>();
+  const profile = useAuth((state) => state.profile);
 
-  const { data, hasNextPage, fetchNextPage } =
-    useSuspenseInfiniteQuery<ProjectEnrichedType>({
-      queryKey: ["projects", style, level],
-      tableName: "projects",
-      columns: `*, profile:profiles(*), song:songs(*), location:locations(*)`,
-      pageSize: 10,
-      trailingQuery: (query) => {
-        if (style) {
-          query = query.eq("style", style);
-        }
-        if (level) {
-          query = query.eq("level", level);
-        }
-        return query;
-      },
-    });
+  const { data: recommendations } = useSuspenseQuery<ProjectEnrichedType[][]>({
+    queryKey: ["recommendations", status, style, level],
+    queryFn: async () => {
+      let query = supabase
+        .from("recommendations")
+        .select(`*, filters:projects!inner(style, level)`)
+        .eq("user_id", profile?.id)
+        .limit(10);
+
+      if (style) {
+        query = query.eq("filters.style", style);
+      }
+      if (level) {
+        query = query.eq("filters.level", level);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return data.length > 0
+        ? [data.map((recommendation) => recommendation.project)]
+        : [];
+    },
+  });
+
+  const {
+    data: projects,
+    hasNextPage,
+    fetchNextPage,
+  } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
+    queryKey: ["projects", status, style, level],
+    tableName: "projects",
+    columns: `*, profile:profiles(*), song:songs(*)`,
+    pageSize: 10,
+    trailingQuery: (query) => {
+      query = query.gte("start_at", new Date().toISOString());
+      if (status) {
+        query = query.eq("status", status);
+      }
+      if (style) {
+        query = query.eq("style", style);
+      }
+      if (level) {
+        query = query.eq("level", level);
+      }
+      return query;
+    },
+  });
 
   const options: ChipBarItemProps[] = [
+    {
+      label: "Status",
+      value: status,
+      options: ProjectStatusEnum,
+      modal: true,
+      onValueChange: setStatus,
+    },
     {
       label: "Style",
       value: style,
@@ -61,34 +106,47 @@ function ClassesContent() {
     />
   );
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
-    <Tile
-      imageSource={data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.song.artistName}
-      metadata={`${data.style} • ${data.level}`}
-      previewUrl={data.song.previewUrl}
-      rightContent={
-        <>
-          <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
-          <Chip color="danger" label={`${data.spots} spots left`} />
-        </>
-      }
-      onPress={() => navigateToClass(data.id)}
-    />
-  );
+  const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
+    let icon: IconSymbolName | undefined;
+    let label = "";
+    if (data.status === ProjectStatusEnum.Draft) {
+      icon = "heart";
+      label = `10`;
+    }
+    if (data.status === ProjectStatusEnum.Release) {
+      icon = "person.fill";
+      label = `5 | ${data.spots}`;
+    }
+
+    return (
+      <Tile
+        imageSource={data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.song.artistName}
+        metadata={`${data.style} • ${data.level}`}
+        previewUrl={data.song.previewUrl}
+        rightContent={
+          <>
+            <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
+            {icon && <Chip color="danger" icon={icon} label={label} />}
+          </>
+        }
+        onPress={() => navigateToClass(data.id)}
+      />
+    );
+  };
 
   const sections: SectionListData<
     ProjectEnrichedType | ProjectEnrichedType[]
   >[] = [
     {
       title: "You might like",
-      data: [data.slice(0, 2)],
+      data: recommendations,
       render: renderCarousel,
     },
     {
       title: "Upcoming",
-      data: data.slice(2),
+      data: projects,
       render: renderTile,
     },
   ];

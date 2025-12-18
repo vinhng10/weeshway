@@ -3,7 +3,7 @@ import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { IconButton } from "@/components/icon-button";
 import { ThemedText } from "@/components/themed-text";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
 import { ProjectStatusEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { ProjectEnrichedType } from "@/types";
@@ -25,6 +25,17 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
   onBook,
   onPress,
 }) => {
+  let icon: IconSymbolName | undefined;
+  let label = "";
+  if (data.status === ProjectStatusEnum.Draft) {
+    icon = "heart";
+    label = `10`;
+  }
+  if (data.status === ProjectStatusEnum.Release) {
+    icon = "person.fill";
+    label = `5 | ${data.spots}`;
+  }
+
   const isPlaying = useAudioPlayerStore((state) =>
     state.isPlaying(data.song.previewUrl)
   );
@@ -35,6 +46,7 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
     e?.stopPropagation?.();
     toggle(data.song.previewUrl);
   };
+
   return (
     <Pressable onPress={() => onPress(data)}>
       <ImageBackground
@@ -102,9 +114,7 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
                       : ""}
                   </ThemedText>
                 </View>
-                <ThemedText color="danger">
-                  {data.spots ? data.spots - 10 : 0} spots left
-                </ThemedText>
+                {icon && <Chip color="danger" icon={icon} label={label} />}
               </View>
             </View>
           </View>
