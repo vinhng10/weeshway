@@ -1,4 +1,5 @@
 import { AvatarGroup } from "@/components/avatar-group";
+import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
@@ -6,19 +7,19 @@ import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { WishStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
-import { useInfiniteQuery } from "@/hooks/useInfiniteQuery";
+import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
 import { WishRecommendationEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Wishes() {
+function WishesContent() {
   const [status, setStatus] = useState<WishStatusEnum | undefined>();
   const profile = useAuth((state) => state.profile);
 
-  const { data, isLoading, error, hasNextPage, fetchNextPage } =
-    useInfiniteQuery<WishRecommendationEnrichedType>({
+  const { data, hasNextPage, fetchNextPage } =
+    useSuspenseInfiniteQuery<WishRecommendationEnrichedType>({
       queryKey: ["wishes", "recommendations"],
       tableName: "wishes",
       columns: `*, 
@@ -71,7 +72,7 @@ export default function Wishes() {
 
   const sections: SectionListData<WishRecommendationEnrichedType>[] = [
     {
-      data: isLoading || error ? [] : data,
+      data: data,
       render: renderTile,
     },
   ];
@@ -92,6 +93,14 @@ export default function Wishes() {
         }}
       />
     </View>
+  );
+}
+
+export default function Wishes() {
+  return (
+    <Boundary>
+      <WishesContent />
+    </Boundary>
   );
 }
 

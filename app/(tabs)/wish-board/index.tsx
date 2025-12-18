@@ -1,10 +1,11 @@
+import { Boundary } from "@/components/boundary";
 import { BubbleChart, BubbleType } from "@/components/bubble-chart";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { LevelEnum, StyleEnum } from "@/constants";
-import { useInfiniteQuery } from "@/hooks/useInfiniteQuery";
-import { useQuery } from "@/hooks/useQuery";
+import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
+import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { router } from "expo-router";
@@ -12,12 +13,12 @@ import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function WishBoard() {
+function WishBoardContent() {
   const [style, setStyle] = useState<StyleEnum | undefined>();
   const [level, setLevel] = useState<LevelEnum | undefined>();
   const [centroidId, setCentroidId] = useState<number | undefined>();
 
-  const { data: bubbles } = useQuery<BubbleType[]>({
+  const { data: bubbles } = useSuspenseQuery<BubbleType[]>({
     queryKey: ["bubbles", style, level],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_wish_clusters", {
@@ -33,7 +34,7 @@ export default function WishBoard() {
     data: wishes,
     hasNextPage,
     fetchNextPage,
-  } = useInfiniteQuery<WishEnrichedType>({
+  } = useSuspenseInfiniteQuery<WishEnrichedType>({
     queryKey: ["wishes", style, level, centroidId],
     tableName: "wishes",
     columns: `*, song:songs!inner(*)`,
@@ -95,12 +96,12 @@ export default function WishBoard() {
   const sections: SectionListData<BubbleType[] | WishEnrichedType>[] = [
     {
       title: "Explore",
-      data: bubbles && bubbles.length > 0 ? [bubbles] : [[]], // Ensure consistent structure
+      data: [bubbles],
       render: renderBubbleChart,
     },
     {
       title: "Wishes",
-      data: wishes ?? [],
+      data: wishes,
       render: renderTile,
     },
   ];
@@ -114,6 +115,14 @@ export default function WishBoard() {
         fetchNextPage={fetchNextPage}
       />
     </View>
+  );
+}
+
+export default function WishBoard() {
+  return (
+    <Boundary>
+      <WishBoardContent />
+    </Boundary>
   );
 }
 

@@ -1,3 +1,4 @@
+import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
@@ -12,7 +13,7 @@ import { LocationInput } from "@/components/input/location-input";
 import { Tile } from "@/components/tile";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@/hooks/useQuery";
+import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { LocationType, ProjectEnrichedType, SongType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,13 +23,13 @@ import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Project() {
+function ProjectContent() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
   const queryClient = useQueryClient();
 
-  const { data, isPending, error } = useQuery<ProjectEnrichedType>({
+  const { data } = useSuspenseQuery<ProjectEnrichedType>({
     queryKey: ["projects", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,7 +42,6 @@ export default function Project() {
       if (error) throw error;
       return data;
     },
-    enabled: !!projectId,
   });
 
   // Initialize state with project data or defaults
@@ -224,6 +224,14 @@ export default function Project() {
         />
       </View>
     </View>
+  );
+}
+
+export default function Project() {
+  return (
+    <Boundary>
+      <ProjectContent />
+    </Boundary>
   );
 }
 

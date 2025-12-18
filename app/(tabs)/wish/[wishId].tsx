@@ -1,18 +1,19 @@
+import { Boundary } from "@/components/boundary";
 import { Carousel } from "@/components/carousel";
 import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
-import { useQuery } from "@/hooks/useQuery";
+import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType, WishRecommendationEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Wish() {
+function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
 
-  const { data, isPending, error } = useQuery<WishRecommendationEnrichedType>({
+  const { data } = useSuspenseQuery<WishRecommendationEnrichedType>({
     queryKey: ["wishes", "recommendations", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,19 +30,7 @@ export default function Wish() {
       if (error) throw error;
       return data;
     },
-    enabled: !!wishId,
   });
-
-  if (error || !data) {
-    return (
-      <View style={styles.container}>
-        <Header title="Wish" />
-        <View style={styles.scrollContainer}>
-          <ThemedText>Wish not found</ThemedText>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -82,6 +71,14 @@ export default function Wish() {
         </View>
       </ScrollView>
     </View>
+  );
+}
+
+export default function Wish() {
+  return (
+    <Boundary>
+      <WishContent />
+    </Boundary>
   );
 }
 

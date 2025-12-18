@@ -1,3 +1,4 @@
+import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
@@ -6,21 +7,21 @@ import { Tile } from "@/components/tile";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
-import { useInfiniteQuery } from "@/hooks/useInfiniteQuery";
+import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
 import { ProjectEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Projects() {
+function ProjectsContent() {
   const [status, setStatus] = useState<ProjectStatusEnum | undefined>();
   const [style, setStyle] = useState<StyleEnum | undefined>();
   const [level, setLevel] = useState<LevelEnum | undefined>();
   const profile = useAuth((state) => state.profile);
 
-  const { data, isLoading, error, hasNextPage, fetchNextPage } =
-    useInfiniteQuery<ProjectEnrichedType>({
+  const { data, hasNextPage, fetchNextPage } =
+    useSuspenseInfiniteQuery<ProjectEnrichedType>({
       queryKey: ["projects", status, style, level],
       tableName: "projects",
       columns: `*, song:songs(*)`,
@@ -70,15 +71,11 @@ export default function Projects() {
 
   // Filter projects by date for "This Week" section
   const { thisWeekProjects, otherProjects } = useMemo(() => {
-    if (!data || isLoading || error) {
-      return { thisWeekProjects: [], otherProjects: [] };
-    }
-
     return {
       thisWeekProjects: data.slice(0, 2),
       otherProjects: data.slice(2),
     };
-  }, [data, isLoading, error]);
+  }, [data]);
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
     let icon: IconSymbolName | undefined = undefined;
@@ -137,6 +134,14 @@ export default function Projects() {
         onPress={() => router.push("/(tabs)/project/create")}
       />
     </View>
+  );
+}
+
+export default function Projects() {
+  return (
+    <Boundary>
+      <ProjectsContent />
+    </Boundary>
   );
 }
 

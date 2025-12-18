@@ -1,4 +1,5 @@
 import { Avatar } from "@/components/avatar";
+import { Boundary } from "@/components/boundary";
 import { Chip } from "@/components/chip";
 import { Header } from "@/components/header";
 import { SectionListView } from "@/components/section-list";
@@ -7,17 +8,17 @@ import { Tile } from "@/components/tile";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { Video } from "@/components/video";
 import { ProjectStatusEnum } from "@/constants";
-import { useQuery } from "@/hooks/useQuery";
+import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, SectionListData, View } from "react-native";
+import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function TeacherProfile() {
+function TeacherProfileContent() {
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
 
-  const { data, isPending, error } = useQuery<ProfileEnrichedType>({
+  const { data } = useSuspenseQuery<ProfileEnrichedType>({
     queryKey: ["profiles", profileId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,7 +30,6 @@ export default function TeacherProfile() {
       if (error) throw error;
       return data;
     },
-    enabled: !!profileId,
   });
 
   const renderProfile = (data: ProfileEnrichedType): React.ReactElement => (
@@ -82,23 +82,6 @@ export default function TeacherProfile() {
     );
   };
 
-  if (isPending) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <View style={styles.container}>
-        <Header title="Profile" />
-        <ThemedText>Profile not found</ThemedText>
-      </View>
-    );
-  }
-
   const sections: SectionListData<
     ProfileEnrichedType | ProjectEnrichedType | string[]
   >[] = [
@@ -122,6 +105,14 @@ export default function TeacherProfile() {
       <Header title="Profile" />
       <SectionListView sections={sections} />
     </View>
+  );
+}
+
+export default function TeacherProfile() {
+  return (
+    <Boundary>
+      <TeacherProfileContent />
+    </Boundary>
   );
 }
 

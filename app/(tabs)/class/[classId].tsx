@@ -1,4 +1,5 @@
 import { Avatar } from "@/components/avatar";
+import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
 import { Hero } from "@/components/hero";
 import {
@@ -11,18 +12,18 @@ import {
 import { LocationInput } from "@/components/input/location-input";
 import { ThemedText } from "@/components/themed-text";
 import { ProjectStatusEnum } from "@/constants";
-import { useQuery } from "@/hooks/useQuery";
+import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Class() {
+function ClassContent() {
   const { classId } = useLocalSearchParams<{ classId: string }>();
 
-  const { data, isPending, error } = useQuery<ProjectEnrichedType>({
+  const { data } = useSuspenseQuery<ProjectEnrichedType>({
     queryKey: ["projects", classId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -34,24 +35,7 @@ export default function Class() {
       if (error) throw error;
       return data;
     },
-    enabled: !!classId,
   });
-
-  if (isPending) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <View style={styles.container}>
-        <ThemedText>Class not found</ThemedText>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -131,6 +115,14 @@ export default function Class() {
         onPress={() => {}}
       />
     </View>
+  );
+}
+
+export default function Class() {
+  return (
+    <Boundary>
+      <ClassContent />
+    </Boundary>
   );
 }
 

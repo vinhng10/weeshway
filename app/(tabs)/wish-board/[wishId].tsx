@@ -1,19 +1,19 @@
+import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { TextBoxInput, TextInput } from "@/components/input";
 import { SongCard } from "@/components/song-card";
-import { ThemedText } from "@/components/themed-text";
-import { useQuery } from "@/hooks/useQuery";
+import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Wish() {
+function WishBoardContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
 
-  const { data, isPending, error } = useQuery<WishEnrichedType>({
+  const { data } = useSuspenseQuery<WishEnrichedType>({
     queryKey: ["wishes", "board", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,17 +27,6 @@ export default function Wish() {
     },
     enabled: !!wishId,
   });
-
-  if (error || !data) {
-    return (
-      <View style={styles.container}>
-        <Header title="Wish" />
-        <View style={styles.scrollContainer}>
-          <ThemedText>Wish not found</ThemedText>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -69,6 +58,14 @@ export default function Wish() {
 
       <Button label="Create Project" onPress={() => {}} stickyBottom />
     </View>
+  );
+}
+
+export default function WishBoard() {
+  return (
+    <Boundary>
+      <WishBoardContent />
+    </Boundary>
   );
 }
 

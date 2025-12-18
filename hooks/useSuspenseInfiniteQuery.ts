@@ -2,10 +2,10 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
-import { useInfiniteQuery as useTanStackInfiniteQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery as useTanStackSuspenseInfiniteQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 
-interface UseInfiniteQueryProps<TData = unknown> {
+interface UseSuspenseInfiniteQueryProps<TData = unknown> {
   tableName: string;
   columns?: string;
   pageSize?: number;
@@ -14,28 +14,24 @@ interface UseInfiniteQueryProps<TData = unknown> {
   trailingQuery?: (query: any) => any;
 }
 
-export function useInfiniteQuery<TData = unknown>({
+export function useSuspenseInfiniteQuery<TData = unknown>({
   tableName,
   columns = "*",
   pageSize = 10,
   queryKey,
-  enabled = true,
   trailingQuery,
-}: UseInfiniteQueryProps<TData>) {
+}: UseSuspenseInfiniteQueryProps<TData>) {
   const profile = useAuth((s) => s.profile);
   const isLoggedIn = useAuth((s) => s.isLoggedIn);
 
-  const baseEnabled = isLoggedIn && !!profile;
-
-  const finalEnabled =
-    baseEnabled &&
-    (typeof enabled === "function" ? enabled() : enabled ?? true);
-
-  const query = useTanStackInfiniteQuery({
+  const query = useTanStackSuspenseInfiniteQuery({
     queryKey: queryKey,
-    enabled: finalEnabled,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
+      if (!isLoggedIn || !profile) {
+        throw new Error("Not Logged In");
+      }
+
       const skip = pageParam;
 
       let builder = supabase
@@ -72,9 +68,6 @@ export function useInfiniteQuery<TData = unknown>({
   return {
     data,
     count,
-    isLoading: query.isLoading,
-    isFetching: query.isFetching,
-    error: query.error,
     hasNextPage: count > data.length,
     fetchNextPage: query.fetchNextPage,
     refetch: query.refetch,

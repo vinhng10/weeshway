@@ -1,23 +1,24 @@
 import { Avatar } from "@/components/avatar";
+import { Boundary } from "@/components/boundary";
 import { Carousel } from "@/components/carousel";
 import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
 import { LevelEnum, StyleEnum } from "@/constants";
-import { useInfiniteQuery } from "@/hooks/useInfiniteQuery";
+import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
 import { ProjectEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function Classes() {
+function ClassesContent() {
   const [style, setStyle] = useState<StyleEnum | undefined>();
   const [level, setLevel] = useState<LevelEnum | undefined>();
 
-  const { data, isLoading, error, hasNextPage, fetchNextPage } =
-    useInfiniteQuery<ProjectEnrichedType>({
+  const { data, hasNextPage, fetchNextPage } =
+    useSuspenseInfiniteQuery<ProjectEnrichedType>({
       queryKey: ["projects", style, level],
       tableName: "projects",
       columns: `*, profile:profiles(*), song:songs(*), location:locations(*)`,
@@ -82,12 +83,12 @@ export default function Classes() {
   >[] = [
     {
       title: "You might like",
-      data: isLoading || error ? [[]] : [data.slice(0, 2)],
+      data: [data.slice(0, 2)],
       render: renderCarousel,
     },
     {
       title: "Upcoming",
-      data: isLoading || error ? [] : data.slice(2),
+      data: data.slice(2),
       render: renderTile,
     },
   ];
@@ -101,6 +102,14 @@ export default function Classes() {
         fetchNextPage={fetchNextPage}
       />
     </View>
+  );
+}
+
+export default function Classes() {
+  return (
+    <Boundary>
+      <ClassesContent />
+    </Boundary>
   );
 }
 
