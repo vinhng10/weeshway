@@ -39,7 +39,7 @@ interface BoxInputBaseProps {
   children: React.ReactNode;
 }
 
-const BaseBoxInput: React.FC<BoxInputBaseProps> = ({
+const BaseBoxInput: React.FunctionComponent<BoxInputBaseProps> = ({
   label,
   icon,
   onPress,
@@ -75,7 +75,7 @@ interface TextBoxInputProps extends BaseBoxInputProps {
   multiline?: boolean;
 }
 
-export const TextBoxInput: React.FC<TextBoxInputProps> = ({
+export const TextBoxInput: React.FunctionComponent<TextBoxInputProps> = ({
   label,
   value,
   onValueChange,
@@ -112,7 +112,7 @@ interface SelectBoxInputProps extends BaseBoxInputProps {
   options?: Record<string, string>;
 }
 
-export const SelectBoxInput: React.FC<SelectBoxInputProps> = ({
+export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
   label,
   value,
   options,
@@ -163,7 +163,7 @@ interface IntBoxInputProps extends BaseBoxInputProps {
   placeholder?: string;
 }
 
-export const IntBoxInput: React.FC<IntBoxInputProps> = ({
+export const IntBoxInput: React.FunctionComponent<IntBoxInputProps> = ({
   label,
   value,
   onValueChange,
@@ -209,7 +209,7 @@ interface FloatBoxInputProps extends BaseBoxInputProps {
   placeholder?: string;
 }
 
-export const FloatBoxInput: React.FC<FloatBoxInputProps> = ({
+export const FloatBoxInput: React.FunctionComponent<FloatBoxInputProps> = ({
   label,
   value,
   onValueChange,
@@ -266,7 +266,9 @@ interface DateTimeBoxInputProps {
   editable?: boolean;
 }
 
-export const DateTimeBoxInput: React.FC<DateTimeBoxInputProps> = ({
+export const DateTimeBoxInput: React.FunctionComponent<
+  DateTimeBoxInputProps
+> = ({
   label,
   value,
   onValueChange,

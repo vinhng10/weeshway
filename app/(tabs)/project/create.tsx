@@ -137,7 +137,7 @@ export default function CreateProject() {
           onChangeText={setName}
         />
 
-        {/* Toggle Button Group for Visibility */}
+        {/* Toggle Button Group for Status */}
         <ChipBar items={options} />
 
         {/* Style and Level Selects */}

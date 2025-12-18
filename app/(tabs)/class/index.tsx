@@ -71,7 +71,7 @@ function ClassesContent() {
       rightContent={
         <>
           <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
-          <Chip color="highlight" label={`${data.spots} spots left`} />
+          <Chip color="danger" label={`${data.spots} spots left`} />
         </>
       }
       onPress={() => navigateToClass(data.id)}

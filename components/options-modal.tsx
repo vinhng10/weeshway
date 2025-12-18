@@ -7,9 +7,10 @@ import { StyleSheet } from "react-native-unistyles";
 interface OptionsModalProps {
   visible: boolean;
   onClose: () => void;
-  onSelect: (value: string) => void;
+  onSelect: (value?: string) => void;
   options: Record<string, string>;
   title: string;
+  currentValue?: string;
 }
 
 export const OptionsModal: React.FunctionComponent<OptionsModalProps> = ({
@@ -18,9 +19,10 @@ export const OptionsModal: React.FunctionComponent<OptionsModalProps> = ({
   onSelect,
   options,
   title,
+  currentValue,
 }) => {
   const handleSelect = (value: string) => {
-    onSelect(value);
+    onSelect(currentValue === value ? undefined : value);
     onClose();
   };
 
@@ -44,7 +46,12 @@ export const OptionsModal: React.FunctionComponent<OptionsModalProps> = ({
           {Object.entries(options).map(([key, value]) => {
             return (
               <Pressable key={key} onPress={() => handleSelect(value)}>
-                <ThemedText type="h3">{value}</ThemedText>
+                <ThemedText
+                  type="h3"
+                  color={currentValue !== value ? "dimmed" : undefined}
+                >
+                  {value}
+                </ThemedText>
               </Pressable>
             );
           })}

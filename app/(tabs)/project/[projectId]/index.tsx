@@ -156,7 +156,7 @@ function ProjectContent() {
           onChangeText={setName}
         />
 
-        {/* Toggle Button Group for Visibility */}
+        {/* Toggle Button Group for Status */}
         <ChipBar items={options} />
 
         {/* StyleEnum and LevelEnum Selects */}

@@ -175,7 +175,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
             )}
             {error && (
               <View style={styles.messageContainer}>
-                <ThemedText color="highlight">{error}</ThemedText>
+                <ThemedText color="danger">{error}</ThemedText>
               </View>
             )}
             {!loading &&

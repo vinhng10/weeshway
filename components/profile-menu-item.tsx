@@ -17,9 +17,7 @@ export function ProfileMenuItem({
   showChevron = true,
   color,
 }: ProfileMenuItemProps) {
-  textStyles.useVariants({
-    color,
-  });
+  textStyles.useVariants({ color });
 
   return (
     <Pressable style={styles.container} onPress={onPress}>

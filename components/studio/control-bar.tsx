@@ -13,7 +13,7 @@ interface ControlBarProps {
   onToggleWakeWord: any;
 }
 
-export const ControlBar: React.FC<ControlBarProps> = ({
+export const ControlBar: React.FunctionComponent<ControlBarProps> = ({
   isPlaying,
   wakeWordEnabled,
   onLoadAudio,

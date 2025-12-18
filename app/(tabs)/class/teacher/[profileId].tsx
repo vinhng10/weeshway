@@ -75,7 +75,7 @@ function TeacherProfileContent() {
         subtitle={data.song.artistName}
         metadata={`${data.style} • ${data.level}`}
         rightContent={
-          <>{icon && <Chip color="highlight" icon={icon} label={label} />}</>
+          <>{icon && <Chip color="danger" icon={icon} label={label} />}</>
         }
         onPress={() => router.push(`/(tabs)/class/${data.id}`)}
       />

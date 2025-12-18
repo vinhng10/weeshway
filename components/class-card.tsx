@@ -102,7 +102,7 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
                       : ""}
                   </ThemedText>
                 </View>
-                <ThemedText color="highlight">
+                <ThemedText color="danger">
                   {data.spots ? data.spots - 10 : 0} spots left
                 </ThemedText>
               </View>

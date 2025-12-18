@@ -25,17 +25,15 @@ export const ChipBarItem = ({
     setVisible(!visible);
   };
 
-  const handleOptionSelect = (selectedValue: string) => {
-    onValueChange?.(selectedValue);
+  const handleOptionSelect = (value?: string) => {
+    onValueChange?.(value);
     setVisible(false);
   };
 
   if (modal) {
-    // Modal mode: single chip with chevron down icon
-    const hasValue = value !== undefined && value !== null && value !== "";
     // When an option is selected, text is the value prop
-    const chipLabel = hasValue ? value : label;
-    const chipColor = hasValue ? "light" : "dark";
+    const chipLabel = value ? value : label;
+    const chipColor = value ? "light" : "dark";
 
     return (
       <>
@@ -53,6 +51,7 @@ export const ChipBarItem = ({
             onSelect={handleOptionSelect}
             options={options}
             title={label}
+            currentValue={value}
           />
         )}
       </>

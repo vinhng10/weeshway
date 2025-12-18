@@ -21,16 +21,10 @@ export function Avatar({
   onSourceChange,
   ...rest
 }: AvatarProps) {
-  styles.useVariants({
-    size,
-    bordered,
-    shape,
-  });
+  styles.useVariants({ size, bordered, shape });
 
   const handleImagePicker = async () => {
-    if (!onSourceChange) {
-      return;
-    }
+    if (!onSourceChange) return;
 
     try {
       // Request permissions

@@ -13,9 +13,7 @@ type ItemProps = UnistylesVariants<typeof styles> & {
 
 export const Item = ({ index, item, onPress, disabled }: ItemProps) => {
   const width = (item.endTime - item.startTime) * PIXELS_PER_SECOND;
-  styles.useVariants({
-    selected: item.selected,
-  });
+  styles.useVariants({ selected: item.selected });
 
   return (
     <Pressable

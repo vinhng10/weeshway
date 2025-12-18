@@ -97,7 +97,7 @@ function ProjectsContent() {
         previewUrl={data.song.previewUrl}
         rightContent={
           <>
-            {icon && <Chip color="highlight" icon={icon} label={label} />}
+            {icon && <Chip color="danger" icon={icon} label={label} />}
             <Chip color="light" label={data.status} />
           </>
         }

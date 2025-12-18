@@ -11,17 +11,8 @@ export type TextInputProps = RNTextInputProps &
 
 export const TextInput = React.forwardRef<RNTextInput, TextInputProps>(
   ({ type, bold, color, multiline, style, ...rest }, ref) => {
-    styles.useVariants({
-      type,
-      bold,
-      color,
-      multiline,
-    });
-    textStyles.useVariants({
-      type,
-      bold,
-      color,
-    });
+    styles.useVariants({ type, bold, color, multiline });
+    textStyles.useVariants({ type, bold, color });
 
     return (
       <RNTextInput
@@ -61,7 +52,7 @@ const styles = StyleSheet.create((theme) => ({
       color: {
         default: {},
         dimmed: {},
-        highlight: {},
+        danger: {},
       },
       multiline: {
         true: {

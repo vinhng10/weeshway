@@ -11,7 +11,7 @@ interface DisplayAreaProps {
   onOpenCamera?: any;
 }
 
-export const DisplayArea: React.FC<DisplayAreaProps> = ({
+export const DisplayArea: React.FunctionComponent<DisplayAreaProps> = ({
   recognizing,
   transcript,
   onOpenCamera,

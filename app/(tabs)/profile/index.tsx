@@ -93,7 +93,7 @@ export default function Profile() {
           label="Sign Out"
           onPress={handleSignOut}
           showChevron={false}
-          color="highlight"
+          color="danger"
         />
       </ScrollView>
     </View>

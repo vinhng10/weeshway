@@ -10,9 +10,7 @@ export type AvatarGroupProps = ViewProps &
   };
 
 export function AvatarGroup({ avatars, max, size, ...rest }: AvatarGroupProps) {
-  styles.useVariants({
-    size,
-  });
+  styles.useVariants({ size });
 
   // Limit the number of avatars to display if max is specified
   const avatarsToShow =

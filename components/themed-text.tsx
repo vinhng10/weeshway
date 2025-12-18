@@ -10,11 +10,7 @@ export function ThemedText({
   color,
   ...rest
 }: ThemedTextProps) {
-  styles.useVariants({
-    type,
-    bold,
-    color,
-  });
+  styles.useVariants({ type, bold, color });
   return (
     <Text style={[styles.family, styles.color, styles.type, style]} {...rest} />
   );
@@ -31,11 +27,14 @@ export const styles = StyleSheet.create((theme) => ({
         default: {
           color: theme.colors.typography,
         },
+        primary: {
+          color: theme.colors.primary,
+        },
         dimmed: {
           color: theme.colors.dimmed,
         },
-        highlight: {
-          color: theme.colors.highlight,
+        danger: {
+          color: theme.colors.danger,
         },
       },
       type: {
@@ -87,7 +86,7 @@ export const styles = StyleSheet.create((theme) => ({
       color: {
         default: {},
         dimmed: {},
-        highlight: {},
+        danger: {},
       },
     },
   },

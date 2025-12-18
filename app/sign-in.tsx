@@ -45,7 +45,7 @@ export default function SignIn() {
         </ThemedText>
 
         {error ? (
-          <ThemedText color="highlight" style={styles.error}>
+          <ThemedText color="danger" style={styles.error}>
             {error}
           </ThemedText>
         ) : null}
@@ -82,7 +82,7 @@ export default function SignIn() {
             Don't have an account?
           </ThemedText>
           <Link href="/sign-up">
-            <ThemedText type="h5" color="highlight">
+            <ThemedText type="h5" color="danger">
               Sign Up
             </ThemedText>
           </Link>

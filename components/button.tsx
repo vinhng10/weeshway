@@ -16,9 +16,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
   style,
   ...rest
 }) => {
-  styles.useVariants({
-    stickyBottom,
-  });
+  styles.useVariants({ stickyBottom });
 
   return (
     <Pressable
