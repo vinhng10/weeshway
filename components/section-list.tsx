@@ -21,9 +21,9 @@ export function SectionListView<ItemT>({
       sections={sections.filter((section) => section.data.length > 0)}
       keyExtractor={(item, i) => `${item}-${i}`}
       renderItem={({ item, section }) => section.render(item)}
-      renderSectionHeader={({ section: { title } }) => (
-        <ThemedText type="h4">{title}</ThemedText>
-      )}
+      renderSectionHeader={({ section: { title } }) =>
+        title && <ThemedText type="h4">{title}</ThemedText>
+      }
       renderSectionFooter={() => <View style={styles.footer} />}
       contentContainerStyle={styles.scrollContainer}
       showsVerticalScrollIndicator={false}

@@ -6,6 +6,7 @@ import { SectionListView } from "@/components/section-list";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { Video } from "@/components/video";
+import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
@@ -16,18 +17,31 @@ import { StyleSheet } from "react-native-unistyles";
 function TeacherProfileContent() {
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
 
-  const { data } = useSuspenseQuery<ProfileEnrichedType>({
-    queryKey: ["profiles", profileId],
+  const { data: profile } = useSuspenseQuery<ProfileEnrichedType>({
+    queryKey: ["classes", "profiles", profileId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select(`*, projects(*, song:songs(*))`)
+        .select(`*`)
         .eq("id", profileId)
         .single();
 
       if (error) throw error;
       return data;
     },
+  });
+
+  const {
+    data: projects,
+    hasNextPage,
+    fetchNextPage,
+  } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
+    queryKey: ["classes", "profiles", profileId, "projects"],
+    tableName: "projects",
+    columns: `*, song:songs(*)`,
+    pageSize: 10,
+    trailingQuery: (query) =>
+      query.eq("user_id", profileId).gte("start_at", new Date().toISOString()),
   });
 
   const renderProfile = (data: ProfileEnrichedType): React.ReactElement => (
@@ -70,16 +84,16 @@ function TeacherProfileContent() {
     ProfileEnrichedType | ProjectEnrichedType | string[]
   >[] = [
     {
-      data: [data],
+      data: [profile],
       render: renderProfile,
     },
     {
-      data: [data.videoUrls || []],
+      data: profile.videoUrls ? [profile.videoUrls] : [],
       render: renderVideos,
     },
     {
       title: "Classes",
-      data: data?.projects || [],
+      data: projects,
       render: renderTile,
     },
   ];
@@ -87,7 +101,11 @@ function TeacherProfileContent() {
   return (
     <View style={styles.container}>
       <Header title="Profile" />
-      <SectionListView sections={sections} />
+      <SectionListView
+        sections={sections}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
     </View>
   );
 }
