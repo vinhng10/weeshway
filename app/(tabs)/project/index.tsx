@@ -1,10 +1,9 @@
 import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
-import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
+import { ProjectStatus } from "@/components/project-status";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
@@ -77,34 +76,17 @@ function ProjectsContent() {
     };
   }, [data]);
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
-    let icon: IconSymbolName | undefined;
-    let label = "";
-    if (data.status === ProjectStatusEnum.Draft) {
-      icon = "heart";
-      label = `10`;
-    }
-    if (data.status === ProjectStatusEnum.Release) {
-      icon = "person.fill";
-      label = `5 | ${data.spots}`;
-    }
-    return (
-      <Tile
-        imageSource={data.song.artworkUrl}
-        title={data.song.name ?? data.name}
-        subtitle={data.song.artistName ?? ""}
-        metadata={`${data.style} • ${data.level}`}
-        previewUrl={data.song.previewUrl}
-        rightContent={
-          <>
-            {icon && <Chip color="danger" icon={icon} label={label} />}
-            <Chip color="light" label={data.status} />
-          </>
-        }
-        onPress={() => router.push(`/(tabs)/project/${data.id}`)}
-      />
-    );
-  };
+  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
+    <Tile
+      imageSource={data.song.artworkUrl}
+      title={data.song.name ?? data.name}
+      subtitle={data.song.artistName ?? ""}
+      metadata={`${data.style} • ${data.level}`}
+      previewUrl={data.song.previewUrl}
+      rightContent={<ProjectStatus data={data} />}
+      onPress={() => router.push(`/(tabs)/project/${data.id}`)}
+    />
+  );
 
   const sections: SectionListData<ProjectEnrichedType>[] = [
     {

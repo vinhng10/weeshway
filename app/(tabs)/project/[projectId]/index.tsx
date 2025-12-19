@@ -138,7 +138,7 @@ function ProjectContent() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Song Card */}
+        {/* Song Tile */}
         {song && (
           <Tile
             imageSource={song.artworkUrl}

@@ -1,13 +1,11 @@
 import { Avatar } from "@/components/avatar";
 import { Boundary } from "@/components/boundary";
-import { Chip } from "@/components/chip";
 import { Header } from "@/components/header";
+import { ProjectStatus } from "@/components/project-status";
 import { SectionListView } from "@/components/section-list";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
-import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { Video } from "@/components/video";
-import { ProjectStatusEnum } from "@/constants";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
@@ -57,30 +55,16 @@ function TeacherProfileContent() {
     </View>
   );
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
-    let icon: IconSymbolName | undefined = undefined;
-    let label = "";
-    if (data.status === ProjectStatusEnum.Draft) {
-      icon = "heart";
-      label = `10`;
-    }
-    if (data.status === ProjectStatusEnum.Release) {
-      icon = "person.fill";
-      label = `${data.spots}`;
-    }
-    return (
-      <Tile
-        imageSource={data.song.artworkUrl}
-        title={data.song.name || data.name || ""}
-        subtitle={data.song.artistName}
-        metadata={`${data.style} • ${data.level}`}
-        rightContent={
-          <>{icon && <Chip color="danger" icon={icon} label={label} />}</>
-        }
-        onPress={() => router.push(`/(tabs)/class/${data.id}`)}
-      />
-    );
-  };
+  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
+    <Tile
+      imageSource={data.song.artworkUrl}
+      title={data.song.name || data.name || ""}
+      subtitle={data.song.artistName}
+      metadata={`${data.style} • ${data.level}`}
+      rightContent={<ProjectStatus data={data} />}
+      onPress={() => router.push(`/(tabs)/class/${data.id}`)}
+    />
+  );
 
   const sections: SectionListData<
     ProfileEnrichedType | ProjectEnrichedType | string[]

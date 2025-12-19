@@ -1,4 +1,4 @@
-import { ClassCard } from "@/components/class-card";
+import { ProjectCard } from "@/components/project-card";
 import { ProjectEnrichedType } from "@/types";
 import * as React from "react";
 import { View } from "react-native";
@@ -48,7 +48,7 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({
         onSnapToItem={(index: number) => {}}
         renderItem={({ item }: { item: ProjectEnrichedType }) => (
           <View style={styles.carouselItem}>
-            <ClassCard data={item} onBook={onBook} onPress={onPress} />
+            <ProjectCard data={item} onBook={onBook} onPress={onPress} />
           </View>
         )}
       />

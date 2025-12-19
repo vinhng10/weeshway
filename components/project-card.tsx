@@ -2,8 +2,9 @@ import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { IconButton } from "@/components/icon-button";
+import { ProjectStatus } from "@/components/project-status";
 import { ThemedText } from "@/components/themed-text";
-import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ProjectStatusEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { ProjectEnrichedType } from "@/types";
@@ -20,22 +21,11 @@ interface CardProps {
   onPress?: any;
 }
 
-export const ClassCard: React.FunctionComponent<CardProps> = ({
+export const ProjectCard: React.FunctionComponent<CardProps> = ({
   data,
   onBook,
   onPress,
 }) => {
-  let icon: IconSymbolName | undefined;
-  let label = "";
-  if (data.status === ProjectStatusEnum.Draft) {
-    icon = "heart";
-    label = `10`;
-  }
-  if (data.status === ProjectStatusEnum.Release) {
-    icon = "person.fill";
-    label = `5 | ${data.spots}`;
-  }
-
   const isPlaying = useAudioPlayerStore((state) =>
     state.isPlaying(data.song.previewUrl)
   );
@@ -114,7 +104,7 @@ export const ClassCard: React.FunctionComponent<CardProps> = ({
                       : ""}
                   </ThemedText>
                 </View>
-                {icon && <Chip color="danger" icon={icon} label={label} />}
+                <ProjectStatus data={data} />
               </View>
             </View>
           </View>

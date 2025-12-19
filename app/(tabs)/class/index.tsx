@@ -1,11 +1,10 @@
 import { Avatar } from "@/components/avatar";
 import { Boundary } from "@/components/boundary";
 import { Carousel } from "@/components/carousel";
-import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
+import { ProjectStatus } from "@/components/project-status";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
@@ -106,35 +105,22 @@ function ClassesContent() {
     />
   );
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => {
-    let icon: IconSymbolName | undefined;
-    let label = "";
-    if (data.status === ProjectStatusEnum.Draft) {
-      icon = "heart";
-      label = `10`;
-    }
-    if (data.status === ProjectStatusEnum.Release) {
-      icon = "person.fill";
-      label = `5 | ${data.spots}`;
-    }
-
-    return (
-      <Tile
-        imageSource={data.song.artworkUrl}
-        title={data.song.name}
-        subtitle={data.song.artistName}
-        metadata={`${data.style} • ${data.level}`}
-        previewUrl={data.song.previewUrl}
-        rightContent={
-          <>
-            <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
-            {icon && <Chip color="danger" icon={icon} label={label} />}
-          </>
-        }
-        onPress={() => navigateToClass(data.id)}
-      />
-    );
-  };
+  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
+    <Tile
+      imageSource={data.song.artworkUrl}
+      title={data.song.name}
+      subtitle={data.song.artistName}
+      metadata={`${data.style} • ${data.level}`}
+      previewUrl={data.song.previewUrl}
+      rightContent={
+        <>
+          <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
+          <ProjectStatus data={data} />
+        </>
+      }
+      onPress={() => navigateToClass(data.id)}
+    />
+  );
 
   const sections: SectionListData<
     ProjectEnrichedType | ProjectEnrichedType[]
