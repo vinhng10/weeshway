@@ -28,7 +28,7 @@ function ProjectsContent() {
       trailingQuery: (query) => {
         query = query
           .eq("user_id", profile?.id)
-          .order("created_at", { ascending: false });
+          .order("updated_at", { ascending: false });
         if (status) {
           query = query.eq("status", status);
         }
@@ -68,10 +68,34 @@ function ProjectsContent() {
 
   // Filter projects by date for "This Week" section
   const { thisWeekProjects, otherProjects } = useMemo(() => {
-    return {
-      thisWeekProjects: data.slice(0, 2),
-      otherProjects: data.slice(2),
-    };
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    return data.reduce<{
+      thisWeekProjects: ProjectEnrichedType[];
+      otherProjects: ProjectEnrichedType[];
+    }>(
+      (acc, project) => {
+        if (!project.startAt) {
+          acc.otherProjects.push(project);
+          return acc;
+        }
+
+        const startAt = new Date(project.startAt);
+        const key =
+          startAt >= startOfWeek && startAt <= endOfWeek
+            ? "thisWeekProjects"
+            : "otherProjects";
+        acc[key].push(project);
+        return acc;
+      },
+      { thisWeekProjects: [], otherProjects: [] }
+    );
   }, [data]);
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
