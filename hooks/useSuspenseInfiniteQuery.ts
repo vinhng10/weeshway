@@ -34,15 +34,15 @@ export function useSuspenseInfiniteQuery<TData = unknown>({
 
       const skip = pageParam;
 
-      let builder = supabase
+      let query = supabase
         .from(tableName)
         .select(columns, { count: "exact" });
 
       if (trailingQuery) {
-        builder = trailingQuery(builder);
+        query = trailingQuery(query);
       }
 
-      const { data, count, error } = await builder.range(
+      const { data, count, error } = await query.range(
         skip,
         skip + pageSize - 1
       );

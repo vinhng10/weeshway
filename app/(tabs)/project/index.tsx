@@ -26,21 +26,19 @@ function ProjectsContent() {
       columns: `*, song:songs(*)`,
       pageSize: 10,
       trailingQuery: (query) => {
-        let builder = query
+        query = query
           .eq("user_id", profile?.id)
           .order("created_at", { ascending: false });
-
         if (status) {
-          builder = builder.eq("status", status);
+          query = query.eq("status", status);
         }
         if (style) {
-          builder = builder.eq("style", style);
+          query = query.eq("style", style);
         }
         if (level) {
-          builder = builder.eq("level", level);
+          query = query.eq("level", level);
         }
-
-        return builder;
+        return query;
       },
     });
 
