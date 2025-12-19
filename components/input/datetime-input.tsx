@@ -134,7 +134,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
   );
 };
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flexDirection: "row",
     alignItems: "center",
@@ -157,6 +157,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   modalContainer: {
     flex: 1,
+    marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
     opacity: 0.95,
   },
