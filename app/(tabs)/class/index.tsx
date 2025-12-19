@@ -23,7 +23,7 @@ function ClassesContent() {
   const profile = useAuth((state) => state.profile);
 
   const { data: recommendations } = useSuspenseQuery<ProjectEnrichedType[][]>({
-    queryKey: ["recommendations", status, style, level],
+    queryKey: ["classes", "recommendations", status, style, level],
     queryFn: async () => {
       let query = supabase
         .from("recommendations")
@@ -52,7 +52,7 @@ function ClassesContent() {
     hasNextPage,
     fetchNextPage,
   } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
-    queryKey: ["projects", status, style, level],
+    queryKey: ["classes", "projects", status, style, level],
     tableName: "projects",
     columns: `*, profile:profiles(*), song:songs(*)`,
     pageSize: 10,

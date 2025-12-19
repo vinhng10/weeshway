@@ -18,14 +18,12 @@ export function SectionListView<ItemT>({
 }: SectionListViewProps<ItemT>) {
   return (
     <SectionList
-      sections={sections}
+      sections={sections.filter((section) => section.data.length > 0)}
       keyExtractor={(item, i) => `${item}-${i}`}
-      renderItem={({ item, section }) => {
-        return section.render(item);
-      }}
-      renderSectionHeader={({ section: { title, data } }) =>
-        title && data.length > 0 && <ThemedText type="h4">{title}</ThemedText>
-      }
+      renderItem={({ item, section }) => section.render(item)}
+      renderSectionHeader={({ section: { title } }) => (
+        <ThemedText type="h4">{title}</ThemedText>
+      )}
       renderSectionFooter={() => <View style={styles.footer} />}
       contentContainerStyle={styles.scrollContainer}
       showsVerticalScrollIndicator={false}
