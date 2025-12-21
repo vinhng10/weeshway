@@ -58,6 +58,7 @@ function ClassesContent() {
     pageSize: 10,
     trailingQuery: (query) => {
       query = query.gte("start_at", new Date().toISOString());
+      query = query.neq("status", ProjectStatusEnum.Cancel);
       if (status) {
         query = query.eq("status", status);
       }
