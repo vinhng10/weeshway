@@ -34,7 +34,8 @@ const QUEUE_NAME = "embedding_jobs";
 // Listen for HTTP requests
 Deno.serve(async (req) => {
   if (
-    req.headers.get("X-Internal-Secret") !== Deno.env.get("INTERNAL_SECRET_KEY")
+    req.headers.get("X-Internal-Secret-Key") !==
+    Deno.env.get("INTERNAL_SECRET_KEY")
   ) {
     return new Response("forbidden", { status: 403 });
   }
@@ -127,7 +128,9 @@ async function generateEmbedding(url: string) {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   // dummy random vector of size 2, each rounded to 2 decimals
-  return [Number(Math.random().toFixed(2)), Number(Math.random().toFixed(2))];
+  const n1 = Math.random() * 2 - 1;
+  const n2 = Math.random() * 2 - 1;
+  return [Number(n1.toFixed(2)), Number(n2.toFixed(2))];
 }
 
 /**
@@ -156,7 +159,7 @@ async function processJob(job: Job) {
 
   // Find nearest cluster centroid
   const [result] = await sql`
-    select public.find_nearest_centroid(${JSON.stringify(
+    select util.find_nearest_centroid(${JSON.stringify(
       embedding
     )}) as centroid_id
   `;
@@ -175,7 +178,7 @@ async function processJob(job: Job) {
 
   // Dequeue the job
   await sql`
-    select public.dequeue_embedding(${QUEUE_NAME}, ${jobId}::bigint)
+    select util.dequeue_embeddings(${QUEUE_NAME}, ${jobId}::bigint)
   `;
 }
 
