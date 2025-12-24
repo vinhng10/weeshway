@@ -48,5 +48,4 @@ ios
 dataconnect
 *.log
 *.pte
-supabase
 mocks

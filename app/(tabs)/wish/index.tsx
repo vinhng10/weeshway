@@ -46,6 +46,7 @@ function WishesContent() {
       subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
+      backgroundColor={data.status}
       rightContent={
         data.recommendations &&
         data.recommendations.length > 0 && (
@@ -60,7 +61,7 @@ function WishesContent() {
                 ),
               ]}
             />
-            <Chip color="light" label={""} />
+            <Chip color="light" label={data.status} />
           </>
         )
       }
@@ -71,7 +72,13 @@ function WishesContent() {
   const sections: SectionListData<WishRecommendationEnrichedType>[] = [
     {
       title: "Wishes",
-      data: data,
+      data: data.map((wish) => ({
+        ...wish,
+        status:
+          wish.recommendations.length > 0
+            ? WishStatusEnum.ClassAvailable
+            : WishStatusEnum.Waiting,
+      })),
       render: renderTile,
     },
   ];

@@ -1,7 +1,13 @@
-import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
+import {
+  LevelEnum,
+  ProjectStatusEnum,
+  StyleEnum,
+  WishStatusEnum,
+} from "@/constants";
 
 export type WishType = {
   id: number;
+  createdAt: Date;
   userId: string;
   style?: string;
   level?: string;
@@ -16,6 +22,7 @@ export type ProfileType = {
   bio?: string;
   avatarUrl?: string;
   videoUrls?: string[];
+  stripeAccountId?: string;
 };
 
 export type ItemType = {
@@ -26,6 +33,8 @@ export type ItemType = {
 
 export type ProjectType = {
   id: number;
+  createdAt: Date;
+  updatedAt: Date;
   userId: string;
   name?: string;
   status: ProjectStatusEnum;
@@ -40,17 +49,17 @@ export type ProjectType = {
   locationId?: number;
   songItems?: ItemType[];
   countItems?: ItemType[];
-  countUrl?: string;
 };
 
 export type SongType = {
   id: string;
+  createdAt: Date;
   name: string;
   artistName: string;
   artworkUrl: string;
   genreNames: string[];
   previewUrl?: string;
-  songUrl?: string;
+  embedding?: number[];
 };
 
 export type LocationType = {
@@ -62,10 +71,11 @@ export type LocationType = {
 
 export type RecommendationType = {
   id: number;
+  createdAt: Date;
+  userId: string;
   wishId: number;
   projectId: number;
   score: number;
-  createdAt: Date;
 };
 
 // Utility type: WishType with song_id replaced by joined songs relation
@@ -73,9 +83,9 @@ export type WishEnrichedType = WishType & {
   song: SongType;
 };
 
-export type WishRecommendationEnrichedType = WishType & {
-  song: SongType;
+export type WishRecommendationEnrichedType = WishEnrichedType & {
   recommendations: RecommendationEnrichedType[];
+  status: WishStatusEnum;
 };
 
 export type ProjectEnrichedType = ProjectType & {

@@ -50,7 +50,6 @@ export default function MakeAWish() {
           genre: song.genreNames[0],
         },
         p_wish_data: {
-          song_id: song.id,
           style: style,
           level: level,
           description: description.trim(),

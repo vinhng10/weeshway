@@ -34,7 +34,7 @@ const QUEUE_NAME = "embedding_jobs";
 // Listen for HTTP requests
 Deno.serve(async (req) => {
   if (
-    req.headers.get("X-Internal-Secret") !== Deno.env.get("INTERNAL_SECRET")
+    req.headers.get("X-Internal-Secret") !== Deno.env.get("INTERNAL_SECRET_KEY")
   ) {
     return new Response("forbidden", { status: 403 });
   }
