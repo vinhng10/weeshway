@@ -26,7 +26,7 @@ export default function Profile() {
   };
 
   const handleWallet = () => {
-    // router.push("/(tabs)/profile/wallet");
+    router.push("/(tabs)/profile/wallet");
   };
 
   const handleDataPrivacy = () => {

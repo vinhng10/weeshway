@@ -1,0 +1,145 @@
+import { Boundary } from "@/components/boundary";
+import { Button } from "@/components/button";
+import { Header } from "@/components/header";
+import { useAuth } from "@/hooks/useAuth";
+import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { supabase } from "@/supabase";
+import * as WebBrowser from "expo-web-browser";
+import { useCallback, useState } from "react";
+import { ScrollView, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+
+type ConnectOnboardingResponse = {
+  url?: string;
+};
+
+type DashboardLoginResponse = {
+  url?: string;
+};
+
+export default function Wallet() {
+  return (
+    <Boundary>
+      <WalletContent />
+    </Boundary>
+  );
+}
+
+function WalletContent() {
+  const profile = useAuth((state) => state.profile);
+  const returnUrl = "https://vinhng10.github.io";
+  const [isLaunchingOnboarding, setIsLaunchingOnboarding] = useState(false);
+  const [isOpeningDashboard, setIsOpeningDashboard] = useState(false);
+
+  const { data: onboardingComplete, refetch } = useSuspenseQuery<boolean>({
+    queryKey: ["profile", "stripe", profile?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("is_stripe_onboarded");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleStartOnboarding = useCallback(async () => {
+    setIsLaunchingOnboarding(true);
+    try {
+      const { data, error } =
+        await supabase.functions.invoke<ConnectOnboardingResponse>("onboard", {
+          body: { returnUrl },
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      const onboardingUrl = data?.url;
+
+      if (!onboardingUrl) {
+        throw new Error("The onboarding link was not returned.");
+      }
+
+      await WebBrowser.openAuthSessionAsync(onboardingUrl, returnUrl);
+
+      await refetch();
+    } catch (error: any) {
+      console.error("Error launching onboarding:", error);
+    } finally {
+      setIsLaunchingOnboarding(false);
+    }
+  }, [refetch]);
+
+  const handleOpenDashboard = useCallback(async () => {
+    if (!profile?.stripeAccountId) {
+      return;
+    }
+
+    setIsOpeningDashboard(true);
+    try {
+      const { data, error } =
+        await supabase.functions.invoke<DashboardLoginResponse>("dashboard", {
+          body: { accountId: profile.stripeAccountId },
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      const dashboardUrl = data?.url;
+
+      if (!dashboardUrl) {
+        throw new Error("The dashboard login link was not returned.");
+      }
+
+      await WebBrowser.openAuthSessionAsync(dashboardUrl, returnUrl);
+    } catch (error: any) {
+      console.error("Error opening dashboard:", error);
+    } finally {
+      setIsOpeningDashboard(false);
+    }
+  }, [profile?.stripeAccountId]);
+
+  return (
+    <View style={styles.container}>
+      <Header title="Wallet" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {onboardingComplete ? (
+          <Button
+            label={
+              isOpeningDashboard
+                ? "Redirecting..."
+                : "Stripe Dashboard"
+            }
+            onPress={handleOpenDashboard}
+            disabled={isOpeningDashboard}
+          />
+        ) : (
+          <Button
+            label={
+              isLaunchingOnboarding
+                ? "Redirecting..."
+                : "Onboarding"
+            }
+            onPress={handleStartOnboarding}
+            disabled={isLaunchingOnboarding}
+          />
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create((theme, rt) => ({
+  container: {
+    flex: 1,
+    marginTop: rt.insets.top + theme.gap(1),
+    backgroundColor: theme.colors.background,
+  },
+  scrollContainer: {
+    paddingHorizontal: theme.gap(2),
+    paddingBottom: theme.gap(6),
+    flexGrow: 1,
+  },
+}));

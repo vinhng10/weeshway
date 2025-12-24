@@ -31,6 +31,12 @@ export default function ProfileLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="wallet"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
