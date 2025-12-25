@@ -124,7 +124,7 @@ export default function Account() {
         throw error;
       }
 
-      await fetchProfile(session);
+      await fetchProfile();
     } catch (error: any) {
       console.error("Error updating profile:", error);
     } finally {

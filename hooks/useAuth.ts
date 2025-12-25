@@ -14,7 +14,7 @@ interface AuthState {
   signOut: () => Promise<void>;
   initialize: () => void;
   setSession: (session: Session | null) => void;
-  fetchProfile: (session: Session | null) => Promise<void>;
+  fetchProfile: () => Promise<void>;
 }
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -26,12 +26,13 @@ export const useAuth = create<AuthState>((set, get) => ({
   setSession: (session) => {
     set({ session, isLoggedIn: session != null });
     // Fetch profile when session changes
-    get().fetchProfile(session);
+    get().fetchProfile();
   },
 
-  fetchProfile: async (session) => {
+  fetchProfile: async () => {
     set({ isLoading: true });
 
+    const session = get().session;
     if (session) {
       const { data } = await supabase
         .from("profiles")

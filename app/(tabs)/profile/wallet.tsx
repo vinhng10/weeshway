@@ -27,9 +27,9 @@ export default function Wallet() {
 
 function WalletContent() {
   const profile = useAuth((state) => state.profile);
+  const fetchProfile = useAuth((state) => state.fetchProfile);
   const returnUrl = "https://vinhng10.github.io";
-  const [isLaunchingOnboarding, setIsLaunchingOnboarding] = useState(false);
-  const [isOpeningDashboard, setIsOpeningDashboard] = useState(false);
+  const [isLaunching, setIsLaunching] = useState(false);
 
   const { data: onboardingComplete, refetch } = useSuspenseQuery<boolean>({
     queryKey: ["profile", "stripe", profile?.id],
@@ -41,7 +41,7 @@ function WalletContent() {
   });
 
   const handleStartOnboarding = useCallback(async () => {
-    setIsLaunchingOnboarding(true);
+    setIsLaunching(true);
     try {
       const { data, error } =
         await supabase.functions.invoke<ConnectOnboardingResponse>("onboard", {
@@ -61,19 +61,18 @@ function WalletContent() {
       await WebBrowser.openAuthSessionAsync(onboardingUrl, returnUrl);
 
       await refetch();
+      await fetchProfile();
     } catch (error: any) {
       console.error("Error launching onboarding:", error);
     } finally {
-      setIsLaunchingOnboarding(false);
+      setIsLaunching(false);
     }
-  }, [refetch]);
+  }, [refetch, fetchProfile]);
 
   const handleOpenDashboard = useCallback(async () => {
-    if (!profile?.stripeAccountId) {
-      return;
-    }
+    if (!profile?.stripeAccountId || !onboardingComplete) return;
 
-    setIsOpeningDashboard(true);
+    setIsLaunching(true);
     try {
       const { data, error } =
         await supabase.functions.invoke<DashboardLoginResponse>("dashboard", {
@@ -94,9 +93,9 @@ function WalletContent() {
     } catch (error: any) {
       console.error("Error opening dashboard:", error);
     } finally {
-      setIsOpeningDashboard(false);
+      setIsLaunching(false);
     }
-  }, [profile?.stripeAccountId]);
+  }, [profile?.stripeAccountId, onboardingComplete, fetchProfile]);
 
   return (
     <View style={styles.container}>
@@ -107,23 +106,15 @@ function WalletContent() {
       >
         {onboardingComplete ? (
           <Button
-            label={
-              isOpeningDashboard
-                ? "Redirecting..."
-                : "Stripe Dashboard"
-            }
+            label={isLaunching ? "Redirecting..." : "Stripe Dashboard"}
             onPress={handleOpenDashboard}
-            disabled={isOpeningDashboard}
+            disabled={isLaunching}
           />
         ) : (
           <Button
-            label={
-              isLaunchingOnboarding
-                ? "Redirecting..."
-                : "Onboarding"
-            }
+            label={isLaunching ? "Redirecting..." : "Onboarding"}
             onPress={handleStartOnboarding}
-            disabled={isLaunchingOnboarding}
+            disabled={isLaunching}
           />
         )}
       </ScrollView>
