@@ -21,9 +21,9 @@ function WishBoardContent() {
   const { data: bubbles } = useSuspenseQuery<BubbleType[]>({
     queryKey: ["bubbles", style, level],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_wish_clusters", {
-        filter_style: style,
-        filter_level: level,
+      const { data, error } = await supabase.rpc("get_bubbles", {
+        p_style: style,
+        p_level: level,
       });
       if (error) throw error;
       return data;
