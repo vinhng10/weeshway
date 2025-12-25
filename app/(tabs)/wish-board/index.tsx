@@ -14,9 +14,9 @@ import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishBoardContent() {
-  const [style, setStyle] = useState<StyleEnum | undefined>();
-  const [level, setLevel] = useState<LevelEnum | undefined>();
-  const [centroidId, setCentroidId] = useState<number | undefined>();
+  const [style, setStyle] = useState<StyleEnum>();
+  const [level, setLevel] = useState<LevelEnum>();
+  const [centroidId, setCentroidId] = useState<number>();
 
   const { data: bubbles } = useSuspenseQuery<BubbleType[]>({
     queryKey: ["bubbles", style, level],

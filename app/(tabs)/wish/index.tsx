@@ -15,7 +15,7 @@ import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishesContent() {
-  const [status, setStatus] = useState<WishStatusEnum | undefined>();
+  const [status, setStatus] = useState<WishStatusEnum>();
   const profile = useAuth((state) => state.profile);
 
   const { data, hasNextPage, fetchNextPage } =

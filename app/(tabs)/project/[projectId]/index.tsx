@@ -45,17 +45,17 @@ function ProjectContent() {
   });
 
   // Initialize state with project data or defaults
-  const [name, setName] = useState<string | undefined>();
-  const [description, setDescription] = useState<string | undefined>();
-  const [status, setStatus] = useState<ProjectStatusEnum | undefined>();
-  const [style, setStyle] = useState<StyleEnum | undefined>();
-  const [level, setLevel] = useState<LevelEnum | undefined>();
-  const [price, setPrice] = useState<string | undefined>();
-  const [spots, setSpots] = useState<string | undefined>();
-  const [startAt, setStartAt] = useState<Date | undefined>();
-  const [endAt, setEndAt] = useState<Date | undefined>();
-  const [song, setSong] = useState<SongType | undefined>();
-  const [location, setLocation] = useState<LocationType | undefined>();
+  const [name, setName] = useState<string>();
+  const [description, setDescription] = useState<string>();
+  const [status, setStatus] = useState<ProjectStatusEnum>();
+  const [style, setStyle] = useState<StyleEnum>();
+  const [level, setLevel] = useState<LevelEnum>();
+  const [price, setPrice] = useState<string>();
+  const [spots, setSpots] = useState<string>();
+  const [startAt, setStartAt] = useState<Date>();
+  const [endAt, setEndAt] = useState<Date>();
+  const [song, setSong] = useState<SongType>();
+  const [location, setLocation] = useState<LocationType>();
   const [isSaving, setIsSaving] = useState(false);
 
   // Update state when project data is loaded

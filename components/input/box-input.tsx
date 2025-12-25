@@ -9,7 +9,7 @@ import { OptionsModal } from "../options-modal";
 import { TextInput } from "./text-input";
 
 export const formatDate = (
-  date: Date | undefined,
+  date?: Date,
   compact: boolean = false
 ): string => {
   if (!date) return "";
@@ -22,7 +22,7 @@ export const formatDate = (
     : `${dayOfWeek.slice(0, 3)}, ${month.slice(0, 3)} ${day}, ${year}`;
 };
 
-export const formatTime = (date: Date | undefined): string => {
+export const formatTime = (date?: Date): string => {
   if (!date) return "";
   const hours = date.getHours();
   const minutes = date.getMinutes();
@@ -131,7 +131,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
     setVisible(false);
   };
 
-  const handleSelect = (selectedValue: string) => {
+  const handleSelect = (selectedValue?: string) => {
     if (onValueChange) {
       onValueChange(selectedValue);
     }

@@ -14,9 +14,9 @@ import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ProjectsContent() {
-  const [status, setStatus] = useState<ProjectStatusEnum | undefined>();
-  const [style, setStyle] = useState<StyleEnum | undefined>();
-  const [level, setLevel] = useState<LevelEnum | undefined>();
+  const [status, setStatus] = useState<ProjectStatusEnum>();
+  const [style, setStyle] = useState<StyleEnum>();
+  const [level, setLevel] = useState<LevelEnum>();
   const profile = useAuth((state) => state.profile);
 
   const { data, hasNextPage, fetchNextPage } =

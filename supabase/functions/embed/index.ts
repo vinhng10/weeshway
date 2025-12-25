@@ -32,7 +32,7 @@ type Row = {
 const QUEUE_NAME = "embedding_jobs";
 
 // Listen for HTTP requests
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (
     req.headers.get("X-Internal-Secret-Key") !==
     Deno.env.get("INTERNAL_SECRET_KEY")
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
   const failedJobs: FailedJob[] = [];
 
   async function processJobs() {
-    let currentJob: Job | undefined;
+    let currentJob: Job;
 
     while ((currentJob = pendingJobs.shift()) !== undefined) {
       try {
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
     // If the worker is terminating (e.g. wall clock limit reached),
     // add pending jobs to fail list with termination reason
     failedJobs.push(
-      ...pendingJobs.map((job) => ({
+      ...pendingJobs.map((job: Job) => ({
         ...job,
         error: error instanceof Error ? error.message : JSON.stringify(error),
       }))
