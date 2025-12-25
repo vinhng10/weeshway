@@ -18,7 +18,18 @@ function WishContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
-        .select(`*, song:songs(*), recommendations:recommendations(*)`)
+        .select(
+          `*, 
+          song:songs(*), 
+          recommendations:recommendations(
+            project:projects(
+              *, 
+              profile:profiles(*), 
+              song:songs(*), 
+              location:locations(*)
+            )
+          )`
+        )
         .eq("id", wishId)
         .single();
 

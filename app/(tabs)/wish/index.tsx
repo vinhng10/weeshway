@@ -5,7 +5,7 @@ import { Chip } from "@/components/chip";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { WishStatusEnum } from "@/constants";
+import { LevelEnum, StyleEnum, WishStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
 import { WishRecommendationEnrichedType } from "@/types";
@@ -16,15 +16,34 @@ import { StyleSheet } from "react-native-unistyles";
 
 function WishesContent() {
   const [status, setStatus] = useState<WishStatusEnum>();
+  const [style, setStyle] = useState<StyleEnum>();
+  const [level, setLevel] = useState<LevelEnum>();
   const profile = useAuth((state) => state.profile);
 
   const { data, hasNextPage, fetchNextPage } =
     useSuspenseInfiniteQuery<WishRecommendationEnrichedType>({
-      queryKey: ["wishes", "recommendations"],
+      queryKey: ["wishes", "recommendations", status, style, level],
       tableName: "wishes",
-      columns: `*, song:songs(*), recommendations:recommendations(*)`,
+      columns: `
+        *, 
+        song:songs(*), 
+        recommendations:recommendations(
+          project:projects(
+            profile:profiles(avatar_url)
+          )
+        )
+      `,
       pageSize: 10,
-      trailingQuery: (query) => query.eq("user_id", profile?.id),
+      trailingQuery: (query) => {
+        query = query.eq("user_id", profile?.id);
+        if (style) {
+          query = query.eq("style", style);
+        }
+        if (level) {
+          query = query.eq("level", level);
+        }
+        return query;
+      },
     });
 
   const options: ChipBarItemProps[] = [
@@ -34,6 +53,20 @@ function WishesContent() {
       modal: true,
       options: WishStatusEnum,
       onValueChange: setStatus,
+    },
+    {
+      label: "Style",
+      value: style,
+      options: StyleEnum,
+      modal: true,
+      onValueChange: setStyle,
+    },
+    {
+      label: "Level",
+      value: level,
+      options: LevelEnum,
+      modal: true,
+      onValueChange: setLevel,
     },
   ];
 

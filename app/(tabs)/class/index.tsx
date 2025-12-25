@@ -27,15 +27,23 @@ function ClassesContent() {
     queryFn: async () => {
       let query = supabase
         .from("recommendations")
-        .select(`*, filters:projects!inner(style, level)`)
+        .select(
+          `*, 
+          project:projects!inner(
+            *, 
+            profile:profiles(*), 
+            song:songs(*), 
+            location:locations(*)
+          )`
+        )
         .eq("user_id", profile?.id)
         .limit(10);
 
       if (style) {
-        query = query.eq("filters.style", style);
+        query = query.eq("project.style", style);
       }
       if (level) {
-        query = query.eq("filters.level", level);
+        query = query.eq("project.level", level);
       }
 
       const { data, error } = await query;
