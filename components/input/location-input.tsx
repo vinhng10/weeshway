@@ -94,7 +94,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     try {
       setIsSaving(true);
 
-      const url = imageUrl ? await uploadMedia(imageUrl, `locations`) : null;
+      const url = imageUrl ? await uploadMedia("locations", imageUrl) : null;
 
       const { data, error } = await supabase
         .from("locations")

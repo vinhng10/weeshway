@@ -88,8 +88,9 @@ export default function Account() {
 
       if (avatarUri && avatarUri !== profile?.avatarUrl) {
         avatarUrl = await uploadMedia(
+          "profiles",
           avatarUri,
-          `profiles/${profile.id}/avatars`
+          `${profile.id}/avatars`
         );
       }
 
@@ -97,7 +98,11 @@ export default function Account() {
       const finalVideoUrls = await Promise.all(
         videoUrls.map(async (videoUrl) => {
           if (isLocalUri(videoUrl)) {
-            return await uploadMedia(videoUrl, `profiles/${profile.id}/videos`);
+            return await uploadMedia(
+              "profiles",
+              videoUrl,
+              `${profile.id}/videos`
+            );
           }
           return videoUrl;
         })
