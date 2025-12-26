@@ -1,10 +1,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-import { z } from "npm:zod";
-
-// We'll make a direct Postgres connection to update the document
 import postgres from "https://deno.land/x/postgresjs@v3.4.5/mod.js";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { z } from "npm:zod";
 
 // Initialize Postgres client
 const sql = postgres(
@@ -66,7 +63,7 @@ Deno.serve(async (req: Request) => {
   const failedJobs: FailedJob[] = [];
 
   async function processJobs() {
-    let currentJob: Job;
+    let currentJob: Job | undefined;
 
     while ((currentJob = pendingJobs.shift()) !== undefined) {
       try {

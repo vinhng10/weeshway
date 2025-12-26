@@ -37,6 +37,10 @@ function ClassContent() {
     },
   });
 
+  const handleBook = async () => {};
+
+  const handleWish = async () => {};
+
   return (
     <View style={styles.container}>
       {/* Hero Section with Song Image */}
@@ -108,11 +112,14 @@ function ClassContent() {
         />
       </ScrollView>
 
-      {/* Book Button */}
+      {/* Button */}
+
       <Button
         stickyBottom
         label={data.status === ProjectStatusEnum.Release ? "Book" : "Wish"}
-        onPress={() => {}}
+        onPress={
+          data.status === ProjectStatusEnum.Release ? handleBook : handleWish
+        }
       />
     </View>
   );

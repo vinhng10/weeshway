@@ -1,11 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { File } from "expo-file-system";
 import Storage from "expo-native-storage";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "./constants";
 
-const supabaseUrl = "http://10.0.0.25:54321";
-const supabasePublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-
-export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: Storage,
     autoRefreshToken: true,

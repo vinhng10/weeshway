@@ -23,6 +23,7 @@ export type ProfileType = {
   avatarUrl?: string;
   videoUrls?: string[];
   stripeAccountId?: string;
+  stripeCustomerId?: string;
 };
 
 export type ItemType = {

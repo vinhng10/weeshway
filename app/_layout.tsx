@@ -1,5 +1,7 @@
+import { STRIPE_PUBLISHABLE_KEY } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { useAuth } from "@/hooks/useAuth";
+import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Stack } from "expo-router";
@@ -48,9 +50,15 @@ export default function Root() {
   return (
     <GestureHandlerRootView>
       <KeyboardProvider>
-        <QueryClientProvider client={queryClient}>
-          <RootNavigator />
-        </QueryClientProvider>
+        <StripeProvider
+          publishableKey={STRIPE_PUBLISHABLE_KEY}
+          merchantIdentifier="merchant.com.anonymous.danceai"
+          urlScheme="danceai"
+        >
+          <QueryClientProvider client={queryClient}>
+            <RootNavigator />
+          </QueryClientProvider>
+        </StripeProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
   );

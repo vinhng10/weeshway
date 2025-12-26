@@ -1,5 +1,11 @@
 export const PIXELS_PER_SECOND = 30;
 export const TICK_INTERVAL = 5;
+export const RETURN_URL = "https://vinhng10.github.io";
+export const SUPABASE_URL = "http://10.0.0.25:54321";
+export const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+export const STRIPE_PUBLISHABLE_KEY =
+  "pk_test_51ShVfcKFOPkzrjS9Gtrjm5RwkYpqhlSkWKBXt7BOJlK92UYi0MEloUnb9RaHSRt0FZlb2ookth7QfCxKBNq2bg8V00I08ol1mn";
 
 export enum StyleEnum {
   Bachata = "Bachata",

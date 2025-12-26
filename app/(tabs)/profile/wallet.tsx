@@ -1,6 +1,7 @@
 import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
 import { Header } from "@/components/header";
+import { RETURN_URL } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
@@ -9,26 +10,13 @@ import { useCallback, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type ConnectOnboardingResponse = {
+type StripeResponse = {
   url?: string;
 };
-
-type DashboardLoginResponse = {
-  url?: string;
-};
-
-export default function Wallet() {
-  return (
-    <Boundary>
-      <WalletContent />
-    </Boundary>
-  );
-}
 
 function WalletContent() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
-  const returnUrl = "https://vinhng10.github.io";
   const [isLaunching, setIsLaunching] = useState(false);
 
   const { data: onboardingComplete, refetch } = useSuspenseQuery<boolean>({
@@ -43,10 +31,12 @@ function WalletContent() {
   const handleStartOnboarding = useCallback(async () => {
     setIsLaunching(true);
     try {
-      const { data, error } =
-        await supabase.functions.invoke<ConnectOnboardingResponse>("onboard", {
-          body: { returnUrl },
-        });
+      const { data, error } = await supabase.functions.invoke<StripeResponse>(
+        "onboard",
+        {
+          body: { returnUrl: RETURN_URL },
+        }
+      );
 
       if (error) {
         throw error;
@@ -58,7 +48,7 @@ function WalletContent() {
         throw new Error("The onboarding link was not returned.");
       }
 
-      await WebBrowser.openAuthSessionAsync(onboardingUrl, returnUrl);
+      await WebBrowser.openAuthSessionAsync(onboardingUrl, RETURN_URL);
 
       await refetch();
       await fetchProfile();
@@ -74,10 +64,12 @@ function WalletContent() {
 
     setIsLaunching(true);
     try {
-      const { data, error } =
-        await supabase.functions.invoke<DashboardLoginResponse>("dashboard", {
+      const { data, error } = await supabase.functions.invoke<StripeResponse>(
+        "dashboard",
+        {
           body: { accountId: profile.stripeAccountId },
-        });
+        }
+      );
 
       if (error) {
         throw error;
@@ -89,7 +81,7 @@ function WalletContent() {
         throw new Error("The dashboard login link was not returned.");
       }
 
-      await WebBrowser.openAuthSessionAsync(dashboardUrl, returnUrl);
+      await WebBrowser.openAuthSessionAsync(dashboardUrl, RETURN_URL);
     } catch (error: any) {
       console.error("Error opening dashboard:", error);
     } finally {
@@ -122,6 +114,14 @@ function WalletContent() {
   );
 }
 
+export default function Wallet() {
+  return (
+    <Boundary>
+      <WalletContent />
+    </Boundary>
+  );
+}
+
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   scrollContainer: {
     paddingHorizontal: theme.gap(2),
-    paddingBottom: theme.gap(6),
+    paddingBottom: theme.gap(16),
     flexGrow: 1,
   },
 }));

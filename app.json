@@ -54,6 +54,19 @@
         {
           "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
         }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.anonymous.danceai",
+          "enableGooglePay": true
+        }
+      ],
+      [
+        "expo-web-browser",
+        {
+          "experimentalLauncherActivity": true
+        }
       ]
     ],
     "experiments": {
