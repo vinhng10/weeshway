@@ -4,8 +4,8 @@ import Stripe from "npm:stripe@^20.1.0";
 import { z } from "npm:zod";
 
 const requestSchema = z.object({
-  stripeCustomerId: z.string(),
-  stripeAccountId: z.string(),
+  customerId: z.string(),
+  accountId: z.string(),
   amount: z.number().positive(),
   currency: z.string().min(3).max(3),
   applicationFeeAmount: z.number().nonnegative(),
@@ -32,17 +32,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const {
-      stripeCustomerId,
-      stripeAccountId,
-      amount,
-      currency,
-      applicationFeeAmount,
-    } = parseResult.data;
+    const { customerId, accountId, amount, currency, applicationFeeAmount } =
+      parseResult.data;
 
     // Create customer session for mobile payment element
     const customerSession = await stripe.customerSessions.create({
-      customer: stripeCustomerId,
+      customer_account: customerId,
       components: {
         mobile_payment_element: {
           enabled: true,
@@ -59,13 +54,13 @@ Deno.serve(async (req: Request) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount,
       currency: currency,
-      customer: stripeCustomerId,
+      customer_account: customerId,
       automatic_payment_methods: {
         enabled: true,
       },
       application_fee_amount: applicationFeeAmount,
       transfer_data: {
-        destination: stripeAccountId,
+        destination: accountId,
       },
     });
 
@@ -73,7 +68,8 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({
         paymentIntent: paymentIntent.client_secret,
         customerSessionClientSecret: customerSession.client_secret,
-        customer: stripeCustomerId,
+        customer: customerId,
+        customerAccount: customerId,
         publishableKey: publishableKey,
       }),
       {

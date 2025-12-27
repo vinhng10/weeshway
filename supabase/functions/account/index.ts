@@ -5,8 +5,8 @@ import Stripe from "npm:stripe@^20.1.0";
 import { z } from "npm:zod";
 
 const requestSchema = z.object({
-  userId: z.uuid(),
-  email: z.email(),
+  userId: z.string().uuid(),
+  email: z.string().email(),
 });
 
 Deno.serve(async (req: Request) => {
@@ -45,27 +45,40 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const customer = await stripe.customers.create({
-      email: email,
-      metadata: { supabase_user_id: userId },
+    const account = await stripe.v2.core.accounts.create({
+      contact_email: email,
+      configuration: {
+        customer: {
+          capabilities: {
+            automatic_indirect_tax: {
+              requested: true,
+            },
+          },
+        },
+      },
+      metadata: {
+        supabase_user_id: userId,
+      },
     });
 
     const { error } = await supabaseClient
       .from("profiles")
-      .update({ stripe_customer_id: customer.id })
+      .update({ stripe_account_id: account.id })
       .eq("id", userId);
 
     if (error) {
-      await stripe.customers.del(customer.id);
+      await stripe.v2.core.accounts.close(account.id, {
+        applied_configurations: ["customer"],
+      });
       throw new Error(`Failed to update profile: ${error.message}`);
     }
 
-    return new Response(JSON.stringify({ customerId: customer.id }), {
+    return new Response(JSON.stringify({ accountId: account.id }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (err: any) {
-    console.error("Error creating Stripe customer:", err.message);
+    console.error("Error creating Stripe account:", err.message);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

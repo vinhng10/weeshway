@@ -29,7 +29,9 @@ export default function CreateProject() {
   // Initialize state with project data or defaults
   const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
-  const [status, setStatus] = useState<ProjectStatusEnum>();
+  const [status, setStatus] = useState<ProjectStatusEnum>(
+    ProjectStatusEnum.Draft
+  );
   const [style, setStyle] = useState<StyleEnum>();
   const [level, setLevel] = useState<LevelEnum>();
   const [price, setPrice] = useState<string>();

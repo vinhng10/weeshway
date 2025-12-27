@@ -368,11 +368,11 @@ verify_jwt = false
 import_map = "./functions/embed/deno.json"
 entrypoint = "./functions/embed/index.ts"
 
-[functions.customer]
+[functions.account]
 enabled = true
 verify_jwt = false
-import_map = "./functions/customer/deno.json"
-entrypoint = "./functions/customer/index.ts"
+import_map = "./functions/account/deno.json"
+entrypoint = "./functions/account/index.ts"
 
 [functions.onboard]
 enabled = true
@@ -385,3 +385,9 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/dashboard/deno.json"
 entrypoint = "./functions/dashboard/index.ts"
+
+[functions.payment]
+enabled = true
+verify_jwt = true
+import_map = "./functions/payment/deno.json"
+entrypoint = "./functions/payment/index.ts"

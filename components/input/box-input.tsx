@@ -8,10 +8,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { OptionsModal } from "../options-modal";
 import { TextInput } from "./text-input";
 
-export const formatDate = (
-  date?: Date,
-  compact: boolean = false
-): string => {
+export const formatDate = (date?: Date, compact: boolean = false): string => {
   if (!date) return "";
   const dayOfWeek = Object.values(DayEnum)[date.getDay()];
   const month = Object.values(MonthEnum)[date.getMonth()];
@@ -152,6 +149,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
           onSelect={handleSelect}
           options={options}
           title={label}
+          currentValue={value}
         />
       )}
     </BaseBoxInput>

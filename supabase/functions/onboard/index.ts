@@ -35,48 +35,57 @@ Deno.serve(async (req: Request) => {
     // Parse request body
     const { returnUrl } = await req.json();
 
-    // Get or create Stripe account
+    // Get Stripe account
     const { data: profile } = await supabaseClient
       .from("profiles")
       .select("stripe_account_id")
       .eq("id", user.id)
       .single();
 
-    let accountId = profile?.stripe_account_id;
+    const accountId = profile?.stripe_account_id;
 
     if (!accountId) {
-      // Create a Connect account
-      const account = await stripe.v2.core.accounts.create({
-        display_name: user.email,
-        contact_email: user.email,
-        dashboard: "express",
-        defaults: {
-          responsibilities: {
-            fees_collector: "application_express",
-            losses_collector: "application",
+      return new Response(
+        JSON.stringify({
+          error: "Stripe account not found. Please sign up first.",
+        }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Update account with merchant and recipient configurations
+    await stripe.v2.core.accounts.update(accountId, {
+      display_name: user.email,
+      dashboard: "express",
+      defaults: {
+        responsibilities: {
+          fees_collector: "application_express",
+          losses_collector: "application",
+        },
+      },
+      identity: {
+        country: "FI",
+      },
+      configuration: {
+        merchant: {
+          capabilities: {
+            card_payments: { requested: true },
           },
         },
-        identity: {
-          country: "FI",
-          entity_type: "individual",
-        },
-        configuration: {
-          merchant: {
-            capabilities: {
-              card_payments: { requested: true },
+        recipient: {
+          capabilities: {
+            stripe_balance: {
+              stripe_transfers: {
+                requested: true,
+              },
             },
           },
         },
-      });
-
-      accountId = account.id;
-
-      // Update profile with account ID
-      await supabaseClient
-        .from("profiles")
-        .update({ stripe_account_id: accountId })
-        .eq("id", user.id);
-    }
+      },
+    });
 
     // Create Account Link for onboarding
     const accountLink = await stripe.v2.core.accountLinks.create({
@@ -84,7 +93,7 @@ Deno.serve(async (req: Request) => {
       use_case: {
         type: "account_onboarding",
         account_onboarding: {
-          configurations: ["merchant"],
+          configurations: ["merchant", "recipient", "customer"],
           refresh_url: returnUrl,
           return_url: returnUrl,
         },

@@ -104,7 +104,6 @@ export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
               onChangeText={setQuery}
               returnKeyType="search"
               autoCapitalize="none"
-              autoFocus
             />
           </View>
 

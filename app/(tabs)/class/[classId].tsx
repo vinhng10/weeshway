@@ -1,6 +1,7 @@
 import { Avatar } from "@/components/avatar";
 import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
+import { Checkout } from "@/components/checkout";
 import { Hero } from "@/components/hero";
 import {
   DateTimeInput,
@@ -12,16 +13,19 @@ import {
 import { LocationInput } from "@/components/input/location-input";
 import { ThemedText } from "@/components/themed-text";
 import { ProjectStatusEnum } from "@/constants";
+import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Alert, Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassContent() {
   const { classId } = useLocalSearchParams<{ classId: string }>();
+  const profile = useAuth((state) => state.profile);
+  const [isCheckoutVisible, setIsCheckoutVisible] = React.useState(false);
 
   const { data } = useSuspenseQuery<ProjectEnrichedType>({
     queryKey: ["projects", classId],
@@ -37,7 +41,33 @@ function ClassContent() {
     },
   });
 
-  const handleBook = async () => {};
+  const handleBook = React.useCallback(() => {
+    if (!profile?.stripeAccountId) {
+      Alert.alert(
+        "Add a payment method",
+        "Open Wallet to add a card before booking a class."
+      );
+      return;
+    }
+
+    if (!data.profile?.stripeAccountId) {
+      Alert.alert(
+        "Instructor unavailable",
+        "This instructor still needs to finish setting up payouts."
+      );
+      return;
+    }
+
+    if (!data.price || data.price <= 0) {
+      Alert.alert(
+        "Price missing",
+        "Booking will be available once the instructor sets a price."
+      );
+      return;
+    }
+
+    setIsCheckoutVisible(true);
+  }, [data.price, data.profile?.stripeAccountId, profile?.stripeAccountId]);
 
   const handleWish = async () => {};
 
@@ -77,7 +107,7 @@ function ClassContent() {
         <View style={styles.row}>
           <FloatBoxInput
             label="Price"
-            value={`$${data.price?.toFixed(2) ?? "0.00"}`}
+            value={`€${data.price?.toFixed(2) ?? "0.00"}`}
             editable={false}
           />
           <IntBoxInput
@@ -120,6 +150,18 @@ function ClassContent() {
         onPress={
           data.status === ProjectStatusEnum.Release ? handleBook : handleWish
         }
+      />
+      <Checkout
+        visible={isCheckoutVisible}
+        onClose={() => setIsCheckoutVisible(false)}
+        onSuccess={() => setIsCheckoutVisible(false)}
+        amount={data.price ?? 0}
+        customerId={profile?.stripeAccountId}
+        teacherAccountId={data.profile?.stripeAccountId}
+        teacherName={data.profile.fullName}
+        projectName={data.name}
+        currency="EUR"
+        applicationFeePercent={0.1}
       />
     </View>
   );
