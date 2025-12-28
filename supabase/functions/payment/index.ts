@@ -85,11 +85,8 @@ Deno.serve(async (req) => {
     ]);
 
     return jsonResponse({
-      paymentIntent: paymentIntent.client_secret,
+      paymentIntentClientSecret: paymentIntent.client_secret,
       customerSessionClientSecret: customerSession.client_secret,
-      customer: customer.id,
-      customerAccount: customer.stripeAccountId,
-      publishableKey: STRIPE_PUBLISHABLE_KEY,
     });
   } catch (err: any) {
     console.error("Payment Intent Error:", err);

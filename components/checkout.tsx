@@ -9,30 +9,26 @@ import { ActivityIndicator, Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type PaymentIntentResponse = {
-  paymentIntent: string;
+  paymentIntentClientSecret: string;
   customerSessionClientSecret: string;
-  customer: string;
-  publishableKey?: string;
 };
 
 type CheckoutProps = {
   visible: boolean;
-  onClose: () => void;
+  onExit: () => void;
   customer: ProfileType | null;
   project: ProjectEnrichedType;
   currency?: string;
   applicationFeePercent?: number;
-  onSuccess?: () => void;
 };
 
 export function Checkout({
   visible,
-  onClose,
+  onExit,
   customer,
   project,
   currency = "EUR",
   applicationFeePercent = 0,
-  onSuccess,
 }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
@@ -82,21 +78,16 @@ export function Checkout({
       });
 
     if (error) {
-      console.error("===> error", error.message);
       throw new Error(error.message);
     }
 
-    if (!data?.paymentIntent || !data.customerSessionClientSecret) {
+    if (!data?.paymentIntentClientSecret || !data.customerSessionClientSecret) {
       throw new Error(
         "Unable to start checkout. Missing Stripe client secrets."
       );
     }
 
-    return {
-      paymentIntent: data.paymentIntent,
-      customerSessionClientSecret: data.customerSessionClientSecret,
-      customer: data.customer,
-    };
+    return data;
   };
 
   const initializePaymentSheet = async () => {
@@ -106,12 +97,12 @@ export function Checkout({
     setStatusMessage(null);
 
     try {
-      const { paymentIntent, customerSessionClientSecret } =
+      const { paymentIntentClientSecret, customerSessionClientSecret } =
         await fetchPaymentSheetParams();
 
       const { error } = await initPaymentSheet({
         merchantDisplayName: "DanceAI",
-        paymentIntentClientSecret: paymentIntent,
+        paymentIntentClientSecret: paymentIntentClientSecret,
         customerSessionClientSecret: customerSessionClientSecret,
         returnURL: RETURN_URL,
       });
@@ -142,12 +133,12 @@ export function Checkout({
         type: "success",
         message: "Payment completed!",
       });
-      onSuccess?.();
+      onExit();
     }
   };
 
   const handleClose = () => {
-    onClose();
+    onExit();
     setLoading(false);
     setStatusMessage(null);
   };

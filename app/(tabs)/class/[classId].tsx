@@ -30,7 +30,7 @@ function ClassContent() {
   const queryClient = useQueryClient();
 
   const { data } = useSuspenseQuery<ProjectEnrichedType>({
-    queryKey: ["projects", classId],
+    queryKey: ["classes", classId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
@@ -43,6 +43,7 @@ function ClassContent() {
         `
         )
         .eq("id", classId)
+        .eq("bookings.status", "Succeeded")
         .single();
 
       if (error) throw error;
@@ -53,6 +54,7 @@ function ClassContent() {
   const booked = data.bookings.some(
     (booking) =>
       booking.userId === profile?.id &&
+      booking.projectId === data.id &&
       booking.status === StripePaymentStatusEnum.Succeeded
   );
 
@@ -85,6 +87,13 @@ function ClassContent() {
   };
 
   const handleWish = async () => {};
+
+  const handleCheckoutExit = async () => {
+    setIsCheckoutVisible(false);
+    await queryClient.invalidateQueries({
+      queryKey: ["classes"],
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -169,14 +178,7 @@ function ClassContent() {
 
       <Checkout
         visible={isCheckoutVisible && !booked}
-        onClose={async () => {
-          setIsCheckoutVisible(false);
-          await queryClient.invalidateQueries({ queryKey: ["projects"] });
-        }}
-        onSuccess={async () => {
-          setIsCheckoutVisible(false);
-          await queryClient.invalidateQueries({ queryKey: ["projects"] });
-        }}
+        onExit={handleCheckoutExit}
         customer={profile}
         project={data}
         currency="EUR"
