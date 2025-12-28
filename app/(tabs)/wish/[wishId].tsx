@@ -5,8 +5,8 @@ import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
-import { ProjectEnrichedType, WishRecommendationEnrichedType } from "@/types";
-import { router, useLocalSearchParams } from "expo-router";
+import { WishRecommendationEnrichedType } from "@/types";
+import { useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -26,7 +26,8 @@ function WishContent() {
               *, 
               profile:profiles(*), 
               song:songs(*), 
-              location:locations(*)
+              location:locations(*),
+              bookings:bookings(*)
             )
           )`
         )
@@ -54,10 +55,6 @@ function WishContent() {
               data={data.recommendations.map(
                 (recommendation) => recommendation.project
               )}
-              onBook={() => {}}
-              onPress={(data: ProjectEnrichedType) =>
-                router.push(`/(tabs)/class/${data.id}`)
-              }
             />
           </View>
         )}

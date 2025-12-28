@@ -1,35 +1,45 @@
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/button";
+import { Checkout } from "@/components/checkout";
 import { Chip } from "@/components/chip";
 import { IconButton } from "@/components/icon-button";
 import { ProjectStatus } from "@/components/project-status";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { ProjectStatusEnum } from "@/constants";
+import { ProjectStatusEnum, StripePaymentStatusEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
+import { useAuth } from "@/hooks/useAuth";
 import { ProjectEnrichedType } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import React from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { useShallow } from "zustand/react/shallow";
 import { formatDate, formatTime } from "./input";
 
 interface CardProps {
   data: ProjectEnrichedType;
-  onBook?: any;
-  onPress?: any;
 }
 
-export const ProjectCard: React.FunctionComponent<CardProps> = ({
-  data,
-  onBook,
-  onPress,
-}) => {
-  const isPlaying = useAudioPlayerStore((state) =>
-    state.isPlaying(data.song.previewUrl)
+export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
+  const profile = useAuth((state) => state.profile);
+  const queryClient = useQueryClient();
+  const [visible, setVisible] = React.useState(false);
+  const { isPlaying, toggle } = useAudioPlayerStore(
+    useShallow((state) => ({
+      isPlaying: state.isPlaying(data.song.previewUrl),
+      toggle: state.toggle,
+    }))
   );
-  const toggle = useAudioPlayerStore((state) => state.toggle);
+  const booked = data.bookings.some(
+    (booking) =>
+      booking.userId === profile?.id &&
+      booking.projectId === data.id &&
+      booking.status === StripePaymentStatusEnum.Succeeded
+  );
 
   const handleAudioPlayer = (e?: any) => {
     if (!data.song.previewUrl) return;
@@ -37,8 +47,27 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({
     toggle(data.song.previewUrl);
   };
 
+  const handleBook = () => {
+    setVisible(true);
+  };
+
+  const handleWish = async () => {
+    // TODO: Implement wish functionality
+  };
+
+  const handleCheckoutExit = async () => {
+    setVisible(false);
+    await queryClient.invalidateQueries({
+      queryKey: ["classes"],
+    });
+  };
+
+  const handlePress = () => {
+    router.push(`/(tabs)/class/${data.id}`);
+  };
+
   return (
-    <Pressable onPress={() => onPress(data)}>
+    <Pressable onPress={handlePress}>
       <ImageBackground
         source={data.song.artworkUrl}
         style={styles.background}
@@ -114,9 +143,18 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({
             <View style={styles.bookButton}>
               <Button
                 label={
-                  data.status === ProjectStatusEnum.Release ? "Book" : "Wish"
+                  booked
+                    ? "Booked"
+                    : data.status === ProjectStatusEnum.Release
+                    ? "Book"
+                    : "Wish"
                 }
-                onPress={() => onBook(data)}
+                onPress={
+                  data.status === ProjectStatusEnum.Release
+                    ? handleBook
+                    : handleWish
+                }
+                disabled={booked}
               />
             </View>
             <IconButton
@@ -127,6 +165,15 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({
           </View>
         </LinearGradient>
       </ImageBackground>
+
+      <Checkout
+        visible={visible && !booked}
+        onExit={handleCheckoutExit}
+        customer={profile}
+        project={data}
+        currency="EUR"
+        applicationFeePercent={0.1}
+      />
     </Pressable>
   );
 };

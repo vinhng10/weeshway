@@ -11,15 +11,9 @@ import { StyleSheet } from "react-native-unistyles";
 
 interface CarouselProps {
   data: ProjectEnrichedType[];
-  onBook?: any;
-  onPress?: any;
 }
 
-export const Carousel: React.FunctionComponent<CarouselProps> = ({
-  data,
-  onBook,
-  onPress,
-}) => {
+export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
 
@@ -48,7 +42,7 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({
         onSnapToItem={(index: number) => {}}
         renderItem={({ item }: { item: ProjectEnrichedType }) => (
           <View style={styles.carouselItem}>
-            <ProjectCard data={item} onBook={onBook} onPress={onPress} />
+            <ProjectCard data={item} />
           </View>
         )}
       />

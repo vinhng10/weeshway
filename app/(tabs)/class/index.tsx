@@ -39,7 +39,7 @@ function ClassesContent() {
             profile:profiles(*), 
             song:songs(*), 
             location:locations(*),
-            bookings:bookings(status)
+            bookings:bookings(*)
           )`
         )
         .eq("user_id", profile?.id)
@@ -115,11 +115,7 @@ function ClassesContent() {
   const navigateToClass = (id: number) => router.push(`/(tabs)/class/${id}`);
 
   const renderCarousel = (data: ProjectEnrichedType[]): React.ReactElement => (
-    <Carousel
-      data={data}
-      onBook={() => {}}
-      onPress={(data: ProjectEnrichedType) => navigateToClass(data.id)}
-    />
+    <Carousel data={data} />
   );
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (

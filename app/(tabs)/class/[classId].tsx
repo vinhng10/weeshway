@@ -20,13 +20,13 @@ import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassContent() {
   const { classId } = useLocalSearchParams<{ classId: string }>();
   const profile = useAuth((state) => state.profile);
-  const [isCheckoutVisible, setIsCheckoutVisible] = React.useState(false);
+  const [visible, setVisible] = React.useState(false);
   const queryClient = useQueryClient();
 
   const { data } = useSuspenseQuery<ProjectEnrichedType>({
@@ -59,37 +59,13 @@ function ClassContent() {
   );
 
   const handleBook = () => {
-    if (!profile?.stripeAccountId) {
-      Alert.alert(
-        "Add a payment method",
-        "Open Wallet to add a card before booking a class."
-      );
-      return;
-    }
-
-    if (!data.profile.stripeAccountId) {
-      Alert.alert(
-        "Instructor unavailable",
-        "This instructor still needs to finish setting up payouts."
-      );
-      return;
-    }
-
-    if (!data.price || data.price <= 0) {
-      Alert.alert(
-        "Price missing",
-        "Booking will be available once the instructor sets a price."
-      );
-      return;
-    }
-
-    setIsCheckoutVisible(true);
+    setVisible(true);
   };
 
   const handleWish = async () => {};
 
   const handleCheckoutExit = async () => {
-    setIsCheckoutVisible(false);
+    setVisible(false);
     await queryClient.invalidateQueries({
       queryKey: ["classes"],
     });
@@ -169,7 +145,13 @@ function ClassContent() {
       {/* Button */}
       <Button
         stickyBottom
-        label={data.status === ProjectStatusEnum.Release ? "Book" : "Wish"}
+        label={
+          booked
+            ? "Booked"
+            : data.status === ProjectStatusEnum.Release
+            ? "Book"
+            : "Wish"
+        }
         onPress={
           data.status === ProjectStatusEnum.Release ? handleBook : handleWish
         }
@@ -177,7 +159,7 @@ function ClassContent() {
       />
 
       <Checkout
-        visible={isCheckoutVisible && !booked}
+        visible={visible && !booked}
         onExit={handleCheckoutExit}
         customer={profile}
         project={data}
