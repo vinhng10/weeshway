@@ -2,8 +2,9 @@ import { Button } from "@/components/button";
 import { ThemedText } from "@/components/themed-text";
 import { RETURN_URL } from "@/constants";
 import { supabase } from "@/supabase";
+import { ProfileType, ProjectEnrichedType } from "@/types";
 import { useStripe } from "@stripe/stripe-react-native";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -17,12 +18,9 @@ type PaymentIntentResponse = {
 type CheckoutProps = {
   visible: boolean;
   onClose: () => void;
-  amount: number;
-  customerId?: string;
-  teacherAccountId?: string;
+  customer: ProfileType | null;
+  project: ProjectEnrichedType;
   currency?: string;
-  teacherName?: string;
-  projectName?: string;
   applicationFeePercent?: number;
   onSuccess?: () => void;
 };
@@ -30,155 +28,138 @@ type CheckoutProps = {
 export function Checkout({
   visible,
   onClose,
-  amount,
-  customerId,
-  teacherAccountId,
+  customer,
+  project,
   currency = "EUR",
-  teacherName,
-  projectName,
   applicationFeePercent = 0,
   onSuccess,
 }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const [isPreparing, setIsPreparing] = useState(false);
-  const [isPresenting, setIsPresenting] = useState(false);
-  const [sheetReady, setSheetReady] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const normalizedCurrency = currency.toUpperCase();
-  const amountInCents = useMemo(
-    () => Math.max(0, Math.round(amount * 100)),
-    [amount]
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
+  const stripeCustomerId = customer?.stripeAccountId;
+  const stripeProviderId = project.profile.stripeAccountId;
+  const amount = project.price ?? 0;
+  const amountInCents = Math.max(0, Math.round(amount * 100));
+  const percent = Math.max(0, applicationFeePercent);
+  const applicationFeeAmount = Math.min(
+    Math.round(amountInCents * percent),
+    amountInCents
   );
-  const applicationFeeAmount = useMemo(() => {
-    const percent = Math.max(0, applicationFeePercent);
-    const fee = Math.round(amountInCents * percent);
-    return Math.min(fee, amountInCents);
-  }, [amountInCents, applicationFeePercent]);
-  const formattedAmount = useMemo(() => {
-    const value = Number.isFinite(amount) ? amount : 0;
-    if (normalizedCurrency === "EUR") {
-      return `€${value.toFixed(2)}`;
-    }
-    return `€${value.toFixed(2)}`;
-  }, [amount, normalizedCurrency]);
+  const formattedAmount = `€${amount.toFixed(2)}`;
 
-  const resetState = useCallback(() => {
-    setIsPreparing(false);
-    setIsPresenting(false);
-    setSheetReady(false);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-  }, []);
-
-  const initializePaymentSheet = useCallback(async () => {
-    if (!visible) return;
-
-    if (!customerId) {
-      setErrorMessage(
-        "We could not find a payment profile. Visit Wallet to link a card."
-      );
-      return;
+  const fetchPaymentSheetParams = async () => {
+    if (!stripeCustomerId) {
+      throw new Error("Customer not found.");
     }
 
-    if (!teacherAccountId) {
-      setErrorMessage(
-        "This instructor still needs to finish Stripe onboarding."
-      );
-      return;
+    if (!stripeProviderId) {
+      throw new Error("Provider not found.");
     }
 
     if (amountInCents <= 0) {
-      setErrorMessage("This class does not have a valid price yet.");
-      return;
+      throw new Error("This class does not have a valid price yet.");
     }
 
-    setIsPreparing(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    setSheetReady(false);
+    const { data, error } =
+      await supabase.functions.invoke<PaymentIntentResponse>("payment", {
+        body: {
+          customer: {
+            id: customer?.id,
+            stripeAccountId: stripeCustomerId,
+          },
+          project: {
+            id: project.id,
+            stripeAccountId: stripeProviderId,
+          },
+          amount: amountInCents,
+          currency: currency.toLowerCase(),
+          applicationFeeAmount,
+        },
+      });
+
+    if (error) {
+      console.error("===> error", error.message);
+      throw new Error(error.message);
+    }
+
+    if (!data?.paymentIntent || !data.customerSessionClientSecret) {
+      throw new Error(
+        "Unable to start checkout. Missing Stripe client secrets."
+      );
+    }
+
+    return {
+      paymentIntent: data.paymentIntent,
+      customerSessionClientSecret: data.customerSessionClientSecret,
+      customer: data.customer,
+    };
+  };
+
+  const initializePaymentSheet = async () => {
+    if (!visible) return;
+
+    setLoading(true);
+    setStatusMessage(null);
 
     try {
-      const { data, error } =
-        await supabase.functions.invoke<PaymentIntentResponse>("payment", {
-          body: {
-            customerId: customerId,
-            accountId: teacherAccountId,
-            amount: amountInCents,
-            currency: normalizedCurrency.toLowerCase(),
-            applicationFeeAmount,
-          },
-        });
+      const { paymentIntent, customerSessionClientSecret } =
+        await fetchPaymentSheetParams();
+
+      const { error } = await initPaymentSheet({
+        merchantDisplayName: "DanceAI",
+        paymentIntentClientSecret: paymentIntent,
+        customerSessionClientSecret: customerSessionClientSecret,
+        returnURL: RETURN_URL,
+      });
 
       if (error) {
         throw new Error(error.message);
       }
-
-      if (!data?.paymentIntent || !data.customerSessionClientSecret) {
-        throw new Error(
-          "Unable to start checkout. Missing Stripe client secrets."
-        );
-      }
-
-      const initResult = await initPaymentSheet({
-        merchantDisplayName: "DanceAI",
-        paymentIntentClientSecret: data.paymentIntent,
-        customerSessionClientSecret: data.customerSessionClientSecret,
-        returnURL: RETURN_URL,
-      });
-
-      if (initResult.error) {
-        throw new Error(initResult.error.message);
-      }
-
-      setSheetReady(true);
     } catch (err: any) {
-      setErrorMessage(err.message ?? "Unable to prepare checkout.");
+      setStatusMessage({
+        type: "error",
+        message: err.message ?? "Unable to prepare checkout.",
+      });
     } finally {
-      setIsPreparing(false);
+      setLoading(false);
     }
-  }, [
-    applicationFeeAmount,
-    amountInCents,
-    customerId,
-    initPaymentSheet,
-    normalizedCurrency,
-    teacherAccountId,
-    visible,
-  ]);
+  };
+
+  const openPaymentSheet = async () => {
+    const { error } = await presentPaymentSheet();
+
+    if (error) {
+      setStatusMessage({
+        type: "error",
+        message: error.message ?? "Payment canceled.",
+      });
+    } else {
+      setStatusMessage({
+        type: "success",
+        message: "Payment completed!",
+      });
+      onSuccess?.();
+    }
+  };
+
+  const handleClose = () => {
+    onClose();
+    setLoading(false);
+    setStatusMessage(null);
+  };
 
   useEffect(() => {
     if (visible) {
       initializePaymentSheet();
     } else {
-      resetState();
+      setLoading(false);
+      setStatusMessage(null);
     }
-  }, [visible, initializePaymentSheet, resetState]);
-
-  const handlePresentPaymentSheet = useCallback(async () => {
-    if (!sheetReady || isPresenting) return;
-    setIsPresenting(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-
-    const { error } = await presentPaymentSheet();
-
-    if (error) {
-      setErrorMessage(error.message ?? "Payment canceled.");
-      setIsPresenting(false);
-      return;
-    }
-
-    setSuccessMessage("Payment completed!");
-    setIsPresenting(false);
-    onSuccess?.();
-  }, [isPresenting, onSuccess, presentPaymentSheet, sheetReady]);
-
-  const handleClose = useCallback(() => {
-    onClose();
-    resetState();
-  }, [onClose, resetState]);
+  }, [visible]);
 
   return (
     <Modal
@@ -187,67 +168,64 @@ export function Checkout({
       visible={visible}
       onRequestClose={handleClose}
     >
-      <Pressable style={styles.backdrop} onPress={handleClose} />
+      <Pressable style={styles.container} onPress={handleClose} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Checkout</ThemedText>
         <View style={styles.summary}>
-          {projectName && <ThemedText type="h3">{projectName}</ThemedText>}
-          {teacherName && (
-            <ThemedText color="dimmed">with {teacherName}</ThemedText>
+          {project.name && <ThemedText type="h3">{project.name}</ThemedText>}
+          {project.profile.fullName && (
+            <ThemedText color="dimmed">
+              with {project.profile.fullName}
+            </ThemedText>
           )}
           <ThemedText type="h1">{formattedAmount}</ThemedText>
         </View>
 
-        {isPreparing && (
+        {loading && (
           <View style={styles.feedbackRow}>
             <ActivityIndicator />
             <ThemedText>Connecting to Stripe…</ThemedText>
           </View>
         )}
 
-        {errorMessage && (
-          <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
-        )}
-
-        {successMessage && (
-          <ThemedText style={styles.successText}>{successMessage}</ThemedText>
+        {statusMessage && (
+          <ThemedText
+            color={statusMessage.type === "error" ? "danger" : "primary"}
+          >
+            {statusMessage.message}
+          </ThemedText>
         )}
 
         <Button
-          label={isPresenting ? "Processing…" : `Pay ${formattedAmount}`}
-          onPress={handlePresentPaymentSheet}
-          disabled={!sheetReady || isPresenting || !!successMessage}
-          style={[
-            styles.payButton,
-            (!sheetReady || isPresenting || !!successMessage) &&
-              styles.disabled,
-          ]}
+          label={`Pay ${formattedAmount}`}
+          onPress={openPaymentSheet}
+          disabled={loading || !!statusMessage}
+          style={[(loading || !!statusMessage) && styles.disabled]}
         />
         <Button
-          label={successMessage ? "Done" : "Cancel"}
+          label={statusMessage?.type === "success" ? "Done" : "Cancel"}
           onPress={handleClose}
-          style={styles.cancelButton}
         />
       </View>
     </Modal>
   );
 }
 
-const styles = StyleSheet.create((theme) => ({
-  backdrop: {
+const styles = StyleSheet.create((theme, rt) => ({
+  container: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    marginTop: rt.insets.top + theme.gap(1),
+    backgroundColor: theme.colors.background,
+    opacity: 0.95,
   },
   sheet: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: theme.gap(2),
-    paddingVertical: theme.gap(3),
-    borderTopLeftRadius: theme.gap(3),
-    borderTopRightRadius: theme.gap(3),
-    backgroundColor: theme.colors.background,
+    padding: theme.gap(2),
+    borderTopLeftRadius: theme.gap(2),
+    borderTopRightRadius: theme.gap(2),
     gap: theme.gap(2),
   },
   summary: {
@@ -258,21 +236,7 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     gap: theme.gap(1),
   },
-  errorText: {
-    color: theme.colors.alert ?? "#FF5A5F",
-  },
-  successText: {
-    color: "#2FBF71",
-  },
-  payButton: {
-    opacity: 1,
-  },
   disabled: {
     opacity: 0.5,
-  },
-  cancelButton: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#FFFFFF",
   },
 }));

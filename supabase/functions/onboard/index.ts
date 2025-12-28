@@ -1,42 +1,46 @@
-// Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@^20.1.0";
+import { z } from "npm:zod";
 
+// --- 1. Configuration & Global Clients ---
+// Initializing outside the handler enables "warm start" performance gains.
+const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
+const supabaseAdmin = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
+
+const requestSchema = z.object({
+  returnUrl: z.url(),
+});
+
+const jsonResponse = (data: object, status = 200) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+
+// --- 2. Main Handler ---
 Deno.serve(async (req: Request) => {
   try {
-    // Get authenticated user
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
-        },
-      }
-    );
+    // A. Authenticate User
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return jsonResponse({ error: "Missing auth header" }, 401);
 
-    // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
-
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
     const {
       data: { user },
-    } = await supabaseClient.auth.getUser(token!);
+      error: authError,
+    } = await supabaseAdmin.auth.getUser(authHeader.replace("Bearer ", ""));
 
-    if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    if (authError || !user) return jsonResponse({ error: "Unauthorized" }, 401);
 
-    // Parse request body
-    const { returnUrl } = await req.json();
+    // B. Validate Input
+    const body = await req.json().catch(() => ({}));
+    const { returnUrl } = requestSchema.parse(body);
 
-    // Get Stripe account
-    const { data: profile } = await supabaseClient
+    // C. Get Stripe Account ID from Profile
+    const { data: profile, error: dbError } = await supabaseAdmin
       .from("profiles")
       .select("stripe_account_id")
       .eq("id", user.id)
@@ -44,19 +48,16 @@ Deno.serve(async (req: Request) => {
 
     const accountId = profile?.stripe_account_id;
 
-    if (!accountId) {
-      return new Response(
-        JSON.stringify({
-          error: "Stripe account not found. Please sign up first.",
-        }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        }
+    if (dbError || !accountId) {
+      return jsonResponse(
+        { error: "Stripe account not found. Please sign up first." },
+        404
       );
     }
 
-    // Update account with merchant and recipient configurations
+    // D. Stripe Operations
+    // We update the account details and then generate the onboarding link.
+    // Note: Using the Stripe V2 syntax as per your requirement.
     await stripe.v2.core.accounts.update(accountId, {
       display_name: user.email,
       dashboard: "express",
@@ -66,28 +67,17 @@ Deno.serve(async (req: Request) => {
           losses_collector: "application",
         },
       },
-      identity: {
-        country: "FI",
-      },
+      identity: { country: "FI" },
       configuration: {
-        merchant: {
-          capabilities: {
-            card_payments: { requested: true },
-          },
-        },
+        merchant: { capabilities: { card_payments: { requested: true } } },
         recipient: {
           capabilities: {
-            stripe_balance: {
-              stripe_transfers: {
-                requested: true,
-              },
-            },
+            stripe_balance: { stripe_transfers: { requested: true } },
           },
         },
       },
     });
 
-    // Create Account Link for onboarding
     const accountLink = await stripe.v2.core.accountLinks.create({
       account: accountId,
       use_case: {
@@ -100,15 +90,15 @@ Deno.serve(async (req: Request) => {
       },
     });
 
-    return new Response(JSON.stringify({ url: accountLink.url }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ url: accountLink.url });
   } catch (err: any) {
-    console.error("Error onboarding:", err.message);
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Onboarding Error:", err.message);
+
+    // Check if error is from Zod validation
+    if (err instanceof z.ZodError) {
+      return jsonResponse({ error: "Invalid returnUrl" }, 400);
+    }
+
+    return jsonResponse({ error: err.message || "Internal Server Error" }, 500);
   }
 });

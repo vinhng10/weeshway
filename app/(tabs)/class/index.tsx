@@ -33,7 +33,8 @@ function ClassesContent() {
             *, 
             profile:profiles(*), 
             song:songs(*), 
-            location:locations(*)
+            location:locations(*),
+            bookings:bookings(*)
           )`
         )
         .eq("user_id", profile?.id)
@@ -62,7 +63,7 @@ function ClassesContent() {
   } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
     queryKey: ["classes", "projects", status, style, level],
     tableName: "projects",
-    columns: `*, profile:profiles(*), song:songs(*)`,
+    columns: `*, profile:profiles(*), song:songs(*), bookings:bookings(*)`,
     pageSize: 10,
     trailingQuery: (query) => {
       query = query.gte("start_at", new Date().toISOString());

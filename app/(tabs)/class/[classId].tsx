@@ -12,11 +12,12 @@ import {
 } from "@/components/input";
 import { LocationInput } from "@/components/input/location-input";
 import { ThemedText } from "@/components/themed-text";
-import { ProjectStatusEnum } from "@/constants";
+import { ProjectStatusEnum, StripePaymentStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
@@ -26,13 +27,21 @@ function ClassContent() {
   const { classId } = useLocalSearchParams<{ classId: string }>();
   const profile = useAuth((state) => state.profile);
   const [isCheckoutVisible, setIsCheckoutVisible] = React.useState(false);
+  const queryClient = useQueryClient();
 
   const { data } = useSuspenseQuery<ProjectEnrichedType>({
     queryKey: ["projects", classId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select(`*, profile:profiles(*), song:songs(*), location:locations(*)`)
+        .select(
+          `*, 
+          profile:profiles(*), 
+          song:songs(*), 
+          location:locations(*), 
+          bookings:bookings(*)
+        `
+        )
         .eq("id", classId)
         .single();
 
@@ -41,7 +50,13 @@ function ClassContent() {
     },
   });
 
-  const handleBook = React.useCallback(() => {
+  const booked = data.bookings.some(
+    (booking) =>
+      booking.userId === profile?.id &&
+      booking.status === StripePaymentStatusEnum.Succeeded
+  );
+
+  const handleBook = () => {
     if (!profile?.stripeAccountId) {
       Alert.alert(
         "Add a payment method",
@@ -50,7 +65,7 @@ function ClassContent() {
       return;
     }
 
-    if (!data.profile?.stripeAccountId) {
+    if (!data.profile.stripeAccountId) {
       Alert.alert(
         "Instructor unavailable",
         "This instructor still needs to finish setting up payouts."
@@ -67,7 +82,7 @@ function ClassContent() {
     }
 
     setIsCheckoutVisible(true);
-  }, [data.price, data.profile?.stripeAccountId, profile?.stripeAccountId]);
+  };
 
   const handleWish = async () => {};
 
@@ -112,7 +127,7 @@ function ClassContent() {
           />
           <IntBoxInput
             label="Spots"
-            value={`${data.spots ?? 0}`}
+            value={`${data.bookings.length} / ${data.spots ?? 0}`}
             editable={false}
           />
         </View>
@@ -143,23 +158,27 @@ function ClassContent() {
       </ScrollView>
 
       {/* Button */}
-
       <Button
         stickyBottom
         label={data.status === ProjectStatusEnum.Release ? "Book" : "Wish"}
         onPress={
           data.status === ProjectStatusEnum.Release ? handleBook : handleWish
         }
+        disabled={booked}
       />
+
       <Checkout
-        visible={isCheckoutVisible}
-        onClose={() => setIsCheckoutVisible(false)}
-        onSuccess={() => setIsCheckoutVisible(false)}
-        amount={data.price ?? 0}
-        customerId={profile?.stripeAccountId}
-        teacherAccountId={data.profile?.stripeAccountId}
-        teacherName={data.profile.fullName}
-        projectName={data.name}
+        visible={isCheckoutVisible && !booked}
+        onClose={async () => {
+          setIsCheckoutVisible(false);
+          await queryClient.invalidateQueries({ queryKey: ["projects"] });
+        }}
+        onSuccess={async () => {
+          setIsCheckoutVisible(false);
+          await queryClient.invalidateQueries({ queryKey: ["projects"] });
+        }}
+        customer={profile}
+        project={data}
         currency="EUR"
         applicationFeePercent={0.1}
       />

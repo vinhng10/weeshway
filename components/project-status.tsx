@@ -1,10 +1,10 @@
 import { Chip } from "@/components/chip";
 import { IconSymbolName } from "@/components/ui/icon-symbol";
 import { ProjectStatusEnum } from "@/constants";
-import { ProjectType } from "@/types";
+import { ProjectEnrichedType } from "@/types";
 
 interface ProjectStatusProps {
-  data: ProjectType;
+  data: ProjectEnrichedType;
 }
 
 export function ProjectStatus({ data }: ProjectStatusProps) {
@@ -18,7 +18,7 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
       break;
     case ProjectStatusEnum.Release:
       icon = "person.fill";
-      label = `5 | ${data.spots}`;
+      label = `${data.bookings.length} | ${data.spots}`;
       break;
   }
 

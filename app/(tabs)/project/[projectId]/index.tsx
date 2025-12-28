@@ -113,9 +113,7 @@ function ProjectContent() {
       if (error) throw error;
 
       // Invalidate and refetch the project query
-      await queryClient.invalidateQueries({
-        queryKey: ["projects"],
-      });
+      await queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       // Navigate back to projects list
       router.push(`/(tabs)/project/`);

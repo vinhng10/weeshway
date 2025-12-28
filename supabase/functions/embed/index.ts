@@ -1,191 +1,138 @@
-// Setup type definitions for built-in Supabase Runtime APIs
 import postgres from "https://deno.land/x/postgresjs@v3.4.5/mod.js";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { z } from "npm:zod";
 
-// Initialize Postgres client
-const sql = postgres(
-  // `SUPABASE_DB_URL` is a built-in environment variable
-  Deno.env.get("SUPABASE_DB_URL")!
-);
+// --- 1. Configuration & Clients ---
+const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
+const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET_KEY");
+const QUEUE_NAME = "embedding_jobs";
+const CONCURRENCY_LIMIT = 4;
 
 const jobSchema = z.object({
   jobId: z.number(),
   id: z.string(),
 });
-
 const failedJobSchema = jobSchema.extend({
   error: z.string(),
 });
-
 type Job = z.infer<typeof jobSchema>;
 type FailedJob = z.infer<typeof failedJobSchema>;
 
-type Row = {
-  id: string;
-  preview_url: string;
-};
+const jsonResponse = (data: object, status = 200, headers = {}) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json", ...headers },
+  });
 
-const QUEUE_NAME = "embedding_jobs";
+// --- 2. Core Logic Helpers ---
+/**
+ * Generates an embedding for a given URL.
+ */
+async function generateEmbedding(url: string): Promise<number[]> {
+  // Simulate API latency
+  await new Promise((r) => setTimeout(r, 1000));
+  return Array.from({ length: 2 }, () =>
+    Number((Math.random() * 2 - 1).toFixed(2))
+  );
+}
 
-// Listen for HTTP requests
-Deno.serve(async (req: Request) => {
-  if (
-    req.headers.get("X-Internal-Secret-Key") !==
-    Deno.env.get("INTERNAL_SECRET_KEY")
-  ) {
-    return new Response("forbidden", { status: 403 });
+/**
+ * Atomic operation for a single job
+ */
+async function processJob(job: z.infer<typeof jobSchema>) {
+  return await sql.begin(async (sql) => {
+    // 1. Fetch song data
+    const [song] = await sql`
+      SELECT id, preview_url FROM public.songs WHERE id = ${job.id} FOR UPDATE
+    `;
+
+    if (!song) throw new Error(`Song ${job.id} not found`);
+
+    // 2. Generate embedding (External Call)
+    const embedding = await generateEmbedding(song.preview_url);
+
+    // 3. Find centroid & Update song in one go (if your SQL logic allows)
+    // We can use a subquery or a CTE to minimize round trips
+    await sql`
+      WITH nearest AS (
+        SELECT util.find_nearest_centroid(${JSON.stringify(embedding)}) as cid
+      )
+      UPDATE public.songs
+      SET 
+        embedding = ${JSON.stringify(embedding)},
+        centroid_id = (SELECT cid FROM nearest)
+      WHERE id = ${job.id}
+    `;
+
+    // 4. Cleanup queue
+    await sql`SELECT util.dequeue_embeddings(${QUEUE_NAME}, ${job.jobId})`;
+
+    return job;
+  });
+}
+
+// --- 3. Main Handler ---
+Deno.serve(async (req) => {
+  // Guard Clauses
+  if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
+    return new Response("Unauthorized", { status: 403 });
   }
-
   if (req.method !== "POST") {
-    return new Response("expected POST request", { status: 405 });
-  }
-
-  if (req.headers.get("Content-Type") !== "application/json") {
-    return new Response("expected JSON body", { status: 400 });
-  }
-
-  // Use Zod to parse and validate the request body
-  const parseResult = z.array(jobSchema).safeParse(await req.json());
-
-  if (parseResult.error) {
-    return new Response(`invalid request body: ${parseResult.error.message}`, {
-      status: 400,
-    });
-  }
-
-  const pendingJobs = parseResult.data;
-
-  // Track jobs that completed successfully
-  const completedJobs: Job[] = [];
-
-  // Track jobs that failed due to an error
-  const failedJobs: FailedJob[] = [];
-
-  async function processJobs() {
-    let currentJob: Job | undefined;
-
-    while ((currentJob = pendingJobs.shift()) !== undefined) {
-      try {
-        await processJob(currentJob);
-        completedJobs.push(currentJob);
-      } catch (error) {
-        failedJobs.push({
-          ...currentJob,
-          error: error instanceof Error ? error.message : JSON.stringify(error),
-        });
-      }
-    }
+    return new Response("Method Not Allowed", { status: 405 });
   }
 
   try {
-    // Process jobs while listening for worker termination
-    await Promise.race([processJobs(), catchUnload()]);
-  } catch (error) {
-    // If the worker is terminating (e.g. wall clock limit reached),
-    // add pending jobs to fail list with termination reason
-    failedJobs.push(
-      ...pendingJobs.map((job: Job) => ({
-        ...job,
-        error: error instanceof Error ? error.message : JSON.stringify(error),
-      }))
-    );
-  }
+    const rawBody = await req.json().catch(() => []);
+    const result = z.array(jobSchema).safeParse(rawBody);
 
-  // Log completed and failed jobs for traceability
-  console.log("finished processing jobs:", {
-    completedJobs: completedJobs.length,
-    failedJobs: failedJobs.length,
-  });
+    if (!result.success) {
+      return jsonResponse({ error: result.error.format() }, 400);
+    }
 
-  return new Response(
-    JSON.stringify({
-      completedJobs,
-      failedJobs,
-    }),
-    {
-      // 200 OK response
-      status: 200,
+    const pendingJobs = result.data;
+    const completedJobs: Job[] = [];
+    const failedJobs: FailedJob[] = [];
 
-      // Custom headers to report job status
-      headers: {
-        "Content-Type": "application/json",
+    const worker = async () => {
+      let job: Job | undefined;
+      while ((job = pendingJobs.shift()) !== undefined) {
+        try {
+          await processJob(job);
+          completedJobs.push(job);
+        } catch (err: any) {
+          failedJobs.push({ ...job, error: err.message });
+        }
+      }
+    };
+
+    // Run workers in parallel
+    await Promise.race([
+      Promise.all(Array(CONCURRENCY_LIMIT).fill(null).map(worker)),
+      new Promise((_, reject) => {
+        addEventListener("beforeunload", () =>
+          reject(new Error("Worker terminating"))
+        );
+      }),
+    ]).catch(() => {
+      // Catch remaining jobs if termination occurs
+      pendingJobs.forEach((j) =>
+        failedJobs.push({ ...j, error: "Termination" })
+      );
+    });
+
+    return jsonResponse(
+      {
+        completed: completedJobs.length,
+        failed: failedJobs.length,
+        details: { completedJobs, failedJobs },
+      },
+      200,
+      {
         "X-Completed-Jobs": completedJobs.length.toString(),
         "X-Failed-Jobs": failedJobs.length.toString(),
-      },
-    }
-  );
-});
-
-/**
- * Generates an embedding for the given text.
- */
-async function generateEmbedding(url: string) {
-  // simulate async embedding generation
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // dummy random vector of size 2, each rounded to 2 decimals
-  const n1 = Math.random() * 2 - 1;
-  const n2 = Math.random() * 2 - 1;
-  return [Number(n1.toFixed(2)), Number(n2.toFixed(2))];
-}
-
-/**
- * Processes an embedding job.
- */
-async function processJob(job: Job) {
-  const { jobId, id } = job;
-
-  // Fetch song data from the public.songs
-  const [row]: [Row] = await sql`
-    select
-      id,
-      preview_url
-    from
-      public.songs
-    where
-      id = ${id}
-  `;
-
-  if (!row) {
-    throw new Error(`row not found: public.songs/${id}`);
+      }
+    );
+  } catch (err: any) {
+    return jsonResponse({ error: err.message }, 500);
   }
-
-  // Generate embedding from the song url
-  const embedding = await generateEmbedding(row.preview_url);
-
-  // Find nearest cluster centroid
-  const [result] = await sql`
-    select util.find_nearest_centroid(${JSON.stringify(
-      embedding
-    )}) as centroid_id
-  `;
-  const centroidId = result.centroid_id ? Number(result.centroid_id) : null;
-
-  // Update the song row with the embedding and nearest centroid
-  await sql`
-    update
-      public.songs
-    set
-      embedding = ${JSON.stringify(embedding)},
-      centroid_id = ${centroidId}
-    where
-      id = ${id}
-  `;
-
-  // Dequeue the job
-  await sql`
-    select util.dequeue_embeddings(${QUEUE_NAME}, ${jobId}::bigint)
-  `;
-}
-
-/**
- * Returns a promise that rejects if the worker is terminating.
- */
-function catchUnload() {
-  return new Promise((reject) => {
-    addEventListener("beforeunload", (ev: any) => {
-      reject(new Error(ev.detail?.reason));
-    });
-  });
-}
+});

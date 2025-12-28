@@ -1,5 +1,6 @@
 import {
   LevelEnum,
+  StripePaymentStatusEnum,
   ProjectStatusEnum,
   StyleEnum,
   WishStatusEnum,
@@ -22,7 +23,7 @@ export type ProfileType = {
   bio?: string;
   avatarUrl?: string;
   videoUrls?: string[];
-  stripeAccountId?: string;
+  stripeAccountId: string;
 };
 
 export type ItemType = {
@@ -78,6 +79,15 @@ export type RecommendationType = {
   score: number;
 };
 
+export type BookingType = {
+  id: number;
+  createdAt: Date;
+  userId: string;
+  projectId: number;
+  stripePaymentIntentId: string;
+  status: StripePaymentStatusEnum;
+};
+
 // Utility type: WishType with song_id replaced by joined songs relation
 export type WishEnrichedType = WishType & {
   song: SongType;
@@ -92,6 +102,7 @@ export type ProjectEnrichedType = ProjectType & {
   profile: ProfileType;
   song: SongType;
   location?: LocationType;
+  bookings: BookingType[];
 };
 
 export type ProfileEnrichedType = ProfileType & {

@@ -391,3 +391,9 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/payment/deno.json"
 entrypoint = "./functions/payment/index.ts"
+
+[functions.webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/webhook/deno.json"
+entrypoint = "./functions/webhook/index.ts"

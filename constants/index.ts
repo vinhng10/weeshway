@@ -44,6 +44,12 @@ export enum ProjectStatusEnum {
   Cancel = "Cancel",
 }
 
+export enum StripePaymentStatusEnum {
+  Succeeded = "Succeeded",
+  Processing = "Processing",
+  Failed = "Failed",
+}
+
 export enum WishStatusEnum {
   ClassAvailable = "Class available",
   Granted = "Granted",
