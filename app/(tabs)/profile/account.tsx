@@ -17,7 +17,6 @@ import { StyleSheet } from "react-native-unistyles";
 export default function Account() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
-  const session = useAuth((state) => state.session);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
 
   const [username, setUsername] = useState(profile?.username || "");
@@ -202,9 +201,9 @@ export default function Account() {
       </ScrollView>
 
       <Button
-        label={isSaving ? "Saving..." : "Save Changes"}
+        label={"Save Changes"}
         onPress={handleSave}
-        disabled={isSaving}
+        loading={isSaving}
         stickyBottom
       />
     </View>

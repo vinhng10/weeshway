@@ -192,9 +192,9 @@ export default function CreateProject() {
 
       {/* Create Button */}
       <Button
-        label={isCreating ? "Creating..." : "Create"}
+        label={"Create"}
         onPress={handleCreate}
-        disabled={isCreating}
+        loading={isCreating}
         stickyBottom
       />
     </View>

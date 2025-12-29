@@ -250,7 +250,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
           stickyBottom
           label={"Add"}
           onPress={handleAddNewLocation}
-          disabled={isSaving}
+          loading={isSaving}
         />
       </Modal>
     </>

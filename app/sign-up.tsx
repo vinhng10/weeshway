@@ -97,10 +97,10 @@ export default function CreateAccountScreen() {
         />
 
         <Button
-          label={loading ? "Creating Account..." : "Create Account"}
+          label={"Create Account"}
           onPress={handleSignUp}
           style={[styles.button]}
-          disabled={loading}
+          loading={loading}
         />
 
         <View style={styles.signin}>

@@ -71,10 +71,10 @@ export default function SignIn() {
         />
 
         <Button
-          label={loading ? "Signing In..." : "Sign In"}
+          label={"Sign In"}
           onPress={handleSignIn}
           style={[styles.button]}
-          disabled={loading}
+          loading={loading}
         />
 
         <View style={styles.signup}>

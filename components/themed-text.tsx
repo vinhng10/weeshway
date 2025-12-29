@@ -21,7 +21,6 @@ export const styles = StyleSheet.create((theme) => ({
     fontFamily: theme.fontFamily,
   },
   color: {
-    color: theme.colors.typography,
     variants: {
       color: {
         default: {
@@ -35,6 +34,9 @@ export const styles = StyleSheet.create((theme) => ({
         },
         danger: {
           color: theme.colors.danger,
+        },
+        dark: {
+          color: theme.colors.background,
         },
       },
       type: {

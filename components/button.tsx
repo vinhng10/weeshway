@@ -1,10 +1,16 @@
-import { Pressable, PressableProps, type ViewProps } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  PressableProps,
+  type ViewProps,
+} from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 import { ThemedText } from "./themed-text";
 
 export type ButtonProps = {
   label: string;
   onPress(): void;
+  loading?: boolean;
 } & ViewProps &
   PressableProps &
   UnistylesVariants<typeof styles>;
@@ -12,21 +18,31 @@ export type ButtonProps = {
 export const Button: React.FunctionComponent<ButtonProps> = ({
   label,
   onPress,
+  outlined,
   stickyBottom,
+  loading,
   style,
   ...rest
 }) => {
-  styles.useVariants({ stickyBottom });
+  styles.useVariants({ outlined, stickyBottom });
 
   return (
     <Pressable
-      style={[styles.button, styles.position, style]}
+      style={[styles.button, styles.position, styles.type, style]}
       onPress={onPress}
+      disabled={rest.disabled || loading}
       {...rest}
     >
-      <ThemedText type="h4" style={styles.label}>
-        {label}
-      </ThemedText>
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color={outlined ? "#FFFFFF" : "#0C0C0C"}
+        />
+      ) : (
+        <ThemedText type="h4" style={styles.label}>
+          {label}
+        </ThemedText>
+      )}
     </Pressable>
   );
 };
@@ -38,10 +54,10 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: theme.gap(2),
-    backgroundColor: "#FFFFFF",
   },
   position: {
     variants: {
+      outlined: { true: {} },
       stickyBottom: {
         true: {
           width: "70%",
@@ -52,7 +68,32 @@ const styles = StyleSheet.create((theme) => ({
       },
     },
   },
+  type: {
+    variants: {
+      outlined: {
+        true: {
+          backgroundColor: theme.colors.background,
+          borderWidth: theme.gap(0.4),
+          borderColor: theme.colors.activeTint,
+        },
+        default: {
+          backgroundColor: theme.colors.activeTint,
+        },
+      },
+      stickyBottom: { true: {} },
+    },
+  },
   label: {
-    color: "#000000",
+    variants: {
+      outlined: {
+        true: {
+          color: theme.colors.activeTint,
+        },
+        default: {
+          color: theme.colors.background,
+        },
+      },
+      stickyBottom: { true: {} },
+    },
   },
 }));

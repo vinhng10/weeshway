@@ -20,7 +20,7 @@ export function Boundary({ children }: { children: React.ReactNode }) {
           <Suspense
             fallback={
               <View style={styles.container}>
-                <ActivityIndicator size="large" />
+                <ActivityIndicator size="large" color="#FFFFFF"/>
               </View>
             }
           >

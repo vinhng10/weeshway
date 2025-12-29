@@ -98,15 +98,15 @@ function WalletContent() {
       >
         {onboardingComplete ? (
           <Button
-            label={isLaunching ? "Redirecting..." : "Stripe Dashboard"}
+            label={"Stripe Dashboard"}
             onPress={handleOpenDashboard}
-            disabled={isLaunching}
+            loading={isLaunching}
           />
         ) : (
           <Button
-            label={isLaunching ? "Redirecting..." : "Onboarding"}
+            label={"Onboarding"}
             onPress={handleStartOnboarding}
-            disabled={isLaunching}
+            loading={isLaunching}
           />
         )}
       </ScrollView>

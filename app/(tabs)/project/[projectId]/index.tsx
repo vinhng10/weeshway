@@ -210,9 +210,9 @@ function ProjectContent() {
       {/* Save Changes Buttons */}
       <View style={[styles.buttonContainer, styles.row]}>
         <Button
-          label={isSaving ? "Saving..." : "Save Changes"}
+          label={"Save Changes"}
           onPress={handleSave}
-          disabled={isSaving}
+          loading={isSaving}
           style={styles.saveButton}
         />
         <Button

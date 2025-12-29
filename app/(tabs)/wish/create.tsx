@@ -117,9 +117,9 @@ export default function MakeAWish() {
       </KeyboardAwareScrollView>
 
       <Button
-        label={isCreating ? "Creating..." : "Create"}
+        label={"Create"}
         onPress={handleCreate}
-        disabled={isCreating}
+        loading={isCreating}
         stickyBottom
       />
     </View>
