@@ -1,12 +1,14 @@
 import { Button } from "@/components/button";
 import { ThemedText } from "@/components/themed-text";
 import { RETURN_URL } from "@/constants";
+import { useLocales } from "@/hooks/useLocales";
 import { supabase } from "@/supabase";
 import { ProfileType, ProjectEnrichedType } from "@/types";
 import { useStripe } from "@stripe/stripe-react-native";
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { useShallow } from "zustand/react/shallow";
 
 type PaymentIntentResponse = {
   paymentIntentClientSecret: string;
@@ -18,8 +20,6 @@ type CheckoutProps = {
   onExit: () => void;
   customer: ProfileType | null;
   project: ProjectEnrichedType;
-  currency?: string;
-  applicationFeePercent?: number;
 };
 
 export function Checkout({
@@ -27,10 +27,14 @@ export function Checkout({
   onExit,
   customer,
   project,
-  currency = "EUR",
-  applicationFeePercent = 0,
 }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { formatMoney, currency } = useLocales(
+    useShallow((state) => ({
+      formatMoney: state.formatMoney,
+      currency: state.currency,
+    }))
+  );
 
   // States to manage separate stages
   const [loading, setLoading] = useState(false);
@@ -41,17 +45,10 @@ export function Checkout({
   const stripeCustomerId = customer?.stripeAccountId;
   const stripeProviderId = project.profile.stripeAccountId;
   const amount = project.price ?? 0;
-  const totalAmount = amount + 0.5;
-  const amountInCents = Math.max(0, Math.round(totalAmount * 100));
-  const applicationFeeAmount = Math.min(
-    Math.round(amountInCents * Math.max(0, applicationFeePercent)),
-    amountInCents
-  );
-  const formattedAmount = `€${amount.toFixed(2)}`;
-  const formattedTotalAmount = `€${totalAmount.toFixed(2)}`;
+  const totalAmount = amount + 50;
 
   const fetchPaymentSheetParams = async () => {
-    if (!stripeCustomerId || !stripeProviderId || amountInCents <= 0) {
+    if (!stripeCustomerId || !stripeProviderId || amount <= 0) {
       throw new Error("Error occurred. Please try again.");
     }
 
@@ -59,16 +56,15 @@ export function Checkout({
       await supabase.functions.invoke<PaymentIntentResponse>("payment", {
         body: {
           customer: {
-            id: customer?.id,
+            id: customer.id,
             stripeAccountId: stripeCustomerId,
           },
           project: {
             id: project.id,
             stripeAccountId: stripeProviderId,
           },
-          amount: amountInCents,
-          currency: currency.toLowerCase(),
-          applicationFeeAmount,
+          amount: totalAmount,
+          currency: currency,
         },
       });
 
@@ -174,8 +170,8 @@ export function Checkout({
             </ThemedText>
           )}
           <View style={styles.amountRow}>
-            <ThemedText type="h1">{formattedAmount}</ThemedText>
-            <ThemedText color="dimmed">+ €{(0.5).toFixed(2)} fee</ThemedText>
+            <ThemedText type="h1">{formatMoney(amount)}</ThemedText>
+            <ThemedText color="dimmed">+ {formatMoney(50)} fee</ThemedText>
           </View>
         </View>
 
@@ -185,7 +181,7 @@ export function Checkout({
         )}
 
         <Button
-          label={`Pay ${formattedTotalAmount}`}
+          label={`Pay ${formatMoney(totalAmount)}`}
           onPress={handlePay}
           loading={loading}
           disabled={successMessage !== null}

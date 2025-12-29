@@ -5,7 +5,6 @@ import { z } from "npm:zod";
 
 // --- 1. Configuration & Clients ---
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")!;
-const STRIPE_PUBLISHABLE_KEY = Deno.env.get("STRIPE_PUBLISHABLE_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -17,7 +16,6 @@ const requestSchema = z.object({
   project: z.object({ id: z.number(), stripeAccountId: z.string() }),
   amount: z.number().positive(),
   currency: z.string().length(3),
-  applicationFeeAmount: z.number().nonnegative(),
 });
 
 // --- 2. Helper Utilities ---
@@ -75,7 +73,7 @@ Deno.serve(async (req) => {
         ? stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id)
         : stripe.paymentIntents.create({
             amount,
-            currency,
+            currency: currency.toLowerCase(),
             customer_account: customer.stripeAccountId,
             automatic_payment_methods: { enabled: true },
             application_fee_amount: applicationFeeAmount,

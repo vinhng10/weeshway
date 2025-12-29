@@ -3,12 +3,14 @@ import { Button } from "@/components/button";
 import { Checkout } from "@/components/checkout";
 import { Chip } from "@/components/chip";
 import { IconButton } from "@/components/icon-button";
+import { formatDate, formatTime } from "@/components/input";
 import { ProjectStatus } from "@/components/project-status";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ProjectStatusEnum, StripePaymentStatusEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocales } from "@/hooks/useLocales";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
@@ -18,7 +20,6 @@ import React from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
-import { formatDate, formatTime } from "./input";
 
 interface CardProps {
   data: ProjectEnrichedType;
@@ -34,6 +35,7 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
       toggle: state.toggle,
     }))
   );
+  const formatMoney = useLocales((state) => state.formatMoney);
   const booked = data.bookings.some(
     (booking) =>
       booking.userId === profile?.id &&
@@ -113,7 +115,7 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
                   />
                   <ThemedText>{data.location?.name}</ThemedText>
                 </View>
-                <ThemedText>${data.price?.toFixed(2)}</ThemedText>
+                <ThemedText>{formatMoney(data.price)}</ThemedText>
               </View>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
@@ -171,8 +173,6 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
         onExit={handleCheckoutExit}
         customer={profile}
         project={data}
-        currency="EUR"
-        applicationFeePercent={0.1}
       />
     </Pressable>
   );

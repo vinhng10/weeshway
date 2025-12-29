@@ -12,6 +12,7 @@ const supabaseAdmin = createClient(
 );
 
 const requestSchema = z.object({
+  country: z.string(),
   returnUrl: z.url(),
 });
 
@@ -37,7 +38,7 @@ Deno.serve(async (req: Request) => {
 
     // B. Validate Input
     const body = await req.json().catch(() => ({}));
-    const { returnUrl } = requestSchema.parse(body);
+    const { country, returnUrl } = requestSchema.parse(body);
 
     // C. Get Stripe Account ID from Profile
     const { data: profile, error: dbError } = await supabaseAdmin
@@ -67,7 +68,7 @@ Deno.serve(async (req: Request) => {
           losses_collector: "application",
         },
       },
-      identity: { country: "FI" },
+      identity: { country },
       configuration: {
         merchant: { capabilities: { card_payments: { requested: true } } },
         recipient: {

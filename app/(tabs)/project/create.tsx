@@ -12,6 +12,7 @@ import { SongSearch } from "@/components/song-search";
 import { Tile } from "@/components/tile";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocales } from "@/hooks/useLocales";
 import { supabase } from "@/supabase";
 import { LocationType, SongType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ import { StyleSheet } from "react-native-unistyles";
 export default function CreateProject() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const currency = useLocales((state) => ({ currency: state.currency }));
   const queryClient = useQueryClient();
 
   // Initialize state with project data or defaults
@@ -86,6 +88,7 @@ export default function CreateProject() {
           start_at: startAt,
           end_at: endAt,
           location_id: location?.id,
+          currency: currency,
         },
       });
 

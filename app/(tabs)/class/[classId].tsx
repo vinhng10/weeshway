@@ -14,6 +14,7 @@ import { LocationInput } from "@/components/input/location-input";
 import { ThemedText } from "@/components/themed-text";
 import { ProjectStatusEnum, StripePaymentStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocales } from "@/hooks/useLocales";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
@@ -28,6 +29,7 @@ function ClassContent() {
   const profile = useAuth((state) => state.profile);
   const [visible, setVisible] = React.useState(false);
   const queryClient = useQueryClient();
+  const formatMoney = useLocales((state) => state.formatMoney);
 
   const { data } = useSuspenseQuery<ProjectEnrichedType>({
     queryKey: ["classes", classId],
@@ -107,7 +109,7 @@ function ClassContent() {
         <View style={styles.row}>
           <FloatBoxInput
             label="Price"
-            value={`€${data.price?.toFixed(2) ?? "0.00"}`}
+            value={formatMoney(data.price)}
             editable={false}
           />
           <IntBoxInput
@@ -163,8 +165,6 @@ function ClassContent() {
         onExit={handleCheckoutExit}
         customer={profile}
         project={data}
-        currency="EUR"
-        applicationFeePercent={0.1}
       />
     </View>
   );

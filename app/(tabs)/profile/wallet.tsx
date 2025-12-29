@@ -3,6 +3,7 @@ import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { RETURN_URL } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocales } from "@/hooks/useLocales";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
 import * as WebBrowser from "expo-web-browser";
@@ -18,6 +19,7 @@ function WalletContent() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const [isLaunching, setIsLaunching] = useState(false);
+  const country = useLocales((state) => state.country);
 
   const { data: onboardingComplete, refetch } = useSuspenseQuery<boolean>({
     queryKey: ["profile", "stripe", profile?.id],
@@ -34,7 +36,7 @@ function WalletContent() {
       const { data, error } = await supabase.functions.invoke<StripeResponse>(
         "onboard",
         {
-          body: { returnUrl: RETURN_URL },
+          body: { country, returnUrl: RETURN_URL },
         }
       );
 
