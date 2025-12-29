@@ -5,7 +5,7 @@ import { supabase } from "@/supabase";
 import { ProfileType, ProjectEnrichedType } from "@/types";
 import { useStripe } from "@stripe/stripe-react-native";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Modal, Pressable, View } from "react-native";
+import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type PaymentIntentResponse = {
@@ -31,33 +31,28 @@ export function Checkout({
   applicationFeePercent = 0,
 }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
+
+  // States to manage separate stages
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{
-    type: "error" | "success";
-    message: string;
-  } | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const stripeCustomerId = customer?.stripeAccountId;
   const stripeProviderId = project.profile.stripeAccountId;
   const amount = project.price ?? 0;
-  const amountInCents = Math.max(0, Math.round(amount * 100));
-  const percent = Math.max(0, applicationFeePercent);
+  const totalAmount = amount + 0.5;
+  const amountInCents = Math.max(0, Math.round(totalAmount * 100));
   const applicationFeeAmount = Math.min(
-    Math.round(amountInCents * percent),
+    Math.round(amountInCents * Math.max(0, applicationFeePercent)),
     amountInCents
   );
   const formattedAmount = `€${amount.toFixed(2)}`;
+  const formattedTotalAmount = `€${totalAmount.toFixed(2)}`;
 
   const fetchPaymentSheetParams = async () => {
-    if (!stripeCustomerId) {
-      throw new Error("Customer not found.");
-    }
-
-    if (!stripeProviderId) {
-      throw new Error("Provider not found.");
-    }
-
-    if (amountInCents <= 0) {
-      throw new Error("This class does not have a valid price yet.");
+    if (!stripeCustomerId || !stripeProviderId || amountInCents <= 0) {
+      throw new Error("Error occurred. Please try again.");
     }
 
     const { data, error } =
@@ -77,25 +72,21 @@ export function Checkout({
         },
       });
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    if (!data?.paymentIntentClientSecret || !data.customerSessionClientSecret) {
-      throw new Error(
-        "Unable to start checkout. Missing Stripe client secrets."
-      );
+    if (
+      error ||
+      !data?.paymentIntentClientSecret ||
+      !data.customerSessionClientSecret
+    ) {
+      throw new Error("Error occurred. Please try again.");
     }
 
     return data;
   };
 
   const initializePaymentSheet = async () => {
-    if (!visible) return;
-
+    setErrorMessage(null);
+    setSuccessMessage(null);
     setLoading(true);
-    setStatusMessage(null);
-
     try {
       const { paymentIntentClientSecret, customerSessionClientSecret } =
         await fetchPaymentSheetParams();
@@ -110,93 +101,96 @@ export function Checkout({
       if (error) {
         throw new Error(error.message);
       }
+
+      setIsInitialized(true);
+      return true;
     } catch (err: any) {
-      setStatusMessage({
-        type: "error",
-        message: err.message ?? "Unable to prepare checkout.",
-      });
+      setErrorMessage("Error occurred. Please try again.");
+      setIsInitialized(false);
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const openPaymentSheet = async () => {
-    const { error } = await presentPaymentSheet();
+  const handlePay = async () => {
+    if (loading) return;
 
-    if (error) {
-      setStatusMessage({
-        type: "error",
-        message: error.message ?? "Payment canceled.",
-      });
-    } else {
-      setStatusMessage({
-        type: "success",
-        message: "Payment completed!",
-      });
-      onExit();
+    if (!isInitialized) {
+      const ok = await initializePaymentSheet();
+      if (!ok) return;
     }
-  };
 
-  const handleClose = () => {
-    onExit();
-    setLoading(false);
-    setStatusMessage(null);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setLoading(true);
+    try {
+      const { error } = await presentPaymentSheet();
+
+      if (error) {
+        setErrorMessage(
+          `Payment ${error.code.toLowerCase()}. Please try again.`
+        );
+        return;
+      }
+
+      setErrorMessage(null);
+      setSuccessMessage("Payment completed!");
+    } catch (err: any) {
+      setErrorMessage(err?.message ?? "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    if (visible) {
-      initializePaymentSheet();
-    } else {
-      setLoading(false);
-      setStatusMessage(null);
-    }
-  }, [visible]);
+    // Reset when modal closes or when project/customer changes
+    setLoading(false);
+    setIsInitialized(false);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+  }, [visible, project.id, customer?.id]);
 
   return (
     <Modal
-      animationType="slide"
-      transparent
       visible={visible}
-      onRequestClose={handleClose}
+      animationType="slide"
+      presentationStyle="overFullScreen"
+      transparent={true}
+      onRequestClose={onExit}
     >
-      <Pressable style={styles.container} onPress={handleClose} />
+      <Pressable style={styles.container} onPress={onExit} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Checkout</ThemedText>
         <View style={styles.summary}>
-          {project.name && <ThemedText type="h3">{project.name}</ThemedText>}
+          {(project.name || project.song.name) && (
+            <ThemedText type="h3">
+              {project.name || project.song.name}
+            </ThemedText>
+          )}
           {project.profile.fullName && (
             <ThemedText color="dimmed">
               with {project.profile.fullName}
             </ThemedText>
           )}
-          <ThemedText type="h1">{formattedAmount}</ThemedText>
+          <View style={styles.amountRow}>
+            <ThemedText type="h1">{formattedAmount}</ThemedText>
+            <ThemedText color="dimmed">+ €{(0.5).toFixed(2)} fee</ThemedText>
+          </View>
         </View>
 
-        {loading && (
-          <View style={styles.feedbackRow}>
-            <ActivityIndicator />
-            <ThemedText>Connecting to Stripe…</ThemedText>
-          </View>
-        )}
-
-        {statusMessage && (
-          <ThemedText
-            color={statusMessage.type === "error" ? "danger" : "primary"}
-          >
-            {statusMessage.message}
-          </ThemedText>
+        {errorMessage && <ThemedText color="danger">{errorMessage}</ThemedText>}
+        {successMessage && (
+          <ThemedText color="primary">{successMessage}</ThemedText>
         )}
 
         <Button
-          label={`Pay ${formattedAmount}`}
-          onPress={openPaymentSheet}
-          disabled={loading || !!statusMessage}
-          style={[(loading || !!statusMessage) && styles.disabled]}
+          label={`Pay ${formattedTotalAmount}`}
+          onPress={handlePay}
+          loading={loading}
+          disabled={successMessage !== null}
         />
-        <Button
-          label={statusMessage?.type === "success" ? "Done" : "Cancel"}
-          onPress={handleClose}
-        />
+        <Button outlined label={"Cancel"} onPress={onExit} />
       </View>
     </Modal>
   );
@@ -207,7 +201,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-    opacity: 0.95,
+    opacity: 0.8,
   },
   sheet: {
     position: "absolute",
@@ -218,16 +212,14 @@ const styles = StyleSheet.create((theme, rt) => ({
     borderTopLeftRadius: theme.gap(2),
     borderTopRightRadius: theme.gap(2),
     gap: theme.gap(2),
+    backgroundColor: theme.colors.background,
   },
   summary: {
     gap: theme.gap(0.5),
   },
-  feedbackRow: {
+  amountRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "baseline",
     gap: theme.gap(1),
-  },
-  disabled: {
-    opacity: 0.5,
   },
 }));

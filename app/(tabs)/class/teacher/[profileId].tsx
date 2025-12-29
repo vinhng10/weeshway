@@ -6,6 +6,7 @@ import { SectionListView } from "@/components/section-list";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { Video } from "@/components/video";
+import { StripePaymentStatusEnum } from "@/constants";
 import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
@@ -38,10 +39,13 @@ function TeacherProfileContent() {
   } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
     queryKey: ["classes", "profiles", profileId, "projects"],
     tableName: "projects",
-    columns: `*, song:songs(*)`,
+    columns: `*, song:songs(*), bookings:bookings(*)`,
     pageSize: 10,
     trailingQuery: (query) =>
-      query.eq("user_id", profileId).gte("start_at", new Date().toISOString()),
+      query
+        .eq("user_id", profileId)
+        .eq("bookings.status", StripePaymentStatusEnum.Succeeded)
+        .gte("start_at", new Date().toISOString()),
   });
 
   const renderProfile = (data: ProfileEnrichedType): React.ReactElement => (

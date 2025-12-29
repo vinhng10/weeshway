@@ -4,7 +4,12 @@ import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { ProjectStatus } from "@/components/project-status";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
+import {
+  LevelEnum,
+  ProjectStatusEnum,
+  StripePaymentStatusEnum,
+  StyleEnum,
+} from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
 import { ProjectEnrichedType } from "@/types";
@@ -23,11 +28,12 @@ function ProjectsContent() {
     useSuspenseInfiniteQuery<ProjectEnrichedType>({
       queryKey: ["projects", status, style, level],
       tableName: "projects",
-      columns: `*, song:songs(*)`,
+      columns: `*, song:songs(*), bookings:bookings(*)`,
       pageSize: 10,
       trailingQuery: (query) => {
         query = query
           .eq("user_id", profile?.id)
+          .eq("bookings.status", StripePaymentStatusEnum.Succeeded)
           .order("updated_at", { ascending: false });
         if (status) {
           query = query.eq("status", status);

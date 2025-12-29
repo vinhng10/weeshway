@@ -11,7 +11,12 @@ import {
 } from "@/components/input";
 import { LocationInput } from "@/components/input/location-input";
 import { Tile } from "@/components/tile";
-import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
+import {
+  LevelEnum,
+  ProjectStatusEnum,
+  StripePaymentStatusEnum,
+  StyleEnum,
+} from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
@@ -34,9 +39,10 @@ function ProjectContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select(`*, song:songs(*), location:locations(*)`)
+        .select(`*, song:songs(*), location:locations(*), bookings:bookings(*)`)
         .eq("id", projectId)
         .eq("user_id", profile?.id)
+        .eq("bookings.status", StripePaymentStatusEnum.Succeeded)
         .single();
 
       if (error) throw error;
@@ -176,7 +182,11 @@ function ProjectContent() {
         {/* Price and Spots Info Fields */}
         <View style={styles.row}>
           <FloatBoxInput label="Price" value={price} onValueChange={setPrice} />
-          <IntBoxInput label="Spots" value={spots} onValueChange={setSpots} />
+          <IntBoxInput
+            label="Spots"
+            value={`${data.bookings.length} / ${data.spots ?? 0}`}
+            onValueChange={setSpots}
+          />
         </View>
 
         {/* Date & Time Row */}

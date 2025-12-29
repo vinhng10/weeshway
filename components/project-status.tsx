@@ -18,7 +18,9 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
       break;
     case ProjectStatusEnum.Release:
       icon = "person.fill";
-      label = `${data.bookings.length} | ${data.spots}`;
+      label = data.bookings
+        ? `${data.bookings.length} | ${data.spots}`
+        : `${data.spots}`;
       break;
   }
 
