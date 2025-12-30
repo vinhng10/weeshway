@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: result.error.format() }, 400);
     }
 
-    const { customer, project, amount, currency, applicationFeeAmount } =
-      result.data;
+    const { customer, project, amount, currency } = result.data;
+    const applicationFeeAmount = Math.round(amount * 0.05) + 50;
 
     // Check for existing booking
     const { data: booking, error: dbError } = await supabase

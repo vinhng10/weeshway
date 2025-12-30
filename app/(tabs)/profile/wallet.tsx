@@ -73,9 +73,7 @@ function WalletContent() {
         }
       );
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const dashboardUrl = data?.url;
 
