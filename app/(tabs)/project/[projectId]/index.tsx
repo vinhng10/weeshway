@@ -72,8 +72,8 @@ function ProjectContent() {
       setStatus(data.status);
       setStyle(data.style);
       setLevel(data.level);
-      setPrice(data.price?.toString());
-      setSpots(data.spots?.toString());
+      setPrice(data.price ? (data.price / 100).toString() : "");
+      setSpots(data.spots ? data.spots.toString() : "");
       setStartAt(data.startAt ? new Date(data.startAt) : undefined);
       setEndAt(data.endAt ? new Date(data.endAt) : undefined);
       setSong(data.song);
@@ -103,15 +103,15 @@ function ProjectContent() {
       const { error } = await supabase
         .from("projects")
         .update({
-          name: name,
+          name: name ?? null,
           status: status,
-          style: style,
-          level: level,
-          price: price,
-          spots: spots,
+          style: style ?? null,
+          level: level ?? null,
+          price: price ? Math.round(Number(price) * 100) : null,
+          spots: spots ? Number(spots) : null,
           start_at: startAt,
           end_at: endAt,
-          description: description,
+          description: description ?? null,
           location_id: location?.id,
         })
         .eq("id", projectId);
@@ -182,11 +182,7 @@ function ProjectContent() {
         {/* Price and Spots Info Fields */}
         <View style={styles.row}>
           <FloatBoxInput label="Price" value={price} onValueChange={setPrice} />
-          <IntBoxInput
-            label="Spots"
-            value={`${data.bookings.length} / ${data.spots ?? 0}`}
-            onValueChange={setSpots}
-          />
+          <IntBoxInput label="Spots" value={spots} onValueChange={setSpots} />
         </View>
 
         {/* Date & Time Row */}

@@ -35,15 +35,9 @@ function ProjectsContent() {
           .eq("user_id", profile?.id)
           .eq("bookings.status", StripePaymentStatusEnum.Succeeded)
           .order("updated_at", { ascending: false });
-        if (status) {
-          query = query.eq("status", status);
-        }
-        if (style) {
-          query = query.eq("style", style);
-        }
-        if (level) {
-          query = query.eq("level", level);
-        }
+        if (status) query = query.eq("status", status);
+        if (style) query = query.eq("style", style);
+        if (level) query = query.eq("level", level);
         return query;
       },
     });

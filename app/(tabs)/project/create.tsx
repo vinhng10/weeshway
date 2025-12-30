@@ -25,7 +25,7 @@ import { StyleSheet } from "react-native-unistyles";
 export default function CreateProject() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
-  const currency = useLocales((state) => ({ currency: state.currency }));
+  const currency = useLocales((state) => state.currency);
   const queryClient = useQueryClient();
 
   // Initialize state with project data or defaults
@@ -82,7 +82,7 @@ export default function CreateProject() {
           status: status,
           style: style,
           level: level,
-          price: price,
+          price: price ?? Math.round(Number(price) * 100),
           spots: spots,
           description: description?.trim(),
           start_at: startAt,

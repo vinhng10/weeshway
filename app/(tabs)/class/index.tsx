@@ -72,18 +72,13 @@ function ClassesContent() {
     columns: `*, profile:profiles(*), song:songs(*), bookings:bookings(*)`,
     pageSize: 10,
     trailingQuery: (query) => {
-      query = query.gte("start_at", new Date().toISOString());
-      query = query.neq("status", ProjectStatusEnum.Cancel);
-      query = query.eq("bookings.status", StripePaymentStatusEnum.Succeeded);
-      if (status) {
-        query = query.eq("status", status);
-      }
-      if (style) {
-        query = query.eq("style", style);
-      }
-      if (level) {
-        query = query.eq("level", level);
-      }
+      query = query
+        .or(`start_at.is.null,start_at.gte.${new Date().toISOString()}`)
+        .neq("status", ProjectStatusEnum.Cancel)
+        .eq("bookings.status", StripePaymentStatusEnum.Succeeded);
+      if (status) query = query.eq("status", status);
+      if (style) query = query.eq("style", style);
+      if (level) query = query.eq("level", level);
       return query;
     },
   });

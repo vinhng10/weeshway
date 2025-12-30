@@ -48,8 +48,8 @@ export type ProjectType = {
   description?: string;
   songId?: string;
   locationId?: number;
-  songItems?: ItemType[];
-  countItems?: ItemType[];
+  songItems: ItemType[];
+  countItems: ItemType[];
 };
 
 export type SongType = {
