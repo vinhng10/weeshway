@@ -2,27 +2,37 @@ import { getLocales } from "expo-localization";
 import { create } from "zustand";
 
 interface LocaleState {
-  formatter: Intl.NumberFormat;
   currency: string;
   country: string;
-  formatMoney: (amount?: number) => string;
+  exchangeRates: Record<string, number>;
+  fetchExchangeRates: () => Promise<void>;
+  formatMoney: (amount?: number, fromCurrency?: string) => string;
 }
 
 const locale = getLocales()[0];
-const currency = locale.currencyCode ?? "USD";
-const languageTag = locale.languageTag ?? "en-US";
-const country = locale.regionCode ?? "FI";
 
 export const useLocales = create<LocaleState>((set, get) => ({
-  currency: currency,
-  country: country,
-  formatter: new Intl.NumberFormat(languageTag, {
-    style: "currency",
-    currency: currency,
-  }),
+  currency: locale.currencyCode ?? "USD",
+  country: locale.regionCode ?? "US",
+  exchangeRates: {},
 
-  formatMoney: (amount?: number) => {
+  fetchExchangeRates: async () => {
+    const currency = get().currency;
+    const response = await fetch(
+      `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currency.toLowerCase()}.json`
+    );
+    const data = await response.json();
+    set({ exchangeRates: data[currency.toLowerCase()] });
+  },
+
+  formatMoney: (amount?: number, currency?: string) => {
     if (!amount) return "";
-    return get().formatter.format(amount / 100);
+    if (!currency) currency = get().currency;
+    const languageTag = locale.languageTag ?? "en-US";
+    const formatter = new Intl.NumberFormat(languageTag, {
+      style: "currency",
+      currency: currency,
+    });
+    return formatter.format(amount * 0.01);
   },
 }));

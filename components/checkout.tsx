@@ -8,7 +8,6 @@ import { useStripe } from "@stripe/stripe-react-native";
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useShallow } from "zustand/react/shallow";
 
 type PaymentIntentResponse = {
   paymentIntentClientSecret: string;
@@ -29,12 +28,7 @@ export function Checkout({
   project,
 }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const { formatMoney, currency } = useLocales(
-    useShallow((state) => ({
-      formatMoney: state.formatMoney,
-      currency: state.currency,
-    }))
-  );
+  const formatMoney = useLocales((state) => state.formatMoney);
 
   // States to manage separate stages
   const [loading, setLoading] = useState(false);
@@ -44,6 +38,7 @@ export function Checkout({
 
   const stripeCustomerId = customer?.stripeAccountId;
   const stripeProviderId = project.profile.stripeAccountId;
+  const currency = project.currency;
   const amount = project.price ?? 0;
   const totalAmount = amount + 50;
 
@@ -170,8 +165,10 @@ export function Checkout({
             </ThemedText>
           )}
           <View style={styles.amountRow}>
-            <ThemedText type="h1">{formatMoney(amount)}</ThemedText>
-            <ThemedText color="dimmed">+ {formatMoney(50)} fee</ThemedText>
+            <ThemedText type="h1">{formatMoney(amount, currency)}</ThemedText>
+            <ThemedText color="dimmed">
+              + {formatMoney(50, currency)} fee
+            </ThemedText>
           </View>
         </View>
 
@@ -181,7 +178,7 @@ export function Checkout({
         )}
 
         <Button
-          label={`Pay ${formatMoney(totalAmount)}`}
+          label={`Pay ${formatMoney(totalAmount, currency)}`}
           onPress={handlePay}
           loading={loading}
           disabled={successMessage !== null}

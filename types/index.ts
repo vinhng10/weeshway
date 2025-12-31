@@ -1,7 +1,7 @@
 import {
   LevelEnum,
-  StripePaymentStatusEnum,
   ProjectStatusEnum,
+  StripePaymentStatusEnum,
   StyleEnum,
   WishStatusEnum,
 } from "@/constants";
@@ -50,6 +50,7 @@ export type ProjectType = {
   locationId?: number;
   songItems: ItemType[];
   countItems: ItemType[];
+  currency: string;
 };
 
 export type SongType = {

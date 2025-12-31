@@ -109,7 +109,7 @@ function ClassContent() {
         <View style={styles.row}>
           <FloatBoxInput
             label="Price"
-            value={formatMoney(data.price)}
+            value={formatMoney(data.price, data.currency)}
             editable={false}
           />
           <IntBoxInput

@@ -72,7 +72,7 @@ function ProjectContent() {
       setStatus(data.status);
       setStyle(data.style);
       setLevel(data.level);
-      setPrice(data.price ? (data.price / 100).toString() : "");
+      setPrice(data.price ? (data.price * 0.01).toString() : "");
       setSpots(data.spots ? data.spots.toString() : "");
       setStartAt(data.startAt ? new Date(data.startAt) : undefined);
       setEndAt(data.endAt ? new Date(data.endAt) : undefined);

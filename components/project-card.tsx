@@ -115,7 +115,7 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
                   />
                   <ThemedText>{data.location?.name}</ThemedText>
                 </View>
-                <ThemedText>{formatMoney(data.price)}</ThemedText>
+                <ThemedText>{formatMoney(data.price, data.currency)}</ThemedText>
               </View>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
