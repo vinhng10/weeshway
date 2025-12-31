@@ -113,3 +113,7 @@ export type ProfileEnrichedType = ProfileType & {
 export type RecommendationEnrichedType = RecommendationType & {
   project: ProjectEnrichedType;
 };
+
+export type BookingEnrichedType = BookingType & {
+  project: ProjectEnrichedType;
+};

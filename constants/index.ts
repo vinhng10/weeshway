@@ -90,3 +90,8 @@ export enum TrackEnum {
   Song = "song",
   Count = "count",
 }
+
+export enum TimeEnum {
+  Upcoming = "Upcoming",
+  Past = "Past",
+}

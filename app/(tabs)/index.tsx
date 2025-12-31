@@ -1,13 +1,112 @@
-import { ThemedText } from "@/components/themed-text";
-import React from "react";
-import { View } from "react-native";
+import { Avatar } from "@/components/avatar";
+import { Boundary } from "@/components/boundary";
+import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
+import { ProjectStatus } from "@/components/project-status";
+import { SectionListView } from "@/components/section-list";
+import { Tile } from "@/components/tile";
+import { StripePaymentStatusEnum, TimeEnum } from "@/constants";
+import { useAuth } from "@/hooks/useAuth";
+import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
+import { BookingEnrichedType, ProjectEnrichedType } from "@/types";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+
+function BookingsContent() {
+  const profile = useAuth((state) => state.profile);
+  const [time, setTime] = useState<TimeEnum>(TimeEnum.Upcoming);
+
+  const {
+    data: bookings,
+    hasNextPage,
+    fetchNextPage,
+  } = useSuspenseInfiniteQuery<BookingEnrichedType>({
+    queryKey: ["classes", "bookings", profile?.id, time],
+    tableName: "bookings",
+    columns: `
+      *, project:projects!inner(
+        *, 
+        profile:profiles(*), 
+        song:songs(*), 
+        location:locations(*), 
+        bookings:bookings(*)
+      )
+    `,
+    pageSize: 10,
+    trailingQuery: (query) => {
+      query = query
+        .eq("user_id", profile?.id)
+        .eq("status", StripePaymentStatusEnum.Succeeded);
+
+      const now = new Date().toISOString();
+      if (time === TimeEnum.Upcoming) {
+        query = query.gte("project.end_at", now);
+      } else if (time === TimeEnum.Past) {
+        query = query.lt("project.end_at", now);
+      }
+
+      query = query.order("created_at", { ascending: false });
+      return query;
+    },
+  });
+
+  const projects = bookings.map((booking) => booking.project);
+
+  const navigateToClass = (id: number) => router.push(`/(tabs)/class/${id}`);
+
+  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
+    <Tile
+      imageSource={data.song.artworkUrl}
+      title={data.song.name}
+      subtitle={data.song.artistName}
+      metadata={`${data.style} • ${data.level}`}
+      previewUrl={data.song.previewUrl}
+      rightContent={
+        <>
+          <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
+          <ProjectStatus data={data} />
+        </>
+      }
+      onPress={() => navigateToClass(data.id)}
+    />
+  );
+
+  const options: ChipBarItemProps[] = [
+    {
+      label: "Time",
+      value: time,
+      options: TimeEnum,
+      modal: false,
+      onValueChange: setTime,
+    },
+  ];
+
+  const sections: SectionListData<ProjectEnrichedType>[] = [
+    {
+      title: "Bookings",
+      data: projects,
+      render: renderTile,
+    },
+  ];
+
+  return (
+    <View style={styles.container}>
+      <ChipBar padding items={options} />
+      <SectionListView
+        sections={sections}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
+    </View>
+  );
+}
 
 export default function Home() {
   return (
-    <View style={styles.container}>
-      <ThemedText type="h1">Home</ThemedText>
-    </View>
+    <Boundary>
+      <BookingsContent />
+    </Boundary>
   );
 }
 

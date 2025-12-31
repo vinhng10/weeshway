@@ -29,7 +29,7 @@ const jsonResponse = (data: object, status = 200) =>
 Deno.serve(async (req) => {
   try {
     // Validation
-    const body = await req.json().catch(() => ({}));
+    const body = await req.json();
     const result = requestSchema.safeParse(body);
 
     if (!result.success) {
