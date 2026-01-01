@@ -16,7 +16,7 @@ import { StyleSheet } from "react-native-unistyles";
 
 export default function MakeAWish() {
   const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => !!state.session);
+  const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const router = useRouter();
   const queryClient = useQueryClient();
 

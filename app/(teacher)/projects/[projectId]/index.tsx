@@ -31,7 +31,7 @@ import { StyleSheet } from "react-native-unistyles";
 function ProjectContent() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => !!state.session);
+  const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const queryClient = useQueryClient();
 
   const { data } = useSuspenseQuery<ProjectEnrichedType>({

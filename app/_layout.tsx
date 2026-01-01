@@ -14,7 +14,7 @@ import "react-native-reanimated";
 const queryClient = new QueryClient();
 
 function RootNavigator() {
-  const isLoggedIn = useAuth((state) => !!state.session);
+  const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const initialize = useAuth((state) => state.initialize);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const player = useAudioPlayer();

@@ -22,7 +22,7 @@ export function useSuspenseInfiniteQuery<TData = unknown>({
   trailingQuery,
 }: UseSuspenseInfiniteQueryProps<TData>) {
   const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => !!state.session);
+  const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
 
   const query = useTanStackSuspenseInfiniteQuery({
     queryKey: queryKey,
