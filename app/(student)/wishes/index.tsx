@@ -98,7 +98,7 @@ function WishesContent() {
           </>
         )
       }
-      onPress={() => router.push(`/(tabs)/wishes/${data.id}`)}
+      onPress={() => router.push(`/(student)/wishes/${data.id}`)}
     />
   );
 
@@ -128,7 +128,7 @@ function WishesContent() {
         stickyBottom
         label="Make A Wish"
         onPress={() => {
-          router.push("/(tabs)/wishes/create");
+          router.push("/(student)/wishes/create");
         }}
       />
     </View>

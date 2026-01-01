@@ -1,59 +1,39 @@
-import { Boundary } from "@/components/boundary";
 import { Button } from "@/components/button";
 import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
 import { Header } from "@/components/header";
+import { DateTimeInput, TextInput } from "@/components/input";
 import {
-  DateTimeInput,
   FloatBoxInput,
   IntBoxInput,
   SelectBoxInput,
-  TextInput,
-} from "@/components/input";
+} from "@/components/input/box-input";
 import { LocationInput } from "@/components/input/location-input";
+import { SongSearch } from "@/components/song-search";
 import { Tile } from "@/components/tile";
-import {
-  LevelEnum,
-  ProjectStatusEnum,
-  StripePaymentStatusEnum,
-  StyleEnum,
-} from "@/constants";
+import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { useLocales } from "@/hooks/useLocales";
 import { supabase } from "@/supabase";
-import { LocationType, ProjectEnrichedType, SongType } from "@/types";
+import { LocationType, SongType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
-function ProjectContent() {
-  const { projectId } = useLocalSearchParams<{ projectId: string }>();
+export default function CreateProject() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const currency = useLocales((state) => state.currency);
   const queryClient = useQueryClient();
-
-  const { data } = useSuspenseQuery<ProjectEnrichedType>({
-    queryKey: ["projects", projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select(`*, song:songs(*), location:locations(*), bookings:bookings(*)`)
-        .eq("id", projectId)
-        .eq("user_id", profile?.id)
-        .eq("bookings.status", StripePaymentStatusEnum.Succeeded)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
 
   // Initialize state with project data or defaults
   const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
-  const [status, setStatus] = useState<ProjectStatusEnum>();
+  const [status, setStatus] = useState<ProjectStatusEnum>(
+    ProjectStatusEnum.Draft
+  );
   const [style, setStyle] = useState<StyleEnum>();
   const [level, setLevel] = useState<LevelEnum>();
   const [price, setPrice] = useState<string>();
@@ -62,24 +42,7 @@ function ProjectContent() {
   const [endAt, setEndAt] = useState<Date>();
   const [song, setSong] = useState<SongType>();
   const [location, setLocation] = useState<LocationType>();
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Update state when project data is loaded
-  useEffect(() => {
-    if (data) {
-      setName(data.name);
-      setDescription(data.description);
-      setStatus(data.status);
-      setStyle(data.style);
-      setLevel(data.level);
-      setPrice(data.price ? (data.price * 0.01).toString() : "");
-      setSpots(data.spots ? data.spots.toString() : "");
-      setStartAt(data.startAt ? new Date(data.startAt) : undefined);
-      setEndAt(data.endAt ? new Date(data.endAt) : undefined);
-      setSong(data.song);
-      setLocation(data.location);
-    }
-  }, [data]);
+  const [isCreating, setIsCreating] = useState(false);
 
   const options: ChipBarItemProps[] = [
     {
@@ -91,43 +54,58 @@ function ProjectContent() {
     },
   ];
 
-  const handleSave = async () => {
-    if (!isLoggedIn || !profile || !projectId || !data) {
-      console.error("Error: User not logged in or project ID missing");
+  const handleCreate = async () => {
+    if (!isLoggedIn || !profile) {
+      console.error("Error: User not logged in");
       return;
     }
 
-    setIsSaving(true);
+    if (!song) {
+      console.error("Error: Song is required");
+      return;
+    }
+
+    setIsCreating(true);
 
     try {
-      const { error } = await supabase
-        .from("projects")
-        .update({
-          name: name ?? null,
+      const { data, error } = await supabase.rpc("create_project_with_song", {
+        p_song_data: {
+          id: song.id,
+          name: song.name,
+          artist_name: song.artistName,
+          artwork_url: song.artworkUrl,
+          preview_url: song.previewUrl,
+          genre: song.genreNames[0],
+        },
+        p_project_data: {
+          name: name?.trim(),
           status: status,
-          style: style ?? null,
-          level: level ?? null,
-          price: price ? Math.round(Number(price) * 100) : null,
-          spots: spots ? Number(spots) : null,
+          style: style,
+          level: level,
+          price: price ?? Math.round(Number(price) * 100),
+          spots: spots,
+          description: description?.trim(),
           start_at: startAt,
           end_at: endAt,
-          description: description ?? null,
           location_id: location?.id,
-        })
-        .eq("id", projectId);
+          currency: currency,
+        },
+      });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       // Invalidate and refetch the project query
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       // Navigate back to projects list
-      router.push(`/(tabs)/projects/`);
+      router.push(`/(teacher)/projects/`);
     } catch (error: any) {
-      console.error("Error updating project:", error);
+      console.error("Error creating project:", error);
       // You might want to show an error message to the user here
     } finally {
-      setIsSaving(false);
+      setIsCreating(false);
     }
   };
 
@@ -142,6 +120,9 @@ function ProjectContent() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Song Search */}
+        <SongSearch onSongPress={(song) => setSong(song)} />
+
         {/* Song Tile */}
         {song && (
           <Tile
@@ -149,7 +130,6 @@ function ProjectContent() {
             title={song.name}
             subtitle={song.artistName}
             previewUrl={song.previewUrl}
-            onPress={() => {}}
           />
         )}
 
@@ -163,7 +143,7 @@ function ProjectContent() {
         {/* Toggle Button Group for Status */}
         <ChipBar items={options} />
 
-        {/* StyleEnum and LevelEnum Selects */}
+        {/* Style and Level Selects */}
         <View style={styles.row}>
           <SelectBoxInput
             label="Style"
@@ -213,29 +193,14 @@ function ProjectContent() {
         />
       </KeyboardAwareScrollView>
 
-      {/* Save Changes Buttons */}
-      <View style={[styles.buttonContainer, styles.row]}>
-        <Button
-          label={"Save Changes"}
-          onPress={handleSave}
-          loading={isSaving}
-          style={styles.saveButton}
-        />
-        <Button
-          label={"Studio"}
-          onPress={() => router.push(`/(tabs)/projects/${projectId}/studio`)}
-          style={styles.studioButton}
-        />
-      </View>
+      {/* Create Button */}
+      <Button
+        label={"Create"}
+        onPress={handleCreate}
+        loading={isCreating}
+        stickyBottom
+      />
     </View>
-  );
-}
-
-export default function Project() {
-  return (
-    <Boundary>
-      <ProjectContent />
-    </Boundary>
   );
 }
 
@@ -253,17 +218,5 @@ const styles = StyleSheet.create((theme, rt) => ({
   row: {
     flexDirection: "row",
     gap: theme.gap(2),
-  },
-  buttonContainer: {
-    position: "absolute",
-    bottom: theme.gap(2),
-    paddingHorizontal: theme.gap(2),
-  },
-  saveButton: {
-    flex: 1,
-  },
-  studioButton: {
-    flex: 1,
-    backgroundColor: theme.colors.primary,
   },
 }));

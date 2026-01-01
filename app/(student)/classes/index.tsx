@@ -107,7 +107,7 @@ function ClassesContent() {
     },
   ];
 
-  const navigateToClass = (id: number) => router.push(`/(tabs)/classes/${id}`);
+  const navigateToClass = (id: number) => router.push(`/(student)/classes/${id}`);
 
   const renderCarousel = (data: ProjectEnrichedType[]): React.ReactElement => (
     <Carousel data={data} />

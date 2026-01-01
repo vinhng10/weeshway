@@ -65,7 +65,7 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
   };
 
   const handlePress = () => {
-    router.push(`/(tabs)/classes/${data.id}`);
+    router.push(`/(student)/classes/${data.id}`);
   };
 
   return (

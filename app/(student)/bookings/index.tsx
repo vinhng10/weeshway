@@ -53,7 +53,7 @@ function BookingsContent() {
 
   const projects = bookings.map((booking) => booking.project);
 
-  const navigateToClass = (id: number) => router.push(`/(tabs)/classes/${id}`);
+  const navigateToClass = (id: number) => router.push(`/(student)/classes/${id}`);
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
     <Tile

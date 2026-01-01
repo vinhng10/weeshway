@@ -1,6 +1,7 @@
-import { STRIPE_PUBLISHABLE_KEY } from "@/constants";
+import { RoleEnum, STRIPE_PUBLISHABLE_KEY } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
@@ -18,6 +19,7 @@ function RootNavigator() {
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const player = useAudioPlayer();
   const status = useAudioPlayerStatus(player);
+  const role = useRole((state) => state.role);
 
   // Initialize audio player on mount
   useEffect(() => {
@@ -39,8 +41,11 @@ function RootNavigator() {
       </Stack.Protected>
 
       {/* Screens for authenticated users */}
-      <Stack.Protected guard={isLoggedIn}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Protected guard={isLoggedIn && role === RoleEnum.Student}>
+        <Stack.Screen name="(student)" options={{ headerShown: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={isLoggedIn && role === RoleEnum.Teacher}>
+        <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
   );
