@@ -34,9 +34,10 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="classes" options={{ href: null }} />
       <Tabs.Protected guard={role === RoleEnum.Student}>
         <Tabs.Screen
-          name="wish"
+          name="wishes"
           options={{
             title: "Wishes",
             tabBarIcon: ({ color }) => (
@@ -45,9 +46,9 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="class"
+          name="bookings"
           options={{
-            title: "Classes",
+            title: "Bookings",
             headerShown: false,
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="circle.grid.2x2.fill" color={color} />
@@ -57,16 +58,16 @@ export default function TabLayout() {
       </Tabs.Protected>
       <Tabs.Protected guard={role === RoleEnum.Teacher}>
         <Tabs.Screen
-          name="wish-board"
+          name="explore"
           options={{
-            title: "Wish Board",
+            title: "Explore",
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="wand.and.sparkles" color={color} />
             ),
           }}
         />
         <Tabs.Screen
-          name="project"
+          name="projects"
           options={{
             title: "Projects",
             headerShown: false,
