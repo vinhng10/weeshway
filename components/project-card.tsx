@@ -65,7 +65,7 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
   };
 
   const handlePress = () => {
-    router.push(`/(tabs)/class/${data.id}`);
+    router.push(`/(tabs)/classes/${data.id}`);
   };
 
   return (
@@ -115,7 +115,9 @@ export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
                   />
                   <ThemedText>{data.location?.name}</ThemedText>
                 </View>
-                <ThemedText>{formatMoney(data.price, data.currency)}</ThemedText>
+                <ThemedText>
+                  {formatMoney(data.price, data.currency)}
+                </ThemedText>
               </View>
               <View style={styles.row}>
                 <View style={styles.infoRow}>

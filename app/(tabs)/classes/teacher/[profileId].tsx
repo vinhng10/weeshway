@@ -80,7 +80,7 @@ function TeacherProfileContent() {
       subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
       rightContent={<ProjectStatus data={data} />}
-      onPress={() => router.push(`/(tabs)/class/${data.id}`)}
+      onPress={() => router.push(`/(tabs)/classes/${data.id}`)}
     />
   );
 

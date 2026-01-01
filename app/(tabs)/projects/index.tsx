@@ -106,7 +106,7 @@ function ProjectsContent() {
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
       rightContent={<ProjectStatus data={data} />}
-      onPress={() => router.push(`/(tabs)/project/${data.id}`)}
+      onPress={() => router.push(`/(tabs)/projects/${data.id}`)}
     />
   );
 
@@ -135,7 +135,7 @@ function ProjectsContent() {
       <Button
         stickyBottom
         label="Create Project"
-        onPress={() => router.push("/(tabs)/project/create")}
+        onPress={() => router.push("/(tabs)/projects/create")}
       />
     </View>
   );

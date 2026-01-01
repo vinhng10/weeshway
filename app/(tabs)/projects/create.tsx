@@ -100,7 +100,7 @@ export default function CreateProject() {
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       // Navigate back to projects list
-      router.push(`/(tabs)/project/`);
+      router.push(`/(tabs)/projects/`);
     } catch (error: any) {
       console.error("Error creating project:", error);
       // You might want to show an error message to the user here

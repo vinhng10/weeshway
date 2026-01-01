@@ -87,7 +87,7 @@ function ClassContent() {
         <Pressable
           style={styles.teacherContainer}
           onPress={() => {
-            router.push(`/(tabs)/class/teacher/${data.profile.id}`);
+            router.push(`/(tabs)/classes/teacher/${data.profile.id}`);
           }}
         >
           <Avatar

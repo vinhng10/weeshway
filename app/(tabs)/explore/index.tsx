@@ -89,7 +89,7 @@ function WishBoardContent() {
       subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
-      onPress={() => router.push(`/(tabs)/wish-board/${data.id}`)}
+      onPress={() => router.push(`/(tabs)/explore/${data.id}`)}
     />
   );
 
