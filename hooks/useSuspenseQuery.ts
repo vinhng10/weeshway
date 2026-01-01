@@ -16,8 +16,8 @@ type AuthenticatedQueryOptions<TData, TError> = Omit<
 export function useSuspenseQuery<TData = unknown, TError = Error>(
   options: AuthenticatedQueryOptions<TData, TError>
 ): UseSuspenseQueryResult<TData, TError> {
-  const profile = useAuth((s) => s.profile);
-  const isLoggedIn = useAuth((s) => s.isLoggedIn);
+  const profile = useAuth((state) => state.profile);
+  const isLoggedIn = useAuth((state) => !!state.session);
 
   const wrappedQueryFn = async () => {
     if (!isLoggedIn || !profile) {

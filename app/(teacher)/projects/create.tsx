@@ -24,7 +24,7 @@ import { StyleSheet } from "react-native-unistyles";
 
 export default function CreateProject() {
   const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const isLoggedIn = useAuth((state) => !!state.session);
   const currency = useLocales((state) => state.currency);
   const queryClient = useQueryClient();
 

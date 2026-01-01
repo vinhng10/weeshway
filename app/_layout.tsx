@@ -14,7 +14,7 @@ import "react-native-reanimated";
 const queryClient = new QueryClient();
 
 function RootNavigator() {
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const isLoggedIn = useAuth((state) => !!state.session);
   const initialize = useAuth((state) => state.initialize);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const player = useAudioPlayer();
@@ -28,8 +28,8 @@ function RootNavigator() {
 
   // Initialize auth store on mount
   useEffect(() => {
-    const cleanup = initialize();
-    return cleanup;
+    const unsubscribe = initialize();
+    return unsubscribe;
   }, [initialize]);
 
   return (

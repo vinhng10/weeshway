@@ -1,13 +1,10 @@
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Tabs } from "expo-router";
 import React from "react";
-
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { useRole } from "@/hooks/useRole";
 import { useUnistyles } from "react-native-unistyles";
 
 export default function TabLayout() {
   const { theme } = useUnistyles();
-  const role = useRole((state) => state.role);
 
   return (
     <Tabs
@@ -61,6 +58,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="index" options={{ href: null }} />
     </Tabs>
   );
 }

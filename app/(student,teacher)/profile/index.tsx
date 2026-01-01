@@ -16,9 +16,10 @@ export default function Profile() {
 
   const role = useRole((state) => state.role);
   const setRole = useRole((state) => state.setRole);
+  const rolePath = role === RoleEnum.Student ? "student" : "teacher";
 
   const handleAccount = () => {
-    router.push("/(tabs)/profile/account");
+    router.push(`/(${rolePath})/profile/account`);
   };
 
   const handleNotifications = () => {
@@ -26,7 +27,7 @@ export default function Profile() {
   };
 
   const handleWallet = () => {
-    router.push("/(tabs)/profile/wallet");
+    router.push(`/(${rolePath})/profile/wallet`);
   };
 
   const handleDataPrivacy = () => {

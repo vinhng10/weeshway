@@ -8,12 +8,10 @@ interface AuthState {
   session: Session | null;
   profile: ProfileType | null;
   isLoading: boolean;
-  isLoggedIn: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  initialize: () => void;
-  setSession: (session: Session | null) => void;
+  initialize: () => () => void;
   fetchProfile: () => Promise<void>;
 }
 
@@ -21,79 +19,71 @@ export const useAuth = create<AuthState>((set, get) => ({
   session: null,
   profile: null,
   isLoading: true,
-  isLoggedIn: false,
-
-  setSession: (session) => {
-    set({ session, isLoggedIn: session != null });
-    // Fetch profile when session changes
-    get().fetchProfile();
-  },
 
   fetchProfile: async () => {
-    set({ isLoading: true });
-
     const session = get().session;
-    if (session) {
-      const { data } = await supabase
+    if (!session) {
+      set({ profile: null, isLoading: false });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
         .single();
 
-      set({ profile: camelcaseKeys(data, { deep: true }), isLoading: false });
-    } else {
+      if (error) throw error;
+
+      set({
+        profile: camelcaseKeys(data, { deep: true }) as ProfileType,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error("Profile fetch failed:", error);
       set({ profile: null, isLoading: false });
     }
   },
 
   initialize: () => {
-    const fetchSession = async () => {
-      set({ isLoading: true });
-
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error("Error fetching session:", error);
+    // 1. Check for an existing session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      set({ session });
+      if (session) {
+        get().fetchProfile();
+      } else {
+        set({ isLoading: false });
       }
-
-      get().setSession(session);
-    };
-
-    fetchSession();
-
-    // Subscribe to auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      get().setSession(session);
     });
 
-    // Return cleanup function
-    return () => {
-      subscription.unsubscribe();
-    };
+    // 2. Setup the listener for all future auth events
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      set({ session });
+
+      if (event === "SIGNED_IN" && session) {
+        await get().fetchProfile();
+      } else if (event === "SIGNED_OUT") {
+        set({ profile: null, session: null, isLoading: false });
+      }
+    });
+
+    // Return cleanup to the caller (usually a useEffect)
+    return () => subscription.unsubscribe();
   },
 
-  signIn: async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  signUp: async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+  signIn: async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    if (error) throw error;
+  },
+
+  signUp: async (email, password) => {
+    const { error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
   },
 

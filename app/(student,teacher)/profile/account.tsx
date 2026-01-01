@@ -17,7 +17,7 @@ import { StyleSheet } from "react-native-unistyles";
 export default function Account() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
-  const isLoggedIn = useAuth((state) => state.isLoggedIn);
+  const isLoggedIn = useAuth((state) => !!state.session);
 
   const [username, setUsername] = useState(profile?.username || "");
   const [fullName, setFullName] = useState(profile?.fullName || "");
