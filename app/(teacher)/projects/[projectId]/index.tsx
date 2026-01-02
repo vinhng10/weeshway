@@ -20,10 +20,10 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
 import { supabase } from "@/supabase";
-import { LocationType, ProjectEnrichedType, SongType } from "@/types";
+import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
@@ -50,36 +50,27 @@ function ProjectContent() {
     },
   });
 
-  // Initialize state with project data or defaults
-  const [name, setName] = useState<string>();
-  const [description, setDescription] = useState<string>();
-  const [status, setStatus] = useState<ProjectStatusEnum>();
-  const [style, setStyle] = useState<StyleEnum>();
-  const [level, setLevel] = useState<LevelEnum>();
-  const [price, setPrice] = useState<string>();
-  const [spots, setSpots] = useState<string>();
-  const [startAt, setStartAt] = useState<Date>();
-  const [endAt, setEndAt] = useState<Date>();
-  const [song, setSong] = useState<SongType>();
-  const [location, setLocation] = useState<LocationType>();
+  // Initialize state directly with project data - no useEffect needed!
+  const [name, setName] = useState(data.name);
+  const [description, setDescription] = useState(data.description);
+  const [status, setStatus] = useState<ProjectStatusEnum>(data.status);
+  const [style, setStyle] = useState(data.style);
+  const [level, setLevel] = useState(data.level);
+  const [price, setPrice] = useState(
+    data.price ? (data.price * 0.01).toString() : ""
+  );
+  const [spots, setSpots] = useState<string>(
+    data.spots ? data.spots.toString() : ""
+  );
+  const [startAt, setStartAt] = useState(
+    data.startAt ? new Date(data.startAt) : undefined
+  );
+  const [endAt, setEndAt] = useState(
+    data.endAt ? new Date(data.endAt) : undefined
+  );
+  const [song, setSong] = useState(data.song);
+  const [location, setLocation] = useState(data.location);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Update state when project data is loaded
-  useEffect(() => {
-    if (data) {
-      setName(data.name);
-      setDescription(data.description);
-      setStatus(data.status);
-      setStyle(data.style);
-      setLevel(data.level);
-      setPrice(data.price ? (data.price * 0.01).toString() : "");
-      setSpots(data.spots ? data.spots.toString() : "");
-      setStartAt(data.startAt ? new Date(data.startAt) : undefined);
-      setEndAt(data.endAt ? new Date(data.endAt) : undefined);
-      setSong(data.song);
-      setLocation(data.location);
-    }
-  }, [data]);
 
   const options: ChipBarItemProps[] = [
     {
@@ -219,12 +210,12 @@ function ProjectContent() {
           label={"Save Changes"}
           onPress={handleSave}
           loading={isSaving}
-          style={styles.saveButton}
+          style={styles.button}
         />
         <Button
           label={"Studio"}
           onPress={() => router.push(`/(teacher)/projects/${projectId}/studio`)}
-          style={styles.studioButton}
+          style={[styles.button, styles.primary]}
         />
       </View>
     </View>
@@ -259,11 +250,10 @@ const styles = StyleSheet.create((theme, rt) => ({
     bottom: theme.gap(2),
     paddingHorizontal: theme.gap(2),
   },
-  saveButton: {
+  button: {
     flex: 1,
   },
-  studioButton: {
-    flex: 1,
+  primary: {
     backgroundColor: theme.colors.primary,
   },
 }));

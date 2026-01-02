@@ -4,7 +4,6 @@ import { FloatBoxInput, IntBoxInput } from "@/components/input";
 import { ProjectStatus } from "@/components/project-status";
 import { SectionListView } from "@/components/section-list";
 import { Tile } from "@/components/tile";
-import { StripePaymentStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocales } from "@/hooks/useLocales";
 import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
@@ -42,7 +41,6 @@ function HomeContent() {
 
       query = query
         .eq("user_id", profile?.id)
-        .eq("bookings.status", StripePaymentStatusEnum.Succeeded)
         .lte("start_at", todayEnd.toISOString())
         .gte("end_at", now.toISOString())
         .order("start_at", { ascending: true });
