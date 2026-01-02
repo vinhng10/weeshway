@@ -89,6 +89,14 @@ export type BookingType = {
   status: StripePaymentStatusEnum;
 };
 
+export type StatsType = {
+  userId: string;
+  totalEarnings: number;
+  bookingCount: number;
+  currency: string;
+  currentMonth: string;
+};
+
 // Utility type: WishType with song_id replaced by joined songs relation
 export type WishEnrichedType = WishType & {
   song: SongType;

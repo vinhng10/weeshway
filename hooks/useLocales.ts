@@ -7,6 +7,7 @@ interface LocaleState {
   exchangeRates: Record<string, number>;
   fetchExchangeRates: () => Promise<void>;
   formatMoney: (amount?: number, fromCurrency?: string) => string;
+  exchangeMoney: (amount?: number, fromCurrency?: string) => number;
 }
 
 const locale = getLocales()[0];
@@ -34,5 +35,19 @@ export const useLocales = create<LocaleState>((set, get) => ({
       currency: currency,
     });
     return formatter.format(amount * 0.01);
+  },
+
+  exchangeMoney: (amount?: number, fromCurrency?: string) => {
+    if (!amount) return 0;
+    const { currency, exchangeRates } = get();
+    if (!fromCurrency) fromCurrency = currency;
+
+    const rate = exchangeRates[fromCurrency.toLowerCase()];
+    if (!rate) return amount;
+
+    // Convert from foreign currency to user's currency
+    // exchangeRates[fromCurrency] is the rate FROM userCurrency TO fromCurrency
+    // So to convert FROM fromCurrency TO userCurrency, we need 1 / rate
+    return (amount * 100) / (rate * 100);
   },
 }));

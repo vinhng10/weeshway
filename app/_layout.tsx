@@ -1,6 +1,7 @@
 import { RoleEnum, STRIPE_PUBLISHABLE_KEY } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocales } from "@/hooks/useLocales";
 import { useRole } from "@/hooks/useRole";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ const queryClient = new QueryClient();
 function RootNavigator() {
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const initialize = useAuth((state) => state.initialize);
+  const fetchExchangeRates = useLocales((state) => state.fetchExchangeRates);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const player = useAudioPlayer();
   const status = useAudioPlayerStatus(player);
@@ -31,6 +33,11 @@ function RootNavigator() {
     const unsubscribe = initialize();
     return unsubscribe;
   }, [initialize]);
+
+  // Initialize exchange rates on mount
+  useEffect(() => {
+    fetchExchangeRates();
+  }, [fetchExchangeRates]);
 
   return (
     <Stack>

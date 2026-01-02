@@ -15,7 +15,7 @@ import { StyleSheet } from "react-native-unistyles";
 
 function BookingsContent() {
   const profile = useAuth((state) => state.profile);
-  const [time, setTime] = useState<TimeEnum>(TimeEnum.Upcoming);
+  const [time, setTime] = useState<TimeEnum>(TimeEnum.Today);
 
   const {
     data: bookings,
@@ -39,11 +39,20 @@ function BookingsContent() {
         .eq("user_id", profile?.id)
         .eq("status", StripePaymentStatusEnum.Succeeded);
 
-      const now = new Date().toISOString();
+      const now = new Date();
+      const todayEnd = new Date();
+      todayEnd.setHours(23, 59, 59, 999);
+      const nowISO = now.toISOString();
+      const todayEndISO = todayEnd.toISOString();
+
       if (time === TimeEnum.Upcoming) {
-        query = query.gte("project.end_at", now);
+        query = query.gt("project.start_at", todayEndISO);
       } else if (time === TimeEnum.Past) {
-        query = query.lt("project.end_at", now);
+        query = query.lt("project.end_at", nowISO);
+      } else if (time === TimeEnum.Today) {
+        query = query
+          .lte("project.start_at", todayEndISO)
+          .gte("project.end_at", nowISO);
       }
 
       query = query.order("created_at", { ascending: false });
@@ -52,8 +61,6 @@ function BookingsContent() {
   });
 
   const projects = bookings.map((booking) => booking.project);
-
-  const navigateToClass = (id: number) => router.push(`/(student)/classes/${id}`);
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
     <Tile
@@ -68,7 +75,7 @@ function BookingsContent() {
           <ProjectStatus data={data} />
         </>
       }
-      onPress={() => navigateToClass(data.id)}
+      onPress={() => router.push(`/(student)/classes/${data.id}`)}
     />
   );
 

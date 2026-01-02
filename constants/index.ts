@@ -92,6 +92,7 @@ export enum TrackEnum {
 }
 
 export enum TimeEnum {
+  Today = "Today",
   Upcoming = "Upcoming",
   Past = "Past",
 }
