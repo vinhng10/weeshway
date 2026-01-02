@@ -1,9 +1,10 @@
-import { Avatar } from "@/components/avatar";
 import { Boundary } from "@/components/boundary";
+import { formatTime } from "@/components/input/box-input";
 import { ProjectStatus } from "@/components/project-status";
 import { SectionListView } from "@/components/section-list";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
+import { ProjectStatusEnum } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocales } from "@/hooks/useLocales";
 import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
@@ -21,7 +22,7 @@ function HomeContent() {
   const exchangeMoney = useLocales((state) => state.exchangeMoney);
 
   const {
-    data: todayClasses,
+    data: projects,
     hasNextPage,
     fetchNextPage,
   } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
@@ -31,6 +32,7 @@ function HomeContent() {
       *, 
       profile:profiles(*), 
       song:songs(*),
+      location:locations(*),
       bookings:bookings(*)
     `,
     pageSize: 10,
@@ -41,6 +43,7 @@ function HomeContent() {
 
       query = query
         .eq("user_id", profile?.id)
+        .eq("status", ProjectStatusEnum.Release)
         .lte("start_at", todayEnd.toISOString())
         .gte("end_at", now.toISOString())
         .order("start_at", { ascending: true });
@@ -88,15 +91,12 @@ function HomeContent() {
     <Tile
       imageSource={data.song.artworkUrl}
       title={data.song.name}
-      subtitle={data.song.artistName}
-      metadata={`${data.style} • ${data.level}`}
+      subtitle={data.location?.name}
+      metadata={`${formatTime(new Date(data.startAt!))} - ${formatTime(
+        new Date(data.endAt!)
+      )}`}
       previewUrl={data.song.previewUrl}
-      rightContent={
-        <>
-          <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
-          <ProjectStatus data={data} />
-        </>
-      }
+      rightContent={<ProjectStatus data={data} />}
       onPress={() => router.push(`/(teacher)/projects/${data.id}`)}
     />
   );
@@ -109,7 +109,7 @@ function HomeContent() {
     },
     {
       title: "Today's Classes",
-      data: todayClasses,
+      data: projects,
       render: renderTile,
     },
   ];
