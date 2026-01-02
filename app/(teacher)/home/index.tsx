@@ -1,8 +1,8 @@
 import { Avatar } from "@/components/avatar";
 import { Boundary } from "@/components/boundary";
-import { FloatBoxInput, IntBoxInput } from "@/components/input";
 import { ProjectStatus } from "@/components/project-status";
 import { SectionListView } from "@/components/section-list";
+import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocales } from "@/hooks/useLocales";
@@ -72,17 +72,14 @@ function HomeContent() {
     }
 
     return (
-      <View style={styles.row}>
-        <FloatBoxInput
-          label="Earning"
-          value={formatMoney(totalEarnings)}
-          editable={false}
-        />
-        <IntBoxInput
-          label="Bookings"
-          value={bookingCount.toString()}
-          editable={false}
-        />
+      <View style={styles.statsContainer}>
+        <ThemedText color="dimmed">Earnings This Month</ThemedText>
+        <ThemedText type="h1" color="primary">
+          {formatMoney(totalEarnings)}
+        </ThemedText>
+        <ThemedText type="h3" color="dimmed">
+          {bookingCount} {bookingCount > 1 ? "bookings" : "booking"}
+        </ThemedText>
       </View>
     );
   };
@@ -106,12 +103,12 @@ function HomeContent() {
 
   const sections: SectionListData<ProjectEnrichedType | StatsType[]>[] = [
     {
-      title: `Overview`,
+      title: "Overview",
       data: stats,
       render: renderStats,
     },
     {
-      title: "Today",
+      title: "Today's Classes",
       data: todayClasses,
       render: renderTile,
     },
@@ -119,6 +116,9 @@ function HomeContent() {
 
   return (
     <View style={styles.container}>
+      <ThemedText type="h1" style={styles.greeting}>
+        Hello, {profile?.fullName}!
+      </ThemedText>
       <SectionListView
         sections={sections}
         hasNextPage={hasNextPage}
@@ -142,8 +142,15 @@ const styles = StyleSheet.create((theme, rt) => ({
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
   },
-  row: {
-    flexDirection: "row",
-    gap: theme.gap(2),
+  greeting: {
+    paddingHorizontal: theme.gap(2),
+  },
+  statsContainer: {
+    justifyContent: "center",
+    paddingVertical: theme.gap(2),
+    paddingHorizontal: theme.gap(1),
+    backgroundColor: theme.colors.foreground,
+    borderRadius: theme.gap(2),
+    gap: theme.gap(1),
   },
 }));

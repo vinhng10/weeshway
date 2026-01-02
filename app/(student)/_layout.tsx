@@ -35,7 +35,7 @@ export default function TabLayout() {
         options={{
           title: "Wishes",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="wand.and.sparkles" color={color} />
+            <IconSymbol size={28} name="sparkles" color={color} />
           ),
         }}
       />

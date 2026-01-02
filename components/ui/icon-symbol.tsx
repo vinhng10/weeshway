@@ -43,6 +43,7 @@ const MAPPING = {
   calendar: "calendar",
   plus: "add",
   xmark: "close",
+  "compass.drawing": "compass",
 } as IconMapping;
 
 /**
