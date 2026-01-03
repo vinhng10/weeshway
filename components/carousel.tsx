@@ -1,13 +1,15 @@
 import { ProjectCard } from "@/components/project-card";
 import { ProjectEnrichedType } from "@/types";
 import * as React from "react";
-import { View } from "react-native";
+import { Dimensions, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import RNCarousel, {
   ICarouselInstance,
   Pagination,
 } from "react-native-reanimated-carousel";
 import { StyleSheet } from "react-native-unistyles";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 interface CarouselProps {
   data: ProjectEnrichedType[];
@@ -16,18 +18,18 @@ interface CarouselProps {
 export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
+  const carouselSize = screenWidth * 0.9; // 90% of screen width
+  const offset = carouselSize * 0.15;
 
-  if (!data || data.length === 0) {
-    return null;
-  }
+  if (!data || data.length === 0) return null;
 
   return (
     <View>
       <RNCarousel
         ref={ref}
         loop={true}
-        width={360}
-        height={360}
+        width={carouselSize}
+        height={carouselSize}
         snapEnabled={true}
         pagingEnabled={true}
         data={data}
@@ -35,8 +37,8 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
         style={styles.carousel}
         mode="parallax"
         modeConfig={{
-          parallaxScrollingScale: 1.0,
-          parallaxScrollingOffset: 45,
+          parallaxScrollingScale: 0.95,
+          parallaxScrollingOffset: offset,
           parallaxAdjacentItemScale: 0.8,
         }}
         onSnapToItem={(index: number) => {}}
@@ -59,8 +61,7 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
 
 const styles = StyleSheet.create((theme) => ({
   carousel: {
-    width: "100%",
-    justifyContent: "center",
+    alignSelf: "center",
   },
   carouselItem: {
     padding: theme.gap(1),

@@ -80,8 +80,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingBottom: theme.gap(16),
   },
   cardContainer: {
-    width: theme.gap(42),
-    height: theme.gap(42),
     alignSelf: "center",
   },
   row: {

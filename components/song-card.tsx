@@ -5,8 +5,10 @@ import { SongType } from "@/types";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { View } from "react-native";
+import { Dimensions, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 interface SongCardProps {
   data: SongType;
@@ -55,7 +57,8 @@ export const SongCard: React.FunctionComponent<SongCardProps> = ({ data }) => {
 
 const styles = StyleSheet.create((theme) => ({
   background: {
-    flex: 1,
+    width: screenWidth * 0.8,
+    height: screenWidth * 0.8,
   },
   backgroundImage: {
     borderRadius: theme.gap(2),
