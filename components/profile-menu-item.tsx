@@ -1,10 +1,10 @@
 import { styles as textStyles, ThemedText } from "@/components/themed-text";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
 import { Pressable } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 
 type ProfileMenuItemProps = {
-  icon: string;
+  icon: IconSymbolName;
   label: string;
   onPress?: () => void;
   showChevron?: boolean;
@@ -17,14 +17,14 @@ export function ProfileMenuItem({
   showChevron = true,
   color,
 }: ProfileMenuItemProps) {
-  textStyles.useVariants({ color });
+  textStyles.useVariants({ type: "h5", color });
 
   return (
     <Pressable style={styles.container} onPress={onPress}>
-      <IconSymbol style={textStyles.color} name={icon as any} size={24} />
-      <ThemedText style={[textStyles.color, styles.label]}>{label}</ThemedText>
+      <IconSymbol style={textStyles.style} name={icon} />
+      <ThemedText style={[textStyles.style, styles.label]}>{label}</ThemedText>
       {showChevron && (
-        <IconSymbol style={textStyles.color} name="chevron.right" size={20} />
+        <IconSymbol style={textStyles.style} name="chevron.right" />
       )}
     </Pressable>
   );

@@ -19,7 +19,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
       <RNTextInput
         ref={ref}
         multiline={multiline}
-        style={[styles.container, textStyles.stype, style]}
+        style={[styles.container, textStyles.style, style]}
         {...rest}
       />
     );
