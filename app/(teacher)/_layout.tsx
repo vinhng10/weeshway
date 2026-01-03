@@ -1,4 +1,4 @@
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { IconSymbol } from "@/components";
 import { Tabs } from "expo-router";
 import { useUnistyles } from "react-native-unistyles";
 

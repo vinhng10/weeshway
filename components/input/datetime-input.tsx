@@ -1,12 +1,12 @@
-import { Header } from "@/components/header";
 import {
+  Button,
   DateTimeBoxInput,
   formatDate,
   formatTime,
-} from "@/components/input/box-input";
-import { Button } from "@/components/input/button";
-import { ThemedText } from "@/components/themed-text";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+  Header,
+  IconSymbol,
+  ThemedText,
+} from "@/components";
 import React, { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";

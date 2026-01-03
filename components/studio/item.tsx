@@ -1,4 +1,4 @@
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText } from "@/components";
 import { PIXELS_PER_SECOND } from "@/constants";
 import { ItemType } from "@/types";
 import { Pressable } from "react-native";

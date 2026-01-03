@@ -1,5 +1,4 @@
-import { ThemedText } from "@/components/themed-text";
-import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
+import { IconSymbol, IconSymbolName, ThemedText } from "@/components";
 import { Pressable, View } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 

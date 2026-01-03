@@ -1,4 +1,4 @@
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { IconSymbol } from "@/components";
 import { Image, type ImageProps } from "expo-image";
 import {
   launchImageLibraryAsync,

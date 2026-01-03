@@ -1,9 +1,7 @@
 // Track.tsx - Fixed version
-import { Item } from "@/components/studio/item";
-import { ThemedText } from "@/components/themed-text";
+import { Item, ThemedText } from "@/components";
 import { PIXELS_PER_SECOND, TICK_INTERVAL, TrackEnum } from "@/constants";
-import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
-import type { StudioStoreHook } from "@/hooks/useStudioStore";
+import { useAudioPlayerStore, type StudioStoreHook } from "@/hooks";
 import { ItemType } from "@/types";
 import React, { useEffect, useMemo } from "react";
 import { Dimensions, Pressable, View } from "react-native";

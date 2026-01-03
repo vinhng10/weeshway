@@ -1,6 +1,5 @@
-import { IconButton } from "@/components/input/icon-button";
-import { ThemedText } from "@/components/themed-text";
-import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
+import { IconButton, ThemedText } from "@/components";
+import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";

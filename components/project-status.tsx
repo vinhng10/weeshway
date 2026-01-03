@@ -1,5 +1,4 @@
-import { Chip } from "@/components/chip";
-import { IconSymbolName } from "@/components/ui/icon-symbol";
+import { Chip, IconSymbolName } from "@/components";
 import { ProjectStatusEnum } from "@/constants";
 import { ProjectEnrichedType } from "@/types";
 

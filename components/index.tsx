@@ -15,7 +15,11 @@ export { ProjectCard } from "./project-card";
 export { ProjectStatus } from "./project-status";
 export { SectionListView } from "./section-list";
 export { SongCard } from "./song-card";
-export { ThemedText, type ThemedTextProps } from "./themed-text";
+export {
+  styles as textStyles,
+  ThemedText,
+  type ThemedTextProps,
+} from "./themed-text";
 export { ThemedView, type ThemedViewProps } from "./themed-view";
 export { Tile } from "./tile";
 export { Video } from "./video";

@@ -61,6 +61,7 @@ export const LocationPermission = () => {
         })
         .eq("id", profile.id);
       if (error) throw error;
+      console.log("Location updated:", location);
     } catch (error) {
       setErrorMessage("Failed to update location. Please try again.");
       console.error("Location update error:", error);

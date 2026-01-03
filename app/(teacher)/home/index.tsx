@@ -1,7 +1,6 @@
 import {
   Boundary,
   formatTime,
-  LocationPermission,
   ProjectStatus,
   SectionListView,
   ThemedText,
@@ -128,7 +127,6 @@ function HomeContent() {
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
       />
-      <LocationPermission />
     </View>
   );
 }

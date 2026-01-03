@@ -1,4 +1,4 @@
-import { ProjectCard } from "@/components/project-card";
+import { ProjectCard } from "@/components";
 import { ProjectEnrichedType } from "@/types";
 import * as React from "react";
 import { Dimensions, View } from "react-native";

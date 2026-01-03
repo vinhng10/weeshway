@@ -1,5 +1,4 @@
-import { Header } from "@/components/header";
-import { ThemedText } from "@/components/themed-text";
+import { Header, ThemedText } from "@/components";
 import { Modal, Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 

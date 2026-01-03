@@ -1,12 +1,15 @@
-import { ThemedText } from "@/components/themed-text";
-import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
+import {
+  IconSymbol,
+  IconSymbolName,
+  OptionsModal,
+  TextInput,
+  ThemedText,
+} from "@/components";
 import { DayEnum, MonthEnum } from "@/constants";
 import React, { useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { StyleSheet } from "react-native-unistyles";
-import { OptionsModal } from "../options-modal";
-import { TextInput } from "./text-input";
 
 export const formatDate = (date?: Date, compact: boolean = false): string => {
   if (!date) return "";

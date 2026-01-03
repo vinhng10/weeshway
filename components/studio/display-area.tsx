@@ -1,6 +1,4 @@
-import { Button } from "@/components/input/button";
-import { IconButton } from "@/components/input/icon-button";
-import { ThemedText } from "@/components/themed-text";
+import { Button, IconButton, ThemedText } from "@/components";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 

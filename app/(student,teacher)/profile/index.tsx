@@ -1,10 +1,12 @@
-import { Avatar } from "@/components/avatar";
-import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
-import { ProfileMenuItem } from "@/components/profile-menu-item";
-import { ThemedText } from "@/components/themed-text";
+import {
+  Avatar,
+  ChipBar,
+  ChipBarItemProps,
+  ProfileMenuItem,
+  ThemedText,
+} from "@/components";
 import { RoleEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useRole } from "@/hooks/useRole";
+import { useAuth, useRole } from "@/hooks";
 import { useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";

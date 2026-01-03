@@ -3,6 +3,7 @@ import {
   BubbleChart,
   ChipBar,
   ChipBarItemProps,
+  LocationPermission,
   SectionListView,
   Tile,
 } from "@/components";
@@ -116,6 +117,7 @@ function WishBoardContent() {
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
       />
+      <LocationPermission />
     </View>
   );
 }

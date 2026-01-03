@@ -1,10 +1,6 @@
-import { Boundary } from "@/components/boundary";
-import { Header } from "@/components/header";
-import { Button } from "@/components/input/button";
+import { Boundary, Button, Header } from "@/components";
 import { RETURN_URL } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocales } from "@/hooks/useLocales";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useState } from "react";

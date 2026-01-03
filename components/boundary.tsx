@@ -1,4 +1,4 @@
-import { Button } from "@/components/input/button";
+import { Button } from "@/components";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";

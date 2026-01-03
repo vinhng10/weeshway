@@ -1,6 +1,4 @@
-import { Header } from "@/components/header";
-import { TextInput } from "@/components/input/text-input";
-import { Tile } from "@/components/tile";
+import { Header, TextInput, ThemedText, Tile } from "@/components";
 import { SongType } from "@/types";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,7 +9,6 @@ import {
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { ThemedText } from "../themed-text";
 
 // --- Types & Helpers ---
 interface iTunesSearchResult {

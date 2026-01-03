@@ -1,7 +1,6 @@
-import { Button } from "@/components/input/button";
-import { ThemedText } from "@/components/themed-text";
+import { Button, ThemedText } from "@/components";
 import { RETURN_URL } from "@/constants";
-import { useLocales } from "@/hooks/useLocales";
+import { useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileType, ProjectEnrichedType } from "@/types";
 import { useStripe } from "@stripe/stripe-react-native";

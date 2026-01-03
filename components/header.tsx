@@ -1,5 +1,4 @@
-import { ThemedText } from "@/components/themed-text";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { IconSymbol, ThemedText } from "@/components";
 import { useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";

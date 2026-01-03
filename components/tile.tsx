@@ -1,13 +1,11 @@
-import { Avatar } from "@/components/avatar";
-import { IconButton } from "@/components/input/icon-button";
+import { Avatar, IconButton, ThemedText } from "@/components";
 import { WishStatusEnum } from "@/constants";
-import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
+import { useAudioPlayerStore } from "@/hooks";
 import { ImageProps } from "expo-image";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import React, { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { ThemedText } from "./themed-text";
 
 interface TileProps {
   imageSource: ImageProps["source"];

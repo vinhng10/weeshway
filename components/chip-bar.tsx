@@ -1,5 +1,4 @@
-import { Chip } from "@/components/chip";
-import { OptionsModal } from "@/components/options-modal";
+import { Chip, OptionsModal } from "@/components";
 import { useState } from "react";
 import { ScrollView } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";

@@ -1,10 +1,12 @@
-import { Avatar } from "@/components/avatar";
-import { Header } from "@/components/header";
-import { TextBoxInput } from "@/components/input/box-input";
-import { Button } from "@/components/input/button";
-import { IconButton } from "@/components/input/icon-button";
-import { Video } from "@/components/video";
-import { useAuth } from "@/hooks/useAuth";
+import {
+  Avatar,
+  Button,
+  Header,
+  IconButton,
+  TextBoxInput,
+  Video,
+} from "@/components";
+import { useAuth } from "@/hooks";
 import { supabase, uploadMedia } from "@/supabase";
 import {
   launchImageLibraryAsync,

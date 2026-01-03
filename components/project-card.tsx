@@ -1,16 +1,17 @@
-import { Avatar } from "@/components/avatar";
-import { Checkout } from "@/components/checkout";
-import { Chip } from "@/components/chip";
-import { formatDate, formatTime } from "@/components/input";
-import { Button } from "@/components/input/button";
-import { IconButton } from "@/components/input/icon-button";
-import { ProjectStatus } from "@/components/project-status";
-import { ThemedText } from "@/components/themed-text";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import {
+  Avatar,
+  Button,
+  Checkout,
+  Chip,
+  formatDate,
+  formatTime,
+  IconButton,
+  IconSymbol,
+  ProjectStatus,
+  ThemedText,
+} from "@/components";
 import { ProjectStatusEnum, StripePaymentStatusEnum } from "@/constants";
-import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocales } from "@/hooks/useLocales";
+import { useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
