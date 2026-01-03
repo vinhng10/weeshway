@@ -1,18 +1,19 @@
-import { Button } from "@/components/button";
-import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
-import { Header } from "@/components/header";
-import { DateTimeInput, TextInput } from "@/components/input";
 import {
+  Button,
+  ChipBar,
+  ChipBarItemProps,
+  DateTimeInput,
   FloatBoxInput,
+  Header,
   IntBoxInput,
+  LocationInput,
   SelectBoxInput,
-} from "@/components/input/box-input";
-import { LocationInput } from "@/components/input/location-input";
-import { SongSearch } from "@/components/song-search";
-import { Tile } from "@/components/tile";
+  SongSearch,
+  TextInput,
+  Tile,
+} from "@/components";
 import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocales } from "@/hooks/useLocales";
+import { useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { LocationType, SongType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";

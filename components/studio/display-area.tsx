@@ -1,7 +1,6 @@
-import { Button } from "@/components/button";
-import { IconButton } from "@/components/icon-button";
+import { Button } from "@/components/input/button";
+import { IconButton } from "@/components/input/icon-button";
 import { ThemedText } from "@/components/themed-text";
-import React from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -11,11 +10,11 @@ interface DisplayAreaProps {
   onOpenCamera?: any;
 }
 
-export const DisplayArea: React.FunctionComponent<DisplayAreaProps> = ({
+export const DisplayArea = ({
   recognizing,
   transcript,
   onOpenCamera,
-}) => {
+}: DisplayAreaProps) => {
   return (
     <View style={styles.container}>
       <IconButton icon="camera.fill" iconSize={36} style={styles.icon} />

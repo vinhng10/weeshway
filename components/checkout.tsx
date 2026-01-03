@@ -1,4 +1,4 @@
-import { Button } from "@/components/button";
+import { Button } from "@/components/input/button";
 import { ThemedText } from "@/components/themed-text";
 import { RETURN_URL } from "@/constants";
 import { useLocales } from "@/hooks/useLocales";

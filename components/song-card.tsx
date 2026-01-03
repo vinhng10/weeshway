@@ -1,10 +1,9 @@
-import { IconButton } from "@/components/icon-button";
+import { IconButton } from "@/components/input/icon-button";
 import { ThemedText } from "@/components/themed-text";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { SongType } from "@/types";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
 import { Dimensions, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -14,7 +13,7 @@ interface SongCardProps {
   data: SongType;
 }
 
-export const SongCard: React.FunctionComponent<SongCardProps> = ({ data }) => {
+export const SongCard = ({ data }: SongCardProps) => {
   const isPlaying = useAudioPlayerStore((state) =>
     state.isPlaying(data.previewUrl)
   );

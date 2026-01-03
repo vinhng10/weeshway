@@ -1,18 +1,21 @@
-import { Boundary } from "@/components/boundary";
-import { formatTime } from "@/components/input/box-input";
-import { ProjectStatus } from "@/components/project-status";
-import { SectionListView } from "@/components/section-list";
-import { ThemedText } from "@/components/themed-text";
-import { Tile } from "@/components/tile";
+import {
+  Boundary,
+  formatTime,
+  ProjectStatus,
+  SectionListView,
+  ThemedText,
+  Tile,
+} from "@/components";
 import { ProjectStatusEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocales } from "@/hooks/useLocales";
-import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import {
+  useAuth,
+  useLocales,
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType, StatsType } from "@/types";
 import { router } from "expo-router";
-import React from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -64,7 +67,7 @@ function HomeContent() {
     },
   });
 
-  const renderStats = (data: StatsType[]): React.ReactElement => {
+  const renderStats = (data: StatsType[]) => {
     let totalEarnings = 0;
     let bookingCount = 0;
 
@@ -87,7 +90,7 @@ function HomeContent() {
     );
   };
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
+  const renderTile = (data: ProjectEnrichedType) => (
     <Tile
       imageSource={data.song.artworkUrl}
       title={data.song.name}

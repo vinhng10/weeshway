@@ -1,9 +1,12 @@
-import { Boundary } from "@/components/boundary";
-import { Button } from "@/components/button";
-import { Header } from "@/components/header";
-import { TextBoxInput, TextInput } from "@/components/input";
-import { SongCard } from "@/components/song-card";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import {
+  Boundary,
+  Button,
+  Header,
+  SongCard,
+  TextBoxInput,
+  TextInput,
+} from "@/components";
+import { useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { useLocalSearchParams } from "expo-router";

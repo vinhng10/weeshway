@@ -1,6 +1,5 @@
 import { Header } from "@/components/header";
 import { ThemedText } from "@/components/themed-text";
-import React from "react";
 import { Modal, Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -13,14 +12,14 @@ interface OptionsModalProps {
   currentValue?: string;
 }
 
-export const OptionsModal: React.FunctionComponent<OptionsModalProps> = ({
+export const OptionsModal = ({
   visible,
   onClose,
   onSelect,
   options,
   title,
   currentValue,
-}) => {
+}: OptionsModalProps) => {
   const handleSelect = (value: string) => {
     onSelect(currentValue === value ? undefined : value);
     onClose();

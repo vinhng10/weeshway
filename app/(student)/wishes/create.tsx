@@ -1,10 +1,13 @@
-import { Button } from "@/components/button";
-import { Header } from "@/components/header";
-import { SelectBoxInput, TextInput } from "@/components/input";
-import { SongCard } from "@/components/song-card";
-import { SongSearch } from "@/components/song-search";
+import {
+  Button,
+  Header,
+  SelectBoxInput,
+  SongCard,
+  SongSearch,
+  TextInput,
+} from "@/components";
 import { LevelEnum, StyleEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks";
 import { supabase } from "@/supabase";
 import { SongType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";

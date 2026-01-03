@@ -1,12 +1,14 @@
-import { Avatar } from "@/components/avatar";
-import { Boundary } from "@/components/boundary";
-import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
-import { ProjectStatus } from "@/components/project-status";
-import { SectionListView } from "@/components/section-list";
-import { Tile } from "@/components/tile";
+import {
+  Avatar,
+  Boundary,
+  ChipBar,
+  ChipBarItemProps,
+  ProjectStatus,
+  SectionListView,
+  Tile,
+} from "@/components";
 import { StripePaymentStatusEnum, TimeEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
+import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
 import { BookingEnrichedType, ProjectEnrichedType } from "@/types";
 import { router } from "expo-router";
 import React, { useState } from "react";

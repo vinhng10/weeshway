@@ -1,9 +1,9 @@
 import { Avatar } from "@/components/avatar";
-import { Button } from "@/components/button";
 import { Checkout } from "@/components/checkout";
 import { Chip } from "@/components/chip";
-import { IconButton } from "@/components/icon-button";
 import { formatDate, formatTime } from "@/components/input";
+import { Button } from "@/components/input/button";
+import { IconButton } from "@/components/input/icon-button";
 import { ProjectStatus } from "@/components/project-status";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -16,7 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React from "react";
+import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
@@ -25,10 +25,10 @@ interface CardProps {
   data: ProjectEnrichedType;
 }
 
-export const ProjectCard: React.FunctionComponent<CardProps> = ({ data }) => {
+export const ProjectCard = ({ data }: CardProps) => {
   const profile = useAuth((state) => state.profile);
   const queryClient = useQueryClient();
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible] = useState(false);
   const { isPlaying, toggle } = useAudioPlayerStore(
     useShallow((state) => ({
       isPlaying: state.isPlaying(data.song.previewUrl),

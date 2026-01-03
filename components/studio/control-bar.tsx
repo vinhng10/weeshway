@@ -1,5 +1,4 @@
-import { IconButton } from "@/components/icon-button";
-import React from "react";
+import { IconButton } from "@/components/input/icon-button";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -13,7 +12,7 @@ interface ControlBarProps {
   onToggleWakeWord: any;
 }
 
-export const ControlBar: React.FunctionComponent<ControlBarProps> = ({
+export const ControlBar = ({
   isPlaying,
   wakeWordEnabled,
   onLoadAudio,
@@ -21,7 +20,7 @@ export const ControlBar: React.FunctionComponent<ControlBarProps> = ({
   onSplit,
   onMerge,
   onToggleWakeWord,
-}) => {
+}: ControlBarProps) => {
   return (
     <View style={styles.container}>
       <IconButton

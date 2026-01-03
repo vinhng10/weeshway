@@ -1,6 +1,6 @@
 import { Pressable, View, type ViewProps } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
-import { IconSymbol, type IconSymbolName } from "./ui/icon-symbol";
+import { IconSymbol, type IconSymbolName } from "../ui/icon-symbol";
 
 export type IconButtonProps = UnistylesVariants<typeof styles> &
   ViewProps & {

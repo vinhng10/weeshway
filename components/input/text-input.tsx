@@ -1,4 +1,4 @@
-import React from "react";
+import { forwardRef } from "react";
 import {
   TextInput as RNTextInput,
   type TextInputProps as RNTextInputProps,
@@ -9,7 +9,7 @@ import { styles as textStyles } from "../themed-text";
 export type TextInputProps = RNTextInputProps &
   UnistylesVariants<typeof styles>;
 
-export const TextInput = React.forwardRef<RNTextInput, TextInputProps>(
+export const TextInput = forwardRef<RNTextInput, TextInputProps>(
   ({ type, bold, color, multiline, style, ...rest }, ref) => {
     styles.useVariants({ type, bold, color, multiline });
     textStyles.useVariants({ type, bold, color });

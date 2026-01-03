@@ -97,6 +97,11 @@ export type StatsType = {
   currentMonth: string;
 };
 
+export type BubbleType = {
+  label: number;
+  value: number;
+}
+
 // Utility type: WishType with song_id replaced by joined songs relation
 export type WishEnrichedType = WishType & {
   song: SongType;

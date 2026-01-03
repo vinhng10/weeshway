@@ -1,14 +1,15 @@
-import { Avatar } from "@/components/avatar";
-import { Boundary } from "@/components/boundary";
-import { Header } from "@/components/header";
-import { ProjectStatus } from "@/components/project-status";
-import { SectionListView } from "@/components/section-list";
-import { ThemedText } from "@/components/themed-text";
-import { Tile } from "@/components/tile";
-import { Video } from "@/components/video";
+import {
+  Avatar,
+  Boundary,
+  Header,
+  ProjectStatus,
+  SectionListView,
+  ThemedText,
+  Tile,
+  Video,
+} from "@/components";
 import { StripePaymentStatusEnum } from "@/constants";
-import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";

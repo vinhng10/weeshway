@@ -1,33 +1,31 @@
-import { Avatar } from "@/components/avatar";
-import { Boundary } from "@/components/boundary";
-import { Button } from "@/components/button";
-import { Checkout } from "@/components/checkout";
-import { Hero } from "@/components/hero";
 import {
+  Avatar,
+  Boundary,
+  Button,
+  Checkout,
   DateTimeInput,
   FloatBoxInput,
+  Hero,
   IntBoxInput,
+  LocationInput,
   TextBoxInput,
   TextInput,
-} from "@/components/input";
-import { LocationInput } from "@/components/input/location-input";
-import { ThemedText } from "@/components/themed-text";
+  ThemedText,
+} from "@/components";
 import { ProjectStatusEnum, StripePaymentStatusEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocales } from "@/hooks/useLocales";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassContent() {
   const { classId } = useLocalSearchParams<{ classId: string }>();
   const profile = useAuth((state) => state.profile);
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible] = useState(false);
   const queryClient = useQueryClient();
   const formatMoney = useLocales((state) => state.formatMoney);
 

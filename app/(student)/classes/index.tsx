@@ -1,23 +1,25 @@
-import { Avatar } from "@/components/avatar";
-import { Boundary } from "@/components/boundary";
-import { Carousel } from "@/components/carousel";
-import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
-import { ProjectStatus } from "@/components/project-status";
-import { SectionListView } from "@/components/section-list";
-import { Tile } from "@/components/tile";
+import {
+  Avatar,
+  Boundary,
+  Carousel,
+  ChipBar,
+  ChipBarItemProps,
+  ProjectStatus,
+  SectionListView,
+  Tile,
+} from "@/components";
 import {
   LevelEnum,
   ProjectStatusEnum,
   StripePaymentStatusEnum,
   StyleEnum,
 } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { useAuth, useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
+import * as Location from "expo-location";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -26,6 +28,21 @@ function ClassesContent() {
   const [style, setStyle] = useState<StyleEnum>();
   const [level, setLevel] = useState<LevelEnum>();
   const profile = useAuth((state) => state.profile);
+
+  useEffect(() => {
+    async function requestLocation() {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === "granted") {
+        const location = await Location.getCurrentPositionAsync({});
+        console.log(
+          "Location:",
+          location.coords.latitude,
+          location.coords.longitude
+        );
+      }
+    }
+    requestLocation();
+  }, []);
 
   const { data: recommendations } = useSuspenseQuery<ProjectEnrichedType[][]>({
     queryKey: ["classes", "recommendations", status, style, level],

@@ -5,7 +5,7 @@ import {
   type ViewProps,
 } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
-import { ThemedText } from "./themed-text";
+import { ThemedText } from "../themed-text";
 
 export type ButtonProps = {
   label: string;

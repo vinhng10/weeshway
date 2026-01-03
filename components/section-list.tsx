@@ -1,5 +1,4 @@
 import { ThemedText } from "@/components/themed-text";
-import React from "react";
 import { SectionList, SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 

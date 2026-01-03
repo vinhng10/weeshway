@@ -1,4 +1,4 @@
-import { Button } from "@/components/button";
+import { Button } from "@/components/input/button";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -20,7 +20,7 @@ export function Boundary({ children }: { children: React.ReactNode }) {
           <Suspense
             fallback={
               <View style={styles.container}>
-                <ActivityIndicator size="large" color="#FFFFFF"/>
+                <ActivityIndicator size="large" color="#FFFFFF" />
               </View>
             }
           >

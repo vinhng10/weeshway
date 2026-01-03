@@ -1,9 +1,5 @@
-import { Boundary } from "@/components/boundary";
-import { Carousel } from "@/components/carousel";
-import { Header } from "@/components/header";
-import { ThemedText } from "@/components/themed-text";
-import { Tile } from "@/components/tile";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { Boundary, Carousel, Header, ThemedText, Tile } from "@/components";
+import { useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishRecommendationEnrichedType } from "@/types";
 import { useLocalSearchParams } from "expo-router";

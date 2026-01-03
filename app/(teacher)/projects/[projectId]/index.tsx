@@ -1,24 +1,24 @@
-import { Boundary } from "@/components/boundary";
-import { Button } from "@/components/button";
-import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
-import { Header } from "@/components/header";
 import {
+  Boundary,
+  Button,
+  ChipBar,
+  ChipBarItemProps,
   DateTimeInput,
   FloatBoxInput,
+  Header,
   IntBoxInput,
+  LocationInput,
   SelectBoxInput,
   TextInput,
-} from "@/components/input";
-import { LocationInput } from "@/components/input/location-input";
-import { Tile } from "@/components/tile";
+  Tile,
+} from "@/components";
 import {
   LevelEnum,
   ProjectStatusEnum,
   StripePaymentStatusEnum,
   StyleEnum,
 } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useSuspenseQuery } from "@/hooks/useSuspenseQuery";
+import { useAuth, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";

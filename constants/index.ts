@@ -1,3 +1,4 @@
+export const DUCKING_VOLUME = 0.1;
 export const PIXELS_PER_SECOND = 30;
 export const TICK_INTERVAL = 5;
 export const RETURN_URL = "https://vinhng10.github.io";

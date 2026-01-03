@@ -1,6 +1,6 @@
 import { Boundary } from "@/components/boundary";
-import { Button } from "@/components/button";
 import { Header } from "@/components/header";
+import { Button } from "@/components/input/button";
 import { RETURN_URL } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocales } from "@/hooks/useLocales";

@@ -52,9 +52,7 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/MomoTrustDisplay-Regular.ttf"
-          ]
+          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
         }
       ],
       [
@@ -70,7 +68,13 @@
           "experimentalLauncherActivity": true
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

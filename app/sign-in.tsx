@@ -1,9 +1,7 @@
-import { Button } from "@/components/button";
-import { TextInput } from "@/components/input";
-import { ThemedText } from "@/components/themed-text";
-import { useAuth } from "@/hooks/useAuth";
+import { Button, TextInput, ThemedText } from "@/components";
+import { useAuth } from "@/hooks";
 import { Link } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 

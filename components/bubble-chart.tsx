@@ -1,3 +1,4 @@
+import { BubbleType } from "@/types";
 import {
   Canvas,
   Circle,
@@ -26,11 +27,6 @@ const BUBBLE_COLORS = [
   { color: "rgba(199, 136, 0, 0.95)", stroke: "rgb(151, 103, 0)" },
   { color: "rgba(16, 164, 142, 0.95)", stroke: "rgb(14, 142, 123)" },
 ];
-
-export interface BubbleType {
-  label: number;
-  value: number;
-}
 
 interface BubbleChartProps {
   data: BubbleType[];

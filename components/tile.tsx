@@ -1,5 +1,5 @@
 import { Avatar } from "@/components/avatar";
-import { IconButton } from "@/components/icon-button";
+import { IconButton } from "@/components/input/icon-button";
 import { WishStatusEnum } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { ImageProps } from "expo-image";

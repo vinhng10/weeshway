@@ -1,8 +1,8 @@
 import { Avatar } from "@/components/avatar";
-import { Button } from "@/components/button";
 import { Header } from "@/components/header";
-import { IconButton } from "@/components/icon-button";
 import { TextBoxInput } from "@/components/input/box-input";
+import { Button } from "@/components/input/button";
+import { IconButton } from "@/components/input/icon-button";
 import { Video } from "@/components/video";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase, uploadMedia } from "@/supabase";

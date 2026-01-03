@@ -1,7 +1,4 @@
-import {
-  DUCKING_VOLUME,
-  IAudioPlayerAction,
-} from "@/components/AudioStudio/types";
+import { DUCKING_VOLUME } from "@/constants";
 import type { AudioPlayer } from "expo-audio";
 import {
   ExpoSpeechRecognitionModule,
@@ -9,6 +6,12 @@ import {
 } from "expo-speech-recognition";
 import Groq from "groq-sdk";
 import { useState } from "react";
+
+interface IAudioPlayerAction {
+  action: "play" | "stop";
+  items: number[];
+  type: "music" | "count";
+}
 
 const llm = new Groq({
   apiKey: "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",

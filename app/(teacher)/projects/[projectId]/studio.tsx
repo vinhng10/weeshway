@@ -1,9 +1,7 @@
 // Studio.tsx
-import { Header } from "@/components/header";
-import { ControlBar, DisplayArea, Track } from "@/components/studio";
+import { ControlBar, DisplayArea, Header, Track } from "@/components";
 import { TrackEnum } from "@/constants";
-import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
-import { createStudioStore } from "@/hooks/useStudioStore";
+import { createStudioStore, useAudioPlayerStore } from "@/hooks";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { View } from "react-native";

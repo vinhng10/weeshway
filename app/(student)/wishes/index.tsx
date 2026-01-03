@@ -1,13 +1,15 @@
-import { AvatarGroup } from "@/components/avatar-group";
-import { Boundary } from "@/components/boundary";
-import { Button } from "@/components/button";
-import { Chip } from "@/components/chip";
-import { ChipBar, ChipBarItemProps } from "@/components/chip-bar";
-import { SectionListView } from "@/components/section-list";
-import { Tile } from "@/components/tile";
+import {
+  AvatarGroup,
+  Boundary,
+  Button,
+  Chip,
+  ChipBar,
+  ChipBarItemProps,
+  SectionListView,
+  Tile,
+} from "@/components";
 import { LevelEnum, StyleEnum, WishStatusEnum } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-import { useSuspenseInfiniteQuery } from "@/hooks/useSuspenseInfiniteQuery";
+import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
 import { WishRecommendationEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";

@@ -1,7 +1,7 @@
 import { Avatar } from "@/components/avatar";
-import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { TextBoxInput } from "@/components/input/box-input";
+import { Button } from "@/components/input/button";
 import { TextInput } from "@/components/input/text-input";
 import { ThemedText } from "@/components/themed-text";
 import { Tile } from "@/components/tile";
@@ -61,9 +61,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
         .select()
         .textSearch("name", `'${trimmedQuery}'`);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       if (data) {
         const camelCasedData = camelcaseKeys(data, { deep: true });
@@ -77,7 +75,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     // Debounce the search
     const timeoutId = setTimeout(() => {
       searchLocations();
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [query]);
@@ -106,9 +104,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
         .select()
         .single();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       if (onValueChange) {
         onValueChange(camelcaseKeys(data, { deep: true }));

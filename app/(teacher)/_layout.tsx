@@ -1,6 +1,5 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Tabs } from "expo-router";
-import React from "react";
 import { useUnistyles } from "react-native-unistyles";
 
 export default function TabLayout() {
