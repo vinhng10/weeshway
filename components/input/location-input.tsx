@@ -1,11 +1,13 @@
-import { Avatar } from "@/components/avatar";
-import { Header } from "@/components/header";
-import { TextBoxInput } from "@/components/input/box-input";
-import { Button } from "@/components/input/button";
-import { TextInput } from "@/components/input/text-input";
-import { ThemedText } from "@/components/themed-text";
-import { Tile } from "@/components/tile";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import {
+  Avatar,
+  Button,
+  Header,
+  IconSymbol,
+  TextBoxInput,
+  TextInput,
+  ThemedText,
+  Tile,
+} from "@/components";
 import { supabase, uploadMedia } from "@/supabase";
 import { LocationType } from "@/types";
 import camelcaseKeys from "camelcase-keys";

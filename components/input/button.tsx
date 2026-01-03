@@ -28,7 +28,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
 
   return (
     <Pressable
-      style={[styles.button, styles.position, styles.type, style]}
+      style={[styles.style, style]}
       onPress={onPress}
       disabled={rest.disabled || loading}
       {...rest}
@@ -48,27 +48,12 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
 };
 
 const styles = StyleSheet.create((theme) => ({
-  button: {
+  style: {
     height: theme.gap(6),
     paddingHorizontal: theme.gap(2),
     justifyContent: "center",
     alignItems: "center",
     borderRadius: theme.gap(2),
-  },
-  position: {
-    variants: {
-      outlined: { true: {} },
-      stickyBottom: {
-        true: {
-          width: "70%",
-          position: "absolute",
-          alignSelf: "center",
-          bottom: theme.gap(2),
-        },
-      },
-    },
-  },
-  type: {
     variants: {
       outlined: {
         true: {
@@ -80,7 +65,14 @@ const styles = StyleSheet.create((theme) => ({
           backgroundColor: theme.colors.activeTint,
         },
       },
-      stickyBottom: { true: {} },
+      stickyBottom: {
+        true: {
+          width: "70%",
+          position: "absolute",
+          alignSelf: "center",
+          bottom: theme.gap(2),
+        },
+      },
     },
   },
   label: {

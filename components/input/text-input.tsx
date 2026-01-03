@@ -7,24 +7,19 @@ import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 import { styles as textStyles } from "../themed-text";
 
 export type TextInputProps = RNTextInputProps &
-  UnistylesVariants<typeof styles>;
+  UnistylesVariants<typeof styles> &
+  UnistylesVariants<typeof textStyles>;
 
 export const TextInput = forwardRef<RNTextInput, TextInputProps>(
   ({ type, bold, color, multiline, style, ...rest }, ref) => {
-    styles.useVariants({ type, bold, color, multiline });
+    styles.useVariants({ multiline });
     textStyles.useVariants({ type, bold, color });
 
     return (
       <RNTextInput
         ref={ref}
         multiline={multiline}
-        style={[
-          styles.container,
-          textStyles.family,
-          textStyles.color,
-          textStyles.type,
-          style,
-        ]}
+        style={[styles.container, textStyles.stype, style]}
         {...rest}
       />
     );
@@ -38,22 +33,6 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.gap(2),
     padding: theme.gap(2),
     variants: {
-      type: {
-        default: {},
-        h1: {},
-        h2: {},
-        h3: {},
-        h4: {},
-        h5: {},
-      },
-      bold: {
-        true: {},
-      },
-      color: {
-        default: {},
-        dimmed: {},
-        danger: {},
-      },
       multiline: {
         true: {
           minHeight: theme.gap(12),

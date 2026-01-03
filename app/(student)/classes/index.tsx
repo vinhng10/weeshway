@@ -4,6 +4,7 @@ import {
   Carousel,
   ChipBar,
   ChipBarItemProps,
+  LocationPermission,
   ProjectStatus,
   SectionListView,
   Tile,
@@ -27,12 +28,16 @@ function ClassesContent() {
   const [status, setStatus] = useState<ProjectStatusEnum>();
   const [style, setStyle] = useState<StyleEnum>();
   const [level, setLevel] = useState<LevelEnum>();
+  const [locationModalVisible, setLocationModalVisible] = useState(false);
   const profile = useAuth((state) => state.profile);
 
   useEffect(() => {
-    async function requestLocation() {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === "granted") {
+    async function checkLocationPermission() {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setLocationModalVisible(true);
+      } else {
+        // Permission already granted, get location
         const location = await Location.getCurrentPositionAsync({});
         console.log(
           "Location:",
@@ -41,8 +46,18 @@ function ClassesContent() {
         );
       }
     }
-    requestLocation();
+    checkLocationPermission();
   }, []);
+
+  const handleLocationPermissionGranted = (
+    location: Location.LocationObject
+  ) => {
+    console.log(
+      "Location:",
+      location.coords.latitude,
+      location.coords.longitude
+    );
+  };
 
   const { data: recommendations } = useSuspenseQuery<ProjectEnrichedType[][]>({
     queryKey: ["classes", "recommendations", status, style, level],
@@ -167,6 +182,11 @@ function ClassesContent() {
         sections={sections}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
+      />
+      <LocationPermission
+        visible={locationModalVisible}
+        onClose={() => setLocationModalVisible(false)}
+        onPermissionGranted={handleLocationPermissionGranted}
       />
     </View>
   );

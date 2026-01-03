@@ -11,48 +11,13 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   styles.useVariants({ type, bold, color });
-  return (
-    <Text style={[styles.family, styles.color, styles.type, style]} {...rest} />
-  );
+  return <Text style={[styles.style, style]} {...rest} />;
 }
 
 export const styles = StyleSheet.create((theme) => ({
-  family: {
+  style: {
+    textAlign: "justify",
     fontFamily: theme.fontFamily,
-  },
-  color: {
-    variants: {
-      color: {
-        default: {
-          color: theme.colors.typography,
-        },
-        primary: {
-          color: theme.colors.primary,
-        },
-        dimmed: {
-          color: theme.colors.dimmed,
-        },
-        danger: {
-          color: theme.colors.danger,
-        },
-        dark: {
-          color: theme.colors.background,
-        },
-      },
-      type: {
-        default: {},
-        h1: {},
-        h2: {},
-        h3: {},
-        h4: {},
-        h5: {},
-      },
-      bold: {
-        true: {},
-      },
-    },
-  },
-  type: {
     variants: {
       type: {
         default: {
@@ -86,9 +51,21 @@ export const styles = StyleSheet.create((theme) => ({
         },
       },
       color: {
-        default: {},
-        dimmed: {},
-        danger: {},
+        default: {
+          color: theme.colors.typography,
+        },
+        primary: {
+          color: theme.colors.primary,
+        },
+        dimmed: {
+          color: theme.colors.dimmed,
+        },
+        danger: {
+          color: theme.colors.danger,
+        },
+        dark: {
+          color: theme.colors.background,
+        },
       },
     },
   },

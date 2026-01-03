@@ -164,12 +164,13 @@ export function Checkout({
               with {project.profile.fullName}
             </ThemedText>
           )}
-          <View style={styles.amountRow}>
-            <ThemedText type="h1">{formatMoney(amount, currency)}</ThemedText>
-            <ThemedText color="dimmed">
-              + {formatMoney(50, currency)} fee
-            </ThemedText>
-          </View>
+        </View>
+
+        <View style={styles.amountRow}>
+          <ThemedText type="h1">{formatMoney(amount, currency)}</ThemedText>
+          <ThemedText color="dimmed">
+            + {formatMoney(50, currency)} fee
+          </ThemedText>
         </View>
 
         {errorMessage && <ThemedText color="danger">{errorMessage}</ThemedText>}
@@ -197,15 +198,11 @@ const styles = StyleSheet.create((theme, rt) => ({
     opacity: 0.8,
   },
   sheet: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: theme.gap(2),
     borderTopLeftRadius: theme.gap(2),
     borderTopRightRadius: theme.gap(2),
     gap: theme.gap(2),
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.foreground,
   },
   summary: {
     gap: theme.gap(0.5),
