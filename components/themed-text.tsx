@@ -16,7 +16,6 @@ export function ThemedText({
 
 export const styles = StyleSheet.create((theme) => ({
   style: {
-    textAlign: "justify",
     fontFamily: theme.fontFamily,
     variants: {
       type: {

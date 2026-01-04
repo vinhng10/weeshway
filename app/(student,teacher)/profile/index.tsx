@@ -5,7 +5,7 @@ import {
   ProfileMenuItem,
   ThemedText,
 } from "@/components";
-import { RoleEnum } from "@/constants";
+import { ROLE } from "@/constants";
 import { useAuth, useRole } from "@/hooks";
 import { useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
@@ -18,7 +18,7 @@ export default function Profile() {
 
   const role = useRole((state) => state.role);
   const setRole = useRole((state) => state.setRole);
-  const rolePath = role === RoleEnum.Student ? "student" : "teacher";
+  const rolePath = role === ROLE.STUDENT ? "student" : "teacher";
 
   const handleAccount = () => {
     router.push(`/(${rolePath})/profile/account`);
@@ -45,7 +45,7 @@ export default function Profile() {
     {
       label: "Role",
       value: role,
-      options: RoleEnum,
+      options: ROLE,
       modal: false,
       onValueChange: setRole,
     },

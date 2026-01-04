@@ -7,18 +7,18 @@ import {
   SectionListView,
   Tile,
 } from "@/components";
-import { LevelEnum, StyleEnum } from "@/constants";
+import { LEVEL, STYLE } from "@/constants";
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import { BubbleType, WishEnrichedType } from "@/types";
+import { BubbleType, LevelType, StyleType, WishEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishBoardContent() {
-  const [style, setStyle] = useState<StyleEnum>();
-  const [level, setLevel] = useState<LevelEnum>();
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
   const [centroidId, setCentroidId] = useState<number>();
 
   const { data: bubbles } = useSuspenseQuery<BubbleType[]>({
@@ -60,14 +60,14 @@ function WishBoardContent() {
     {
       label: "Style",
       value: style,
-      options: StyleEnum,
+      options: STYLE,
       modal: true,
       onValueChange: setStyle,
     },
     {
       label: "Level",
       value: level,
-      options: LevelEnum,
+      options: LEVEL,
       modal: true,
       onValueChange: setLevel,
     },

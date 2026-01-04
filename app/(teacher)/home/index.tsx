@@ -6,7 +6,7 @@ import {
   ThemedText,
   Tile,
 } from "@/components";
-import { ProjectStatusEnum } from "@/constants";
+import { PROJECT_STATUS } from "@/constants";
 import {
   useAuth,
   useLocales,
@@ -46,7 +46,7 @@ function HomeContent() {
 
       query = query
         .eq("user_id", profile?.id)
-        .eq("status", ProjectStatusEnum.Release)
+        .eq("status", PROJECT_STATUS.RELEASE)
         .lte("start_at", todayEnd.toISOString())
         .gte("end_at", now.toISOString())
         .order("start_at", { ascending: true });

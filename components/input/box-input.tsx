@@ -1,20 +1,17 @@
-import {
-  IconSymbol,
-  IconSymbolName,
-  Options,
-  TextInput,
-  ThemedText,
-} from "@/components";
-import { DayEnum, MonthEnum } from "@/constants";
+import { DAY, MONTH } from "@/constants";
 import React, { useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { StyleSheet } from "react-native-unistyles";
+import { ThemedText } from "../themed-text";
+import { IconSymbol, IconSymbolName } from "../ui/icon-symbol";
+import { Options } from "./options";
+import { TextInput } from "./text-input";
 
 export const formatDate = (date?: Date, compact: boolean = false): string => {
   if (!date) return "";
-  const dayOfWeek = Object.values(DayEnum)[date.getDay()];
-  const month = Object.values(MonthEnum)[date.getMonth()];
+  const dayOfWeek = Object.values(DAY)[date.getDay()];
+  const month = Object.values(MONTH)[date.getMonth()];
   const day = date.getDate();
   const year = date.getFullYear();
   return compact
@@ -47,11 +44,7 @@ const BaseBoxInput: React.FunctionComponent<BoxInputBaseProps> = ({
   children,
 }) => {
   return (
-    <Pressable
-      style={styles.container}
-      onPress={onPress}
-      disabled={!editable}
-    >
+    <Pressable style={styles.container} onPress={onPress} disabled={!editable}>
       <View style={styles.labelContainer}>
         <ThemedText color="dimmed">{label}</ThemedText>
         {icon && <IconSymbol style={styles.icon} name={icon} size={16} />}
@@ -110,6 +103,7 @@ export const TextBoxInput: React.FunctionComponent<TextBoxInputProps> = ({
 // SelectBoxInput variant
 interface SelectBoxInputProps extends BaseBoxInputProps {
   options?: Record<string, string>;
+  renderFunction?: (item: any) => string;
 }
 
 export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
@@ -118,6 +112,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
   options,
   onValueChange,
   editable = true,
+  renderFunction,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -140,7 +135,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
   return (
     <BaseBoxInput
       label={label}
-      icon="chevron.down"
+      icon={editable ? "chevron.down" : undefined}
       onPress={handlePress}
       editable={editable}
     >
@@ -153,6 +148,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
           options={options}
           title={label}
           currentValue={value}
+          renderFunction={renderFunction}
         />
       )}
     </BaseBoxInput>

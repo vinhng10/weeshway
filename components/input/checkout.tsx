@@ -1,4 +1,3 @@
-import { Button, ThemedText } from "@/components";
 import { RETURN_URL } from "@/constants";
 import { useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
@@ -7,6 +6,8 @@ import { useStripe } from "@stripe/stripe-react-native";
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { ThemedText } from "../themed-text";
+import { Button } from "./button";
 
 type PaymentIntentResponse = {
   paymentIntentClientSecret: string;

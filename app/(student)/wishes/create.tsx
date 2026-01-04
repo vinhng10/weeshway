@@ -6,10 +6,10 @@ import {
   SongSearch,
   TextInput,
 } from "@/components";
-import { LevelEnum, StyleEnum } from "@/constants";
+import { LEVEL, STYLE } from "@/constants";
 import { useAuth } from "@/hooks";
 import { supabase } from "@/supabase";
-import { SongType } from "@/types";
+import { LevelType, SongType, StyleType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -23,8 +23,8 @@ export default function MakeAWish() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const [style, setStyle] = useState<StyleEnum>(StyleEnum.HipHop);
-  const [level, setLevel] = useState<LevelEnum>(LevelEnum.Beginner);
+  const [style, setStyle] = useState<StyleType>(STYLE.HIPHOP);
+  const [level, setLevel] = useState<LevelType>(LEVEL.BEGINNER);
   const [description, setDescription] = useState("");
   const [song, setSong] = useState<SongType | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -98,13 +98,13 @@ export default function MakeAWish() {
           <SelectBoxInput
             label="Style"
             value={style}
-            options={StyleEnum}
+            options={STYLE}
             onValueChange={setStyle}
           />
           <SelectBoxInput
             label="Level"
             value={level}
-            options={LevelEnum}
+            options={LEVEL}
             onValueChange={setLevel}
           />
         </View>

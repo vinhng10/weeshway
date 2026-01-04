@@ -1,6 +1,9 @@
-import { Avatar, IconButton, ThemedText } from "@/components";
-import { WishStatusEnum } from "@/constants";
+import { Avatar } from "./avatar";
+import { IconButton } from "./input/icon-button";
+import { ThemedText } from "./themed-text";
+import { WISH_STATUS } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks";
+import { WishStatusType } from "@/types";
 import { ImageProps } from "expo-image";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import React, { ReactNode } from "react";
@@ -12,7 +15,7 @@ interface TileProps {
   title: string;
   subtitle?: string;
   metadata?: string;
-  backgroundColor?: WishStatusEnum;
+  backgroundColor?: WishStatusType;
   rightContent?: ReactNode;
   previewUrl?: string;
   onPress?(): void;
@@ -39,9 +42,9 @@ export const Tile: React.FunctionComponent<TileProps> = ({
 
   const getBackgroundColor = (): LinearGradientProps["colors"] => {
     switch (backgroundColor) {
-      case WishStatusEnum.ClassAvailable:
+      case WISH_STATUS.CLASS_AVAILABLE:
         return ["#FF5154", "#D7137B"];
-      case WishStatusEnum.Granted:
+      case WISH_STATUS.GRANTED:
         return ["#558200", "#135700"];
       default:
         return ["#1B1B1B", "#1B1B1B"];

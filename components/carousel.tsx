@@ -1,4 +1,3 @@
-import { ProjectCard } from "@/components";
 import { ProjectEnrichedType } from "@/types";
 import * as React from "react";
 import { Dimensions, View } from "react-native";
@@ -8,6 +7,7 @@ import RNCarousel, {
   Pagination,
 } from "react-native-reanimated-carousel";
 import { StyleSheet } from "react-native-unistyles";
+import { ProjectCard } from "./project-card";
 
 const { width: screenWidth } = Dimensions.get("window");
 

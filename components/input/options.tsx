@@ -1,8 +1,8 @@
-import { Header, ThemedText } from "@/components";
+import { OptionItem } from "@/types";
 import { FlatList, ListRenderItem, Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-
-type OptionItem = { key: string; value: string };
+import { Header } from "../header";
+import { ThemedText } from "../themed-text";
 
 interface OptionsModalProps {
   visible: boolean;
@@ -11,7 +11,7 @@ interface OptionsModalProps {
   options: Record<string, string>;
   title: string;
   currentValue?: string;
-  renderItem?: ListRenderItem<OptionItem>;
+  renderFunction?: (item: OptionItem) => string;
 }
 
 export const Options = ({
@@ -21,7 +21,7 @@ export const Options = ({
   options,
   title,
   currentValue,
-  renderItem,
+  renderFunction,
 }: OptionsModalProps) => {
   const handleSelect = (value: string) => {
     onSelect(currentValue === value ? undefined : value);
@@ -33,14 +33,14 @@ export const Options = ({
     value,
   }));
 
-  const defaultRenderItem: ListRenderItem<OptionItem> = ({ item }) => {
+  const renderItem: ListRenderItem<OptionItem> = ({ item }) => {
     return (
       <Pressable onPress={() => handleSelect(item.value)}>
         <ThemedText
           type="h3"
           color={currentValue !== item.value ? "dimmed" : undefined}
         >
-          {item.value}
+          {renderFunction ? renderFunction(item) : item.value}
         </ThemedText>
       </Pressable>
     );
@@ -61,7 +61,7 @@ export const Options = ({
         {/* Options List */}
         <FlatList
           data={optionsArray}
-          renderItem={renderItem ?? defaultRenderItem}
+          renderItem={renderItem}
           keyExtractor={(item) => item.key}
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}

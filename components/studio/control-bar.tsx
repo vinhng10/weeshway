@@ -1,4 +1,4 @@
-import { IconButton } from "@/components";
+import { IconButton } from "../input/icon-button";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 

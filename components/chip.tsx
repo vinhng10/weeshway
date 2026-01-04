@@ -1,6 +1,7 @@
-import { IconSymbol, IconSymbolName, ThemedText } from "@/components";
 import { Pressable, View } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
+import { ThemedText } from "./themed-text";
+import { IconSymbol, IconSymbolName } from "./ui/icon-symbol";
 
 type ChipProps = UnistylesVariants<typeof styles> & {
   label: string;

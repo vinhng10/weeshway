@@ -1,4 +1,3 @@
-import { IconSymbol } from "@/components";
 import { Image, type ImageProps } from "expo-image";
 import {
   launchImageLibraryAsync,
@@ -6,6 +5,7 @@ import {
 } from "expo-image-picker";
 import { Pressable, View } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
+import { IconSymbol } from "./ui/icon-symbol";
 
 export type AvatarProps = ImageProps &
   UnistylesVariants<typeof styles> & {

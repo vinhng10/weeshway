@@ -7,9 +7,9 @@ import {
   SectionListView,
   Tile,
 } from "@/components";
-import { StripePaymentStatusEnum, TimeEnum } from "@/constants";
+import { STRIPE_PAYMENT_STATUS, TIME } from "@/constants";
 import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
-import { BookingEnrichedType, ProjectEnrichedType } from "@/types";
+import { BookingEnrichedType, ProjectEnrichedType, TimeType } from "@/types";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { SectionListData, View } from "react-native";
@@ -17,7 +17,7 @@ import { StyleSheet } from "react-native-unistyles";
 
 function BookingsContent() {
   const profile = useAuth((state) => state.profile);
-  const [time, setTime] = useState<TimeEnum>(TimeEnum.Today);
+  const [time, setTime] = useState<TimeType>(TIME.TODAY);
 
   const {
     data: bookings,
@@ -39,7 +39,7 @@ function BookingsContent() {
     trailingQuery: (query) => {
       query = query
         .eq("user_id", profile?.id)
-        .eq("status", StripePaymentStatusEnum.Succeeded);
+        .eq("status", STRIPE_PAYMENT_STATUS.SUCCEEDED);
 
       const now = new Date();
       const todayEnd = new Date();
@@ -47,11 +47,11 @@ function BookingsContent() {
       const nowISO = now.toISOString();
       const todayEndISO = todayEnd.toISOString();
 
-      if (time === TimeEnum.Upcoming) {
+      if (time === TIME.UPCOMING) {
         query = query.gt("project.start_at", todayEndISO);
-      } else if (time === TimeEnum.Past) {
+      } else if (time === TIME.PAST) {
         query = query.lt("project.end_at", nowISO);
-      } else if (time === TimeEnum.Today) {
+      } else if (time === TIME.TODAY) {
         query = query
           .lte("project.start_at", todayEndISO)
           .gte("project.end_at", nowISO);
@@ -85,7 +85,7 @@ function BookingsContent() {
     {
       label: "Time",
       value: time,
-      options: TimeEnum,
+      options: TIME,
       modal: false,
       onValueChange: setTime,
     },

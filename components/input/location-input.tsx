@@ -1,12 +1,3 @@
-import {
-  Button,
-  Header,
-  IconSymbol,
-  LocationModal,
-  TextInput,
-  ThemedText,
-  Tile,
-} from "@/components";
 import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
 import camelcaseKeys from "camelcase-keys";
@@ -20,6 +11,13 @@ import {
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Header } from "../header";
+import { ThemedText } from "../themed-text";
+import { Tile } from "../tile";
+import { IconSymbol } from "../ui/icon-symbol";
+import { Button } from "./button";
+import { Location } from "./location";
+import { TextInput } from "./text-input";
 
 interface LocationProps {
   label: string;
@@ -78,18 +76,35 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
 
   const handleLocationPress = (location: LocationType) => {
     Keyboard.dismiss();
-    if (onValueChange) {
-      onValueChange(location);
-    }
+    if (onValueChange) onValueChange(location);
     setVisible(false);
-  };
-
-  const handleLocationSaveSuccess = (locationName: string) => {
-    setQuery(locationName);
   };
 
   const handlePress = () => {
     editable ? setVisible(true) : setAddLocationVisible(true);
+  };
+
+  const formatAddress = (location: LocationType): string => {
+    const parts: string[] = [];
+
+    if (location.addressLine1) parts.push(location.addressLine1);
+    if (location.addressLine2) parts.push(location.addressLine2);
+
+    const cityStateZip: string[] = [];
+    if (location.city) cityStateZip.push(location.city);
+    if (location.stateProvince) cityStateZip.push(location.stateProvince);
+    if (location.postalCode) cityStateZip.push(location.postalCode);
+
+    if (cityStateZip.length > 0) {
+      parts.push(cityStateZip.join(", "));
+    }
+
+    // Fallback to old address field for backward compatibility
+    if (parts.length === 0 && location.address) {
+      return location.address;
+    }
+
+    return parts.join(", ") || "";
   };
 
   return (
@@ -160,7 +175,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
                   key={location.id}
                   imageSource={{ uri: location.imageUrl }}
                   title={location.name}
-                  subtitle={location.address}
+                  subtitle={formatAddress(location)}
                   onPress={() => handleLocationPress(location)}
                 />
               ))}
@@ -174,13 +189,12 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
         </View>
       </Modal>
 
-      <LocationModal
+      <Location
         visible={addLocationVisible}
         editable={editable}
         value={value}
         onClose={() => setAddLocationVisible(false)}
-        onValueChange={onValueChange}
-        onSaveSuccess={handleLocationSaveSuccess}
+        onSave={handleLocationPress}
       />
     </>
   );

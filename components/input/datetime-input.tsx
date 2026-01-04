@@ -1,15 +1,11 @@
-import {
-  Button,
-  DateTimeBoxInput,
-  formatDate,
-  formatTime,
-  Header,
-  IconSymbol,
-  ThemedText,
-} from "@/components";
 import React, { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Header } from "../header";
+import { ThemedText } from "../themed-text";
+import { IconSymbol } from "../ui/icon-symbol";
+import { DateTimeBoxInput, formatDate, formatTime } from "./box-input";
+import { Button } from "./button";
 
 interface DateTimeProps {
   label: string;

@@ -12,7 +12,7 @@ import {
   TextInput,
   ThemedText,
 } from "@/components";
-import { ProjectStatusEnum, StripePaymentStatusEnum } from "@/constants";
+import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
 import { useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
@@ -55,7 +55,7 @@ function ClassContent() {
     (booking) =>
       booking.userId === profile?.id &&
       booking.projectId === data.id &&
-      booking.status === StripePaymentStatusEnum.Succeeded
+      booking.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
   );
 
   const handleBook = () => {
@@ -148,12 +148,12 @@ function ClassContent() {
         label={
           booked
             ? "Booked"
-            : data.status === ProjectStatusEnum.Release
+            : data.status === PROJECT_STATUS.RELEASE
             ? "Book"
             : "Wish"
         }
         onPress={
-          data.status === ProjectStatusEnum.Release ? handleBook : handleWish
+          data.status === PROJECT_STATUS.RELEASE ? handleBook : handleWish
         }
         disabled={booked}
       />

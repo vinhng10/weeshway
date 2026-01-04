@@ -8,18 +8,23 @@ import {
   SectionListView,
   Tile,
 } from "@/components";
-import { LevelEnum, StyleEnum, WishStatusEnum } from "@/constants";
+import { LEVEL, STYLE, WISH_STATUS } from "@/constants";
 import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
-import { WishRecommendationEnrichedType } from "@/types";
+import {
+  LevelType,
+  StyleType,
+  WishRecommendationEnrichedType,
+  WishStatusType,
+} from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishesContent() {
-  const [status, setStatus] = useState<WishStatusEnum>();
-  const [style, setStyle] = useState<StyleEnum>();
-  const [level, setLevel] = useState<LevelEnum>();
+  const [status, setStatus] = useState<WishStatusType>();
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
   const profile = useAuth((state) => state.profile);
 
   const { data, hasNextPage, fetchNextPage } =
@@ -53,20 +58,20 @@ function WishesContent() {
       label: "Status",
       value: status,
       modal: true,
-      options: WishStatusEnum,
+      options: WISH_STATUS,
       onValueChange: setStatus,
     },
     {
       label: "Style",
       value: style,
-      options: StyleEnum,
+      options: STYLE,
       modal: true,
       onValueChange: setStyle,
     },
     {
       label: "Level",
       value: level,
-      options: LevelEnum,
+      options: LEVEL,
       modal: true,
       onValueChange: setLevel,
     },
@@ -111,8 +116,8 @@ function WishesContent() {
         ...wish,
         status:
           wish.recommendations.length > 0
-            ? WishStatusEnum.ClassAvailable
-            : WishStatusEnum.Waiting,
+            ? WISH_STATUS.CLASS_AVAILABLE
+            : WISH_STATUS.WAITING,
       })),
       render: renderTile,
     },

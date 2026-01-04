@@ -1,4 +1,5 @@
-import { IconButton, ThemedText } from "@/components";
+import { IconButton } from "./input/icon-button";
+import { ThemedText } from "./themed-text";
 import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
 import { ImageBackground } from "expo-image";

@@ -10,23 +10,28 @@ import {
   Tile,
 } from "@/components";
 import {
-  LevelEnum,
-  ProjectStatusEnum,
-  StripePaymentStatusEnum,
-  StyleEnum,
+  LEVEL,
+  PROJECT_STATUS,
+  STRIPE_PAYMENT_STATUS,
+  STYLE,
 } from "@/constants";
 import { useAuth, useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import { ProjectEnrichedType } from "@/types";
+import {
+  LevelType,
+  ProjectEnrichedType,
+  ProjectStatusType,
+  StyleType,
+} from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassesContent() {
-  const [status, setStatus] = useState<ProjectStatusEnum>();
-  const [style, setStyle] = useState<StyleEnum>();
-  const [level, setLevel] = useState<LevelEnum>();
+  const [status, setStatus] = useState<ProjectStatusType>();
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
   const profile = useAuth((state) => state.profile);
 
   const { data: recommendations } = useSuspenseQuery<ProjectEnrichedType[][]>({
@@ -45,7 +50,7 @@ function ClassesContent() {
           )`
         )
         .eq("user_id", profile?.id)
-        .eq("project.bookings.status", StripePaymentStatusEnum.Succeeded)
+        .eq("project.bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
         .limit(10);
 
       if (style) {
@@ -76,8 +81,8 @@ function ClassesContent() {
     trailingQuery: (query) => {
       query = query
         .or(`start_at.is.null,start_at.gte.${new Date().toISOString()}`)
-        .neq("status", ProjectStatusEnum.Cancel)
-        .eq("bookings.status", StripePaymentStatusEnum.Succeeded);
+        .neq("status", PROJECT_STATUS.CANCEL)
+        .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED);
       if (status) query = query.eq("status", status);
       if (style) query = query.eq("style", style);
       if (level) query = query.eq("level", level);
@@ -89,21 +94,21 @@ function ClassesContent() {
     {
       label: "Status",
       value: status,
-      options: ProjectStatusEnum,
+      options: PROJECT_STATUS,
       modal: true,
       onValueChange: setStatus,
     },
     {
       label: "Style",
       value: style,
-      options: StyleEnum,
+      options: STYLE,
       modal: true,
       onValueChange: setStyle,
     },
     {
       label: "Level",
       value: level,
-      options: LevelEnum,
+      options: LEVEL,
       modal: true,
       onValueChange: setLevel,
     },

@@ -1,9 +1,9 @@
-import { Button } from "@/components";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Button } from "./input/button";
 
 export function Boundary({ children }: { children: React.ReactNode }) {
   return (

@@ -8,22 +8,27 @@ import {
   Tile,
 } from "@/components";
 import {
-  LevelEnum,
-  ProjectStatusEnum,
-  StripePaymentStatusEnum,
-  StyleEnum,
+  LEVEL,
+  PROJECT_STATUS,
+  STRIPE_PAYMENT_STATUS,
+  STYLE,
 } from "@/constants";
 import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
-import { ProjectEnrichedType } from "@/types";
+import {
+  LevelType,
+  ProjectEnrichedType,
+  ProjectStatusType,
+  StyleType,
+} from "@/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ProjectsContent() {
-  const [status, setStatus] = useState<ProjectStatusEnum>();
-  const [style, setStyle] = useState<StyleEnum>();
-  const [level, setLevel] = useState<LevelEnum>();
+  const [status, setStatus] = useState<ProjectStatusType>();
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
   const profile = useAuth((state) => state.profile);
 
   const { data, hasNextPage, fetchNextPage } =
@@ -35,7 +40,7 @@ function ProjectsContent() {
       trailingQuery: (query) => {
         query = query
           .eq("user_id", profile?.id)
-          .eq("bookings.status", StripePaymentStatusEnum.Succeeded)
+          .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
           .order("updated_at", { ascending: false });
         if (status) query = query.eq("status", status);
         if (style) query = query.eq("style", style);
@@ -48,21 +53,21 @@ function ProjectsContent() {
     {
       label: "Status",
       value: status,
-      options: ProjectStatusEnum,
+      options: PROJECT_STATUS,
       modal: true,
       onValueChange: setStatus,
     },
     {
       label: "Style",
       value: style,
-      options: StyleEnum,
+      options: STYLE,
       modal: true,
       onValueChange: setStyle,
     },
     {
       label: "Level",
       value: level,
-      options: LevelEnum,
+      options: LEVEL,
       modal: true,
       onValueChange: setLevel,
     },

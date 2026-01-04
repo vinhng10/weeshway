@@ -1,4 +1,4 @@
-import { RoleEnum, STRIPE_PUBLISHABLE_KEY } from "@/constants";
+import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocales } from "@/hooks/useLocales";
@@ -48,10 +48,10 @@ function RootNavigator() {
       </Stack.Protected>
 
       {/* Screens for authenticated users */}
-      <Stack.Protected guard={isLoggedIn && role === RoleEnum.Student}>
+      <Stack.Protected guard={isLoggedIn && role === ROLE.STUDENT}>
         <Stack.Screen name="(student)" options={{ headerShown: false }} />
       </Stack.Protected>
-      <Stack.Protected guard={isLoggedIn && role === RoleEnum.Teacher}>
+      <Stack.Protected guard={isLoggedIn && role === ROLE.TEACHER}>
         <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>

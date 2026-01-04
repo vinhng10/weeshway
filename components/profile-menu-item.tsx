@@ -1,11 +1,7 @@
-import {
-  IconSymbol,
-  IconSymbolName,
-  textStyles,
-  ThemedText,
-} from "@/components";
 import { Pressable } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
+import { ThemedText, styles as textStyles } from "./themed-text";
+import { IconSymbol, IconSymbolName } from "./ui/icon-symbol";
 
 type ProfileMenuItemProps = {
   icon: IconSymbolName;

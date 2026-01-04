@@ -13,14 +13,14 @@ import {
   Tile,
 } from "@/components";
 import {
-  LevelEnum,
-  ProjectStatusEnum,
-  StripePaymentStatusEnum,
-  StyleEnum,
+  LEVEL,
+  PROJECT_STATUS,
+  STRIPE_PAYMENT_STATUS,
+  STYLE,
 } from "@/constants";
 import { useAuth, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import { ProjectEnrichedType } from "@/types";
+import { ProjectEnrichedType, ProjectStatusType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
@@ -42,7 +42,7 @@ function ProjectContent() {
         .select(`*, song:songs(*), location:locations(*), bookings:bookings(*)`)
         .eq("id", projectId)
         .eq("user_id", profile?.id)
-        .eq("bookings.status", StripePaymentStatusEnum.Succeeded)
+        .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
         .single();
 
       if (error) throw error;
@@ -53,7 +53,7 @@ function ProjectContent() {
   // Initialize state directly with project data - no useEffect needed!
   const [name, setName] = useState(data.name);
   const [description, setDescription] = useState(data.description);
-  const [status, setStatus] = useState<ProjectStatusEnum>(data.status);
+  const [status, setStatus] = useState<ProjectStatusType>(data.status);
   const [style, setStyle] = useState(data.style);
   const [level, setLevel] = useState(data.level);
   const [price, setPrice] = useState(
@@ -76,7 +76,7 @@ function ProjectContent() {
     {
       label: "Status",
       value: status,
-      options: ProjectStatusEnum,
+      options: PROJECT_STATUS,
       modal: false,
       onValueChange: setStatus,
     },
@@ -154,18 +154,18 @@ function ProjectContent() {
         {/* Toggle Button Group for Status */}
         <ChipBar items={options} />
 
-        {/* StyleEnum and LevelEnum Selects */}
+        {/* Style and Level Selects */}
         <View style={styles.row}>
           <SelectBoxInput
             label="Style"
             value={style}
-            options={StyleEnum}
+            options={STYLE}
             onValueChange={setStyle}
           />
           <SelectBoxInput
             label="Level"
             value={level}
-            options={LevelEnum}
+            options={LEVEL}
             onValueChange={setLevel}
           />
         </View>

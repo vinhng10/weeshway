@@ -1,6 +1,6 @@
 // Studio.tsx
 import { ControlBar, DisplayArea, Header, Track } from "@/components";
-import { TrackEnum } from "@/constants";
+import { TRACK } from "@/constants";
 import { createStudioStore, useAudioPlayerStore } from "@/hooks";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo } from "react";
@@ -118,8 +118,8 @@ export default function Studio() {
         />
 
         <View style={styles.tracksContainer}>
-          <Track type={TrackEnum.Song} useStudioStore={useStudioStore} />
-          <Track type={TrackEnum.Count} useStudioStore={useStudioStore} />
+          <Track type={TRACK.SONG} useStudioStore={useStudioStore} />
+          <Track type={TRACK.COUNT} useStudioStore={useStudioStore} />
         </View>
       </View>
     </View>

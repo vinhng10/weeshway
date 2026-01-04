@@ -1,6 +1,7 @@
-import { Chip, IconSymbolName } from "@/components";
-import { ProjectStatusEnum } from "@/constants";
+import { PROJECT_STATUS } from "@/constants";
 import { ProjectEnrichedType } from "@/types";
+import { Chip } from "./chip";
+import { IconSymbolName } from "./ui/icon-symbol";
 
 interface ProjectStatusProps {
   data: ProjectEnrichedType;
@@ -11,11 +12,11 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
   let label: string | undefined;
 
   switch (data.status) {
-    case ProjectStatusEnum.Draft:
+    case PROJECT_STATUS.DRAFT:
       icon = "heart";
       label = "10";
       break;
-    case ProjectStatusEnum.Release:
+    case PROJECT_STATUS.RELEASE:
       icon = "person.fill";
       label = data.bookings
         ? `${data.bookings.length} | ${data.spots}`

@@ -1,16 +1,4 @@
-import {
-  Avatar,
-  Button,
-  Checkout,
-  Chip,
-  formatDate,
-  formatTime,
-  IconButton,
-  IconSymbol,
-  ProjectStatus,
-  ThemedText,
-} from "@/components";
-import { ProjectStatusEnum, StripePaymentStatusEnum } from "@/constants";
+import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
 import { useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,6 +9,12 @@ import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
+import { Avatar } from "./avatar";
+import { Chip } from "./chip";
+import { Button, Checkout, formatDate, formatTime, IconButton } from "./input";
+import { ProjectStatus } from "./project-status";
+import { ThemedText } from "./themed-text";
+import { IconSymbol } from "./ui/icon-symbol";
 
 interface CardProps {
   data: ProjectEnrichedType;
@@ -41,7 +35,7 @@ export const ProjectCard = ({ data }: CardProps) => {
     (booking) =>
       booking.userId === profile?.id &&
       booking.projectId === data.id &&
-      booking.status === StripePaymentStatusEnum.Succeeded
+      booking.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
   );
 
   const handleAudioPlayer = (e?: any) => {
@@ -150,12 +144,12 @@ export const ProjectCard = ({ data }: CardProps) => {
                 label={
                   booked
                     ? "Booked"
-                    : data.status === ProjectStatusEnum.Release
+                    : data.status === PROJECT_STATUS.RELEASE
                     ? "Book"
                     : "Wish"
                 }
                 onPress={
-                  data.status === ProjectStatusEnum.Release
+                  data.status === PROJECT_STATUS.RELEASE
                     ? handleBook
                     : handleWish
                 }

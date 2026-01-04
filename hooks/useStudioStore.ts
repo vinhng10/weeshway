@@ -1,6 +1,6 @@
-import { TrackEnum } from "@/constants";
+import { TRACK } from "@/constants";
 import { supabase } from "@/supabase";
-import { ItemType } from "@/types";
+import { ItemType, TrackType } from "@/types";
 import camelcaseKeys from "camelcase-keys";
 import Storage from "expo-native-storage";
 import { create } from "zustand";
@@ -14,13 +14,13 @@ export type TrackState = {
 
 interface StudioState {
   studio: {
-    activeTrack: TrackEnum;
+    activeTrack: TrackType;
     song: TrackState;
     count: TrackState;
   };
 
-  setActive: (type: TrackEnum) => void;
-  isActive: (type: TrackEnum) => boolean;
+  setActive: (type: TrackType) => void;
+  isActive: (type: TrackType) => boolean;
   toggle: (index: number) => void;
   split: (time: number) => void;
   merge: () => void;
@@ -35,7 +35,7 @@ export const createStudioStore = (projectId: number) =>
     persist(
       immer((set, get) => ({
         studio: {
-          activeTrack: TrackEnum.Song,
+          activeTrack: TRACK.SONG,
           song: {
             source: undefined,
             items: [],
@@ -112,7 +112,7 @@ export const createStudioStore = (projectId: number) =>
 
         reset: () => {
           set((state) => {
-            state.studio.activeTrack = TrackEnum.Song;
+            state.studio.activeTrack = TRACK.SONG;
             state.studio.song.items.forEach((item) => {
               item.selected = false;
             });

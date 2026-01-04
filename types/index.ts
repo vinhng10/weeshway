@@ -1,10 +1,37 @@
 import {
-  LevelEnum,
-  ProjectStatusEnum,
-  StripePaymentStatusEnum,
-  StyleEnum,
-  WishStatusEnum,
+  COUNTRY,
+  LEVEL,
+  PROJECT_STATUS,
+  ROLE,
+  STRIPE_PAYMENT_STATUS,
+  STYLE,
+  TIME,
+  TRACK,
+  WISH_STATUS,
 } from "@/constants";
+
+type ValueOf<T> = T[keyof T];
+
+export type LevelType = ValueOf<typeof LEVEL>;
+export type ProjectStatusType = ValueOf<typeof PROJECT_STATUS>;
+export type StripePaymentStatusType = ValueOf<typeof STRIPE_PAYMENT_STATUS>;
+export type StyleType = ValueOf<typeof STYLE>;
+export type WishStatusType = ValueOf<typeof WISH_STATUS>;
+export type TimeType = ValueOf<typeof TIME>;
+export type TrackType = ValueOf<typeof TRACK>;
+export type RoleType = ValueOf<typeof ROLE>;
+
+export type CountryCodeType = keyof typeof COUNTRY;
+export type CountryNameType = ValueOf<typeof COUNTRY>;
+export type CountryType = {
+  code: CountryCodeType;
+  name: CountryNameType;
+};
+
+export type OptionItem = {
+  key: string;
+  value: string;
+};
 
 export type WishType = {
   id: number;
@@ -38,9 +65,9 @@ export type ProjectType = {
   updatedAt: Date;
   userId: string;
   name?: string;
-  status: ProjectStatusEnum;
-  style?: StyleEnum;
-  level?: LevelEnum;
+  status: ProjectStatusType;
+  style?: StyleType;
+  level?: LevelType;
   price?: number;
   spots?: number;
   startAt?: Date;
@@ -67,7 +94,13 @@ export type SongType = {
 export type LocationType = {
   id: number;
   name: string;
-  address: string;
+  address?: string; // Kept for backward compatibility
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  stateProvince?: string;
+  postalCode?: string;
+  countryCode?: CountryCodeType;
   imageUrl: string;
 };
 
@@ -86,7 +119,7 @@ export type BookingType = {
   userId: string;
   projectId: number;
   stripePaymentIntentId: string;
-  status: StripePaymentStatusEnum;
+  status: StripePaymentStatusType;
 };
 
 export type StatsType = {
@@ -100,7 +133,7 @@ export type StatsType = {
 export type BubbleType = {
   label: number;
   value: number;
-}
+};
 
 // Utility type: WishType with song_id replaced by joined songs relation
 export type WishEnrichedType = WishType & {
@@ -109,7 +142,7 @@ export type WishEnrichedType = WishType & {
 
 export type WishRecommendationEnrichedType = WishEnrichedType & {
   recommendations: RecommendationEnrichedType[];
-  status: WishStatusEnum;
+  status: WishStatusType;
 };
 
 export type ProjectEnrichedType = ProjectType & {

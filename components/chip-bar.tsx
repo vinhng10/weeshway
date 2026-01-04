@@ -1,7 +1,8 @@
-import { Chip, Options } from "@/components";
 import { useState } from "react";
 import { ScrollView } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
+import { Chip } from "./chip";
+import { Options } from "./input/options";
 
 export interface ChipBarItemProps {
   label: string;

@@ -1,10 +1,11 @@
-import { Button, ThemedText } from "@/components";
 import { useAuth } from "@/hooks";
 import { supabase } from "@/supabase";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { ThemedText } from "../themed-text";
+import { Button } from "./button";
 
 export const LocationPermission = () => {
   const [loading, setLoading] = useState(false);

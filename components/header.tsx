@@ -1,7 +1,8 @@
-import { IconSymbol, ThemedText } from "@/components";
 import { useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { ThemedText } from "./themed-text";
+import { IconSymbol } from "./ui/icon-symbol";
 
 type HeaderProps = {
   title?: string;

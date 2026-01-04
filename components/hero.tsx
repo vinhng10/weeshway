@@ -1,10 +1,12 @@
-import { Header, IconButton, ThemedText } from "@/components";
 import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Header } from "./header";
+import { IconButton } from "./input/icon-button";
+import { ThemedText } from "./themed-text";
 
 interface HeroProps {
   data: SongType;

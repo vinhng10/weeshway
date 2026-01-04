@@ -1,8 +1,7 @@
 // Track.tsx - Fixed version
-import { Item, ThemedText } from "@/components";
-import { PIXELS_PER_SECOND, TICK_INTERVAL, TrackEnum } from "@/constants";
+import { PIXELS_PER_SECOND, TICK_INTERVAL } from "@/constants";
 import { useAudioPlayerStore, type StudioStoreHook } from "@/hooks";
-import { ItemType } from "@/types";
+import { ItemType, TrackType } from "@/types";
 import React, { useEffect, useMemo } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import Animated, {
@@ -19,6 +18,8 @@ import Animated, {
 import { StyleSheet } from "react-native-unistyles";
 import { scheduleOnRN } from "react-native-worklets";
 import { useShallow } from "zustand/react/shallow";
+import { ThemedText } from "../themed-text";
+import { Item } from "./item";
 
 const { width } = Dimensions.get("window");
 
@@ -41,7 +42,7 @@ const offsetToTime = (offset: number) => {
 };
 
 type TrackProps = {
-  type: TrackEnum;
+  type: TrackType;
   useStudioStore: StudioStoreHook;
 };
 

@@ -12,10 +12,16 @@ import {
   TextInput,
   Tile,
 } from "@/components";
-import { LevelEnum, ProjectStatusEnum, StyleEnum } from "@/constants";
+import { LEVEL, PROJECT_STATUS, STYLE } from "@/constants";
 import { useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
-import { LocationType, SongType } from "@/types";
+import {
+  LevelType,
+  LocationType,
+  ProjectStatusType,
+  SongType,
+  StyleType,
+} from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -32,11 +38,9 @@ export default function CreateProject() {
   // Initialize state with project data or defaults
   const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
-  const [status, setStatus] = useState<ProjectStatusEnum>(
-    ProjectStatusEnum.Draft
-  );
-  const [style, setStyle] = useState<StyleEnum>();
-  const [level, setLevel] = useState<LevelEnum>();
+  const [status, setStatus] = useState<ProjectStatusType>(PROJECT_STATUS.DRAFT);
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
   const [price, setPrice] = useState<string>();
   const [spots, setSpots] = useState<string>();
   const [startAt, setStartAt] = useState<Date>();
@@ -49,7 +53,7 @@ export default function CreateProject() {
     {
       label: "Status",
       value: status,
-      options: ProjectStatusEnum,
+      options: PROJECT_STATUS,
       modal: false,
       onValueChange: setStatus,
     },
@@ -149,13 +153,13 @@ export default function CreateProject() {
           <SelectBoxInput
             label="Style"
             value={style}
-            options={StyleEnum}
+            options={STYLE}
             onValueChange={setStyle}
           />
           <SelectBoxInput
             label="Level"
             value={level}
-            options={LevelEnum}
+            options={LEVEL}
             onValueChange={setLevel}
           />
         </View>
