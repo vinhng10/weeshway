@@ -1,7 +1,7 @@
 import {
   IconSymbol,
   IconSymbolName,
-  OptionsModal,
+  Options,
   TextInput,
   ThemedText,
 } from "@/components";
@@ -50,7 +50,7 @@ const BaseBoxInput: React.FunctionComponent<BoxInputBaseProps> = ({
     <Pressable
       style={styles.container}
       onPress={onPress}
-      disabled={!editable || !onPress}
+      disabled={!editable}
     >
       <View style={styles.labelContainer}>
         <ThemedText color="dimmed">{label}</ThemedText>
@@ -146,7 +146,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
     >
       <ThemedText type="h5">{value}</ThemedText>
       {options && onValueChange && (
-        <OptionsModal
+        <Options
           visible={visible}
           onClose={handleCloseModal}
           onSelect={handleSelect}

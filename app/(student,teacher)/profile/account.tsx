@@ -149,6 +149,7 @@ export default function Account() {
             shape="circle"
             bordered
             onSourceChange={setAvatarUri}
+            editable={true}
           />
         </View>
 

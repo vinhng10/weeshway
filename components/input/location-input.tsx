@@ -120,13 +120,13 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     }
   };
 
+  const handlePress = () => {
+    editable ? setVisible(true) : setAddLocationVisible(true);
+  };
+
   return (
     <>
-      <Pressable
-        style={styles.container}
-        onPress={() => setVisible(true)}
-        disabled={!editable}
-      >
+      <Pressable style={styles.container} onPress={handlePress}>
         <View style={styles.iconContainer}>
           <IconSymbol
             style={styles.icon}
@@ -215,7 +215,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
       >
         <View style={styles.modalContainer}>
           <Header
-            title="Add Location"
+            title={editable ? "Add Location" : "Location Details"}
             onPress={() => setAddLocationVisible(false)}
           />
 
@@ -227,11 +227,17 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
                 shape="square"
                 bordered
                 onSourceChange={setImageUrl}
+                editable={editable}
               />
             </View>
 
             <View style={styles.row}>
-              <TextBoxInput label="Name" value={name} onValueChange={setName} />
+              <TextBoxInput
+                label="Name"
+                value={name}
+                onValueChange={setName}
+                editable={editable}
+              />
             </View>
 
             <View style={styles.row}>
@@ -239,17 +245,20 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
                 label="Address"
                 value={address}
                 onValueChange={setAddress}
+                editable={editable}
               />
             </View>
           </View>
         </View>
 
-        <Button
-          stickyBottom
-          label={"Add"}
-          onPress={handleAddNewLocation}
-          loading={isSaving}
-        />
+        {editable && (
+          <Button
+            stickyBottom
+            label={"Add"}
+            onPress={handleAddNewLocation}
+            loading={isSaving}
+          />
+        )}
       </Modal>
     </>
   );

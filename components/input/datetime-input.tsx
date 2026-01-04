@@ -31,8 +31,12 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
   const [startTime, setStartTime] = useState(startAt ?? new Date());
   const [endTime, setEndTime] = useState(endAt ?? new Date());
 
+  const handlePress = () => {
+    setVisible(true);
+  };
+
   const handleModal = () => {
-    setVisible(!visible);
+    setVisible(false);
   };
 
   const handleSave = () => {
@@ -60,11 +64,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
 
   return (
     <>
-      <Pressable
-        style={styles.container}
-        onPress={handleModal}
-        disabled={!editable}
-      >
+      <Pressable style={styles.container} onPress={handlePress}>
         <View style={styles.iconContainer}>
           <IconSymbol
             style={styles.icon}
@@ -104,6 +104,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
                 icon="calendar"
                 mode="date"
                 minimumDate={new Date()}
+                editable={editable}
               />
             </View>
 
@@ -115,6 +116,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
                 onValueChange={setStartTime}
                 icon="timer.circle.fill"
                 mode="time"
+                editable={editable}
               />
               <DateTimeBoxInput
                 label="End Time"
@@ -123,12 +125,13 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
                 icon="timer.circle.fill"
                 mode="time"
                 minimumDate={startTime}
+                editable={editable}
               />
             </View>
           </View>
         </View>
 
-        <Button stickyBottom label="Save" onPress={handleSave} />
+        {editable && <Button stickyBottom label="Save" onPress={handleSave} />}
       </Modal>
     </>
   );

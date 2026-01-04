@@ -10,6 +10,7 @@ import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 export type AvatarProps = ImageProps &
   UnistylesVariants<typeof styles> & {
     onSourceChange?: (uri: string) => void;
+    editable?: boolean;
   };
 
 export function Avatar({
@@ -19,12 +20,13 @@ export function Avatar({
   bordered,
   shape,
   onSourceChange,
+  editable,
   ...rest
 }: AvatarProps) {
   styles.useVariants({ size, bordered, shape });
 
   const handleImagePicker = async () => {
-    if (!onSourceChange) return;
+    if (!editable || !onSourceChange) return;
 
     try {
       // Request permissions
@@ -55,7 +57,7 @@ export function Avatar({
   return (
     <Pressable onPress={handleImagePicker}>
       <Image source={source} style={[styles.avatar, style]} {...rest} />
-      {onSourceChange && (
+      {editable && onSourceChange && (
         <View style={styles.cameraButton}>
           <IconSymbol name="camera.fill" size={16} />
         </View>

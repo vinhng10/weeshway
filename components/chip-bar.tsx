@@ -1,4 +1,4 @@
-import { Chip, OptionsModal } from "@/components";
+import { Chip, Options } from "@/components";
 import { useState } from "react";
 import { ScrollView } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
@@ -44,7 +44,7 @@ export const ChipBarItem = ({
           onPress={handleModal}
         />
         {options && (
-          <OptionsModal
+          <Options
             visible={visible}
             onClose={handleModal}
             onSelect={handleOptionSelect}
