@@ -1,14 +1,13 @@
 import {
-  Avatar,
   Button,
   Header,
   IconSymbol,
-  TextBoxInput,
+  LocationModal,
   TextInput,
   ThemedText,
   Tile,
 } from "@/components";
-import { supabase, uploadMedia } from "@/supabase";
+import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
 import camelcaseKeys from "camelcase-keys";
 import React, { useEffect, useState } from "react";
@@ -41,11 +40,6 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
   const [locations, setLocations] = useState<LocationType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [name, setName] = useState(value?.name || "");
-  const [address, setAddress] = useState(value?.address || "");
-  const [imageUrl, setImageUrl] = useState(value?.imageUrl || null);
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const searchLocations = async () => {
@@ -90,34 +84,8 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     setVisible(false);
   };
 
-  const handleAddNewLocation = async () => {
-    try {
-      setIsSaving(true);
-
-      const url = imageUrl ? await uploadMedia("locations", imageUrl) : null;
-
-      const { data, error } = await supabase
-        .from("locations")
-        .insert({
-          name: name.trim(),
-          address: address.trim(),
-          image_url: url,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      if (onValueChange) {
-        onValueChange(camelcaseKeys(data, { deep: true }));
-      }
-    } catch (error: any) {
-      console.error("Error updating profile:", error);
-    } finally {
-      setIsSaving(false);
-      setQuery(name);
-      setAddLocationVisible(false);
-    }
+  const handleLocationSaveSuccess = (locationName: string) => {
+    setQuery(locationName);
   };
 
   const handlePress = () => {
@@ -206,60 +174,14 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
         </View>
       </Modal>
 
-      <Modal
+      <LocationModal
         visible={addLocationVisible}
-        animationType="slide"
-        presentationStyle="overFullScreen"
-        transparent={true}
-        onRequestClose={() => setAddLocationVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <Header
-            title={editable ? "Add Location" : "Location Details"}
-            onPress={() => setAddLocationVisible(false)}
-          />
-
-          <View style={styles.addLocationContainer}>
-            <View style={styles.row}>
-              <Avatar
-                source={imageUrl}
-                size="large"
-                shape="square"
-                bordered
-                onSourceChange={setImageUrl}
-                editable={editable}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <TextBoxInput
-                label="Name"
-                value={name}
-                onValueChange={setName}
-                editable={editable}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <TextBoxInput
-                label="Address"
-                value={address}
-                onValueChange={setAddress}
-                editable={editable}
-              />
-            </View>
-          </View>
-        </View>
-
-        {editable && (
-          <Button
-            stickyBottom
-            label={"Add"}
-            onPress={handleAddNewLocation}
-            loading={isSaving}
-          />
-        )}
-      </Modal>
+        editable={editable}
+        value={value}
+        onClose={() => setAddLocationVisible(false)}
+        onValueChange={onValueChange}
+        onSaveSuccess={handleLocationSaveSuccess}
+      />
     </>
   );
 };
@@ -303,14 +225,5 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  addLocationContainer: {
-    alignItems: "center",
-    gap: theme.gap(2),
-    padding: theme.gap(2),
-  },
-  row: {
-    flexDirection: "row",
-    gap: theme.gap(2),
   },
 }));
