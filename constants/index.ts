@@ -7,6 +7,7 @@ export const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
 export const STRIPE_PUBLISHABLE_KEY =
   "pk_test_51ShVfcKFOPkzrjS9Gtrjm5RwkYpqhlSkWKBXt7BOJlK92UYi0MEloUnb9RaHSRt0FZlb2ookth7QfCxKBNq2bg8V00I08ol1mn";
+export const GOOGLE_PLACES_API_KEY = "AIzaSyBfs9q-TjvY_K4jrNGGnu6A8KNTlavLDiw";
 
 export const STYLE = {
   BACHATA: "Bachata",

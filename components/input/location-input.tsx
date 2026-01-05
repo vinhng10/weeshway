@@ -1,13 +1,15 @@
+import { GOOGLE_PLACES_API_KEY } from "@/constants";
 import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
 import camelcaseKeys from "camelcase-keys";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Keyboard,
+  Linking,
   Modal,
   Pressable,
-  ScrollView,
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -15,16 +17,104 @@ import { Header } from "../header";
 import { ThemedText } from "../themed-text";
 import { Tile } from "../tile";
 import { IconSymbol } from "../ui/icon-symbol";
+import { TextBoxInput } from "./box-input";
 import { Button } from "./button";
-import { Location } from "./location";
 import { TextInput } from "./text-input";
 
 interface LocationProps {
   label: string;
   value?: LocationType;
   editable?: boolean;
-  onValueChange?: any;
+  onValueChange?: (location: LocationType) => void;
 }
+
+interface GooglePlace {
+  id: string;
+  displayName?: { text: string };
+  formattedAddress?: string;
+  shortFormattedAddress?: string;
+  addressComponents?: Array<{
+    types: string[];
+    shortText?: string;
+    longText?: string;
+  }>;
+  location?: { latitude: number; longitude: number };
+  googleMapsUri?: string;
+}
+
+interface LocationDetailProps {
+  visible: boolean;
+  value?: LocationType;
+  onClose: () => void;
+}
+
+const LocationDetail: React.FunctionComponent<LocationDetailProps> = ({
+  visible,
+  value,
+  onClose,
+}) => {
+  const handleOpenMaps = () => {
+    if (value?.googleMapsUri) {
+      Linking.openURL(value.googleMapsUri);
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="overFullScreen"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalContainer}>
+        <Header title={"Location"} onPress={onClose} />
+
+        <View style={styles.modalContent}>
+          <View style={styles.row}>
+            <TextBoxInput
+              label="Name"
+              value={value?.displayName}
+              editable={false}
+            />
+          </View>
+          <View style={styles.row}>
+            <TextBoxInput
+              label="Address"
+              value={value?.formattedAddress}
+              editable={false}
+              multiline
+            />
+          </View>
+          {value?.googleMapsUri && (
+            <Button label="Open in Google Maps" onPress={handleOpenMaps} />
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const convertGooglePlaceToLocation = (place: GooglePlace): LocationType => {
+  const country = place.addressComponents?.find((comp) =>
+    comp.types.includes("country")
+  )?.shortText as LocationType["country"];
+
+  const administrativeAreaLevel1 = place.addressComponents?.find((comp) =>
+    comp.types.includes("administrative_area_level_1")
+  )?.longText;
+
+  return {
+    id: place.id,
+    displayName: place.displayName?.text,
+    formattedAddress: place.formattedAddress,
+    shortFormattedAddress: place.shortFormattedAddress,
+    googleMapsUri: place.googleMapsUri,
+    location: place.location,
+    country,
+    administrativeAreaLevel1,
+  };
+};
 
 export const LocationInput: React.FunctionComponent<LocationProps> = ({
   label,
@@ -33,7 +123,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
   editable = true,
 }) => {
   const [visible, setVisible] = useState(false);
-  const [addLocationVisible, setAddLocationVisible] = useState(false);
+  const [locationDetailVisible, setLocationDetailVisible] = useState(false);
   const [query, setQuery] = useState("");
   const [locations, setLocations] = useState<LocationType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,61 +140,125 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
-        .from("locations")
-        .select()
-        .textSearch("name", `'${trimmedQuery}'`);
+      try {
+        const response = await fetch(
+          "https://places.googleapis.com/v1/places:searchText",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
+              "X-Goog-FieldMask":
+                "places.id,places.displayName,places.formattedAddress,places.shortFormattedAddress,places.addressComponents,places.location,places.googleMapsUri",
+            },
+            body: JSON.stringify({
+              textQuery: trimmedQuery,
+            }),
+          }
+        );
 
-      if (error) throw error;
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
 
-      if (data) {
-        const camelCasedData = camelcaseKeys(data, { deep: true });
-        setLocations(camelCasedData as LocationType[]);
-      } else {
+        const jsonData = await response.json();
+        const data = camelcaseKeys(jsonData, { deep: true });
+        const places: GooglePlace[] = data && data.places ? data.places : [];
+        const convertedLocations = places.map(convertGooglePlaceToLocation);
+        setLocations(convertedLocations);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to search locations"
+        );
+        console.error("Search error:", err);
         setLocations([]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     // Debounce the search
     const timeoutId = setTimeout(() => {
       searchLocations();
-    }, 500);
+    }, 1500);
 
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  const handleLocationPress = (location: LocationType) => {
-    Keyboard.dismiss();
-    if (onValueChange) onValueChange(location);
-    setVisible(false);
+  const handleLocationPress = async (location: LocationType) => {
+    try {
+      Keyboard.dismiss();
+      setLoading(true);
+
+      const locationPoint = location.location
+        ? `POINT(${location.location.longitude} ${location.location.latitude})`
+        : null;
+
+      // Upsert location to database
+      const { error } = await supabase
+        .from("locations")
+        .upsert(
+          {
+            id: location.id,
+            display_name: location.displayName,
+            formatted_address: location.formattedAddress,
+            short_formatted_address: location.shortFormattedAddress,
+            google_maps_uri: location.googleMapsUri,
+            country: location.country,
+            administrative_area_level_1: location.administrativeAreaLevel1,
+            location: locationPoint,
+          },
+          { onConflict: "id" }
+        )
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (onValueChange) onValueChange(location);
+      setVisible(false);
+      setQuery("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save location");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderEmptyState = () => {
+    if (loading) {
+      return (
+        <View style={styles.messageContainer}>
+          <ActivityIndicator size="large" />
+        </View>
+      );
+    }
+
+    if (error) {
+      return (
+        <View style={styles.messageContainer}>
+          <ThemedText color="danger">{error}</ThemedText>
+        </View>
+      );
+    }
+
+    if (query.trim()) {
+      return (
+        <View style={styles.messageContainer}>
+          <ThemedText color="dimmed">No locations found</ThemedText>
+        </View>
+      );
+    }
+
+    return null;
   };
 
   const handlePress = () => {
-    editable ? setVisible(true) : setAddLocationVisible(true);
-  };
-
-  const formatAddress = (location: LocationType): string => {
-    const parts: string[] = [];
-
-    if (location.addressLine1) parts.push(location.addressLine1);
-    if (location.addressLine2) parts.push(location.addressLine2);
-
-    const cityStateZip: string[] = [];
-    if (location.city) cityStateZip.push(location.city);
-    if (location.stateProvince) cityStateZip.push(location.stateProvince);
-    if (location.postalCode) cityStateZip.push(location.postalCode);
-
-    if (cityStateZip.length > 0) {
-      parts.push(cityStateZip.join(", "));
+    if (editable) {
+      setVisible(true);
+    } else {
+      setLocationDetailVisible(true);
     }
-
-    // Fallback to old address field for backward compatibility
-    if (parts.length === 0 && location.address) {
-      return location.address;
-    }
-
-    return parts.join(", ") || "";
   };
 
   return (
@@ -119,7 +273,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
         </View>
         <View style={styles.content}>
           <ThemedText color="dimmed">{label}</ThemedText>
-          <ThemedText type="h5">{value?.name}</ThemedText>
+          <ThemedText type="h5">{value?.displayName}</ThemedText>
         </View>
       </Pressable>
 
@@ -135,7 +289,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
 
           <View style={styles.searchContainer}>
             <TextInput
-              placeholder="What location do you want to dance?"
+              placeholder="Search location"
               value={query}
               onChangeText={setQuery}
               returnKeyType="search"
@@ -144,57 +298,32 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
             />
           </View>
 
-          <ScrollView
+          <FlatList
+            data={locations}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item: location }) => (
+              <Tile
+                title={location.displayName || "Unknown"}
+                subtitle={
+                  location.shortFormattedAddress ||
+                  location.formattedAddress ||
+                  ""
+                }
+                onPress={() => handleLocationPress(location)}
+              />
+            )}
+            ListEmptyComponent={renderEmptyState}
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-          >
-            {loading && (
-              <View style={styles.messageContainer}>
-                <ActivityIndicator size="large" />
-              </View>
-            )}
-            {error && (
-              <View style={styles.messageContainer}>
-                <ThemedText color="danger">{error}</ThemedText>
-              </View>
-            )}
-            {!loading &&
-              !error &&
-              query.length > 0 &&
-              locations.length === 0 && (
-                <View style={styles.messageContainer}>
-                  <ThemedText color="dimmed">No locations found</ThemedText>
-                </View>
-              )}
-            {!loading &&
-              !error &&
-              query.length > 0 &&
-              locations.map((location) => (
-                <Tile
-                  key={location.id}
-                  imageSource={{ uri: location.imageUrl }}
-                  title={location.name}
-                  subtitle={formatAddress(location)}
-                  onPress={() => handleLocationPress(location)}
-                />
-              ))}
-          </ScrollView>
-
-          <Button
-            stickyBottom
-            label="Add Location"
-            onPress={() => setAddLocationVisible(true)}
           />
         </View>
       </Modal>
 
-      <Location
-        visible={addLocationVisible}
-        editable={editable}
+      <LocationDetail
+        visible={locationDetailVisible}
         value={value}
-        onClose={() => setAddLocationVisible(false)}
-        onSave={handleLocationPress}
+        onClose={() => setLocationDetailVisible(false)}
       />
     </>
   );
@@ -239,5 +368,13 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalContent: {
+    padding: theme.gap(2),
+    gap: theme.gap(2),
+  },
+  row: {
+    flexDirection: "row",
+    gap: theme.gap(2),
   },
 }));

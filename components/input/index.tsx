@@ -3,7 +3,6 @@ export * from "./button";
 export * from "./checkout";
 export * from "./datetime-input";
 export * from "./icon-button";
-export * from "./location";
 export * from "./location-input";
 export * from "./location-permission";
 export * from "./options";

@@ -92,16 +92,18 @@ export type SongType = {
 };
 
 export type LocationType = {
-  id: number;
-  name: string;
-  address?: string; // Kept for backward compatibility
-  addressLine1?: string;
-  addressLine2?: string;
-  city?: string;
-  stateProvince?: string;
-  postalCode?: string;
-  countryCode?: CountryCodeType;
-  imageUrl: string;
+  id: string;
+  createdAt?: Date;
+  displayName?: string;
+  formattedAddress?: string;
+  shortFormattedAddress?: string;
+  googleMapsUri?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  country?: CountryCodeType;
+  administrativeAreaLevel1?: string;
 };
 
 export type RecommendationType = {

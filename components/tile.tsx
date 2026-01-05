@@ -1,6 +1,3 @@
-import { Avatar } from "./avatar";
-import { IconButton } from "./input/icon-button";
-import { ThemedText } from "./themed-text";
 import { WISH_STATUS } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks";
 import { WishStatusType } from "@/types";
@@ -9,9 +6,12 @@ import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import React, { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Avatar } from "./avatar";
+import { IconButton } from "./input/icon-button";
+import { ThemedText } from "./themed-text";
 
 interface TileProps {
-  imageSource: ImageProps["source"];
+  imageSource?: ImageProps["source"];
   title: string;
   subtitle?: string;
   metadata?: string;
@@ -60,18 +60,20 @@ export const Tile: React.FunctionComponent<TileProps> = ({
         end={{ x: 1, y: 0 }}
       >
         <View style={styles.leftContainer}>
-          <View style={styles.avatarContainer}>
-            <Avatar source={imageSource} size="large" shape="square" />
-            {previewUrl && (
-              <View style={styles.playButtonOverlay}>
-                <IconButton
-                  icon={isPlaying ? "pause" : "play"}
-                  iconSize={24}
-                  onPress={handleAudioPlayer}
-                />
-              </View>
-            )}
-          </View>
+          {imageSource && (
+            <View style={styles.avatarContainer}>
+              <Avatar source={imageSource} size="large" shape="square" />
+              {previewUrl && (
+                <View style={styles.playButtonOverlay}>
+                  <IconButton
+                    icon={isPlaying ? "pause" : "play"}
+                    iconSize={24}
+                    onPress={handleAudioPlayer}
+                  />
+                </View>
+              )}
+            </View>
+          )}
           <View style={styles.textContainer}>
             <ThemedText type="h5" numberOfLines={1} ellipsizeMode="tail">
               {title}
