@@ -1,10 +1,11 @@
+import { useSongSearch } from "@/hooks";
 import { SongType } from "@/types";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Keyboard,
   Modal,
-  ScrollView,
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -13,78 +14,6 @@ import { ThemedText } from "../themed-text";
 import { Tile } from "../tile";
 import { TextInput } from "./text-input";
 
-// --- Types & Helpers ---
-interface iTunesSearchResult {
-  trackId: number;
-  trackName: string;
-  artistName: string;
-  artworkUrl100?: string;
-  artworkUrl60?: string;
-  previewUrl?: string;
-  primaryGenreName?: string;
-}
-
-const mapITunesToSong = (result: iTunesSearchResult): SongType => ({
-  id: result.trackId.toString(),
-  name: result.trackName,
-  artistName: result.artistName,
-  artworkUrl: (result.artworkUrl100 || result.artworkUrl60 || "").replace(
-    /\d+x\d+/g,
-    "200x200"
-  ),
-  genreNames: result.primaryGenreName ? [result.primaryGenreName] : [],
-  previewUrl: result.previewUrl,
-  createdAt: new Date(),
-});
-
-// --- Custom Hook ---
-const useSongSearch = (query: string) => {
-  const [state, setState] = useState({
-    songs: [] as SongType[],
-    loading: false,
-    error: null as string | null,
-  });
-
-  useEffect(() => {
-    const trimmed = query.trim();
-    if (!trimmed) {
-      setState({ songs: [], loading: false, error: null });
-      return;
-    }
-
-    const abortController = new AbortController();
-    setState((prev) => ({ ...prev, loading: true, error: null }));
-
-    const timeoutId = setTimeout(async () => {
-      try {
-        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
-          trimmed
-        )}&media=music&entity=song&limit=25`;
-        const response = await fetch(url, { signal: abortController.signal });
-
-        if (!response.ok) throw new Error("Search failed");
-
-        const data = await response.json();
-        const mapped = data.results.map(mapITunesToSong);
-
-        setState({ songs: mapped, loading: false, error: null });
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
-          setState({ songs: [], loading: false, error: err.message });
-        }
-      }
-    }, 500);
-
-    return () => {
-      clearTimeout(timeoutId);
-      abortController.abort();
-    };
-  }, [query]);
-
-  return state;
-};
-
-// --- Main Component ---
 interface SongSearchProps {
   onSongPress?(song: SongType): void;
 }
@@ -105,35 +34,32 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
     handleClose();
   };
 
-  // Simplified List Rendering Logic
-  const renderContent = () => {
-    if (loading)
+  const renderEmptyState = () => {
+    if (loading) {
       return (
-        <ActivityIndicator size="large" color="#FFFFFF" style={styles.center} />
+        <View style={styles.messageContainer}>
+          <ActivityIndicator size="large" />
+        </View>
       );
-    if (error)
-      return (
-        <ThemedText color="danger" style={styles.center}>
-          {error}
-        </ThemedText>
-      );
-    if (query.trim() && songs.length === 0)
-      return (
-        <ThemedText color="dimmed" style={styles.center}>
-          No songs found
-        </ThemedText>
-      );
+    }
 
-    return songs.map((song, i) => (
-      <Tile
-        key={`${song.id}-${i}`}
-        imageSource={{ uri: song.artworkUrl }}
-        title={song.name}
-        subtitle={song.artistName}
-        metadata={song.genreNames.join(", ")}
-        onPress={() => onSelect(song)}
-      />
-    ));
+    if (error) {
+      return (
+        <View style={styles.messageContainer}>
+          <ThemedText color="danger">{error}</ThemedText>
+        </View>
+      );
+    }
+
+    if (query.trim()) {
+      return (
+        <View style={styles.messageContainer}>
+          <ThemedText color="dimmed">No songs found</ThemedText>
+        </View>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -162,12 +88,23 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
             />
           </View>
 
-          <ScrollView
+          <FlatList
+            data={songs}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item: song }) => (
+              <Tile
+                imageSource={{ uri: song.artworkUrl }}
+                title={song.name}
+                subtitle={song.artistName}
+                metadata={song.genreNames.join(", ")}
+                onPress={() => onSelect(song)}
+              />
+            )}
+            ListEmptyComponent={renderEmptyState}
             contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-          >
-            {renderContent()}
-          </ScrollView>
+          />
         </View>
       </Modal>
     </>
@@ -189,8 +126,9 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
-  center: {
-    marginTop: theme.gap(8),
-    textAlign: "center",
+  messageContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 }));

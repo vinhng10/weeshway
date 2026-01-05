@@ -1,5 +1,4 @@
 import {
-  COUNTRY,
   LEVEL,
   PROJECT_STATUS,
   ROLE,
@@ -20,13 +19,6 @@ export type WishStatusType = ValueOf<typeof WISH_STATUS>;
 export type TimeType = ValueOf<typeof TIME>;
 export type TrackType = ValueOf<typeof TRACK>;
 export type RoleType = ValueOf<typeof ROLE>;
-
-export type CountryCodeType = keyof typeof COUNTRY;
-export type CountryNameType = ValueOf<typeof COUNTRY>;
-export type CountryType = {
-  code: CountryCodeType;
-  name: CountryNameType;
-};
 
 export type OptionItem = {
   key: string;
@@ -102,7 +94,7 @@ export type LocationType = {
     latitude: number;
     longitude: number;
   };
-  country?: CountryCodeType;
+  country?: string;
   administrativeAreaLevel1?: string;
 };
 

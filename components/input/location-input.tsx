@@ -1,8 +1,7 @@
-import { GOOGLE_PLACES_API_KEY } from "@/constants";
+import { useLocationSearch } from "@/hooks";
 import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
-import camelcaseKeys from "camelcase-keys";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -26,20 +25,6 @@ interface LocationProps {
   value?: LocationType;
   editable?: boolean;
   onValueChange?: (location: LocationType) => void;
-}
-
-interface GooglePlace {
-  id: string;
-  displayName?: { text: string };
-  formattedAddress?: string;
-  shortFormattedAddress?: string;
-  addressComponents?: Array<{
-    types: string[];
-    shortText?: string;
-    longText?: string;
-  }>;
-  location?: { latitude: number; longitude: number };
-  googleMapsUri?: string;
 }
 
 interface LocationDetailProps {
@@ -95,27 +80,6 @@ const LocationDetail: React.FunctionComponent<LocationDetailProps> = ({
   );
 };
 
-const convertGooglePlaceToLocation = (place: GooglePlace): LocationType => {
-  const country = place.addressComponents?.find((comp) =>
-    comp.types.includes("country")
-  )?.shortText as LocationType["country"];
-
-  const administrativeAreaLevel1 = place.addressComponents?.find((comp) =>
-    comp.types.includes("administrative_area_level_1")
-  )?.longText;
-
-  return {
-    id: place.id,
-    displayName: place.displayName?.text,
-    formattedAddress: place.formattedAddress,
-    shortFormattedAddress: place.shortFormattedAddress,
-    googleMapsUri: place.googleMapsUri,
-    location: place.location,
-    country,
-    administrativeAreaLevel1,
-  };
-};
-
 export const LocationInput: React.FunctionComponent<LocationProps> = ({
   label,
   value,
@@ -125,70 +89,11 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
   const [visible, setVisible] = useState(false);
   const [locationDetailVisible, setLocationDetailVisible] = useState(false);
   const [query, setQuery] = useState("");
-  const [locations, setLocations] = useState<LocationType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const searchLocations = async () => {
-      const trimmedQuery = query.trim();
-      if (!trimmedQuery) {
-        setLocations([]);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(
-          "https://places.googleapis.com/v1/places:searchText",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
-              "X-Goog-FieldMask":
-                "places.id,places.displayName,places.formattedAddress,places.shortFormattedAddress,places.addressComponents,places.location,places.googleMapsUri",
-            },
-            body: JSON.stringify({
-              textQuery: trimmedQuery,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
-        }
-
-        const jsonData = await response.json();
-        const data = camelcaseKeys(jsonData, { deep: true });
-        const places: GooglePlace[] = data && data.places ? data.places : [];
-        const convertedLocations = places.map(convertGooglePlaceToLocation);
-        setLocations(convertedLocations);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to search locations"
-        );
-        console.error("Search error:", err);
-        setLocations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Debounce the search
-    const timeoutId = setTimeout(() => {
-      searchLocations();
-    }, 1500);
-
-    return () => clearTimeout(timeoutId);
-  }, [query]);
+  const { locations, loading, error } = useLocationSearch(query);
 
   const handleLocationPress = async (location: LocationType) => {
     try {
       Keyboard.dismiss();
-      setLoading(true);
 
       const locationPoint = location.location
         ? `POINT(${location.location.longitude} ${location.location.latitude})`
@@ -219,9 +124,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
       setVisible(false);
       setQuery("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save location");
-    } finally {
-      setLoading(false);
+      console.error(err);
     }
   };
 
