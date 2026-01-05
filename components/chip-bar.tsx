@@ -59,14 +59,14 @@ export const ChipBarItem = ({
   } else {
     return (
       <>
-        {Object.entries(options).map(([optionValue, optionLabel]) => {
+        {Object.values(options).map((optionValue) => {
           const isActive = value === optionValue;
           return (
             <Chip
               key={optionValue}
               size={"large"}
               color={isActive ? "light" : "dark"}
-              label={optionLabel}
+              label={optionValue}
               onPress={() => onValueChange?.(optionValue)}
             />
           );
