@@ -29,7 +29,7 @@ function HomeContent() {
     hasNextPage,
     fetchNextPage,
   } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
-    queryKey: ["projects", "home", profile?.id],
+    queryKey: ["projects", "home"],
     tableName: "projects",
     columns: `
       *, 
@@ -55,7 +55,7 @@ function HomeContent() {
   });
 
   const { data: stats } = useSuspenseQuery<StatsType[][]>({
-    queryKey: ["projects", "stats", profile?.id],
+    queryKey: ["projects", "stats"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("stats")

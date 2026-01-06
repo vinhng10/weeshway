@@ -18,7 +18,7 @@ function WalletContent() {
   const country = useLocales((state) => state.country);
 
   const { data: onboardingComplete, refetch } = useSuspenseQuery<boolean>({
-    queryKey: ["profile", "stripe", profile?.id],
+    queryKey: ["profile", "stripe"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("is_stripe_onboarded");
       if (error) throw error;

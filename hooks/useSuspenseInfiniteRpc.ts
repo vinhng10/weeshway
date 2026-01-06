@@ -25,7 +25,7 @@ export function useSuspenseInfiniteRpc<TData = unknown>({
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
 
   const query = useTanStackSuspenseInfiniteQuery({
-    queryKey: queryKey,
+    queryKey: [...queryKey, profile?.id],
     initialPageParam: undefined as string | number | undefined,
     queryFn: async ({ pageParam }) => {
       if (!isLoggedIn || !profile) {

@@ -24,7 +24,7 @@ function BookingsContent() {
     hasNextPage,
     fetchNextPage,
   } = useSuspenseInfiniteQuery<BookingEnrichedType>({
-    queryKey: ["classes", "bookings", profile?.id, time],
+    queryKey: ["classes", "bookings", time],
     tableName: "bookings",
     columns: `
       *, project:projects!inner(
