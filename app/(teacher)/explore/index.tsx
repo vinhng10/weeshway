@@ -8,7 +8,7 @@ import {
   Tile,
 } from "@/components";
 import { LEVEL, STYLE } from "@/constants";
-import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
+import { useSuspenseInfiniteRpc, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { BubbleType, LevelType, StyleType, WishEnrichedType } from "@/types";
 import { router } from "expo-router";
@@ -37,9 +37,9 @@ function WishBoardContent() {
     data: wishes,
     hasNextPage,
     fetchNextPage,
-  } = useSuspenseInfiniteQuery<WishEnrichedType>({
+  } = useSuspenseInfiniteRpc<WishEnrichedType>({
     queryKey: ["wishes", style, level, centroidId],
-    tableName: "wishes",
+    rpcFunction: "get_nearby_wishes",
     columns: `*, song:songs!inner(*)`,
     pageSize: 10,
     trailingQuery: (query) => {
