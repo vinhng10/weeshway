@@ -5,22 +5,24 @@ import { supabase } from "@/supabase";
 import { useSuspenseInfiniteQuery as useTanStackSuspenseInfiniteQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 
-interface UseSuspenseInfiniteQueryProps<TData = unknown> {
-  tableName: string;
+interface UseSuspenseInfiniteRpcProps<TData = unknown> {
+  rpcFunction: string;
+  rpcParams?: Record<string, unknown>;
   columns?: string;
   pageSize?: number;
   queryKey: readonly unknown[];
   enabled?: boolean | (() => boolean);
-  trailingQuery?: (query: any) => any;
+  trailingQuery?: (query: any, rpcResult?: any) => any;
 }
 
-export function useSuspenseInfiniteQuery<TData = unknown>({
-  tableName,
+export function useSuspenseInfiniteRpc<TData = unknown>({
+  rpcFunction,
+  rpcParams = {},
   columns = "*",
   pageSize = 10,
   queryKey,
   trailingQuery,
-}: UseSuspenseInfiniteQueryProps<TData>) {
+}: UseSuspenseInfiniteRpcProps<TData>) {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
 
@@ -34,7 +36,10 @@ export function useSuspenseInfiniteQuery<TData = unknown>({
 
       const skip = pageParam;
 
-      let query = supabase.from(tableName).select(columns, { count: "exact" });
+      // Call RPC function first
+      let query = supabase
+        .rpc(rpcFunction, rpcParams)
+        .select(columns, { count: "exact" });
 
       if (trailingQuery) {
         query = trailingQuery(query);

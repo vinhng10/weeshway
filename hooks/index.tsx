@@ -6,6 +6,7 @@ export * from "./useRole";
 export * from "./useSongSearch";
 export * from "./useStudioStore";
 export * from "./useSuspenseInfiniteQuery";
+export * from "./useSuspenseInfiniteRpc";
 export * from "./useSuspenseQuery";
 export * from "./useVoiceCommands";
 export * from "./useWakeWordDetection";

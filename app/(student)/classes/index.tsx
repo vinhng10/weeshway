@@ -15,7 +15,7 @@ import {
   STRIPE_PAYMENT_STATUS,
   STYLE,
 } from "@/constants";
-import { useAuth, useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
+import { useAuth, useSuspenseInfiniteRpc, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   LevelType,
@@ -73,9 +73,9 @@ function ClassesContent() {
     data: projects,
     hasNextPage,
     fetchNextPage,
-  } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
+  } = useSuspenseInfiniteRpc<ProjectEnrichedType>({
     queryKey: ["classes", "projects", status, style, level],
-    tableName: "projects",
+    rpcFunction: "get_nearby_classes",
     columns: `*, profile:profiles(*), song:songs(*), bookings:bookings(*)`,
     pageSize: 10,
     trailingQuery: (query) => {
