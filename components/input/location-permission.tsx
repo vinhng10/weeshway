@@ -19,14 +19,15 @@ export const LocationPermission = () => {
     if (!profile?.id || !country) return;
 
     try {
-      const updateData: { country: string; location?: string } = { country };
+      const updateData: { country: string; location: string | null } = {
+        country,
+        location: null,
+      };
 
       if (status === Location.PermissionStatus.GRANTED) {
         const { coords } = await Location.getCurrentPositionAsync();
         updateData.location = `POINT(${coords.longitude} ${coords.latitude})`;
       }
-
-      console.log("updateData", updateData);
 
       const { error } = await supabase
         .from("profiles")
@@ -36,7 +37,6 @@ export const LocationPermission = () => {
       if (error) throw error;
       await fetchProfile();
     } catch (error) {
-      console.error("Profile update error:", error);
       throw error;
     }
   };
