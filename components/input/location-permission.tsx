@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks";
+import { useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
@@ -9,64 +9,73 @@ import { Button } from "./button";
 
 export const LocationPermission = () => {
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
+
   const profile = useAuth((state) => state.profile);
+  const fetchProfile = useAuth((state) => state.fetchProfile);
+  const country = useLocales((state) => state.country);
 
-  useEffect(() => {
-    async function checkLocationPermission() {
-      const { status } = await Location.getForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setVisible(true);
-      } else {
-        // Permission already granted, update location
-        await updateLocation();
-      }
-    }
-    checkLocationPermission();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id]);
-
-  const handleRequestPermission = async () => {
-    try {
-      setLoading(true);
-      setErrorMessage(null);
-
-      const { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status === "granted") {
-        await updateLocation();
-        setVisible(false);
-      } else {
-        setErrorMessage(
-          "Location permission denied. You can enable it in Settings."
-        );
-      }
-    } catch (error) {
-      setErrorMessage("Failed to get location. Please try again.");
-      console.error("Location permission error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateLocation = async () => {
-    if (!profile?.id) return;
+  const updateLocation = async (status: Location.PermissionStatus) => {
+    if (!profile?.id || !country) return;
 
     try {
-      const location = await Location.getCurrentPositionAsync({});
+      const updateData: { country: string; location?: string } = { country };
+
+      if (status === Location.PermissionStatus.GRANTED) {
+        const { coords } = await Location.getCurrentPositionAsync();
+        updateData.location = `POINT(${coords.longitude} ${coords.latitude})`;
+      }
+
+      console.log("updateData", updateData);
+
       const { error } = await supabase
         .from("profiles")
-        .update({
-          location: `POINT(${location.coords.longitude} ${location.coords.latitude})`,
-        })
+        .update(updateData)
         .eq("id", profile.id);
+
       if (error) throw error;
+      await fetchProfile();
     } catch (error) {
-      setErrorMessage("Failed to update location. Please try again.");
-      console.error("Location update error:", error);
+      console.error("Profile update error:", error);
+      throw error;
     }
   };
+
+  const handleRequestPermission = async () => {
+    setLoading(true);
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      await updateLocation(status);
+    } finally {
+      setLoading(false);
+      setVisible(false);
+    }
+  };
+
+  const handleClose = async () => {
+    try {
+      await updateLocation(Location.PermissionStatus.DENIED);
+    } finally {
+      setVisible(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!profile?.id) return;
+
+    async function checkAndUpdateLocation() {
+      const { status } = await Location.getForegroundPermissionsAsync();
+
+      if (status === Location.PermissionStatus.UNDETERMINED) {
+        setVisible(true);
+      } else {
+        await updateLocation(status);
+      }
+    }
+
+    checkAndUpdateLocation();
+  }, []);
 
   return (
     <Modal
@@ -74,9 +83,9 @@ export const LocationPermission = () => {
       animationType="slide"
       presentationStyle="overFullScreen"
       transparent={true}
-      onRequestClose={() => setVisible(false)}
+      onRequestClose={handleClose}
     >
-      <Pressable style={styles.container} onPress={() => setVisible(false)} />
+      <Pressable style={styles.container} onPress={handleClose} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Location Access</ThemedText>
         <ThemedText type="h5" color="dimmed">
@@ -84,14 +93,12 @@ export const LocationPermission = () => {
           classes by letting us know where you are.
         </ThemedText>
 
-        {errorMessage && <ThemedText color="danger">{errorMessage}</ThemedText>}
-
         <Button
           label="Allow"
           onPress={handleRequestPermission}
           loading={loading}
         />
-        <Button outlined label="Not Now" onPress={() => setVisible(false)} />
+        <Button outlined label="Not Now" onPress={handleClose} />
       </View>
     </Modal>
   );
