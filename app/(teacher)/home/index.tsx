@@ -94,7 +94,7 @@ function HomeContent() {
     <Tile
       imageSource={data.song.artworkUrl}
       title={data.song.name}
-      subtitle={data.location?.name}
+      subtitle={data.location?.displayName}
       metadata={`${formatTime(new Date(data.startAt!))} - ${formatTime(
         new Date(data.endAt!)
       )}`}

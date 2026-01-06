@@ -108,7 +108,7 @@ export const ProjectCard = ({ data }: CardProps) => {
                     size={16}
                     color="#FFFFFF"
                   />
-                  <ThemedText>{data.location?.name}</ThemedText>
+                  <ThemedText>{data.location?.displayName}</ThemedText>
                 </View>
                 <ThemedText>
                   {formatMoney(data.price, data.currency)}

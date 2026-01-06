@@ -57,7 +57,6 @@ function BookingsContent() {
           .gte("project.end_at", nowISO);
       }
 
-      query = query.order("created_at", { ascending: false });
       return query;
     },
   });
