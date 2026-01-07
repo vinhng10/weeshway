@@ -2,7 +2,7 @@ import { RETURN_URL } from "@/constants";
 import { useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileType, ProjectEnrichedType } from "@/types";
-import { useStripe } from "@stripe/stripe-react-native";
+import { PaymentMethodLayout, useStripe } from "@stripe/stripe-react-native";
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -84,10 +84,15 @@ export function Checkout({
     setLoading(true);
 
     try {
-      const paymentData = await fetchPaymentSheetParams();
+      const {
+        paymentIntentClientSecret,
+        customerSessionClientSecret,
+        autoConfirmed,
+        status,
+      } = await fetchPaymentSheetParams();
 
       // Handle auto-confirmed payment with saved payment method
-      if (paymentData.autoConfirmed && paymentData.status === "succeeded") {
+      if (autoConfirmed && status === "succeeded") {
         setStatus("success");
         setStatusMessage("Payment completed!");
         return;
@@ -97,15 +102,11 @@ export function Checkout({
       if (!isInitialized) {
         const { error } = await initPaymentSheet({
           merchantDisplayName: "DanceAI",
-          paymentIntentClientSecret: paymentData.paymentIntentClientSecret,
-          customerSessionClientSecret: paymentData.customerSessionClientSecret,
+          paymentIntentClientSecret,
+          customerSessionClientSecret,
           returnURL: RETURN_URL,
-          appearance: {
-            colors: {
-              primary: "#6B9C00",
-            },
-          },
           paymentMethodOrder: ["card"],
+          paymentMethodLayout: PaymentMethodLayout.Horizontal,
         });
 
         if (error) throw new Error(error.message);
