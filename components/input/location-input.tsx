@@ -113,10 +113,10 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
             administrative_area_level_1: location.administrativeAreaLevel1,
             location: locationPoint,
           },
-          { onConflict: "id" }
+          { ignoreDuplicates: true }
         )
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
