@@ -1,17 +1,162 @@
 import { Boundary, Button, Header } from "@/components";
-import { RETURN_URL } from "@/constants";
-import { useAuth, useLocales, useSuspenseQuery } from "@/hooks";
+import { RETURN_URL, ROLE } from "@/constants";
+import { useAuth, useLocales, useRole, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
+import {
+  ClientSecretProvider,
+  CustomerSessionClientSecret,
+  CustomerSheet,
+  CustomerSheetError,
+} from "@stripe/stripe-react-native";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type StripeResponse = {
   url?: string;
 };
 
-function WalletContent() {
+function StudentWalletContent() {
+  const profile = useAuth((state) => state.profile);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isPresenting, setIsPresenting] = useState(false);
+
+  const clientSecretProvider: ClientSecretProvider = useMemo(
+    () => ({
+      // Must return an object with customerId and clientSecret
+      async provideCustomerSessionClientSecret(): Promise<CustomerSessionClientSecret> {
+        const { data, error } = await supabase.functions.invoke<{
+          customerId: string;
+          clientSecret: string;
+        }>("setup-session", {
+          body: {
+            stripeAccountId: profile?.stripeAccountId,
+          },
+        });
+
+        if (error) throw error;
+        if (!data) throw new Error("Failed to create customer session");
+        return {
+          customerId: data.customerId,
+          clientSecret: data.clientSecret,
+        };
+      },
+
+      // Must return a string
+      async provideSetupIntentClientSecret(): Promise<string> {
+        const { data, error } = await supabase.functions.invoke<{
+          setupIntentClientSecret: string;
+        }>("setup-intent", {
+          body: {
+            stripeAccountId: profile?.stripeAccountId,
+          },
+        });
+
+        if (error) throw error;
+        if (!data?.setupIntentClientSecret)
+          throw new Error("Failed to create setup intent");
+        return data.setupIntentClientSecret;
+      },
+    }),
+    [profile?.stripeAccountId]
+  );
+
+  // Initialize CustomerSheet on mount
+  useEffect(() => {
+    const initializeCustomerSheet = async () => {
+      if (!profile?.stripeAccountId) return;
+
+      try {
+        const { error } = await CustomerSheet.initialize({
+          intentConfiguration: {
+            paymentMethodTypes: ["card"],
+          },
+          clientSecretProvider: clientSecretProvider,
+          headerTextForSelectionScreen: "Manage your payment method",
+          returnURL: "danceai://",
+        });
+
+        if (error) {
+          console.error("CustomerSheet initialization error:", error);
+          Alert.alert("Error", "Failed to initialize payment methods");
+        } else {
+          setIsInitialized(true);
+        }
+      } catch (err: any) {
+        console.error("Error initializing CustomerSheet:", err);
+        Alert.alert(
+          "Error",
+          err.message || "Failed to initialize payment methods"
+        );
+      }
+    };
+
+    initializeCustomerSheet();
+  }, [profile?.stripeAccountId, clientSecretProvider]);
+
+  const handlePresentCustomerSheet = async () => {
+    if (!isInitialized) {
+      Alert.alert("Error", "Payment methods not initialized");
+      return;
+    }
+
+    setIsPresenting(true);
+    try {
+      const { error, paymentOption, paymentMethod } =
+        await CustomerSheet.present();
+
+      if (error) {
+        if (error.code === CustomerSheetError.Canceled) {
+        } else {
+          // Show the error in your UI
+          Alert.alert("Error", error.message || "An error occurred");
+        }
+      } else {
+        if (paymentOption) {
+          // Configure your UI based on the payment option
+          if (paymentMethod) {
+            console.log(
+              "Payment method:",
+              JSON.stringify(paymentMethod, null, 2)
+            );
+            // You can save the default payment method to your backend here
+            // await MyBackend.setDefaultPaymentMethod(paymentMethod.id);
+          }
+        }
+        if (paymentMethod) {
+          console.log(
+            "Payment method details:",
+            JSON.stringify(paymentMethod, null, 2)
+          );
+        }
+      }
+    } catch (err: any) {
+      console.error("Error presenting CustomerSheet:", err);
+      Alert.alert("Error", err.message || "Failed to present payment methods");
+    } finally {
+      setIsPresenting(false);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Header title="Wallet" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <Button
+          label="Manage Payment Methods"
+          onPress={handlePresentCustomerSheet}
+          loading={isPresenting || !isInitialized}
+        />
+      </ScrollView>
+    </View>
+  );
+}
+
+function TeacherWalletContent() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const [isLaunching, setIsLaunching] = useState(false);
@@ -26,7 +171,7 @@ function WalletContent() {
     },
   });
 
-  const handleStartOnboarding = useCallback(async () => {
+  const handleStartOnboarding = async () => {
     setIsLaunching(true);
     try {
       const { data, error } = await supabase.functions.invoke<StripeResponse>(
@@ -55,9 +200,9 @@ function WalletContent() {
     } finally {
       setIsLaunching(false);
     }
-  }, [refetch, fetchProfile]);
+  };
 
-  const handleOpenDashboard = useCallback(async () => {
+  const handleOpenDashboard = async () => {
     if (!profile?.stripeAccountId || !onboardingComplete) return;
 
     setIsLaunching(true);
@@ -83,7 +228,7 @@ function WalletContent() {
     } finally {
       setIsLaunching(false);
     }
-  }, [profile?.stripeAccountId, onboardingComplete, fetchProfile]);
+  };
 
   return (
     <View style={styles.container}>
@@ -111,9 +256,15 @@ function WalletContent() {
 }
 
 export default function Wallet() {
+  const role = useRole((state) => state.role);
+
   return (
     <Boundary>
-      <WalletContent />
+      {role === ROLE.STUDENT ? (
+        <StudentWalletContent />
+      ) : (
+        <TeacherWalletContent />
+      )}
     </Boundary>
   );
 }
