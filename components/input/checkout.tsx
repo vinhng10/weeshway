@@ -12,6 +12,8 @@ import { Button } from "./button";
 type PaymentIntentResponse = {
   paymentIntentClientSecret: string;
   customerSessionClientSecret: string;
+  autoConfirmed?: boolean;
+  status?: string;
 };
 
 type CheckoutProps = {
@@ -33,8 +35,8 @@ export function Checkout({
   // States to manage separate stages
   const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
+  const [statusMessage, setStatusMessage] = useState<string>("");
 
   const stripeCustomerId = customer?.stripeAccountId;
   const stripeProviderId = project.profile.stripeAccountId;
@@ -74,61 +76,58 @@ export function Checkout({
     return data;
   };
 
-  const initializePaymentSheet = async () => {
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    setLoading(true);
-    try {
-      const { paymentIntentClientSecret, customerSessionClientSecret } =
-        await fetchPaymentSheetParams();
-
-      const { error } = await initPaymentSheet({
-        merchantDisplayName: "DanceAI",
-        paymentIntentClientSecret: paymentIntentClientSecret,
-        customerSessionClientSecret: customerSessionClientSecret,
-        returnURL: RETURN_URL,
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      setIsInitialized(true);
-      return true;
-    } catch (err: any) {
-      setErrorMessage("Error occurred. Please try again.");
-      setIsInitialized(false);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handlePay = async () => {
     if (loading) return;
 
-    if (!isInitialized) {
-      const ok = await initializePaymentSheet();
-      if (!ok) return;
-    }
-
-    setErrorMessage(null);
-    setSuccessMessage(null);
+    setStatus("idle");
+    setStatusMessage("");
     setLoading(true);
+
     try {
+      const paymentData = await fetchPaymentSheetParams();
+
+      // Handle auto-confirmed payment with saved payment method
+      if (paymentData.autoConfirmed && paymentData.status === "succeeded") {
+        setStatus("success");
+        setStatusMessage("Payment completed!");
+        return;
+      }
+
+      // Initialize payment sheet if needed
+      if (!isInitialized) {
+        const { error } = await initPaymentSheet({
+          merchantDisplayName: "DanceAI",
+          paymentIntentClientSecret: paymentData.paymentIntentClientSecret,
+          customerSessionClientSecret: paymentData.customerSessionClientSecret,
+          returnURL: RETURN_URL,
+          appearance: {
+            colors: {
+              primary: "#6B9C00",
+            },
+          },
+          paymentMethodOrder: ["card"],
+        });
+
+        if (error) throw new Error(error.message);
+        setIsInitialized(true);
+      }
+
+      // Present payment sheet for user interaction
       const { error } = await presentPaymentSheet();
 
       if (error) {
-        setErrorMessage(
+        setStatus("error");
+        setStatusMessage(
           `Payment ${error.code.toLowerCase()}. Please try again.`
         );
         return;
       }
 
-      setErrorMessage(null);
-      setSuccessMessage("Payment completed!");
+      setStatus("success");
+      setStatusMessage("Payment completed!");
     } catch (err: any) {
-      setErrorMessage(err?.message ?? "An unexpected error occurred.");
+      setStatus("error");
+      setStatusMessage(err?.message ?? "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -138,8 +137,8 @@ export function Checkout({
     // Reset when modal closes or when project/customer changes
     setLoading(false);
     setIsInitialized(false);
-    setErrorMessage(null);
-    setSuccessMessage(null);
+    setStatus("idle");
+    setStatusMessage("");
   }, [visible, project.id, customer?.id]);
 
   return (
@@ -173,16 +172,22 @@ export function Checkout({
           </ThemedText>
         </View>
 
-        {errorMessage && <ThemedText color="danger">{errorMessage}</ThemedText>}
-        {successMessage && (
-          <ThemedText color="primary">{successMessage}</ThemedText>
+        {status === "error" && (
+          <ThemedText color="danger">{statusMessage}</ThemedText>
+        )}
+        {status === "success" && (
+          <ThemedText color="primary">{statusMessage}</ThemedText>
         )}
 
         <Button
-          label={`Pay ${formatMoney(totalAmount, currency)}`}
+          label={
+            status === "success"
+              ? "See you in class!"
+              : `Pay ${formatMoney(totalAmount, currency)}`
+          }
           onPress={handlePay}
           loading={loading}
-          disabled={successMessage !== null}
+          disabled={status === "success"}
         />
         <Button outlined label={"Cancel"} onPress={onExit} />
       </View>

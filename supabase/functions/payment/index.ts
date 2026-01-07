@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     const result = requestSchema.safeParse(body);
 
     if (!result.success) {
-      return jsonResponse({ error: result.error.format() }, 400);
+      return jsonResponse({ error: z.treeifyError(result.error) }, 400);
     }
 
     const { customer, project, amount, currency } = result.data;
@@ -54,6 +54,13 @@ Deno.serve(async (req) => {
       return jsonResponse({ message: "Payment already succeeded" });
     }
 
+    const savedPaymentMethods = await stripe.paymentMethods.list({
+      customer_account: customer.stripeAccountId,
+      type: "card",
+    });
+
+    const savedPaymentMethodId = savedPaymentMethods.data[0]?.id;
+
     // Concurrent Stripe Operations: Create Session and Get/Create Intent
     const [customerSession, paymentIntent] = await Promise.all([
       stripe.customerSessions.create({
@@ -69,7 +76,7 @@ Deno.serve(async (req) => {
           },
         },
       }),
-      booking?.stripe_payment_intent_id
+      booking?.stripe_payment_intent_id && booking.status !== "Canceled"
         ? stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id)
         : stripe.paymentIntents.create({
             amount,
@@ -79,12 +86,20 @@ Deno.serve(async (req) => {
             application_fee_amount: applicationFeeAmount,
             transfer_data: { destination: project.stripeAccountId },
             metadata: { user_id: customer.id, project_id: project.id },
+            payment_method: savedPaymentMethodId,
+            off_session: !!savedPaymentMethodId,
+            confirm: !!savedPaymentMethodId,
+            setup_future_usage: savedPaymentMethodId
+              ? undefined
+              : "off_session",
           }),
     ]);
 
     return jsonResponse({
       paymentIntentClientSecret: paymentIntent.client_secret,
       customerSessionClientSecret: customerSession.client_secret,
+      autoConfirmed: !!savedPaymentMethodId,
+      status: paymentIntent.status,
     });
   } catch (err: any) {
     console.error("Payment Intent Error:", err);

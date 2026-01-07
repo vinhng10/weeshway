@@ -51,6 +51,7 @@ export const STRIPE_PAYMENT_STATUS = {
   SUCCEEDED: "Succeeded",
   PROCESSING: "Processing",
   FAILED: "Failed",
+  CANCELED: "Canceled",
 } as const;
 
 export const WISH_STATUS = {

@@ -43,7 +43,7 @@ function ClassContent() {
         `
         )
         .eq("id", classId)
-        .eq("bookings.status", "Succeeded")
+        .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
         .single();
 
       if (error) throw error;
