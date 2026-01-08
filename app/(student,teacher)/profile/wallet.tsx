@@ -6,7 +6,6 @@ import {
   ClientSecretProvider,
   CustomerSessionClientSecret,
   CustomerSheet,
-  CustomerSheetError,
 } from "@stripe/stripe-react-native";
 import * as WebBrowser from "expo-web-browser";
 import { useMemo, useState } from "react";
@@ -88,39 +87,9 @@ function StudentWalletContent() {
         setIsInitialized(true);
       }
 
-      const { error, paymentOption, paymentMethod } =
-        await CustomerSheet.present();
+      const { error } = await CustomerSheet.present();
 
-      if (error) {
-        if (error.code === CustomerSheetError.Canceled) {
-        } else {
-          // Show the error in your UI
-        }
-      } else {
-        if (paymentOption) {
-          try {
-            // paymentOption.id may exist at runtime even if TypeScript doesn't recognize it
-            // Fallback to paymentMethod.id if paymentOption.id is not available
-            const paymentMethodId =
-              (paymentOption as any).id || paymentMethod?.id;
-
-            if (paymentMethodId) {
-              const { error } = await supabase
-                .from("profiles")
-                .update({ default_payment_method_id: paymentMethodId })
-                .eq("id", profile?.id);
-
-              if (error) {
-                console.error("Error updating default payment method:", error);
-              } else {
-                await fetchProfile();
-              }
-            }
-          } catch (err: any) {
-            console.error("Error saving payment method:", err);
-          }
-        }
-      }
+      if (error) throw error;
     } catch (err: any) {
       console.error("Error presenting CustomerSheet:", err);
     } finally {

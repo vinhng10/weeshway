@@ -10,6 +10,7 @@ import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
 type PaymentIntentResponse = {
+  customerId: string;
   paymentIntentClientSecret: string;
   customerSessionClientSecret: string;
   autoConfirmed?: boolean;
@@ -72,6 +73,7 @@ export function Checkout({
 
     try {
       const {
+        customerId,
         paymentIntentClientSecret,
         customerSessionClientSecret,
         autoConfirmed,
@@ -89,6 +91,7 @@ export function Checkout({
       if (!isInitialized) {
         const { error } = await initPaymentSheet({
           merchantDisplayName: "DanceAI",
+          customerId,
           paymentIntentClientSecret,
           customerSessionClientSecret,
           returnURL: RETURN_URL,

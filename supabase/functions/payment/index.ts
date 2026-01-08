@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     const [profileResult, projectResult] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, stripe_account_id, default_payment_method_id")
+        .select("id, stripe_account_id")
         .eq("id", user.id)
         .single(),
       supabase
@@ -81,31 +81,11 @@ Deno.serve(async (req) => {
     // Handle already paid state
     if (booking?.status === "Succeeded") {
       return jsonResponse({
+        customerId: customer.stripe_account_id,
         paymentIntentClientSecret: "",
         customerSessionClientSecret: "",
-        autoConfirmed: false,
         status: "succeeded",
       });
-    }
-
-    // Get saved payment method - use default if set, otherwise fetch and set it
-    let savedPaymentMethodId = customer.default_payment_method_id;
-
-    if (!savedPaymentMethodId) {
-      const savedPaymentMethods = await stripe.paymentMethods.list({
-        customer_account: customer.stripe_account_id,
-        type: "card",
-      });
-
-      savedPaymentMethodId = savedPaymentMethods.data[0]?.id;
-
-      // If we found a payment method, set it as default in the database
-      if (savedPaymentMethodId) {
-        await supabase
-          .from("profiles")
-          .update({ default_payment_method_id: savedPaymentMethodId })
-          .eq("id", customer.id);
-      }
     }
 
     // Concurrent Stripe Operations: Create Session and Get/Create Intent
@@ -133,19 +113,13 @@ Deno.serve(async (req) => {
             application_fee_amount: applicationFeeAmount,
             transfer_data: { destination: teacher.stripe_account_id },
             metadata: { user_id: customer.id, project_id: project.id },
-            payment_method: savedPaymentMethodId,
-            off_session: !!savedPaymentMethodId,
-            confirm: !!savedPaymentMethodId,
-            setup_future_usage: savedPaymentMethodId
-              ? undefined
-              : "off_session",
           }),
     ]);
 
     return jsonResponse({
+      customerId: customer.stripe_account_id,
       paymentIntentClientSecret: paymentIntent.client_secret,
       customerSessionClientSecret: customerSession.client_secret,
-      autoConfirmed: !!savedPaymentMethodId,
       status: paymentIntent.status,
     });
   } catch (err: unknown) {

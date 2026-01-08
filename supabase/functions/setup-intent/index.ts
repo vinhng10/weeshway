@@ -15,6 +15,9 @@ Deno.serve(async (req) => {
     // Create setup intent
     const setupIntent = await stripe.setupIntents.create({
       customer_account: stripeAccountId,
+      automatic_payment_methods: {
+        enabled: true,
+      },
     });
 
     return jsonResponse({
