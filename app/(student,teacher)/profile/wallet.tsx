@@ -9,8 +9,8 @@ import {
   CustomerSheetError,
 } from "@stripe/stripe-react-native";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect, useMemo, useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { useMemo, useState } from "react";
+import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type StripeResponse = {
@@ -19,6 +19,7 @@ type StripeResponse = {
 
 function StudentWalletContent() {
   const profile = useAuth((state) => state.profile);
+  const fetchProfile = useAuth((state) => state.fetchProfile);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
 
@@ -62,12 +63,15 @@ function StudentWalletContent() {
     [profile?.stripeAccountId]
   );
 
-  // Initialize CustomerSheet on mount
-  useEffect(() => {
-    const initializeCustomerSheet = async () => {
-      if (!profile?.stripeAccountId) return;
+  const handleSetup = async () => {
+    if (!profile?.stripeAccountId) {
+      return;
+    }
 
-      try {
+    setIsPresenting(true);
+    try {
+      // Initialize CustomerSheet if needed
+      if (!isInitialized) {
         const { error } = await CustomerSheet.initialize({
           intentConfiguration: {
             paymentMethodTypes: ["card"],
@@ -79,30 +83,11 @@ function StudentWalletContent() {
 
         if (error) {
           console.error("CustomerSheet initialization error:", error);
-          Alert.alert("Error", "Failed to initialize payment methods");
-        } else {
-          setIsInitialized(true);
+          return;
         }
-      } catch (err: any) {
-        console.error("Error initializing CustomerSheet:", err);
-        Alert.alert(
-          "Error",
-          err.message || "Failed to initialize payment methods"
-        );
+        setIsInitialized(true);
       }
-    };
 
-    initializeCustomerSheet();
-  }, [profile?.stripeAccountId, clientSecretProvider]);
-
-  const handlePresentCustomerSheet = async () => {
-    if (!isInitialized) {
-      Alert.alert("Error", "Payment methods not initialized");
-      return;
-    }
-
-    setIsPresenting(true);
-    try {
       const { error, paymentOption, paymentMethod } =
         await CustomerSheet.present();
 
@@ -110,30 +95,34 @@ function StudentWalletContent() {
         if (error.code === CustomerSheetError.Canceled) {
         } else {
           // Show the error in your UI
-          Alert.alert("Error", error.message || "An error occurred");
         }
       } else {
         if (paymentOption) {
-          // Configure your UI based on the payment option
-          if (paymentMethod) {
-            console.log(
-              "Payment method:",
-              JSON.stringify(paymentMethod, null, 2)
-            );
-            // You can save the default payment method to your backend here
-            // await MyBackend.setDefaultPaymentMethod(paymentMethod.id);
+          try {
+            // paymentOption.id may exist at runtime even if TypeScript doesn't recognize it
+            // Fallback to paymentMethod.id if paymentOption.id is not available
+            const paymentMethodId =
+              (paymentOption as any).id || paymentMethod?.id;
+
+            if (paymentMethodId) {
+              const { error } = await supabase
+                .from("profiles")
+                .update({ default_payment_method: paymentMethodId })
+                .eq("id", profile?.id);
+
+              if (error) {
+                console.error("Error updating default payment method:", error);
+              } else {
+                await fetchProfile();
+              }
+            }
+          } catch (err: any) {
+            console.error("Error saving payment method:", err);
           }
-        }
-        if (paymentMethod) {
-          console.log(
-            "Payment method details:",
-            JSON.stringify(paymentMethod, null, 2)
-          );
         }
       }
     } catch (err: any) {
       console.error("Error presenting CustomerSheet:", err);
-      Alert.alert("Error", err.message || "Failed to present payment methods");
     } finally {
       setIsPresenting(false);
     }
@@ -148,8 +137,8 @@ function StudentWalletContent() {
       >
         <Button
           label="Manage Payment Methods"
-          onPress={handlePresentCustomerSheet}
-          loading={isPresenting || !isInitialized}
+          onPress={handleSetup}
+          loading={isPresenting}
         />
       </ScrollView>
     </View>
