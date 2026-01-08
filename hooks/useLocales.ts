@@ -27,7 +27,7 @@ export const useLocales = create<LocaleState>((set, get) => ({
   },
 
   formatMoney: (amount?: number, currency?: string) => {
-    if (!amount) return "";
+    if (!amount) amount = 0;
     if (!currency) currency = get().currency;
     const languageTag = locale.languageTag ?? "en-US";
     const formatter = new Intl.NumberFormat(languageTag, {
