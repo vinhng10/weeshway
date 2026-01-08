@@ -34,7 +34,7 @@ async function generateEmbedding(url: string): Promise<number[]> {
  * Atomic operation for a single job
  */
 async function processJob(job: z.infer<typeof jobSchema>) {
-  return await sql.begin(async (sql) => {
+  return await sql.begin(async () => {
     // 1. Fetch song data
     const [song] = await sql`
       SELECT id, preview_url FROM public.songs WHERE id = ${job.id} FOR UPDATE
