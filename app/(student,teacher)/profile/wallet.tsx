@@ -6,6 +6,7 @@ import {
   ClientSecretProvider,
   CustomerSessionClientSecret,
   CustomerSheet,
+  CustomerSheetError,
 } from "@stripe/stripe-react-native";
 import * as WebBrowser from "expo-web-browser";
 import { useMemo, useState } from "react";
@@ -88,8 +89,9 @@ function StudentWalletContent() {
       }
 
       const { error } = await CustomerSheet.present();
+      if (!error || error.code === CustomerSheetError.Canceled) return;
 
-      if (error) throw error;
+      throw error;
     } catch (err: any) {
       console.error("Error presenting CustomerSheet:", err);
     } finally {
