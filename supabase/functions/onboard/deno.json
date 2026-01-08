@@ -1,6 +1,7 @@
 {
   "nodeModulesDir": "auto",
   "imports": {
-    "stripe": "npm:stripe"
+    "stripe": "npm:stripe",
+    "zod": "npm:zod"
   }
 }

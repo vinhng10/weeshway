@@ -1,6 +1,5 @@
-import postgres from "https://deno.land/x/postgresjs@v3.4.5/mod.js";
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { z } from "npm:zod";
+import postgres from "postgres";
+import { z } from "zod";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
@@ -110,7 +109,7 @@ Deno.serve(async (req) => {
       }),
     ]).catch(() => {
       // Catch remaining jobs if termination occurs
-      pendingJobs.forEach((j) =>
+      pendingJobs.forEach((j: Job) =>
         failedJobs.push({ ...j, error: "Termination" })
       );
     });

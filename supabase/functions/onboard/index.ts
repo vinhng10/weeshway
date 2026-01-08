@@ -1,6 +1,5 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import Stripe from "npm:stripe@^20.1.0";
-import { z } from "npm:zod";
+import Stripe from "stripe";
+import { z } from "zod";
 import { authenticateRequest, getUserProfile } from "../_shared/auth.ts";
 import { jsonResponse } from "../_shared/response.ts";
 

@@ -1,0 +1,7 @@
+{
+  "nodeModulesDir": "auto",
+  "imports": {
+    "zod": "npm:zod",
+    "postgres": "npm:postgres"
+  }
+}
