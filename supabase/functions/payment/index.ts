@@ -1,7 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@^20.1.0";
 import { z } from "npm:zod";
+import { authenticateRequest } from "../_shared/auth.ts";
+import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
@@ -10,36 +11,11 @@ const requestSchema = z.object({
   projectId: z.number().positive(),
 });
 
-// --- 2. Helper Utilities ---
-const jsonResponse = (data: object, status = 200) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-
 // --- 3. Main Handler ---
 Deno.serve(async (req) => {
   try {
-    // Get authenticated user from request
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Missing authorization header");
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
-    );
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) throw new Error("Unauthorized");
+    // Authenticate user
+    const { supabase, user } = await authenticateRequest(req);
 
     // Validation
     const body = await req.json();
@@ -76,10 +52,11 @@ Deno.serve(async (req) => {
     }
 
     // Teacher profile (single profile per project)
-    const teacher = project.profile;
+    const teacher = (
+      Array.isArray(project.profile) ? project.profile[0] : project.profile
+    ) as { stripe_account_id: string } | null | undefined;
 
     if (!teacher?.stripe_account_id) {
-      console.log("===>", project);
       throw new Error("Teacher Stripe account not set up");
     }
 

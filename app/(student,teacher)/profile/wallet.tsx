@@ -197,10 +197,7 @@ function TeacherWalletContent() {
     setIsLaunching(true);
     try {
       const { data, error } = await supabase.functions.invoke<StripeResponse>(
-        "dashboard",
-        {
-          body: { accountId: profile.stripeAccountId },
-        }
+        "dashboard"
       );
 
       if (error) throw error;

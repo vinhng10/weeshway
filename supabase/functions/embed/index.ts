@@ -1,6 +1,7 @@
 import postgres from "https://deno.land/x/postgresjs@v3.4.5/mod.js";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { z } from "npm:zod";
+import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
@@ -17,12 +18,6 @@ const failedJobSchema = jobSchema.extend({
 });
 type Job = z.infer<typeof jobSchema>;
 type FailedJob = z.infer<typeof failedJobSchema>;
-
-const jsonResponse = (data: object, status = 200, headers = {}) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...headers },
-  });
 
 // --- 2. Core Logic Helpers ---
 /**

@@ -1,14 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@^20.1.0";
 import { z } from "npm:zod";
+import { createServiceRoleClient } from "../_shared/auth.ts";
+import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Clients & Configuration ---
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-);
+const supabase = createServiceRoleClient();
 
 const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET_KEY");
 
@@ -16,12 +14,6 @@ const requestSchema = z.object({
   userId: z.uuid(),
   email: z.email(),
 });
-
-const jsonResponse = (data: object, status = 200) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
 
 // --- 2. Main Handler ---
 Deno.serve(async (req) => {

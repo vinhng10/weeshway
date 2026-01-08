@@ -1,7 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@^20.1.0";
 import { z } from "npm:zod";
+import { authenticateRequest, getUserProfile } from "../_shared/auth.ts";
+import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Global Clients ---
 // Initializing outside the handler enables "warm start" performance gains.
@@ -12,48 +13,19 @@ const requestSchema = z.object({
   returnUrl: z.url(),
 });
 
-const jsonResponse = (data: object, status = 200) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-
 // --- 2. Main Handler ---
 Deno.serve(async (req: Request) => {
   try {
     // A. Authenticate User
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Missing authorization header");
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
-    );
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) throw new Error("Unauthorized");
+    const { supabase, user } = await authenticateRequest(req);
 
     // B. Validate Input
     const body = await req.json();
     const { country, returnUrl } = requestSchema.parse(body);
 
     // C. Get Stripe Account ID from Profile
-    const { data: profile, error: dbError } = await supabase
-      .from("profiles")
-      .select("stripe_account_id")
-      .eq("id", user.id)
-      .single();
-
-    if (dbError) throw dbError;
-
-    const accountId = profile?.stripe_account_id;
+    const profile = await getUserProfile(supabase, user.id);
+    const accountId = profile.stripe_account_id;
 
     if (!accountId) {
       throw new Error("Stripe account not found. Please sign up first.");
