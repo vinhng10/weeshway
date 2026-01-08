@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { authenticateAndGetStripeAccount } from "../_shared/auth.ts";
+import { handleError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
@@ -19,8 +20,8 @@ Deno.serve(async (req) => {
     return jsonResponse({
       setupIntentClientSecret: setupIntent.client_secret,
     });
-  } catch (err: any) {
-    console.error("Setup Intent Error:", err);
-    return jsonResponse({ error: err.message || "Internal Server Error" }, 500);
+  } catch (err: unknown) {
+    const { message, status } = handleError("Setup Intent Error", err);
+    return jsonResponse({ error: message }, status);
   }
 });

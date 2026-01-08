@@ -54,13 +54,11 @@ Deno.serve(async (req) => {
     }
 
     return jsonResponse({ accountId: account.id });
-  } catch (err: any) {
-    console.error("Stripe Account Creation Error:", err.message);
+  } catch (err: unknown) {
+    console.error("Stripe Account Creation Error:", err);
 
     const status = err instanceof z.ZodError ? 400 : 500;
-    return jsonResponse(
-      { error: err.message || "Internal Server Error" },
-      status
-    );
+    const message = err instanceof Error ? err.message : "Internal Server Error";
+    return jsonResponse({ error: message }, status);
   }
 });

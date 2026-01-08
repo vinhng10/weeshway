@@ -66,14 +66,15 @@ Deno.serve(async (req: Request) => {
     });
 
     return jsonResponse({ url: accountLink.url });
-  } catch (err: any) {
-    console.error("Onboarding Error:", err.message);
+  } catch (err: unknown) {
+    console.error("Onboarding Error:", err);
 
     // Check if error is from Zod validation
     if (err instanceof z.ZodError) {
       return jsonResponse({ error: "Invalid returnUrl" }, 400);
     }
 
-    return jsonResponse({ error: err.message || "Internal Server Error" }, 500);
+    const message = err instanceof Error ? err.message : "Internal Server Error";
+    return jsonResponse({ error: message }, 500);
   }
 });

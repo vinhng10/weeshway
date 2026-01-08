@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { authenticateAndGetStripeAccount } from "../_shared/auth.ts";
+import { handleError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Clients & Helpers ---
@@ -15,8 +16,8 @@ Deno.serve(async (req) => {
     const loginLink = await stripe.accounts.createLoginLink(stripeAccountId);
 
     return jsonResponse({ url: loginLink.url });
-  } catch (err: any) {
-    console.error("Dashboard Link Error:", err.message);
-    return jsonResponse({ error: err.message || "Internal Server Error" }, 500);
+  } catch (err: unknown) {
+    const { message, status } = handleError("Dashboard Link Error", err);
+    return jsonResponse({ error: message }, status);
   }
 });

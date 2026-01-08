@@ -8,6 +8,12 @@ const supabase = createServiceRoleClient();
 const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
 // --- Types & Constants ---
+type BookingData = {
+  stripe_payment_intent_id: string;
+  status: BookingStatus;
+  user_id?: string;
+  project_id?: string;
+};
 type BookingStatus = "Processing" | "Succeeded" | "Failed" | "Canceled";
 
 const STATUS_MAP: Record<string, BookingStatus> = {
@@ -22,7 +28,7 @@ async function upsertBooking(
   status: BookingStatus,
   metadata?: { user_id?: string; project_id?: string }
 ) {
-  const bookingData: any = {
+  const bookingData: BookingData = {
     stripe_payment_intent_id: paymentIntentId,
     status,
   };
@@ -77,9 +83,11 @@ Deno.serve(async (req) => {
     await upsertBooking(paymentIntent.id, status, { user_id, project_id });
 
     return jsonResponse({ received: true });
-  } catch (err: any) {
-    console.error(`❌ Webhook Error: ${err.message}`);
-    const status = err.message.includes("signature") ? 400 : 500;
-    return jsonResponse({ error: err.message }, status);
+  } catch (err: unknown) {
+    console.error(`❌ Webhook Error:`, err);
+    const message =
+      err instanceof Error ? err.message : "Internal Server Error";
+    const status = message.includes("signature") ? 400 : 500;
+    return jsonResponse({ error: message }, status);
   }
 });

@@ -93,8 +93,9 @@ Deno.serve(async (req) => {
         try {
           await processJob(job);
           completedJobs.push(job);
-        } catch (err: any) {
-          failedJobs.push({ ...job, error: err.message });
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : "Unknown error";
+          failedJobs.push({ ...job, error: message });
         }
       }
     };
@@ -126,7 +127,9 @@ Deno.serve(async (req) => {
         "X-Failed-Jobs": failedJobs.length.toString(),
       }
     );
-  } catch (err: any) {
-    return jsonResponse({ error: err.message }, 500);
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Internal Server Error";
+    return jsonResponse({ error: message }, 500);
   }
 });
