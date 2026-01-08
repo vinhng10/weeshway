@@ -17,6 +17,15 @@ type StripeResponse = {
   url?: string;
 };
 
+type SetupSessionResponse = {
+  customerId: string;
+  clientSecret: string;
+};
+
+type SetupIntentResponse = {
+  setupIntentClientSecret: string;
+};
+
 function StudentWalletContent() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
@@ -27,14 +36,10 @@ function StudentWalletContent() {
     () => ({
       // Must return an object with customerId and clientSecret
       async provideCustomerSessionClientSecret(): Promise<CustomerSessionClientSecret> {
-        const { data, error } = await supabase.functions.invoke<{
-          customerId: string;
-          clientSecret: string;
-        }>("setup-session", {
-          body: {
-            stripeAccountId: profile?.stripeAccountId,
-          },
-        });
+        const { data, error } =
+          await supabase.functions.invoke<SetupSessionResponse>(
+            "setup-session"
+          );
 
         if (error) throw error;
         if (!data) throw new Error("Failed to create customer session");
@@ -46,13 +51,8 @@ function StudentWalletContent() {
 
       // Must return a string
       async provideSetupIntentClientSecret(): Promise<string> {
-        const { data, error } = await supabase.functions.invoke<{
-          setupIntentClientSecret: string;
-        }>("setup-intent", {
-          body: {
-            stripeAccountId: profile?.stripeAccountId,
-          },
-        });
+        const { data, error } =
+          await supabase.functions.invoke<SetupIntentResponse>("setup-intent");
 
         if (error) throw error;
         if (!data?.setupIntentClientSecret)
@@ -107,7 +107,7 @@ function StudentWalletContent() {
             if (paymentMethodId) {
               const { error } = await supabase
                 .from("profiles")
-                .update({ default_payment_method: paymentMethodId })
+                .update({ default_payment_method_id: paymentMethodId })
                 .eq("id", profile?.id);
 
               if (error) {

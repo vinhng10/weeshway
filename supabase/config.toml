@@ -365,35 +365,23 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 [functions.embed]
 enabled = true
 verify_jwt = false
-import_map = "./functions/embed/deno.json"
-entrypoint = "./functions/embed/index.ts"
 
 [functions.account]
 enabled = true
 verify_jwt = false
-import_map = "./functions/account/deno.json"
-entrypoint = "./functions/account/index.ts"
 
 [functions.onboard]
 enabled = true
 verify_jwt = true
-import_map = "./functions/onboard/deno.json"
-entrypoint = "./functions/onboard/index.ts"
 
 [functions.dashboard]
 enabled = true
 verify_jwt = true
-import_map = "./functions/dashboard/deno.json"
-entrypoint = "./functions/dashboard/index.ts"
 
 [functions.payment]
 enabled = true
 verify_jwt = true
-import_map = "./functions/payment/deno.json"
-entrypoint = "./functions/payment/index.ts"
 
 [functions.webhook]
 enabled = true
 verify_jwt = false
-import_map = "./functions/webhook/deno.json"
-entrypoint = "./functions/webhook/index.ts"

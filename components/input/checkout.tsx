@@ -38,31 +38,18 @@ export function Checkout({
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
   const [statusMessage, setStatusMessage] = useState<string>("");
 
-  const stripeCustomerId = customer?.stripeAccountId;
-  const stripeProviderId = project.profile.stripeAccountId;
   const currency = project.currency;
   const amount = project.price ?? 0;
   const totalAmount = amount + 50;
 
   const fetchPaymentSheetParams = async () => {
-    if (!stripeCustomerId || !stripeProviderId || amount <= 0) {
+    if (amount <= 0) {
       throw new Error("Error occurred. Please try again.");
     }
 
     const { data, error } =
       await supabase.functions.invoke<PaymentIntentResponse>("payment", {
-        body: {
-          customer: {
-            id: customer.id,
-            stripeAccountId: stripeCustomerId,
-          },
-          project: {
-            id: project.id,
-            stripeAccountId: stripeProviderId,
-          },
-          amount: totalAmount,
-          currency: currency,
-        },
+        body: { projectId: project.id },
       });
 
     if (

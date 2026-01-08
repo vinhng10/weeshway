@@ -4,18 +4,10 @@ import Stripe from "npm:stripe@^20.1.0";
 import { z } from "npm:zod";
 
 // --- 1. Configuration & Clients ---
-const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")!;
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-const stripe = new Stripe(STRIPE_SECRET_KEY);
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 
 const requestSchema = z.object({
-  customer: z.object({ id: z.string(), stripeAccountId: z.string() }),
-  project: z.object({ id: z.number(), stripeAccountId: z.string() }),
-  amount: z.number().positive(),
-  currency: z.string().length(3),
+  projectId: z.number().positive(),
 });
 
 // --- 2. Helper Utilities ---
@@ -28,15 +20,75 @@ const jsonResponse = (data: object, status = 200) =>
 // --- 3. Main Handler ---
 Deno.serve(async (req) => {
   try {
+    // Get authenticated user from request
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("Missing authorization header");
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) throw new Error("Unauthorized");
+
     // Validation
     const body = await req.json();
     const result = requestSchema.safeParse(body);
 
-    if (!result.success) {
-      return jsonResponse({ error: z.treeifyError(result.error) }, 400);
+    if (!result.success) throw new Error(result.error.message);
+
+    const { projectId } = result.data;
+
+    // Fetch user profile and project details from database
+    const [profileResult, projectResult] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, stripe_account_id, default_payment_method_id")
+        .eq("id", user.id)
+        .single(),
+      supabase
+        .from("projects")
+        .select(
+          "id, price, currency, profile:profiles!inner(stripe_account_id)"
+        )
+        .eq("id", projectId)
+        .single(),
+    ]);
+
+    if (profileResult.error) throw new Error("Failed to fetch user profile");
+    if (projectResult.error) throw new Error("Failed to fetch project");
+
+    const customer = profileResult.data;
+    const project = projectResult.data;
+
+    if (!customer.stripe_account_id) {
+      throw new Error("Customer Stripe account not set up");
     }
 
-    const { customer, project, amount, currency } = result.data;
+    // Teacher profile (single profile per project)
+    const teacher = project.profile;
+
+    if (!teacher?.stripe_account_id) {
+      console.log("===>", project);
+      throw new Error("Teacher Stripe account not set up");
+    }
+
+    if (!project.price || project.price <= 0) {
+      throw new Error("Invalid project price");
+    }
+
+    const amount = project.price + 50; // Add fee
+    const currency = project.currency;
     const applicationFeeAmount = Math.round(amount * 0.05) + 50;
 
     // Check for existing booking
@@ -51,20 +103,38 @@ Deno.serve(async (req) => {
 
     // Handle already paid state
     if (booking?.status === "Succeeded") {
-      return jsonResponse({ message: "Payment already succeeded" });
+      return jsonResponse({
+        paymentIntentClientSecret: "",
+        customerSessionClientSecret: "",
+        autoConfirmed: false,
+        status: "succeeded",
+      });
     }
 
-    const savedPaymentMethods = await stripe.paymentMethods.list({
-      customer_account: customer.stripeAccountId,
-      type: "card",
-    });
+    // Get saved payment method - use default if set, otherwise fetch and set it
+    let savedPaymentMethodId = customer.default_payment_method_id;
 
-    const savedPaymentMethodId = savedPaymentMethods.data[0]?.id;
+    if (!savedPaymentMethodId) {
+      const savedPaymentMethods = await stripe.paymentMethods.list({
+        customer_account: customer.stripe_account_id,
+        type: "card",
+      });
+
+      savedPaymentMethodId = savedPaymentMethods.data[0]?.id;
+
+      // If we found a payment method, set it as default in the database
+      if (savedPaymentMethodId) {
+        await supabase
+          .from("profiles")
+          .update({ default_payment_method_id: savedPaymentMethodId })
+          .eq("id", customer.id);
+      }
+    }
 
     // Concurrent Stripe Operations: Create Session and Get/Create Intent
     const [customerSession, paymentIntent] = await Promise.all([
       stripe.customerSessions.create({
-        customer_account: customer.stripeAccountId,
+        customer_account: customer.stripe_account_id,
         components: {
           mobile_payment_element: {
             enabled: true,
@@ -81,10 +151,10 @@ Deno.serve(async (req) => {
         : stripe.paymentIntents.create({
             amount,
             currency: currency.toLowerCase(),
-            customer_account: customer.stripeAccountId,
+            customer_account: customer.stripe_account_id,
             automatic_payment_methods: { enabled: true },
             application_fee_amount: applicationFeeAmount,
-            transfer_data: { destination: project.stripeAccountId },
+            transfer_data: { destination: teacher.stripe_account_id },
             metadata: { user_id: customer.id, project_id: project.id },
             payment_method: savedPaymentMethodId,
             off_session: !!savedPaymentMethodId,

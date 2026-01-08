@@ -6,10 +6,6 @@ import { z } from "npm:zod";
 // --- 1. Configuration & Global Clients ---
 // Initializing outside the handler enables "warm start" performance gains.
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
-const supabaseAdmin = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-);
 
 const requestSchema = z.object({
   country: z.string(),
@@ -27,33 +23,40 @@ Deno.serve(async (req: Request) => {
   try {
     // A. Authenticate User
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return jsonResponse({ error: "Missing auth header" }, 401);
+    if (!authHeader) throw new Error("Missing authorization header");
 
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
     const {
       data: { user },
-      error: authError,
-    } = await supabaseAdmin.auth.getUser(authHeader.replace("Bearer ", ""));
+    } = await supabase.auth.getUser();
 
-    if (authError || !user) return jsonResponse({ error: "Unauthorized" }, 401);
+    if (!user) throw new Error("Unauthorized");
 
     // B. Validate Input
-    const body = await req.json().catch(() => ({}));
+    const body = await req.json();
     const { country, returnUrl } = requestSchema.parse(body);
 
     // C. Get Stripe Account ID from Profile
-    const { data: profile, error: dbError } = await supabaseAdmin
+    const { data: profile, error: dbError } = await supabase
       .from("profiles")
       .select("stripe_account_id")
       .eq("id", user.id)
       .single();
 
+    if (dbError) throw dbError;
+
     const accountId = profile?.stripe_account_id;
 
-    if (dbError || !accountId) {
-      return jsonResponse(
-        { error: "Stripe account not found. Please sign up first." },
-        404
-      );
+    if (!accountId) {
+      throw new Error("Stripe account not found. Please sign up first.");
     }
 
     // D. Stripe Operations
