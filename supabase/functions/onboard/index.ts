@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { z } from "zod";
 import { authenticateRequest, getUserProfile } from "../_shared/auth.ts";
+import { handleError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Global Clients ---
@@ -67,14 +68,7 @@ Deno.serve(async (req: Request) => {
 
     return jsonResponse({ url: accountLink.url });
   } catch (err: unknown) {
-    console.error("Onboarding Error:", err);
-
-    // Check if error is from Zod validation
-    if (err instanceof z.ZodError) {
-      return jsonResponse({ error: "Invalid returnUrl" }, 400);
-    }
-
-    const message = err instanceof Error ? err.message : "Internal Server Error";
-    return jsonResponse({ error: message }, 500);
+    const { message, status } = handleError("Onboarding Error", err);
+    return jsonResponse({ error: message }, status);
   }
 });

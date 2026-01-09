@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { z } from "zod";
 import { createServiceRoleClient } from "../_shared/auth.ts";
+import { handleError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Clients & Configuration ---
@@ -55,10 +56,10 @@ Deno.serve(async (req) => {
 
     return jsonResponse({ accountId: account.id });
   } catch (err: unknown) {
-    console.error("Stripe Account Creation Error:", err);
-
-    const status = err instanceof z.ZodError ? 400 : 500;
-    const message = err instanceof Error ? err.message : "Internal Server Error";
+    const { message, status } = handleError(
+      "Stripe Account Creation Error",
+      err
+    );
     return jsonResponse({ error: message }, status);
   }
 });

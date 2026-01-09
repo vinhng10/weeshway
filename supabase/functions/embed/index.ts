@@ -1,5 +1,6 @@
 import postgres from "postgres";
 import { z } from "zod";
+import { handleError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
@@ -128,8 +129,7 @@ Deno.serve(async (req) => {
       }
     );
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : "Internal Server Error";
-    return jsonResponse({ error: message }, 500);
+    const { message, status } = handleError("Embedding Processing Error", err);
+    return jsonResponse({ error: message }, status);
   }
 });

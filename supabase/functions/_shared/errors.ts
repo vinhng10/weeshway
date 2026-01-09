@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * Extracts a safe error message from an unknown error
  */
@@ -24,6 +26,11 @@ export function handleError(
   defaultStatus = 500
 ): { message: string; status: number } {
   logError(context, error);
+
+  // Check for Zod validation errors (400)
+  if (error instanceof z.ZodError) {
+    return { message: getErrorMessage(error), status: 400 };
+  }
 
   const message = getErrorMessage(error);
 
