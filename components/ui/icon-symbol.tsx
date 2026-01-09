@@ -44,6 +44,8 @@ const MAPPING = {
   plus: "add",
   xmark: "close",
   "compass.drawing": "compass",
+  "creditcard.fill": "card",
+  "checkmark.circle": "checkmark-circle",
 } as IconMapping;
 
 /**

@@ -8,14 +8,14 @@ export { Chip } from "./chip";
 export { ChipBar, ChipBarItem, type ChipBarItemProps } from "./chip-bar";
 export { Header } from "./header";
 export { Hero } from "./hero";
-export { ProfileMenuItem } from "./profile-menu-item";
+export { MenuItem } from "./menu-item";
 export { ProjectCard } from "./project-card";
 export { ProjectStatus } from "./project-status";
 export { SectionListView } from "./section-list";
 export { SongCard } from "./song-card";
 export {
-  styles as textStyles,
   ThemedText,
+  styles as textStyles,
   type ThemedTextProps,
 } from "./themed-text";
 export { ThemedView, type ThemedViewProps } from "./themed-view";

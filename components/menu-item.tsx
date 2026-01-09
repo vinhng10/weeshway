@@ -10,7 +10,7 @@ type ProfileMenuItemProps = {
   showChevron?: boolean;
 } & UnistylesVariants<typeof textStyles>;
 
-export function ProfileMenuItem({
+export function MenuItem({
   icon,
   label,
   onPress,
@@ -34,8 +34,10 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    padding: theme.gap(1),
+    padding: theme.gap(2),
     gap: theme.gap(2),
+    borderRadius: theme.gap(2),
+    backgroundColor: theme.colors.foreground,
   },
   label: {
     flex: 1,

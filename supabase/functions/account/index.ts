@@ -1,65 +1,54 @@
 import Stripe from "stripe";
-import { z } from "zod";
-import { createServiceRoleClient } from "../_shared/auth.ts";
+import { authenticateAndGetStripeAccount } from "../_shared/auth.ts";
 import { handleError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
-// --- 1. Clients & Configuration ---
+// --- 1. Configuration & Clients ---
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
-const supabase = createServiceRoleClient();
-
-const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET_KEY");
-
-const requestSchema = z.object({
-  userId: z.uuid(),
-  email: z.email(),
-});
 
 // --- 2. Main Handler ---
 Deno.serve(async (req) => {
-  // Security & Method Guards
-  if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
-    return new Response("Forbidden", { status: 403 });
-  }
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
   try {
-    const body = await req.json();
-    const { userId, email } = requestSchema.parse(body);
+    // Authenticate and get Stripe account ID
+    const { stripeAccountId } = await authenticateAndGetStripeAccount(req);
 
-    // 1. Create Stripe Account (v2 API)
-    const account = await stripe.v2.core.accounts.create({
-      contact_email: email,
-      configuration: {
-        customer: {
-          capabilities: { automatic_indirect_tax: { requested: true } },
-        },
-      },
-      metadata: { supabase_user_id: userId },
+    // Retrieve the connected account with external accounts expanded
+    const account = await stripe.accounts.retrieve(stripeAccountId);
+
+    // Determine if onboarding is complete
+    const onboardingComplete =
+      account.charges_enabled &&
+      account.payouts_enabled &&
+      account.details_submitted;
+
+    // Extract external accounts (bank accounts)
+    const externalAccounts =
+      account.external_accounts?.data
+        .filter((ea) => ea.object === "bank_account")
+        .map((ea) => {
+          const bankAccount = ea as Stripe.BankAccount;
+          return {
+            bankName: bankAccount.bank_name || null,
+            currency: bankAccount.currency,
+            last4: bankAccount.last4,
+          };
+        }) || [];
+
+    return jsonResponse({
+      onboardingComplete,
+      externalAccounts,
     });
-
-    // 2. Link to Supabase Profile
-    const { error: dbError } = await supabase
-      .from("profiles")
-      .update({ stripe_account_id: account.id })
-      .eq("id", userId);
-
-    // 3. Atomic Rollback: If DB update fails, close the Stripe account
-    if (dbError) {
-      await stripe.v2.core.accounts.close(account.id, {
-        applied_configurations: ["customer"],
-      });
-      throw new Error(`Profile sync failed: ${dbError.message}`);
-    }
-
-    return jsonResponse({ accountId: account.id });
   } catch (err: unknown) {
-    const { message, status } = handleError(
-      "Stripe Account Creation Error",
-      err
-    );
+    // Handle Stripe-specific error for missing account configuration
+    if (err instanceof Stripe.errors.StripeError) {
+      if (err.code === "v2_account_missing_configuration") {
+        return jsonResponse(
+          { onboardingComplete: false, externalAccounts: [] },
+          200
+        );
+      }
+    }
+    const { message, status } = handleError("Retrieve Account Error", err);
     return jsonResponse({ error: message }, status);
   }
 });

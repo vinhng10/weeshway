@@ -2,7 +2,7 @@ import {
   Avatar,
   ChipBar,
   ChipBarItemProps,
-  ProfileMenuItem,
+  MenuItem,
   ThemedText,
 } from "@/components";
 import { ROLE } from "@/constants";
@@ -71,27 +71,19 @@ export default function Profile() {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <ProfileMenuItem
-          icon="person.fill"
-          label="Account"
-          onPress={handleAccount}
-        />
-        <ProfileMenuItem
+        <MenuItem icon="person.fill" label="Account" onPress={handleAccount} />
+        <MenuItem
           icon="bell"
           label="Notifications"
           onPress={handleNotifications}
         />
-        <ProfileMenuItem
-          icon="wallet.pass"
-          label="Wallet"
-          onPress={handleWallet}
-        />
-        <ProfileMenuItem
+        <MenuItem icon="wallet.pass" label="Wallet" onPress={handleWallet} />
+        <MenuItem
           icon="shield.fill"
           label="Data Privacy"
           onPress={handleDataPrivacy}
         />
-        <ProfileMenuItem
+        <MenuItem
           icon="rectangle.portrait.and.arrow.right"
           label="Sign Out"
           onPress={handleSignOut}

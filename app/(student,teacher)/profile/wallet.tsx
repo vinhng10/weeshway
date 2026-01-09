@@ -2,6 +2,7 @@ import {
   Boundary,
   Button,
   Header,
+  MenuItem,
   SectionListView,
   ThemedText,
 } from "@/components";
@@ -17,7 +18,7 @@ import {
 } from "@stripe/stripe-react-native";
 import * as WebBrowser from "expo-web-browser";
 import { useMemo, useState } from "react";
-import { ScrollView, SectionListData, View } from "react-native";
+import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type StripeResponse = {
@@ -127,16 +128,11 @@ function StudentWalletContent() {
   const renderPaymentMethod = (item: PaymentMethod): React.ReactElement => {
     const brand = item.brand.charAt(0).toUpperCase() + item.brand.slice(1);
     return (
-      <View style={styles.paymentMethodCard}>
-        <View style={styles.paymentMethodContent}>
-          <IconSymbol name="creditcard.fill" size={24} color="#4F46E5" />
-          <View style={styles.paymentMethodInfo}>
-            <ThemedText type="h5" bold>
-              {brand} •••• {item.last4}
-            </ThemedText>
-          </View>
-        </View>
-      </View>
+      <MenuItem
+        icon="creditcard.fill"
+        label={`${brand}     •••• ${item.last4}`}
+        showChevron={false}
+      />
     );
   };
 
@@ -162,20 +158,52 @@ function StudentWalletContent() {
   );
 }
 
+type RequirementItem = {
+  text: string;
+};
+
+type AccountResponse = {
+  onboardingComplete: boolean;
+  externalAccounts: Array<{
+    bankName: string | null;
+    currency: string;
+    last4: string;
+  }>;
+};
+
 function TeacherWalletContent() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const [isLaunching, setIsLaunching] = useState(false);
   const country = useLocales((state) => state.country);
+  const headerContent = [
+    "To receive payments from students, you need to complete your payment account setup with Stripe.",
+  ];
+  const requirements: RequirementItem[] = [
+    {
+      text: "Government-issued ID",
+    },
+    {
+      text: "Bank account details for receiving payouts",
+    },
+    {
+      text: "Business information (if applicable)",
+    },
+  ];
 
-  const { data: onboardingComplete, refetch } = useSuspenseQuery<boolean>({
+  const { data, refetch } = useSuspenseQuery<AccountResponse>({
     queryKey: ["profile", "stripe"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("is_stripe_onboarded");
+      const { data, error } = await supabase.functions.invoke<AccountResponse>(
+        "account"
+      );
       if (error) throw error;
+      if (!data) throw new Error("Failed to retrieve account");
       return data;
     },
   });
+
+  const { onboardingComplete, externalAccounts } = data;
 
   const handleStartOnboarding = async () => {
     setIsLaunching(true);
@@ -187,9 +215,7 @@ function TeacherWalletContent() {
         }
       );
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const onboardingUrl = data?.url;
 
@@ -233,27 +259,87 @@ function TeacherWalletContent() {
     }
   };
 
+  const renderRequirement = (item: RequirementItem): React.ReactElement => {
+    return (
+      <View style={styles.requirementItem}>
+        <IconSymbol name="checkmark.circle" size={20} color="#10B981" />
+        <ThemedText style={styles.requirementText}>{item.text}</ThemedText>
+      </View>
+    );
+  };
+
+  const renderHeader = (content: string): React.ReactElement => {
+    return <ThemedText color="dimmed">{content}</ThemedText>;
+  };
+
+  const renderExternalAccount = (
+    item: AccountResponse["externalAccounts"][0]
+  ): React.ReactElement => {
+    const displayName = item.bankName
+      ? `${item.bankName}\n•••• ${item.last4}`
+      : `•••• ${item.last4}`;
+    const label = `${displayName} (${item.currency.toUpperCase()})`;
+    return (
+      <MenuItem icon="creditcard.fill" label={label} showChevron={false} />
+    );
+  };
+
+  const onboardingSections: SectionListData<string | RequirementItem>[] = [
+    {
+      title: "Setup required",
+      data: headerContent,
+      render: renderHeader,
+    },
+    {
+      title: "What you'll need",
+      data: requirements,
+      render: renderRequirement,
+    },
+  ];
+
+  const onboardedHeaderContent = [
+    "Use the Stripe Dashboard to track your earnings, manage payouts to your bank account, and access tax documents.",
+  ];
+
+  const externalAccountsSections: SectionListData<
+    string | AccountResponse["externalAccounts"][0]
+  >[] = [
+    {
+      title: "You're All Set!",
+      data: onboardedHeaderContent,
+      render: renderHeader,
+    },
+    {
+      title: "Bank Accounts",
+      data: externalAccounts,
+      render: renderExternalAccount,
+    },
+  ];
+
   return (
     <View style={styles.container}>
       <Header title="Wallet" />
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {onboardingComplete ? (
+      {onboardingComplete ? (
+        <>
+          <SectionListView sections={externalAccountsSections} />
           <Button
-            label={"Stripe Dashboard"}
+            label="Stripe Dashboard"
             onPress={handleOpenDashboard}
             loading={isLaunching}
+            stickyBottom
           />
-        ) : (
+        </>
+      ) : (
+        <>
+          <SectionListView sections={onboardingSections as any} />
           <Button
-            label={"Onboarding"}
+            label="Setup"
             onPress={handleStartOnboarding}
             loading={isLaunching}
+            stickyBottom
           />
-        )}
-      </ScrollView>
+        </>
+      )}
     </View>
   );
 }
@@ -278,9 +364,14 @@ const styles = StyleSheet.create((theme, rt) => ({
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
   },
-  scrollContainer: {
-    paddingHorizontal: theme.gap(2),
-    paddingBottom: theme.gap(16),
-    flexGrow: 1,
+  requirementItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(1.5),
+  },
+  requirementText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
   },
 }));

@@ -366,21 +366,9 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 enabled = true
 verify_jwt = false
 
-[functions.account]
+[functions.connect-account]
 enabled = true
 verify_jwt = false
-
-[functions.onboard]
-enabled = true
-verify_jwt = true
-
-[functions.dashboard]
-enabled = true
-verify_jwt = true
-
-[functions.payment]
-enabled = true
-verify_jwt = true
 
 [functions.webhook]
 enabled = true
