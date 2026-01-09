@@ -51,12 +51,14 @@ function ClassContent() {
     },
   });
 
-  const booked = data.bookings.some(
+  const userBooking = data.bookings.find(
     (booking) =>
       booking.userId === profile?.id &&
       booking.projectId === data.id &&
       booking.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
   );
+  const booked = !!userBooking;
+  const bookedSpots = userBooking?.spots ?? 0;
 
   const handleBook = () => {
     setVisible(true);
@@ -147,7 +149,7 @@ function ClassContent() {
         stickyBottom
         label={
           booked
-            ? "Booked"
+            ? `Booked (${bookedSpots} ${bookedSpots === 1 ? "spot" : "spots"})`
             : data.status === PROJECT_STATUS.RELEASE
             ? "Book"
             : "Wish"

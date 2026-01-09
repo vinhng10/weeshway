@@ -114,6 +114,7 @@ export type BookingType = {
   projectId: number;
   stripePaymentIntentId: string;
   status: StripePaymentStatusType;
+  spots: number;
 };
 
 export type StatsType = {

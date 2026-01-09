@@ -42,6 +42,7 @@ const MAPPING = {
   sparkles: "sparkles",
   calendar: "calendar",
   plus: "add",
+  minus: "remove",
   xmark: "close",
   "compass.drawing": "compass",
   "creditcard.fill": "card",

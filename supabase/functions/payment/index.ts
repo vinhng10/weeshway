@@ -4,125 +4,136 @@ import { authenticateRequest } from "../_shared/auth.ts";
 import { handleError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
-// --- 1. Configuration & Clients ---
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 
 const requestSchema = z.object({
   projectId: z.number().positive(),
+  spots: z.number().positive().default(1),
 });
 
-// --- 3. Main Handler ---
 Deno.serve(async (req) => {
   try {
-    // Authenticate user
     const { supabase, user } = await authenticateRequest(req);
 
-    // Validation
+    // 1. Parse & Validate Input
     const body = await req.json();
-    const result = requestSchema.safeParse(body);
+    const { projectId, spots } = requestSchema.parse(body);
 
-    if (!result.success) throw new Error(result.error.message);
-
-    const { projectId } = result.data;
-
-    // Fetch user profile and project details from database
-    const [profileResult, projectResult] = await Promise.all([
+    // 2. Fetch Data (Using .throwOnError() to reduce boilerplate)
+    const [{ data: customer }, { data: project }] = await Promise.all([
       supabase
         .from("profiles")
         .select("id, stripe_account_id")
         .eq("id", user.id)
-        .single(),
+        .single()
+        .throwOnError(),
       supabase
         .from("projects")
         .select(
-          "id, price, currency, profile:profiles!inner(stripe_account_id)"
+          "id, price, currency, teacher:profiles!inner(stripe_account_id)"
         )
         .eq("id", projectId)
-        .single(),
+        .single()
+        .throwOnError(),
     ]);
 
-    if (profileResult.error) throw new Error("Failed to fetch user profile");
-    if (projectResult.error) throw new Error("Failed to fetch project");
+    // 3. Guards
+    // teacher:profiles!inner always returns an array
+    const teacherStripeId = (
+      Array.isArray(project.teacher) ? project.teacher[0] : project.teacher
+    )?.stripe_account_id;
 
-    const customer = profileResult.data;
-    const project = projectResult.data;
-
-    if (!customer.stripe_account_id) {
+    if (!customer?.stripe_account_id)
       throw new Error("Customer Stripe account not set up");
-    }
-
-    // Teacher profile (single profile per project)
-    const teacher = (
-      Array.isArray(project.profile) ? project.profile[0] : project.profile
-    ) as { stripe_account_id: string } | null | undefined;
-
-    if (!teacher?.stripe_account_id) {
-      throw new Error("Teacher Stripe account not set up");
-    }
-
-    if (!project.price || project.price <= 0) {
+    if (!teacherStripeId) throw new Error("Teacher Stripe account not set up");
+    if (!project.price || project.price <= 0)
       throw new Error("Invalid project price");
-    }
 
-    const amount = project.price + 50; // Add fee
-    const currency = project.currency;
-    const applicationFeeAmount = Math.round(amount * 0.05) + 50;
-
-    // Check for existing booking
-    const { data: booking, error: dbError } = await supabase
+    // 4. Check Existing Booking
+    const { data: booking } = await supabase
       .from("bookings")
       .select("*")
-      .eq("user_id", customer.id)
-      .eq("project_id", project.id)
+      .match({ user_id: customer.id, project_id: project.id })
       .maybeSingle();
 
-    if (dbError) throw dbError;
-
-    // Handle already paid state
     if (booking?.status === "Succeeded") {
       return jsonResponse({
-        customerId: customer.stripe_account_id,
-        paymentIntentClientSecret: "",
-        customerSessionClientSecret: "",
         status: "succeeded",
+        customerId: customer.stripe_account_id,
       });
     }
 
-    // Concurrent Stripe Operations: Create Session and Get/Create Intent
-    const [customerSession, paymentIntent] = await Promise.all([
-      stripe.customerSessions.create({
-        customer_account: customer.stripe_account_id,
-        components: {
-          mobile_payment_element: {
-            enabled: true,
-            features: {
-              payment_method_save: "enabled",
-              payment_method_redisplay: "enabled",
-              payment_method_remove: "enabled",
-            },
+    // 5. Calculate Financials
+    const spotAmount = project.price * spots;
+    const feeAmount = 50 * spots;
+    const totalAmount = spotAmount + feeAmount;
+    const fee = Math.round(totalAmount * 0.05) + feeAmount;
+
+    // 6. Execute Stripe Operations
+    const session = await stripe.customerSessions.create({
+      customer_account: customer.stripe_account_id,
+      components: {
+        mobile_payment_element: {
+          enabled: true,
+          features: {
+            payment_method_save: "enabled",
+            payment_method_redisplay: "enabled",
+            payment_method_remove: "enabled",
           },
         },
-      }),
-      booking?.stripe_payment_intent_id && booking.status !== "Canceled"
-        ? stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id)
-        : stripe.paymentIntents.create({
-            amount,
-            currency: currency.toLowerCase(),
-            customer_account: customer.stripe_account_id,
-            automatic_payment_methods: { enabled: true },
-            application_fee_amount: applicationFeeAmount,
-            transfer_data: { destination: teacher.stripe_account_id },
-            metadata: { user_id: customer.id, project_id: project.id },
-          }),
-    ]);
+      },
+    });
+
+    // Handle payment intent: retrieve, update, or create
+    let intent: Stripe.PaymentIntent;
+    const spotsChanged = booking && booking.spots !== spots;
+
+    if (booking?.stripe_payment_intent_id && booking.status !== "Canceled") {
+      if (spotsChanged) {
+        // Try to update existing payment intent with new amount
+        intent = await stripe.paymentIntents.update(
+          booking.stripe_payment_intent_id,
+          {
+            amount: totalAmount,
+            application_fee_amount: fee,
+            metadata: {
+              user_id: customer.id,
+              project_id: project.id,
+              spots,
+            },
+          }
+        );
+        await supabase.from("bookings").update({ spots }).eq("id", booking.id);
+      } else {
+        // Just retrieve existing payment intent
+        intent = await stripe.paymentIntents.retrieve(
+          booking.stripe_payment_intent_id
+        );
+      }
+    } else {
+      // Create new payment intent
+      intent = await stripe.paymentIntents.create({
+        amount: totalAmount,
+        currency: project.currency.toLowerCase(),
+        customer_account: customer.stripe_account_id,
+        application_fee_amount: fee,
+        transfer_data: { destination: teacherStripeId },
+        automatic_payment_methods: { enabled: true },
+        metadata: {
+          user_id: customer.id,
+          project_id: project.id,
+          spots,
+        },
+      });
+    }
 
     return jsonResponse({
       customerId: customer.stripe_account_id,
-      paymentIntentClientSecret: paymentIntent.client_secret,
-      customerSessionClientSecret: customerSession.client_secret,
-      status: paymentIntent.status,
+      paymentIntentClientSecret: intent.client_secret,
+      customerSessionClientSecret: session.client_secret,
+      status: intent.status,
     });
-  } catch (err: unknown) {
+  } catch (err) {
     const { message, status } = handleError("Payment Intent Error", err);
     return jsonResponse({ error: message }, status);
   }

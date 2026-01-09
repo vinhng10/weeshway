@@ -9,35 +9,26 @@ const supabase = createServiceRoleClient();
 const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
 // --- Types ---
-type BookingData = {
-  stripe_payment_intent_id: string;
-  status: BookingStatus;
-  user_id?: string;
-  project_id?: string;
-};
-type BookingStatus = "Processing" | "Succeeded" | "Failed" | "Canceled";
 type EventHandler = (event: Stripe.Event) => Promise<void> | void;
 
-// --- Database Helper ---
 async function upsertBooking(
   paymentIntentId: string,
-  status: BookingStatus,
-  metadata?: { user_id?: string; project_id?: string }
+  status: string,
+  metadata: Stripe.PaymentIntent["metadata"] = {}
 ) {
-  const bookingData: BookingData = {
-    stripe_payment_intent_id: paymentIntentId,
-    status,
-  };
-
-  if (metadata?.user_id && metadata?.project_id) {
-    bookingData.user_id = metadata.user_id;
-    bookingData.project_id = metadata.project_id;
-  }
-
-  const { error } = await supabase.from("bookings").upsert(bookingData, {
-    onConflict: "stripe_payment_intent_id",
-    ignoreDuplicates: status === "Processing",
-  });
+  const { error } = await supabase.from("bookings").upsert(
+    {
+      stripe_payment_intent_id: paymentIntentId,
+      status,
+      user_id: metadata.user_id,
+      project_id: metadata.project_id,
+      spots: metadata?.spots,
+    },
+    {
+      onConflict: "stripe_payment_intent_id",
+      ignoreDuplicates: status === "Processing",
+    }
+  );
 
   if (error) console.error(`DB error (${status}):`, error.message);
 }
@@ -46,23 +37,16 @@ async function upsertBooking(
 const handlers: Record<string, EventHandler> = {
   "payment_intent.created": async (event) => {
     const pi = event.data.object as Stripe.PaymentIntent;
-    const { user_id, project_id } = pi.metadata;
-    if (!user_id || !project_id) {
-      throw new Error("Missing user_id or project_id");
-    }
-    await upsertBooking(pi.id, "Processing", { user_id, project_id });
+    await upsertBooking(pi.id, "Processing", pi.metadata);
   },
-
   "payment_intent.succeeded": async (event) => {
     const pi = event.data.object as Stripe.PaymentIntent;
     await upsertBooking(pi.id, "Succeeded", pi.metadata);
   },
-
   "payment_intent.payment_failed": async (event) => {
     const pi = event.data.object as Stripe.PaymentIntent;
     await upsertBooking(pi.id, "Failed", pi.metadata);
   },
-
   "payment_intent.canceled": async (event) => {
     const pi = event.data.object as Stripe.PaymentIntent;
     await upsertBooking(pi.id, "Canceled", pi.metadata);

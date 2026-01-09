@@ -31,12 +31,14 @@ export const ProjectCard = ({ data }: CardProps) => {
     }))
   );
   const formatMoney = useLocales((state) => state.formatMoney);
-  const booked = data.bookings.some(
+  const userBooking = data.bookings.find(
     (booking) =>
       booking.userId === profile?.id &&
       booking.projectId === data.id &&
       booking.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
   );
+  const booked = !!userBooking;
+  const bookedSpots = userBooking?.spots ?? 0;
 
   const handleAudioPlayer = (e?: any) => {
     if (!data.song.previewUrl) return;
@@ -143,7 +145,7 @@ export const ProjectCard = ({ data }: CardProps) => {
               <Button
                 label={
                   booked
-                    ? "Booked"
+                    ? `Booked (${bookedSpots} ${bookedSpots === 1 ? "spot" : "spots"})`
                     : data.status === PROJECT_STATUS.RELEASE
                     ? "Book"
                     : "Wish"
