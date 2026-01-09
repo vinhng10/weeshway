@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createServiceRoleClient } from "../_shared/auth.ts";
+import { handleError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- Configuration ---
@@ -7,7 +8,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 const supabase = createServiceRoleClient();
 const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
-// --- Types & Constants ---
+// --- Types ---
 type BookingData = {
   stripe_payment_intent_id: string;
   status: BookingStatus;
@@ -15,14 +16,9 @@ type BookingData = {
   project_id?: string;
 };
 type BookingStatus = "Processing" | "Succeeded" | "Failed" | "Canceled";
+type EventHandler = (event: Stripe.Event) => Promise<void> | void;
 
-const STATUS_MAP: Record<string, BookingStatus> = {
-  "payment_intent.created": "Processing",
-  "payment_intent.succeeded": "Succeeded",
-  "payment_intent.payment_failed": "Failed",
-  "payment_intent.canceled": "Canceled",
-};
-
+// --- Database Helper ---
 async function upsertBooking(
   paymentIntentId: string,
   status: BookingStatus,
@@ -33,7 +29,6 @@ async function upsertBooking(
     status,
   };
 
-  // Include metadata only for creation events
   if (metadata?.user_id && metadata?.project_id) {
     bookingData.user_id = metadata.user_id;
     bookingData.project_id = metadata.project_id;
@@ -46,6 +41,33 @@ async function upsertBooking(
 
   if (error) console.error(`DB error (${status}):`, error.message);
 }
+
+// --- Event Handlers ---
+const handlers: Record<string, EventHandler> = {
+  "payment_intent.created": async (event) => {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    const { user_id, project_id } = pi.metadata;
+    if (!user_id || !project_id) {
+      throw new Error("Missing user_id or project_id");
+    }
+    await upsertBooking(pi.id, "Processing", { user_id, project_id });
+  },
+
+  "payment_intent.succeeded": async (event) => {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    await upsertBooking(pi.id, "Succeeded", pi.metadata);
+  },
+
+  "payment_intent.payment_failed": async (event) => {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    await upsertBooking(pi.id, "Failed", pi.metadata);
+  },
+
+  "payment_intent.canceled": async (event) => {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    await upsertBooking(pi.id, "Canceled", pi.metadata);
+  },
+};
 
 // --- Main Handler ---
 Deno.serve(async (req) => {
@@ -66,28 +88,16 @@ Deno.serve(async (req) => {
       WEBHOOK_SECRET
     );
 
-    const status = STATUS_MAP[event.type];
-    if (!status) {
+    const handler = handlers[event.type];
+    if (!handler) {
       console.log(`ℹ️ Unhandled event type: ${event.type}`);
       return jsonResponse({ received: true });
     }
 
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
-    const { user_id, project_id } = paymentIntent.metadata;
-
-    // Validate metadata for creation events
-    if (event.type === "payment_intent.created" && (!user_id || !project_id)) {
-      return jsonResponse({ error: "Missing user_id or project_id" }, 400);
-    }
-
-    await upsertBooking(paymentIntent.id, status, { user_id, project_id });
-
+    await handler(event);
     return jsonResponse({ received: true });
   } catch (err: unknown) {
-    console.error(`❌ Webhook Error:`, err);
-    const message =
-      err instanceof Error ? err.message : "Internal Server Error";
-    const status = message.includes("signature") ? 400 : 500;
+    const { message, status } = handleError("Webhook Error", err);
     return jsonResponse({ error: message }, status);
   }
 });

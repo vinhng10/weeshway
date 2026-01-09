@@ -1,4 +1,11 @@
-import { Boundary, Button, Header } from "@/components";
+import {
+  Boundary,
+  Button,
+  Header,
+  SectionListView,
+  ThemedText,
+} from "@/components";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import { RETURN_URL, ROLE } from "@/constants";
 import { useAuth, useLocales, useRole, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
@@ -10,7 +17,7 @@ import {
 } from "@stripe/stripe-react-native";
 import * as WebBrowser from "expo-web-browser";
 import { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type StripeResponse = {
@@ -26,11 +33,31 @@ type SetupIntentResponse = {
   setupIntentClientSecret: string;
 };
 
+type PaymentMethod = {
+  brand: string;
+  last4: string;
+};
+
+type PaymentMethodsResponse = {
+  paymentMethods: PaymentMethod[];
+};
+
 function StudentWalletContent() {
   const profile = useAuth((state) => state.profile);
-  const fetchProfile = useAuth((state) => state.fetchProfile);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
+
+  const { data, refetch } = useSuspenseQuery<PaymentMethod[]>({
+    queryKey: ["payment-methods"],
+    queryFn: async () => {
+      const { data, error } =
+        await supabase.functions.invoke<PaymentMethodsResponse>(
+          "payment-methods"
+        );
+      if (error) throw error;
+      return data ? data.paymentMethods : [];
+    },
+  });
 
   const clientSecretProvider: ClientSecretProvider = useMemo(
     () => ({
@@ -76,9 +103,7 @@ function StudentWalletContent() {
           intentConfiguration: {
             paymentMethodTypes: ["card"],
           },
-          clientSecretProvider: clientSecretProvider,
-          headerTextForSelectionScreen: "Manage your payment method",
-          returnURL: "danceai://",
+          clientSecretProvider,
         });
 
         if (error) {
@@ -89,9 +114,9 @@ function StudentWalletContent() {
       }
 
       const { error } = await CustomerSheet.present();
-      if (!error || error.code === CustomerSheetError.Canceled) return;
+      if (error && error.code !== CustomerSheetError.Canceled) throw error;
 
-      throw error;
+      await refetch();
     } catch (err: any) {
       console.error("Error presenting CustomerSheet:", err);
     } finally {
@@ -99,19 +124,40 @@ function StudentWalletContent() {
     }
   };
 
+  const renderPaymentMethod = (item: PaymentMethod): React.ReactElement => {
+    const brand = item.brand.charAt(0).toUpperCase() + item.brand.slice(1);
+    return (
+      <View style={styles.paymentMethodCard}>
+        <View style={styles.paymentMethodContent}>
+          <IconSymbol name="creditcard.fill" size={24} color="#4F46E5" />
+          <View style={styles.paymentMethodInfo}>
+            <ThemedText type="h5" bold>
+              {brand} •••• {item.last4}
+            </ThemedText>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const sections: SectionListData<PaymentMethod>[] = [
+    {
+      title: "Payment Methods",
+      data: data,
+      render: renderPaymentMethod,
+    },
+  ];
+
   return (
     <View style={styles.container}>
       <Header title="Wallet" />
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <Button
-          label="Manage Payment Methods"
-          onPress={handleSetup}
-          loading={isPresenting}
-        />
-      </ScrollView>
+      <SectionListView sections={sections} />
+      <Button
+        label="Manage"
+        onPress={handleSetup}
+        loading={isPresenting}
+        stickyBottom
+      />
     </View>
   );
 }
