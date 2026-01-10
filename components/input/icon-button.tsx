@@ -1,26 +1,32 @@
-import { Pressable, View, type ViewProps } from "react-native";
+import {
+  Pressable,
+  View,
+  type PressableProps,
+  type ViewProps,
+} from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 import { IconSymbol, type IconSymbolName } from "../ui/icon-symbol";
 
 export type IconButtonProps = UnistylesVariants<typeof styles> &
-  ViewProps & {
+  ViewProps &
+  PressableProps & {
     icon: IconSymbolName;
-    onPress?: any;
     iconSize?: number;
   };
 
 export const IconButton: React.FunctionComponent<IconButtonProps> = ({
   icon,
   onPress,
+  disabled,
   iconSize = 24,
   style,
   type,
   ...rest
 }) => {
-  styles.useVariants({ type });
+  styles.useVariants({ type, disabled: !!disabled });
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPress={onPress} disabled={disabled}>
       <View style={[styles.container, style]} {...rest}>
         <IconSymbol name={icon} size={iconSize} style={styles.color} />
       </View>
@@ -42,6 +48,11 @@ const styles = StyleSheet.create((theme) => ({
         },
         transparent: {
           backgroundColor: "transparent",
+        },
+      },
+      disabled: {
+        true: {
+          opacity: 0.7,
         },
       },
     },

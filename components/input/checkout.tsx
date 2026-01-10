@@ -8,9 +8,8 @@ import { Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
 import { ThemedText } from "../themed-text";
-import { IconSymbol } from "../ui/icon-symbol";
 import { Button } from "./button";
-import { IconButton } from "./icon-button";
+import { SpotsSelector } from "./spots-selector";
 
 type PaymentIntentResponse = {
   customerId: string;
@@ -173,35 +172,12 @@ export function Checkout({
           </View>
 
           {/* Price and Quantity Row */}
-          <View style={[styles.row, styles.priceQuantityRow]}>
-            <View style={[styles.row, styles.spotsLabel]}>
-              <IconSymbol name="person.fill" size={20} color="#FFFFFF" />
-              <ThemedText type="h3">Spots</ThemedText>
-            </View>
-            <View style={[styles.row, styles.quantitySelector]}>
-              <IconButton
-                icon="minus"
-                onPress={
-                  spots <= 1 || loading
-                    ? undefined
-                    : () => setSpots(Math.max(1, spots - 1))
-                }
-                iconSize={20}
-                type="transparent"
-                style={
-                  spots <= 1 || loading ? styles.disabledButton : undefined
-                }
-              />
-              <ThemedText type="h3">{spots}</ThemedText>
-              <IconButton
-                icon="plus"
-                onPress={loading ? undefined : () => setSpots(spots + 1)}
-                iconSize={20}
-                type="transparent"
-                style={[loading ? styles.disabledButton : undefined]}
-              />
-            </View>
-          </View>
+          <SpotsSelector
+            spots={spots}
+            onSpotsChange={setSpots}
+            loading={loading}
+            disabled={status === "success"}
+          />
 
           {/* Price Breakdown */}
           <View style={styles.priceBreakdown}>
@@ -274,20 +250,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   row: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  priceQuantityRow: {
-    justifyContent: "space-between",
-  },
-  spotsLabel: {
-    gap: theme.gap(1),
-  },
-  quantitySelector: {
-    backgroundColor: theme.colors.foreground,
-    borderRadius: theme.gap(2),
-    gap: theme.gap(1),
-  },
-  disabledButton: {
-    opacity: 0.5,
   },
   priceBreakdown: {
     gap: theme.gap(1.5),

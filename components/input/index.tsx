@@ -7,4 +7,5 @@ export * from "./location-input";
 export * from "./location-permission";
 export * from "./options";
 export * from "./song-search";
+export * from "./spots-selector";
 export * from "./text-input";

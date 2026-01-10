@@ -1,7 +1,7 @@
 import {
   ActivityIndicator,
   Pressable,
-  PressableProps,
+  type PressableProps,
   type ViewProps,
 } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
@@ -9,7 +9,6 @@ import { ThemedText } from "../themed-text";
 
 export type ButtonProps = {
   label: string;
-  onPress?: () => void;
   loading?: boolean;
 } & ViewProps &
   PressableProps &
@@ -18,19 +17,21 @@ export type ButtonProps = {
 export const Button: React.FunctionComponent<ButtonProps> = ({
   label,
   onPress,
+  disabled,
   outlined,
   stickyBottom,
   loading,
   style,
   ...rest
 }) => {
-  styles.useVariants({ outlined, stickyBottom });
+  const isDisabled = disabled || loading;
+  styles.useVariants({ outlined, stickyBottom, disabled: !!isDisabled });
 
   return (
     <Pressable
       style={[styles.style, style]}
       onPress={onPress}
-      disabled={rest.disabled || loading}
+      disabled={isDisabled}
       {...rest}
     >
       {loading ? (
@@ -71,6 +72,11 @@ const styles = StyleSheet.create((theme) => ({
           position: "absolute",
           alignSelf: "center",
           bottom: theme.gap(2),
+        },
+      },
+      disabled: {
+        true: {
+          opacity: 0.7,
         },
       },
     },
