@@ -228,16 +228,18 @@ export function Checkout({
           </View>
 
           {/* Status Messages */}
-          {(status === "error" || status === "success") && (
-            <View style={styles.statusContainer}>
-              <ThemedText
-                type="h5"
-                color={status === "error" ? "danger" : "primary"}
-              >
+          <View style={styles.statusContainer}>
+            {status === "error" && (
+              <ThemedText type="h5" color="danger">
                 {statusMessage}
               </ThemedText>
-            </View>
-          )}
+            )}
+            {status === "success" && (
+              <ThemedText type="h5" color="primary">
+                {statusMessage}
+              </ThemedText>
+            )}
+          </View>
         </View>
 
         {/* Action Buttons */}

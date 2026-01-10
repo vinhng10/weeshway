@@ -18,7 +18,7 @@ import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -51,15 +51,6 @@ function ClassContent() {
     },
   });
 
-  const userBooking = data.bookings.find(
-    (booking) =>
-      booking.userId === profile?.id &&
-      booking.projectId === data.id &&
-      booking.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
-  );
-  const booked = !!userBooking;
-  const bookedSpots = userBooking?.spots ?? 0;
-
   const handleBook = () => {
     setVisible(true);
   };
@@ -72,6 +63,24 @@ function ClassContent() {
       queryKey: ["classes"],
     });
   };
+
+  const { booked, label, onPress } = useMemo(() => {
+    const userBooking = data.bookings.find(
+      (b) =>
+        b.userId === profile?.id &&
+        b.projectId === data.id &&
+        b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
+    );
+    const spots = userBooking?.spots ?? 0;
+    const booked = !!userBooking;
+    const released = data.status === PROJECT_STATUS.RELEASE;
+
+    return {
+      booked,
+      label: booked ? `Booked x${spots}` : released ? "Book" : "Wish",
+      onPress: booked ? undefined : released ? handleBook : handleWish,
+    };
+  }, [data.bookings, data.id, data.status, profile?.id]);
 
   return (
     <View style={styles.container}>
@@ -145,20 +154,7 @@ function ClassContent() {
       </ScrollView>
 
       {/* Button */}
-      <Button
-        stickyBottom
-        label={
-          booked
-            ? `Booked (${bookedSpots} ${bookedSpots === 1 ? "spot" : "spots"})`
-            : data.status === PROJECT_STATUS.RELEASE
-            ? "Book"
-            : "Wish"
-        }
-        onPress={
-          data.status === PROJECT_STATUS.RELEASE ? handleBook : handleWish
-        }
-        disabled={booked}
-      />
+      <Button stickyBottom label={label} onPress={onPress} disabled={booked} />
 
       <Checkout
         visible={visible && !booked}

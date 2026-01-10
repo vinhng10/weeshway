@@ -9,7 +9,7 @@ import { ThemedText } from "../themed-text";
 
 export type ButtonProps = {
   label: string;
-  onPress(): void;
+  onPress?: () => void;
   loading?: boolean;
 } & ViewProps &
   PressableProps &

@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
@@ -31,14 +31,6 @@ export const ProjectCard = ({ data }: CardProps) => {
     }))
   );
   const formatMoney = useLocales((state) => state.formatMoney);
-  const userBooking = data.bookings.find(
-    (booking) =>
-      booking.userId === profile?.id &&
-      booking.projectId === data.id &&
-      booking.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
-  );
-  const booked = !!userBooking;
-  const bookedSpots = userBooking?.spots ?? 0;
 
   const handleAudioPlayer = (e?: any) => {
     if (!data.song.previewUrl) return;
@@ -64,6 +56,24 @@ export const ProjectCard = ({ data }: CardProps) => {
   const handlePress = () => {
     router.push(`/(student)/classes/${data.id}`);
   };
+
+  const { booked, label, onPress } = useMemo(() => {
+    const userBooking = data.bookings.find(
+      (b) =>
+        b.userId === profile?.id &&
+        b.projectId === data.id &&
+        b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
+    );
+    const spots = userBooking?.spots ?? 0;
+    const booked = !!userBooking;
+    const released = data.status === PROJECT_STATUS.RELEASE;
+
+    return {
+      booked,
+      label: booked ? `Booked x${spots}` : released ? "Book" : "Wish",
+      onPress: booked ? undefined : released ? handleBook : handleWish,
+    };
+  }, [data.bookings, data.id, data.status, profile?.id]);
 
   return (
     <Pressable onPress={handlePress}>
@@ -142,21 +152,7 @@ export const ProjectCard = ({ data }: CardProps) => {
           {/* Bottom Container */}
           <View style={styles.bottomContainer}>
             <View style={styles.bookButton}>
-              <Button
-                label={
-                  booked
-                    ? `Booked (${bookedSpots} ${bookedSpots === 1 ? "spot" : "spots"})`
-                    : data.status === PROJECT_STATUS.RELEASE
-                    ? "Book"
-                    : "Wish"
-                }
-                onPress={
-                  data.status === PROJECT_STATUS.RELEASE
-                    ? handleBook
-                    : handleWish
-                }
-                disabled={booked}
-              />
+              <Button label={label} onPress={onPress} disabled={booked} />
             </View>
             <IconButton
               icon={isPlaying ? "pause" : "play"}
