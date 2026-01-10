@@ -41,7 +41,6 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
           parallaxScrollingOffset: offset,
           parallaxAdjacentItemScale: 0.8,
         }}
-        onSnapToItem={(index: number) => {}}
         renderItem={({ item }: { item: ProjectEnrichedType }) => (
           <View style={styles.carouselItem}>
             <ProjectCard data={item} />

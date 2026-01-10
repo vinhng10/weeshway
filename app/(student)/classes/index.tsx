@@ -46,7 +46,8 @@ function ClassesContent() {
             profile:profiles(*), 
             song:songs(*), 
             location:locations(*),
-            bookings:bookings(*)
+            bookings:bookings(*),
+            wishings:wishings(*)
           )`
         )
         .eq("user_id", profile?.id)
@@ -76,7 +77,13 @@ function ClassesContent() {
   } = useSuspenseInfiniteRpc<ProjectEnrichedType>({
     queryKey: ["classes", "projects", status, style, level],
     rpcFunction: "get_nearby_classes",
-    columns: `*, profile:profiles(*), song:songs(*), bookings:bookings(*)`,
+    columns: `
+      *, 
+      profile:profiles(*), 
+      song:songs(*), 
+      bookings:bookings(*), 
+      wishings:wishings(*)
+    `,
     pageSize: 10,
     trailingQuery: (query) => {
       query = query

@@ -40,7 +40,12 @@ function TeacherProfileContent() {
   } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
     queryKey: ["classes", "profiles", profileId, "projects"],
     tableName: "projects",
-    columns: `*, song:songs(*), bookings:bookings(*)`,
+    columns: `
+      *, 
+      song:songs(*), 
+      bookings:bookings(*), 
+      wishings:wishings(*)
+    `,
     pageSize: 10,
     trailingQuery: (query) =>
       query

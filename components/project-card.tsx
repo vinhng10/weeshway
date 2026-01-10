@@ -1,11 +1,12 @@
 import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
 import { useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
+import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
@@ -43,7 +44,23 @@ export const ProjectCard = ({ data }: CardProps) => {
   };
 
   const handleWish = async () => {
-    // TODO: Implement wish functionality
+    if (!profile?.id) return;
+
+    try {
+      const wishing = data.wishings.find((w) => w.userId === profile.id);
+      const { error } = wishing
+        ? await supabase.from("wishings").delete().eq("id", wishing.id)
+        : await supabase.from("wishings").insert({
+            user_id: profile.id,
+            project_id: data.id,
+          });
+
+      if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ["classes"] });
+    } catch (error: any) {
+      console.error("Error toggling wish:", error);
+    }
   };
 
   const handleCheckoutExit = async () => {
@@ -57,23 +74,25 @@ export const ProjectCard = ({ data }: CardProps) => {
     router.push(`/(student)/classes/${data.id}`);
   };
 
-  const { booked, label, onPress } = useMemo(() => {
-    const userBooking = data.bookings.find(
-      (b) =>
-        b.userId === profile?.id &&
-        b.projectId === data.id &&
-        b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
-    );
-    const spots = userBooking?.spots ?? 0;
-    const booked = !!userBooking;
-    const released = data.status === PROJECT_STATUS.RELEASE;
-
-    return {
-      booked,
-      label: booked ? `Booked x${spots}` : released ? "Book" : "Wish",
-      onPress: booked ? undefined : released ? handleBook : handleWish,
-    };
-  }, [data.bookings, data.id, data.status, profile?.id]);
+  // Compute booking and wish status
+  const userBooking = data.bookings.find(
+    (b) =>
+      b.userId === profile?.id &&
+      b.projectId === data.id &&
+      b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
+  );
+  const booked = !!userBooking;
+  const wished = data.wishings.some((w) => w.userId === profile?.id);
+  const spots = userBooking?.spots ?? 0;
+  const released = data.status === PROJECT_STATUS.RELEASE;
+  const label = booked
+    ? `Booked x${spots}`
+    : released
+    ? "Book"
+    : wished
+    ? "Unwish"
+    : "Wish";
+  const onPress = booked ? undefined : released ? handleBook : handleWish;
 
   return (
     <Pressable onPress={handlePress}>

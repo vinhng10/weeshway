@@ -35,7 +35,7 @@ function ProjectsContent() {
     useSuspenseInfiniteQuery<ProjectEnrichedType>({
       queryKey: ["projects", status, style, level],
       tableName: "projects",
-      columns: `*, song:songs(*), bookings:bookings(*)`,
+      columns: `*, song:songs(*), bookings:bookings(*), wishings:wishings(*)`,
       pageSize: 10,
       trailingQuery: (query) => {
         query = query

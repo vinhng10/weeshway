@@ -9,7 +9,6 @@ import { Button } from "./button";
 
 export const LocationPermission = () => {
   const [visible, setVisible] = useState(false);
-
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const country = useLocales((state) => state.country);

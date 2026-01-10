@@ -14,7 +14,7 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
   switch (data.status) {
     case PROJECT_STATUS.DRAFT:
       icon = "heart";
-      label = "10";
+      label = `${data.wishings.length}`;
       break;
     case PROJECT_STATUS.RELEASE:
       icon = "person.fill";

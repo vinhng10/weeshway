@@ -18,7 +18,7 @@ import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -39,11 +39,13 @@ function ClassContent() {
           profile:profiles(*), 
           song:songs(*), 
           location:locations(*), 
-          bookings:bookings(*)
+          bookings:bookings(*),
+          wishings:wishings(*)
         `
         )
         .eq("id", classId)
         .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
+        .eq("wishings.user_id", profile?.id)
         .single();
 
       if (error) throw error;
@@ -55,7 +57,25 @@ function ClassContent() {
     setVisible(true);
   };
 
-  const handleWish = async () => {};
+  const handleWish = async () => {
+    if (!profile?.id) return;
+
+    try {
+      const wishing = data.wishings.find((w) => w.userId === profile.id);
+      const { error } = wishing
+        ? await supabase.from("wishings").delete().eq("id", wishing.id)
+        : await supabase.from("wishings").insert({
+            user_id: profile.id,
+            project_id: data.id,
+          });
+
+      if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ["classes"] });
+    } catch (error: any) {
+      console.error("Error toggling wish:", error);
+    }
+  };
 
   const handleCheckoutExit = async () => {
     setVisible(false);
@@ -64,23 +84,24 @@ function ClassContent() {
     });
   };
 
-  const { booked, label, onPress } = useMemo(() => {
-    const userBooking = data.bookings.find(
-      (b) =>
-        b.userId === profile?.id &&
-        b.projectId === data.id &&
-        b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
-    );
-    const spots = userBooking?.spots ?? 0;
-    const booked = !!userBooking;
-    const released = data.status === PROJECT_STATUS.RELEASE;
-
-    return {
-      booked,
-      label: booked ? `Booked x${spots}` : released ? "Book" : "Wish",
-      onPress: booked ? undefined : released ? handleBook : handleWish,
-    };
-  }, [data.bookings, data.id, data.status, profile?.id]);
+  const userBooking = data.bookings.find(
+    (b) =>
+      b.userId === profile?.id &&
+      b.projectId === data.id &&
+      b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
+  );
+  const booked = !!userBooking;
+  const wished = data.wishings.some((w) => w.userId === profile?.id);
+  const spots = userBooking?.spots ?? 0;
+  const released = data.status === PROJECT_STATUS.RELEASE;
+  const label = booked
+    ? `Booked x${spots}`
+    : released
+    ? "Book"
+    : wished
+    ? "Unwish"
+    : "Wish";
+  const onPress = booked ? undefined : released ? handleBook : handleWish;
 
   return (
     <View style={styles.container}>

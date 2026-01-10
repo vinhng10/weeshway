@@ -130,6 +130,13 @@ export type BubbleType = {
   value: number;
 };
 
+export type WishingType = {
+  id: number;
+  createdAt: Date;
+  userId: string;
+  projectId: number;
+};
+
 // Utility type: WishType with song_id replaced by joined songs relation
 export type WishEnrichedType = WishType & {
   song: SongType;
@@ -145,6 +152,7 @@ export type ProjectEnrichedType = ProjectType & {
   song: SongType;
   location?: LocationType;
   bookings: BookingType[];
+  wishings: WishingType[];
 };
 
 export type ProfileEnrichedType = ProfileType & {
