@@ -46,7 +46,6 @@ type PaymentMethodsResponse = {
 function StudentWalletContent() {
   const profile = useAuth((state) => state.profile);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isPresenting, setIsPresenting] = useState(false);
 
   const { data, refetch } = useSuspenseQuery<PaymentMethod[]>({
     queryKey: ["payment-methods"],
@@ -96,7 +95,6 @@ function StudentWalletContent() {
       return;
     }
 
-    setIsPresenting(true);
     try {
       // Initialize CustomerSheet if needed
       if (!isInitialized) {
@@ -120,8 +118,6 @@ function StudentWalletContent() {
       await refetch();
     } catch (err: any) {
       console.error("Error presenting CustomerSheet:", err);
-    } finally {
-      setIsPresenting(false);
     }
   };
 
@@ -148,12 +144,7 @@ function StudentWalletContent() {
     <View style={styles.container}>
       <Header title="Wallet" />
       <SectionListView sections={sections} />
-      <Button
-        label="Manage"
-        onPress={handleSetup}
-        loading={isPresenting}
-        stickyBottom
-      />
+      <Button label="Manage" onPress={handleSetup} stickyBottom />
     </View>
   );
 }
@@ -174,7 +165,6 @@ type AccountResponse = {
 function TeacherWalletContent() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
-  const [isLaunching, setIsLaunching] = useState(false);
   const country = useLocales((state) => state.country);
   const headerContent = [
     "To receive payments from students, you need to complete your payment account setup with Stripe.",
@@ -206,7 +196,6 @@ function TeacherWalletContent() {
   const { onboardingComplete, externalAccounts } = data;
 
   const handleStartOnboarding = async () => {
-    setIsLaunching(true);
     try {
       const { data, error } = await supabase.functions.invoke<StripeResponse>(
         "onboard",
@@ -229,15 +218,12 @@ function TeacherWalletContent() {
       await fetchProfile();
     } catch (error: any) {
       console.error("Error launching onboarding:", error);
-    } finally {
-      setIsLaunching(false);
     }
   };
 
   const handleOpenDashboard = async () => {
     if (!profile?.stripeAccountId || !onboardingComplete) return;
 
-    setIsLaunching(true);
     try {
       const { data, error } = await supabase.functions.invoke<StripeResponse>(
         "dashboard"
@@ -254,8 +240,6 @@ function TeacherWalletContent() {
       await WebBrowser.openAuthSessionAsync(dashboardUrl, RETURN_URL);
     } catch (error: any) {
       console.error("Error opening dashboard:", error);
-    } finally {
-      setIsLaunching(false);
     }
   };
 
@@ -325,19 +309,13 @@ function TeacherWalletContent() {
           <Button
             label="Stripe Dashboard"
             onPress={handleOpenDashboard}
-            loading={isLaunching}
             stickyBottom
           />
         </>
       ) : (
         <>
           <SectionListView sections={onboardingSections as any} />
-          <Button
-            label="Setup"
-            onPress={handleStartOnboarding}
-            loading={isLaunching}
-            stickyBottom
-          />
+          <Button label="Setup" onPress={handleStartOnboarding} stickyBottom />
         </>
       )}
     </View>

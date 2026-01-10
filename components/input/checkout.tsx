@@ -223,7 +223,6 @@ export function Checkout({
           <Button
             label={status === "success" ? "See you in class!" : "Pay"}
             onPress={handlePay}
-            loading={loading}
             disabled={status === "success"}
           />
           <Button outlined label="Cancel" onPress={onExit} />

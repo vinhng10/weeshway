@@ -9,14 +9,11 @@ export default function CreateAccountScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const signUp = useAuth((state) => state.signUp);
   const router = useRouter();
 
   const handleSignUp = async () => {
-    if (loading) return;
-
     if (!email || !password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
@@ -32,7 +29,6 @@ export default function CreateAccountScreen() {
       return;
     }
 
-    setLoading(true);
     setError("");
 
     try {
@@ -40,8 +36,6 @@ export default function CreateAccountScreen() {
       router.replace("/sign-in");
     } catch (error: any) {
       setError(error.message || "Failed to create account");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -98,7 +92,6 @@ export default function CreateAccountScreen() {
           label={"Create Account"}
           onPress={handleSignUp}
           style={[styles.button]}
-          loading={loading}
         />
 
         <View style={styles.signin}>

@@ -8,7 +8,6 @@ import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
 export const LocationPermission = () => {
-  const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
 
   const profile = useAuth((state) => state.profile);
@@ -42,13 +41,10 @@ export const LocationPermission = () => {
   };
 
   const handleRequestPermission = async () => {
-    setLoading(true);
-
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       await updateLocation(status);
     } finally {
-      setLoading(false);
       setVisible(false);
     }
   };
@@ -93,11 +89,7 @@ export const LocationPermission = () => {
           classes by letting us know where you are.
         </ThemedText>
 
-        <Button
-          label="Allow"
-          onPress={handleRequestPermission}
-          loading={loading}
-        />
+        <Button label="Allow" onPress={handleRequestPermission} />
         <Button outlined label="Not Now" onPress={handleClose} />
       </View>
     </Modal>

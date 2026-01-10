@@ -30,7 +30,6 @@ export default function Account() {
   const [videoUrls, setVideoUrls] = useState<string[]>(
     profile?.videoUrls || []
   );
-  const [isSaving, setIsSaving] = useState(false);
 
   const isLocalUri = (uri: string): boolean => {
     return (
@@ -82,8 +81,6 @@ export default function Account() {
       return;
     }
 
-    setIsSaving(true);
-
     try {
       let avatarUrl = profile?.avatarUrl;
 
@@ -128,8 +125,6 @@ export default function Account() {
       await fetchProfile();
     } catch (error: any) {
       console.error("Error updating profile:", error);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -203,12 +198,7 @@ export default function Account() {
         </View>
       </ScrollView>
 
-      <Button
-        label={"Save Changes"}
-        onPress={handleSave}
-        loading={isSaving}
-        stickyBottom
-      />
+      <Button label={"Save Changes"} onPress={handleSave} stickyBottom />
     </View>
   );
 }

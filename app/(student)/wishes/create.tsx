@@ -27,7 +27,6 @@ export default function MakeAWish() {
   const [level, setLevel] = useState<LevelType>(LEVEL.BEGINNER);
   const [description, setDescription] = useState("");
   const [song, setSong] = useState<SongType | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
@@ -39,8 +38,6 @@ export default function MakeAWish() {
       console.error("Error: Song is required");
       return;
     }
-
-    setIsCreating(true);
 
     try {
       const { error } = await supabase.rpc("create_wish_with_song", {
@@ -70,8 +67,6 @@ export default function MakeAWish() {
       router.back();
     } catch (error: any) {
       console.error("Error creating wish:", error);
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -119,12 +114,7 @@ export default function MakeAWish() {
         />
       </KeyboardAwareScrollView>
 
-      <Button
-        label={"Create"}
-        onPress={handleCreate}
-        loading={isCreating}
-        stickyBottom
-      />
+      <Button label={"Create"} onPress={handleCreate} stickyBottom />
     </View>
   );
 }

@@ -9,26 +9,20 @@ export default function SignIn() {
   const signIn = useAuth((state) => state.signIn);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSignIn = async () => {
-    if (loading) return;
-
     if (!email || !password) {
       setError("Please enter both email and password");
       return;
     }
 
-    setLoading(true);
     setError("");
 
     try {
       await signIn(email, password);
     } catch (error: any) {
       setError(error.message || "Failed to sign in");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -72,7 +66,6 @@ export default function SignIn() {
           label={"Sign In"}
           onPress={handleSignIn}
           style={[styles.button]}
-          loading={loading}
         />
 
         <View style={styles.signup}>

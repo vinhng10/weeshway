@@ -70,7 +70,6 @@ function ProjectContent() {
   );
   const [song, setSong] = useState(data.song);
   const [location, setLocation] = useState(data.location);
-  const [isSaving, setIsSaving] = useState(false);
 
   const options: ChipBarItemProps[] = [
     {
@@ -87,8 +86,6 @@ function ProjectContent() {
       console.error("Error: User not logged in or project ID missing");
       return;
     }
-
-    setIsSaving(true);
 
     try {
       const { error } = await supabase
@@ -117,8 +114,6 @@ function ProjectContent() {
     } catch (error: any) {
       console.error("Error updating project:", error);
       // You might want to show an error message to the user here
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -209,7 +204,6 @@ function ProjectContent() {
         <Button
           label={"Save Changes"}
           onPress={handleSave}
-          loading={isSaving}
           style={styles.button}
         />
         <Button

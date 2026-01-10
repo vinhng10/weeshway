@@ -47,7 +47,6 @@ export default function CreateProject() {
   const [endAt, setEndAt] = useState<Date>();
   const [song, setSong] = useState<SongType>();
   const [location, setLocation] = useState<LocationType>();
-  const [isCreating, setIsCreating] = useState(false);
 
   const options: ChipBarItemProps[] = [
     {
@@ -69,8 +68,6 @@ export default function CreateProject() {
       console.error("Error: Song is required");
       return;
     }
-
-    setIsCreating(true);
 
     try {
       const { data, error } = await supabase.rpc("create_project_with_song", {
@@ -109,8 +106,6 @@ export default function CreateProject() {
     } catch (error: any) {
       console.error("Error creating project:", error);
       // You might want to show an error message to the user here
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -199,12 +194,7 @@ export default function CreateProject() {
       </KeyboardAwareScrollView>
 
       {/* Create Button */}
-      <Button
-        label={"Create"}
-        onPress={handleCreate}
-        loading={isCreating}
-        stickyBottom
-      />
+      <Button label={"Create"} onPress={handleCreate} stickyBottom />
     </View>
   );
 }

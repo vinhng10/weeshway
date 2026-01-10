@@ -1,5 +1,7 @@
+import { useState } from "react";
 import {
   ActivityIndicator,
+  GestureResponderEvent,
   Pressable,
   type PressableProps,
   type ViewProps,
@@ -9,7 +11,6 @@ import { ThemedText } from "../themed-text";
 
 export type ButtonProps = {
   label: string;
-  loading?: boolean;
 } & ViewProps &
   PressableProps &
   UnistylesVariants<typeof styles>;
@@ -20,17 +21,29 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
   disabled,
   outlined,
   stickyBottom,
-  loading,
   style,
   ...rest
 }) => {
+  const [loading, setLoading] = useState(false);
   const isDisabled = disabled || loading;
-  styles.useVariants({ outlined, stickyBottom, disabled: !!isDisabled });
+  styles.useVariants({ outlined, stickyBottom });
+
+  const handlePress = (event: GestureResponderEvent) => {
+    if (!onPress || loading) return;
+
+    const result = onPress(event);
+
+    // Only manage loading state for async operations
+    if (result != null && typeof (result as any).then === "function") {
+      setLoading(true);
+      Promise.resolve(result).finally(() => setLoading(false));
+    }
+  };
 
   return (
     <Pressable
       style={[styles.style, style]}
-      onPress={onPress}
+      onPress={handlePress}
       disabled={isDisabled}
       {...rest}
     >
@@ -72,11 +85,6 @@ const styles = StyleSheet.create((theme) => ({
           position: "absolute",
           alignSelf: "center",
           bottom: theme.gap(2),
-        },
-      },
-      disabled: {
-        true: {
-          opacity: 0.7,
         },
       },
     },
