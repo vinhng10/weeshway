@@ -20,7 +20,7 @@ const mapITunesToSong = (result: iTunesSearchResult): SongType => ({
     /\d+x\d+/g,
     "200x200"
   ),
-  genreNames: result.primaryGenreName ? [result.primaryGenreName] : [],
+  genre: result.primaryGenreName,
   previewUrl: result.previewUrl,
   createdAt: new Date(),
 });

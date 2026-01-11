@@ -65,7 +65,7 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
   return (
     <>
       <TextInput
-        placeholder="What song are you looking for?"
+        placeholder="What song is in your mind?"
         onPress={() => setVisible(true)}
       />
 
@@ -81,7 +81,7 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
 
           <View style={styles.searchContainer}>
             <TextInput
-              placeholder="What song do you want to dance?"
+              placeholder="What song is in your mind?"
               value={query}
               onChangeText={setQuery}
               autoFocus
@@ -96,7 +96,7 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
                 imageSource={{ uri: song.artworkUrl }}
                 title={song.name}
                 subtitle={song.artistName}
-                metadata={song.genreNames.join(", ")}
+                metadata={song.genre}
                 onPress={() => onSelect(song)}
               />
             )}

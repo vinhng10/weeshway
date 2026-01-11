@@ -16,12 +16,12 @@ import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-interface WishBoardContentProps {
+interface ExploreContentProps {
   style?: StyleType;
   level?: LevelType;
 }
 
-function WishBoardContent({ style, level }: WishBoardContentProps) {
+function ExploreContent({ style, level }: ExploreContentProps) {
   const [centroidId, setCentroidId] = useState<number>();
 
   const { data: bubbles } = useSuspenseQuery<BubbleType[]>({
@@ -107,7 +107,7 @@ function WishBoardContent({ style, level }: WishBoardContentProps) {
   );
 }
 
-export default function WishBoard() {
+export default function Explore() {
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
@@ -132,7 +132,7 @@ export default function WishBoard() {
     <View style={styles.container}>
       <ChipBar padding items={options} />
       <Boundary>
-        <WishBoardContent />
+        <ExploreContent />
       </Boundary>
     </View>
   );

@@ -47,7 +47,7 @@ export default function MakeAWish() {
           artist_name: song.artistName,
           artwork_url: song.artworkUrl,
           preview_url: song.previewUrl,
-          genre: song.genreNames[0],
+          genre: song.genre,
         },
         p_wish_data: {
           style: style,

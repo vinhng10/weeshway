@@ -1,16 +1,17 @@
 import { Boundary, Button, Header, WishInfo } from "@/components";
-import { useSuspenseQuery } from "@/hooks";
+import { useSuspenseQuery, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-function WishBoardContent() {
+function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
+  const setData = useTempDataStore((state) => state.setData);
 
   const { data } = useSuspenseQuery<WishEnrichedType>({
-    queryKey: ["wishes", "board", wishId],
+    queryKey: ["wishes", "explore", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("wishes")
@@ -24,20 +25,31 @@ function WishBoardContent() {
     enabled: !!wishId,
   });
 
+  const handleCreateProject = () => {
+    // Store the wish data in the temporary data store
+    setData<WishEnrichedType>(data);
+    // Navigate to create project screen
+    router.push("/(teacher)/projects/create");
+  };
+
   return (
     <>
       <WishInfo data={data} />
-      <Button label="Create Project" onPress={() => {}} stickyBottom />
+      <Button
+        label="Create Project"
+        onPress={handleCreateProject}
+        stickyBottom
+      />
     </>
   );
 }
 
-export default function WishBoard() {
+export default function Wish() {
   return (
     <View style={styles.container}>
       <Header title="Wish" />
       <Boundary>
-        <WishBoardContent />
+        <WishContent />
       </Boundary>
     </View>
   );

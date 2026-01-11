@@ -8,5 +8,6 @@ export * from "./useStudioStore";
 export * from "./useSuspenseInfiniteQuery";
 export * from "./useSuspenseInfiniteRpc";
 export * from "./useSuspenseQuery";
+export * from "./useTempDataStore";
 export * from "./useVoiceCommands";
 export * from "./useWakeWordDetection";

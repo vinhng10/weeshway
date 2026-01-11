@@ -80,7 +80,7 @@ export type SongType = {
   name: string;
   artistName: string;
   artworkUrl: string;
-  genreNames: string[];
+  genre?: string;
   previewUrl?: string;
   embedding?: number[];
 };

@@ -13,7 +13,7 @@ import {
   Tile,
 } from "@/components";
 import { LEVEL, PROJECT_STATUS, STYLE } from "@/constants";
-import { useAuth, useLocales } from "@/hooks";
+import { useAuth, useLocales, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   LevelType,
@@ -21,10 +21,11 @@ import {
   ProjectStatusType,
   SongType,
   StyleType,
+  WishEnrichedType,
 } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
@@ -34,6 +35,8 @@ export default function CreateProject() {
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const currency = useLocales((state) => state.currency);
   const queryClient = useQueryClient();
+  const getData = useTempDataStore((state) => state.getData);
+  const reset = useTempDataStore((state) => state.reset);
 
   // Initialize state with project data or defaults
   const [name, setName] = useState<string>();
@@ -47,6 +50,29 @@ export default function CreateProject() {
   const [endAt, setEndAt] = useState<Date>();
   const [song, setSong] = useState<SongType>();
   const [location, setLocation] = useState<LocationType>();
+  const hasInitialized = useRef(false);
+
+  // Initialize form with wish data from store when component mounts
+  useEffect(() => {
+    if (hasInitialized.current) return;
+
+    const wishData = getData<WishEnrichedType>();
+
+    if (wishData) {
+      hasInitialized.current = true;
+
+      // Capture the data before resetting
+      const data = wishData;
+
+      if (data.song) setSong(data.song);
+      if (data.style) setStyle(data.style as StyleType);
+      if (data.level) setLevel(data.level as LevelType);
+
+      // Reset the store after loading the data
+      reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const options: ChipBarItemProps[] = [
     {
@@ -77,7 +103,7 @@ export default function CreateProject() {
           artist_name: song.artistName,
           artwork_url: song.artworkUrl,
           preview_url: song.previewUrl,
-          genre: song.genreNames[0],
+          genre: song.genre,
         },
         p_project_data: {
           name: name?.trim(),
@@ -94,12 +120,13 @@ export default function CreateProject() {
         },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       // Invalidate and refetch the project query
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
+
+      // Reset temporary data store before navigating
+      reset();
 
       // Navigate back to projects list
       router.push(`/(teacher)/projects/`);
@@ -121,7 +148,7 @@ export default function CreateProject() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Song Search */}
-        <SongSearch onSongPress={(song) => setSong(song)} />
+        <SongSearch onSongPress={setSong} />
 
         {/* Song Tile */}
         {song && (
