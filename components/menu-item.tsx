@@ -1,18 +1,20 @@
-import { Pressable } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 import { ThemedText, styles as textStyles } from "./themed-text";
 import { IconSymbol, IconSymbolName } from "./ui/icon-symbol";
 
 type ProfileMenuItemProps = {
   icon: IconSymbolName;
-  label: string;
+  title?: string | null;
+  subtitle?: string | null;
   onPress?: () => void;
   showChevron?: boolean;
 } & UnistylesVariants<typeof textStyles>;
 
 export function MenuItem({
   icon,
-  label,
+  title,
+  subtitle,
   onPress,
   showChevron = true,
   color,
@@ -22,7 +24,22 @@ export function MenuItem({
   return (
     <Pressable style={styles.container} onPress={onPress}>
       <IconSymbol style={textStyles.style} name={icon} />
-      <ThemedText style={[textStyles.style, styles.label]}>{label}</ThemedText>
+      <View style={styles.textContainer}>
+        {title && (
+          <ThemedText
+            style={[textStyles.style, styles.title]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {title}
+          </ThemedText>
+        )}
+        {subtitle && (
+          <ThemedText color="dimmed" numberOfLines={1} ellipsizeMode="tail">
+            {subtitle}
+          </ThemedText>
+        )}
+      </View>
       {showChevron && (
         <IconSymbol style={textStyles.style} name="chevron.right" />
       )}
@@ -39,7 +56,14 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.gap(2),
     backgroundColor: theme.colors.foreground,
   },
-  label: {
+  textContainer: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    gap: theme.gap(0.5),
+  },
+  title: {
     flex: 1,
   },
 }));

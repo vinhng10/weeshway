@@ -71,21 +71,21 @@ export default function Profile() {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <MenuItem icon="person.fill" label="Account" onPress={handleAccount} />
+        <MenuItem icon="person.fill" title="Account" onPress={handleAccount} />
         <MenuItem
           icon="bell"
-          label="Notifications"
+          title="Notifications"
           onPress={handleNotifications}
         />
-        <MenuItem icon="wallet.pass" label="Wallet" onPress={handleWallet} />
+        <MenuItem icon="wallet.pass" title="Wallet" onPress={handleWallet} />
         <MenuItem
           icon="shield.fill"
-          label="Data Privacy"
+          title="Data Privacy"
           onPress={handleDataPrivacy}
         />
         <MenuItem
           icon="rectangle.portrait.and.arrow.right"
-          label="Sign Out"
+          title="Sign Out"
           onPress={handleSignOut}
           showChevron={false}
           color="danger"

@@ -126,7 +126,7 @@ function StudentWalletContent() {
     return (
       <MenuItem
         icon="creditcard.fill"
-        label={`${brand}     •••• ${item.last4}`}
+        title={`${brand}     •••• ${item.last4}`}
         showChevron={false}
       />
     );
@@ -258,12 +258,15 @@ function TeacherWalletContent() {
   const renderExternalAccount = (
     item: AccountResponse["externalAccounts"][0]
   ): React.ReactElement => {
-    const displayName = item.bankName
-      ? `${item.bankName}\n•••• ${item.last4}`
-      : `•••• ${item.last4}`;
-    const label = `${displayName} (${item.currency.toUpperCase()})`;
+    const title = item.bankName;
+    const subtitle = `•••• ${item.last4} (${item.currency.toUpperCase()})`;
     return (
-      <MenuItem icon="creditcard.fill" label={label} showChevron={false} />
+      <MenuItem
+        icon="creditcard.fill"
+        title={title}
+        subtitle={subtitle}
+        showChevron={false}
+      />
     );
   };
 
