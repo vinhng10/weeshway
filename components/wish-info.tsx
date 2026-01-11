@@ -9,10 +9,7 @@ interface WishInfoProps {
 
 export function WishInfo({ data }: WishInfoProps) {
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.container}>
       {/* Song Card */}
       <View style={styles.cardContainer}>
         <SongCard data={data.song} />
@@ -31,15 +28,13 @@ export function WishInfo({ data }: WishInfoProps) {
         value={data.description}
         editable={false}
       />
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-  scrollContainer: {
+  container: {
     gap: theme.gap(2),
-    padding: theme.gap(2),
-    paddingBottom: theme.gap(16),
   },
   cardContainer: {
     alignSelf: "center",

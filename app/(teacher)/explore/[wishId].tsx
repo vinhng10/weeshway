@@ -3,7 +3,7 @@ import { useSuspenseQuery, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishContent() {
@@ -34,7 +34,12 @@ function WishContent() {
 
   return (
     <>
-      <WishInfo data={data} />
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <WishInfo data={data} />
+      </ScrollView>
       <Button
         label="Create Project"
         onPress={handleCreateProject}
