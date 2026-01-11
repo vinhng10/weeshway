@@ -118,24 +118,25 @@ function HomeContent() {
   ];
 
   return (
-    <View style={styles.container}>
-      <ThemedText type="h1" style={styles.greeting}>
-        Hello, {profile?.fullName}!
-      </ThemedText>
-      <SectionListView
-        sections={sections}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-      />
-    </View>
+    <SectionListView
+      sections={sections}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+    />
   );
 }
 
 export default function Home() {
+  const profile = useAuth((state) => state.profile);
   return (
-    <Boundary>
-      <HomeContent />
-    </Boundary>
+    <View style={styles.container}>
+      <ThemedText type="h1" style={styles.greeting}>
+        Hello, {profile?.fullName}!
+      </ThemedText>
+      <Boundary>
+        <HomeContent />
+      </Boundary>
+    </View>
   );
 }
 

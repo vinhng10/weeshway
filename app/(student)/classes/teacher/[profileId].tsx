@@ -110,22 +110,22 @@ function TeacherProfileContent() {
   ];
 
   return (
-    <View style={styles.container}>
-      <Header title="Profile" />
-      <SectionListView
-        sections={sections}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-      />
-    </View>
+    <SectionListView
+      sections={sections}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+    />
   );
 }
 
 export default function TeacherProfile() {
   return (
-    <Boundary>
-      <TeacherProfileContent />
-    </Boundary>
+    <View style={styles.container}>
+      <Header title="Profile" />
+      <Boundary>
+        <TeacherProfileContent />
+      </Boundary>
+    </View>
   );
 }
 

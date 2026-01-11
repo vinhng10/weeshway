@@ -16,9 +16,12 @@ import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-function WishBoardContent() {
-  const [style, setStyle] = useState<StyleType>();
-  const [level, setLevel] = useState<LevelType>();
+interface WishBoardContentProps {
+  style?: StyleType;
+  level?: LevelType;
+}
+
+function WishBoardContent({ style, level }: WishBoardContentProps) {
   const [centroidId, setCentroidId] = useState<number>();
 
   const { data: bubbles } = useSuspenseQuery<BubbleType[]>({
@@ -55,23 +58,6 @@ function WishBoardContent() {
       return query;
     },
   });
-
-  const options: ChipBarItemProps[] = [
-    {
-      label: "Style",
-      value: style,
-      options: STYLE,
-      modal: true,
-      onValueChange: setStyle,
-    },
-    {
-      label: "Level",
-      value: level,
-      options: LEVEL,
-      modal: true,
-      onValueChange: setLevel,
-    },
-  ];
 
   const handleBubbleTap = (bubbleData: BubbleType) => {
     if (centroidId !== bubbleData.label) {
@@ -110,23 +96,45 @@ function WishBoardContent() {
   ];
 
   return (
-    <View style={styles.container}>
-      <ChipBar padding items={options} />
+    <>
       <SectionListView
         sections={sections}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
       />
       <LocationPermission />
-    </View>
+    </>
   );
 }
 
 export default function WishBoard() {
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
+
+  const options: ChipBarItemProps[] = [
+    {
+      label: "Style",
+      value: style,
+      options: STYLE,
+      modal: true,
+      onValueChange: setStyle,
+    },
+    {
+      label: "Level",
+      value: level,
+      options: LEVEL,
+      modal: true,
+      onValueChange: setLevel,
+    },
+  ];
+
   return (
-    <Boundary>
-      <WishBoardContent />
-    </Boundary>
+    <View style={styles.container}>
+      <ChipBar padding items={options} />
+      <Boundary>
+        <WishBoardContent />
+      </Boundary>
+    </View>
   );
 }
 

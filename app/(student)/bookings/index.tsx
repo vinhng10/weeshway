@@ -15,9 +15,12 @@ import React, { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-function BookingsContent() {
+interface BookingsContentProps {
+  time?: TimeType;
+}
+
+function BookingsContent({ time }: BookingsContentProps) {
   const profile = useAuth((state) => state.profile);
-  const [time, setTime] = useState<TimeType>(TIME.TODAY);
 
   const {
     data: bookings,
@@ -80,6 +83,26 @@ function BookingsContent() {
     />
   );
 
+  const sections: SectionListData<ProjectEnrichedType>[] = [
+    {
+      title: "Bookings",
+      data: projects,
+      render: renderTile,
+    },
+  ];
+
+  return (
+    <SectionListView
+      sections={sections}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+    />
+  );
+}
+
+export default function Bookings() {
+  const [time, setTime] = useState<TimeType>(TIME.TODAY);
+
   const options: ChipBarItemProps[] = [
     {
       label: "Time",
@@ -90,31 +113,13 @@ function BookingsContent() {
     },
   ];
 
-  const sections: SectionListData<ProjectEnrichedType>[] = [
-    {
-      title: "Bookings",
-      data: projects,
-      render: renderTile,
-    },
-  ];
-
   return (
     <View style={styles.container}>
       <ChipBar padding items={options} />
-      <SectionListView
-        sections={sections}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-      />
+      <Boundary>
+        <BookingsContent time={time} />
+      </Boundary>
     </View>
-  );
-}
-
-export default function Bookings() {
-  return (
-    <Boundary>
-      <BookingsContent />
-    </Boundary>
   );
 }
 

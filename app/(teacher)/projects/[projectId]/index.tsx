@@ -118,10 +118,7 @@ function ProjectContent() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <Header title="Project" />
-
+    <>
       {/* Scrollable Content */}
       <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContainer}
@@ -212,15 +209,18 @@ function ProjectContent() {
           style={[styles.button, styles.primary]}
         />
       </View>
-    </View>
+    </>
   );
 }
 
 export default function Project() {
   return (
-    <Boundary>
-      <ProjectContent />
-    </Boundary>
+    <View style={styles.container}>
+      <Header title="Project" />
+      <Boundary>
+        <ProjectContent />
+      </Boundary>
+    </View>
   );
 }
 

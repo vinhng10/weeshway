@@ -28,10 +28,13 @@ import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-function ClassesContent() {
-  const [status, setStatus] = useState<ProjectStatusType>();
-  const [style, setStyle] = useState<StyleType>();
-  const [level, setLevel] = useState<LevelType>();
+interface ClassesContentProps {
+  status?: ProjectStatusType;
+  style?: StyleType;
+  level?: LevelType;
+}
+
+function ClassesContent({ status, style, level }: ClassesContentProps) {
   const profile = useAuth((state) => state.profile);
 
   const { data: recommendations } = useSuspenseQuery<ProjectEnrichedType[][]>({
@@ -97,30 +100,6 @@ function ClassesContent() {
     },
   });
 
-  const options: ChipBarItemProps[] = [
-    {
-      label: "Status",
-      value: status,
-      options: PROJECT_STATUS,
-      modal: true,
-      onValueChange: setStatus,
-    },
-    {
-      label: "Style",
-      value: style,
-      options: STYLE,
-      modal: true,
-      onValueChange: setStyle,
-    },
-    {
-      label: "Level",
-      value: level,
-      options: LEVEL,
-      modal: true,
-      onValueChange: setLevel,
-    },
-  ];
-
   const renderCarousel = (data: ProjectEnrichedType[]): React.ReactElement => (
     <Carousel data={data} />
   );
@@ -158,23 +137,51 @@ function ClassesContent() {
   ];
 
   return (
-    <View style={styles.container}>
-      <ChipBar padding items={options} />
-      <SectionListView
-        sections={sections}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-      />
-      <LocationPermission />
-    </View>
+    <SectionListView
+      sections={sections}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+    />
   );
 }
 
 export default function Classes() {
+  const [status, setStatus] = useState<ProjectStatusType>();
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
+
+  const options: ChipBarItemProps[] = [
+    {
+      label: "Status",
+      value: status,
+      options: PROJECT_STATUS,
+      modal: true,
+      onValueChange: setStatus,
+    },
+    {
+      label: "Style",
+      value: style,
+      options: STYLE,
+      modal: true,
+      onValueChange: setStyle,
+    },
+    {
+      label: "Level",
+      value: level,
+      options: LEVEL,
+      modal: true,
+      onValueChange: setLevel,
+    },
+  ];
+
   return (
-    <Boundary>
-      <ClassesContent />
-    </Boundary>
+    <View style={styles.container}>
+      <ChipBar padding items={options} />
+      <Boundary>
+        <ClassesContent status={status} style={style} level={level} />
+      </Boundary>
+      <LocationPermission />
+    </View>
   );
 }
 

@@ -32,9 +32,7 @@ function WishBoardContent() {
   });
 
   return (
-    <View style={styles.container}>
-      <Header title="Wish" />
-
+    <>
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -60,15 +58,18 @@ function WishBoardContent() {
       </ScrollView>
 
       <Button label="Create Project" onPress={() => {}} stickyBottom />
-    </View>
+    </>
   );
 }
 
 export default function WishBoard() {
   return (
-    <Boundary>
-      <WishBoardContent />
-    </Boundary>
+    <View style={styles.container}>
+      <Header title="Wish" />
+      <Boundary>
+        <WishBoardContent />
+      </Boundary>
+    </View>
   );
 }
 

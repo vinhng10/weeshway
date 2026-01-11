@@ -21,10 +21,13 @@ import { useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-function WishesContent() {
-  const [status, setStatus] = useState<WishStatusType>();
-  const [style, setStyle] = useState<StyleType>();
-  const [level, setLevel] = useState<LevelType>();
+interface WishesContentProps {
+  status?: WishStatusType;
+  style?: StyleType;
+  level?: LevelType;
+}
+
+function WishesContent({ status, style, level }: WishesContentProps) {
   const profile = useAuth((state) => state.profile);
 
   const { data, hasNextPage, fetchNextPage } =
@@ -52,30 +55,6 @@ function WishesContent() {
         return query;
       },
     });
-
-  const options: ChipBarItemProps[] = [
-    {
-      label: "Status",
-      value: status,
-      modal: true,
-      options: WISH_STATUS,
-      onValueChange: setStatus,
-    },
-    {
-      label: "Style",
-      value: style,
-      options: STYLE,
-      modal: true,
-      onValueChange: setStyle,
-    },
-    {
-      label: "Level",
-      value: level,
-      options: LEVEL,
-      modal: true,
-      onValueChange: setLevel,
-    },
-  ];
 
   const renderTile = (
     data: WishRecommendationEnrichedType
@@ -124,8 +103,7 @@ function WishesContent() {
   ];
 
   return (
-    <View style={styles.container}>
-      <ChipBar padding items={options} />
+    <>
       <SectionListView
         sections={sections}
         hasNextPage={hasNextPage}
@@ -138,15 +116,46 @@ function WishesContent() {
           router.push("/(student)/wishes/create");
         }}
       />
-    </View>
+    </>
   );
 }
 
 export default function Wishes() {
+  const [status, setStatus] = useState<WishStatusType>();
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
+
+  const options: ChipBarItemProps[] = [
+    {
+      label: "Status",
+      value: status,
+      modal: true,
+      options: WISH_STATUS,
+      onValueChange: setStatus,
+    },
+    {
+      label: "Style",
+      value: style,
+      options: STYLE,
+      modal: true,
+      onValueChange: setStyle,
+    },
+    {
+      label: "Level",
+      value: level,
+      options: LEVEL,
+      modal: true,
+      onValueChange: setLevel,
+    },
+  ];
+
   return (
-    <Boundary>
-      <WishesContent />
-    </Boundary>
+    <View style={styles.container}>
+      <ChipBar padding items={options} />
+      <Boundary>
+        <WishesContent status={status} style={style} level={level} />
+      </Boundary>
+    </View>
   );
 }
 

@@ -70,7 +70,7 @@ export default function CreateProject() {
     }
 
     try {
-      const { data, error } = await supabase.rpc("create_project_with_song", {
+      const { error } = await supabase.rpc("create_project_with_song", {
         p_song_data: {
           id: song.id,
           name: song.name,

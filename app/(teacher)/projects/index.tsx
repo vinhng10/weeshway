@@ -25,10 +25,13 @@ import { useMemo, useState } from "react";
 import { SectionListData, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-function ProjectsContent() {
-  const [status, setStatus] = useState<ProjectStatusType>();
-  const [style, setStyle] = useState<StyleType>();
-  const [level, setLevel] = useState<LevelType>();
+interface ProjectsContentProps {
+  status?: ProjectStatusType;
+  style?: StyleType;
+  level?: LevelType;
+}
+
+function ProjectsContent({ status, style, level }: ProjectsContentProps) {
   const profile = useAuth((state) => state.profile);
 
   const { data, hasNextPage, fetchNextPage } =
@@ -48,30 +51,6 @@ function ProjectsContent() {
         return query;
       },
     });
-
-  const options: ChipBarItemProps[] = [
-    {
-      label: "Status",
-      value: status,
-      options: PROJECT_STATUS,
-      modal: true,
-      onValueChange: setStatus,
-    },
-    {
-      label: "Style",
-      value: style,
-      options: STYLE,
-      modal: true,
-      onValueChange: setStyle,
-    },
-    {
-      label: "Level",
-      value: level,
-      options: LEVEL,
-      modal: true,
-      onValueChange: setLevel,
-    },
-  ];
 
   // Filter projects by date for "This Week" section
   const { thisWeekProjects, otherProjects } = useMemo(() => {
@@ -131,8 +110,7 @@ function ProjectsContent() {
   ];
 
   return (
-    <View style={styles.container}>
-      <ChipBar padding items={options} />
+    <>
       <SectionListView
         sections={sections}
         hasNextPage={hasNextPage}
@@ -144,15 +122,46 @@ function ProjectsContent() {
         label="Create Project"
         onPress={() => router.push("/(teacher)/projects/create")}
       />
-    </View>
+    </>
   );
 }
 
 export default function Projects() {
+  const [status, setStatus] = useState<ProjectStatusType>();
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
+
+  const options: ChipBarItemProps[] = [
+    {
+      label: "Status",
+      value: status,
+      options: PROJECT_STATUS,
+      modal: true,
+      onValueChange: setStatus,
+    },
+    {
+      label: "Style",
+      value: style,
+      options: STYLE,
+      modal: true,
+      onValueChange: setStyle,
+    },
+    {
+      label: "Level",
+      value: level,
+      options: LEVEL,
+      modal: true,
+      onValueChange: setLevel,
+    },
+  ];
+
   return (
-    <Boundary>
-      <ProjectsContent />
-    </Boundary>
+    <View style={styles.container}>
+      <ChipBar padding items={options} />
+      <Boundary>
+        <ProjectsContent status={status} style={style} level={level} />
+      </Boundary>
+    </View>
   );
 }
 

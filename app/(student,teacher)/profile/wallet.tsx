@@ -247,7 +247,7 @@ function TeacherWalletContent() {
     return (
       <View style={styles.requirementItem}>
         <IconSymbol name="checkmark.circle" size={20} color="#10B981" />
-        <ThemedText style={styles.requirementText}>{item.text}</ThemedText>
+        <ThemedText>{item.text}</ThemedText>
       </View>
     );
   };
@@ -300,25 +300,20 @@ function TeacherWalletContent() {
     },
   ];
 
-  return (
-    <View style={styles.container}>
-      <Header title="Wallet" />
-      {onboardingComplete ? (
-        <>
-          <SectionListView sections={externalAccountsSections} />
-          <Button
-            label="Stripe Dashboard"
-            onPress={handleOpenDashboard}
-            stickyBottom
-          />
-        </>
-      ) : (
-        <>
-          <SectionListView sections={onboardingSections as any} />
-          <Button label="Setup" onPress={handleStartOnboarding} stickyBottom />
-        </>
-      )}
-    </View>
+  return onboardingComplete ? (
+    <>
+      <SectionListView sections={externalAccountsSections} />
+      <Button
+        label="Stripe Dashboard"
+        onPress={handleOpenDashboard}
+        stickyBottom
+      />
+    </>
+  ) : (
+    <>
+      <SectionListView sections={onboardingSections as any} />
+      <Button label="Setup" onPress={handleStartOnboarding} stickyBottom />
+    </>
   );
 }
 
@@ -326,13 +321,16 @@ export default function Wallet() {
   const role = useRole((state) => state.role);
 
   return (
-    <Boundary>
-      {role === ROLE.STUDENT ? (
-        <StudentWalletContent />
-      ) : (
-        <TeacherWalletContent />
-      )}
-    </Boundary>
+    <View style={styles.container}>
+      <Header title="Wallet" />
+      <Boundary>
+        {role === ROLE.STUDENT ? (
+          <StudentWalletContent />
+        ) : (
+          <TeacherWalletContent />
+        )}
+      </Boundary>
+    </View>
   );
 }
 
@@ -345,11 +343,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   requirementItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.gap(1.5),
-  },
-  requirementText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
+    gap: theme.gap(1),
   },
 }));

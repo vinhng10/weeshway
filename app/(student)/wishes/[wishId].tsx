@@ -37,48 +37,47 @@ function WishContent() {
   });
 
   return (
-    <View style={styles.container}>
-      <Header title="Wish" />
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Top Classes Container */}
-        {data.recommendations && data.recommendations.length > 0 && (
-          <View style={styles.section}>
-            <ThemedText type="h4">Classes</ThemedText>
-            <Carousel
-              data={data.recommendations.map(
-                (recommendation) => recommendation.project
-              )}
-            />
-          </View>
-        )}
-
-        <View style={styles.wishContainer}>
-          <Tile
-            imageSource={data.song.artworkUrl}
-            title={data.song.name}
-            subtitle={data.song.artistName}
-            metadata={`${data.style} • ${data.level}`}
-            previewUrl={data.song.previewUrl}
-            onPress={() => {}}
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Top Classes Container */}
+      {data.recommendations && data.recommendations.length > 0 && (
+        <View style={styles.section}>
+          <ThemedText type="h4">Classes</ThemedText>
+          <Carousel
+            data={data.recommendations.map(
+              (recommendation) => recommendation.project
+            )}
           />
-          <View style={styles.descriptionContainer}>
-            <ThemedText>{data.description}</ThemedText>
-          </View>
         </View>
-      </ScrollView>
-    </View>
+      )}
+
+      <View style={styles.wishContainer}>
+        <Tile
+          imageSource={data.song.artworkUrl}
+          title={data.song.name}
+          subtitle={data.song.artistName}
+          metadata={`${data.style} • ${data.level}`}
+          previewUrl={data.song.previewUrl}
+          onPress={() => {}}
+        />
+        <View style={styles.descriptionContainer}>
+          <ThemedText>{data.description}</ThemedText>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 export default function Wish() {
   return (
-    <Boundary>
-      <WishContent />
-    </Boundary>
+    <View style={styles.container}>
+      <Header title="Wish" />
+      <Boundary>
+        <WishContent />
+      </Boundary>
+    </View>
   );
 }
 
