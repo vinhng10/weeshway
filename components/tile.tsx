@@ -108,7 +108,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   leftContainer: {
     flex: 1,
-    flexShrink: 1,
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",

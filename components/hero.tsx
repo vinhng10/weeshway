@@ -78,7 +78,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   songInfo: {
     flex: 1,
-    flexShrink: 1,
     gap: theme.gap(0.5),
   },
   buttonContainer: {
