@@ -99,7 +99,7 @@ function HomeContent() {
         new Date(data.endAt!)
       )}`}
       previewUrl={data.song.previewUrl}
-      rightContent={<ProjectStatus data={data} />}
+      status={<ProjectStatus data={data} />}
       onPress={() => router.push(`/(teacher)/projects/${data.id}`)}
     />
   );

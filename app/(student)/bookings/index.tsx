@@ -73,12 +73,10 @@ function BookingsContent({ time }: BookingsContentProps) {
       subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
-      rightContent={
-        <>
-          <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
-          <ProjectStatus data={data} />
-        </>
+      avatar={
+        <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
       }
+      status={<ProjectStatus data={data} />}
       onPress={() => router.push(`/(student)/classes/${data.id}`)}
     />
   );

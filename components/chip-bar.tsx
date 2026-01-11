@@ -10,6 +10,7 @@ export interface ChipBarItemProps {
   options: Record<string, string>;
   onValueChange?: any;
   modal: boolean;
+  enabled?: boolean;
 }
 
 export const ChipBarItem = ({
@@ -18,6 +19,7 @@ export const ChipBarItem = ({
   options,
   onValueChange,
   modal,
+  enabled = true,
 }: ChipBarItemProps) => {
   const [visible, setVisible] = useState(false);
 
@@ -29,6 +31,8 @@ export const ChipBarItem = ({
     onValueChange?.(value);
     setVisible(false);
   };
+
+  if (!enabled) return null;
 
   if (modal) {
     // When an option is selected, text is the value prop
@@ -91,14 +95,7 @@ export const ChipBar = ({ items, padding }: ChipBarProps) => {
       showsHorizontalScrollIndicator={false}
     >
       {items.map((item, index) => (
-        <ChipBarItem
-          key={item.label || index}
-          label={item.label}
-          value={item.value}
-          options={item.options}
-          onValueChange={item.onValueChange}
-          modal={item.modal}
-        />
+        <ChipBarItem key={index} {...item} />
       ))}
     </ScrollView>
   );

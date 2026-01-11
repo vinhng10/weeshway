@@ -126,8 +126,17 @@ export const ProjectCard = ({ data }: CardProps) => {
           <View style={styles.middleContainer}>
             {/* Song Info */}
             <View style={styles.rowGroup}>
-              <ThemedText type="h3">{data.song.name}</ThemedText>
-              <ThemedText color="dimmed">{data.song.artistName}</ThemedText>
+              <ThemedText type="h3" numberOfLines={1} ellipsizeMode="tail">
+                {data.song.name}
+              </ThemedText>
+              <ThemedText
+                type="h5"
+                color="dimmed"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {data.song.artistName}
+              </ThemedText>
             </View>
 
             {/* Location and DateTime Info */}

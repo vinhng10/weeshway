@@ -62,26 +62,24 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
 
-    return data.reduce<{
-      thisWeekProjects: ProjectEnrichedType[];
-      otherProjects: ProjectEnrichedType[];
-    }>(
-      (acc, project) => {
-        if (!project.startAt) {
-          acc.otherProjects.push(project);
-          return acc;
-        }
+    const thisWeekProjects: ProjectEnrichedType[] = [];
+    const otherProjects: ProjectEnrichedType[] = [];
 
-        const startAt = new Date(project.startAt);
-        const key =
-          startAt >= startOfWeek && startAt <= endOfWeek
-            ? "thisWeekProjects"
-            : "otherProjects";
-        acc[key].push(project);
-        return acc;
-      },
-      { thisWeekProjects: [], otherProjects: [] }
-    );
+    for (const project of data) {
+      if (!project.startAt) {
+        otherProjects.push(project);
+        continue;
+      }
+
+      const startAt = new Date(project.startAt);
+      if (startAt >= startOfWeek && startAt <= endOfWeek) {
+        thisWeekProjects.push(project);
+      } else {
+        otherProjects.push(project);
+      }
+    }
+
+    return { thisWeekProjects, otherProjects };
   }, [data]);
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
@@ -91,7 +89,7 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
       subtitle={data.song.artistName ?? ""}
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
-      rightContent={<ProjectStatus data={data} />}
+      status={<ProjectStatus data={data} />}
       onPress={() => router.push(`/(teacher)/projects/${data.id}`)}
     />
   );

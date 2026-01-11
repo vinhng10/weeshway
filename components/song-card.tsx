@@ -1,11 +1,11 @@
-import { IconButton } from "./input/icon-button";
-import { ThemedText } from "./themed-text";
 import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dimensions, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { IconButton } from "./input/icon-button";
+import { ThemedText } from "./themed-text";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -38,8 +38,8 @@ export const SongCard = ({ data }: SongCardProps) => {
       >
         <View style={styles.container}>
           <View style={styles.song}>
-            <ThemedText type="h2">{data.name}</ThemedText>
-            <ThemedText color="dimmed" type="h3">
+            <ThemedText type="h3">{data.name}</ThemedText>
+            <ThemedText color="dimmed" type="h5">
               {data.artistName}
             </ThemedText>
           </View>
