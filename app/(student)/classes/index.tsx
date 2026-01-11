@@ -47,7 +47,7 @@ function ClassesContent() {
             song:songs(*), 
             location:locations(*),
             bookings:bookings(*),
-            wishings:wishings(*)
+            watchings:watchings(*)
           )`
         )
         .eq("user_id", profile?.id)
@@ -82,7 +82,7 @@ function ClassesContent() {
       profile:profiles(*), 
       song:songs(*), 
       bookings:bookings(*), 
-      wishings:wishings(*)
+      watchings:watchings(*)
     `,
     pageSize: 10,
     trailingQuery: (query) => {

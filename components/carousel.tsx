@@ -19,7 +19,7 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
   const carouselSize = screenWidth * 0.9; // 90% of screen width
-  const offset = carouselSize * 0.15;
+  const offset = carouselSize * 0.2;
 
   if (!data || data.length === 0) return null;
 
@@ -37,9 +37,9 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
         style={styles.carousel}
         mode="parallax"
         modeConfig={{
-          parallaxScrollingScale: 0.95,
+          parallaxScrollingScale: 0.9,
           parallaxScrollingOffset: offset,
-          parallaxAdjacentItemScale: 0.8,
+          parallaxAdjacentItemScale: 0.75,
         }}
         renderItem={({ item }: { item: ProjectEnrichedType }) => (
           <View style={styles.carouselItem}>
@@ -68,6 +68,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   dotContainer: {
     gap: theme.gap(1),
+    marginTop: theme.gap(-2),
   },
   dotStyle: {
     backgroundColor: theme.colors.dimmed,

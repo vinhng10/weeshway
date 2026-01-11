@@ -130,7 +130,7 @@ export type BubbleType = {
   value: number;
 };
 
-export type WishingType = {
+export type WatchingType = {
   id: number;
   createdAt: Date;
   userId: string;
@@ -152,7 +152,7 @@ export type ProjectEnrichedType = ProjectType & {
   song: SongType;
   location?: LocationType;
   bookings: BookingType[];
-  wishings: WishingType[];
+  watchings: WatchingType[];
 };
 
 export type ProfileEnrichedType = ProfileType & {

@@ -90,8 +90,8 @@ const styles = StyleSheet.create((theme) => ({
           height: theme.gap(5),
         },
         large: {
-          width: theme.gap(10),
-          height: theme.gap(10),
+          width: theme.gap(8),
+          height: theme.gap(8),
         },
       },
     },

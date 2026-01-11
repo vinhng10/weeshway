@@ -23,7 +23,8 @@ function WishContent() {
               profile:profiles(*), 
               song:songs(*), 
               location:locations(*),
-              bookings:bookings(*)
+              bookings:bookings(*),
+              watchings:watchings(*)
             )
           )`
         )

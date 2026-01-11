@@ -43,14 +43,14 @@ export const ProjectCard = ({ data }: CardProps) => {
     setVisible(true);
   };
 
-  const handleWish = async () => {
+  const handleWatch = async () => {
     if (!profile?.id) return;
 
     try {
-      const wishing = data.wishings.find((w) => w.userId === profile.id);
-      const { error } = wishing
-        ? await supabase.from("wishings").delete().eq("id", wishing.id)
-        : await supabase.from("wishings").insert({
+      const watching = data.watchings.find((w) => w.userId === profile.id);
+      const { error } = watching
+        ? await supabase.from("watchings").delete().eq("id", watching.id)
+        : await supabase.from("watchings").insert({
             user_id: profile.id,
             project_id: data.id,
           });
@@ -82,17 +82,17 @@ export const ProjectCard = ({ data }: CardProps) => {
       b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
   );
   const booked = !!userBooking;
-  const wished = data.wishings.some((w) => w.userId === profile?.id);
+  const watching = data.watchings.some((w) => w.userId === profile?.id);
   const spots = userBooking?.spots ?? 0;
   const released = data.status === PROJECT_STATUS.RELEASE;
   const label = booked
     ? `Booked x${spots}`
     : released
     ? "Book"
-    : wished
-    ? "Unwish"
-    : "Wish";
-  const onPress = booked ? undefined : released ? handleBook : handleWish;
+    : watching
+    ? "Unwatch"
+    : "Watch";
+  const onPress = booked ? undefined : released ? handleBook : handleWatch;
 
   return (
     <Pressable onPress={handlePress}>

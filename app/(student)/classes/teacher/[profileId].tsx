@@ -44,7 +44,7 @@ function TeacherProfileContent() {
       *, 
       song:songs(*), 
       bookings:bookings(*), 
-      wishings:wishings(*)
+      watchings:watchings(*)
     `,
     pageSize: 10,
     trailingQuery: (query) =>
@@ -82,9 +82,10 @@ function TeacherProfileContent() {
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
     <Tile
       imageSource={data.song.artworkUrl}
-      title={data.song.name || data.name || ""}
+      title={data.song.name}
       subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
+      previewUrl={data.song.previewUrl}
       rightContent={<ProjectStatus data={data} />}
       onPress={() => router.push(`/(student)/classes/${data.id}`)}
     />
