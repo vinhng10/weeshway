@@ -91,7 +91,9 @@ export const Tile: React.FunctionComponent<TileProps> = ({
           </View>
         </View>
 
-        <View style={styles.rightContainer}>{rightContent}</View>
+        {rightContent && (
+          <View style={styles.rightContainer}>{rightContent}</View>
+        )}
       </LinearGradient>
     </Pressable>
   );
@@ -121,11 +123,11 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.gap(0.5),
   },
   textContainer: {
+    flex: 1,
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start",
     gap: theme.gap(0.5),
-    minWidth: 0,
   },
   avatarContainer: {
     position: "relative",
