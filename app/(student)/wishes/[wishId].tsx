@@ -1,4 +1,11 @@
-import { Boundary, Carousel, Header, ThemedText, Tile } from "@/components";
+import {
+  Boundary,
+  Carousel,
+  Header,
+  ThemedText,
+  Tile,
+  WishInfo,
+} from "@/components";
 import { useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishRecommendationEnrichedType } from "@/types";
@@ -42,30 +49,32 @@ function WishContent() {
       showsVerticalScrollIndicator={false}
     >
       {/* Top Classes Container */}
-      {data.recommendations && data.recommendations.length > 0 && (
-        <View style={styles.section}>
-          <ThemedText type="h4">Classes</ThemedText>
-          <Carousel
-            data={data.recommendations.map(
-              (recommendation) => recommendation.project
-            )}
-          />
-        </View>
+      {data.recommendations && data.recommendations.length > 0 ? (
+        <>
+          <View style={styles.section}>
+            <ThemedText type="h4">Classes</ThemedText>
+            <Carousel
+              data={data.recommendations.map(
+                (recommendation) => recommendation.project
+              )}
+            />
+          </View>
+          <View style={styles.wishContainer}>
+            <Tile
+              imageSource={data.song.artworkUrl}
+              title={data.song.name}
+              subtitle={data.song.artistName}
+              metadata={`${data.style} • ${data.level}`}
+              previewUrl={data.song.previewUrl}
+            />
+            <View style={styles.descriptionContainer}>
+              <ThemedText>{data.description}</ThemedText>
+            </View>
+          </View>
+        </>
+      ) : (
+        <WishInfo data={data} />
       )}
-
-      <View style={styles.wishContainer}>
-        <Tile
-          imageSource={data.song.artworkUrl}
-          title={data.song.name}
-          subtitle={data.song.artistName}
-          metadata={`${data.style} • ${data.level}`}
-          previewUrl={data.song.previewUrl}
-          onPress={() => {}}
-        />
-        <View style={styles.descriptionContainer}>
-          <ThemedText>{data.description}</ThemedText>
-        </View>
-      </View>
     </ScrollView>
   );
 }

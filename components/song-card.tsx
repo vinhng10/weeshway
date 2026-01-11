@@ -56,8 +56,8 @@ export const SongCard = ({ data }: SongCardProps) => {
 
 const styles = StyleSheet.create((theme) => ({
   background: {
-    width: screenWidth * 0.8,
-    height: screenWidth * 0.8,
+    width: screenWidth * 0.75,
+    height: screenWidth * 0.75,
   },
   backgroundImage: {
     borderRadius: theme.gap(2),

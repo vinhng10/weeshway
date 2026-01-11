@@ -1,16 +1,9 @@
-import {
-  Boundary,
-  Button,
-  Header,
-  SongCard,
-  TextBoxInput,
-  TextInput,
-} from "@/components";
+import { Boundary, Button, Header, WishInfo } from "@/components";
 import { useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { useLocalSearchParams } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishBoardContent() {
@@ -33,30 +26,7 @@ function WishBoardContent() {
 
   return (
     <>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Song Card */}
-        <View style={styles.cardContainer}>
-          <SongCard data={data.song} />
-        </View>
-
-        {/* Style and Level Selects */}
-        <View style={styles.row}>
-          <TextBoxInput label="Style" value={data.style} editable={false} />
-          <TextBoxInput label="Level" value={data.level} editable={false} />
-        </View>
-
-        {/* Wish Description */}
-        <TextInput
-          multiline
-          numberOfLines={4}
-          value={data.description}
-          editable={false}
-        />
-      </ScrollView>
-
+      <WishInfo data={data} />
       <Button label="Create Project" onPress={() => {}} stickyBottom />
     </>
   );

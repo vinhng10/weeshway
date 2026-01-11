@@ -21,6 +21,7 @@ export {
 export { ThemedView, type ThemedViewProps } from "./themed-view";
 export { Tile } from "./tile";
 export { Video } from "./video";
+export { WishInfo } from "./wish-info";
 
 // Input Components (re-export from input/index.tsx)
 export * from "./input";
