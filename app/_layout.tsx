@@ -6,7 +6,7 @@ import { useRole } from "@/hooks/useRole";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import { Stack } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -19,9 +19,11 @@ function RootNavigator() {
   const initialize = useAuth((state) => state.initialize);
   const fetchExchangeRates = useLocales((state) => state.fetchExchangeRates);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
+  const pause = useAudioPlayerStore((state) => state.pause);
   const player = useAudioPlayer();
   const status = useAudioPlayerStatus(player);
   const role = useRole((state) => state.role);
+  const pathname = usePathname();
 
   // Initialize audio player on mount
   useEffect(() => {
@@ -38,6 +40,11 @@ function RootNavigator() {
   useEffect(() => {
     fetchExchangeRates();
   }, [fetchExchangeRates]);
+
+  // Pause audio player on navigation
+  useEffect(() => {
+    pause();
+  }, [pathname]);
 
   return (
     <Stack>
