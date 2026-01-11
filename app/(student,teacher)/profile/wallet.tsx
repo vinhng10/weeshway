@@ -141,11 +141,10 @@ function StudentWalletContent() {
   ];
 
   return (
-    <View style={styles.container}>
-      <Header title="Wallet" />
+    <>
       <SectionListView sections={sections} />
       <Button label="Manage" onPress={handleSetup} stickyBottom />
-    </View>
+    </>
   );
 }
 
