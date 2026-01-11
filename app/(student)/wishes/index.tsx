@@ -1,20 +1,33 @@
 import {
+  Avatar,
   AvatarGroup,
   Boundary,
   Button,
   Chip,
   ChipBar,
   ChipBarItemProps,
+  ProjectStatus,
   SectionListView,
   Tile,
 } from "@/components";
-import { LEVEL, STYLE, WISH_STATUS } from "@/constants";
+import {
+  LEVEL,
+  PROJECT_STATUS,
+  STRIPE_PAYMENT_STATUS,
+  STYLE,
+  WISH_STATUS,
+  WISH_WATCH,
+} from "@/constants";
 import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
 import {
   LevelType,
+  ProjectEnrichedType,
+  ProjectStatusType,
   StyleType,
+  WatchingEnrichedType,
   WishRecommendationEnrichedType,
   WishStatusType,
+  WishWatchType,
 } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -23,6 +36,12 @@ import { StyleSheet } from "react-native-unistyles";
 
 interface WishesContentProps {
   status?: WishStatusType;
+  style?: StyleType;
+  level?: LevelType;
+}
+
+interface WatchingsContentProps {
+  status?: ProjectStatusType;
   style?: StyleType;
   level?: LevelType;
 }
@@ -46,12 +65,8 @@ function WishesContent({ status, style, level }: WishesContentProps) {
       pageSize: 10,
       trailingQuery: (query) => {
         query = query.eq("user_id", profile?.id);
-        if (style) {
-          query = query.eq("style", style);
-        }
-        if (level) {
-          query = query.eq("level", level);
-        }
+        if (style) query = query.eq("style", style);
+        if (level) query = query.eq("level", level);
         return query;
       },
     });
@@ -120,18 +135,93 @@ function WishesContent({ status, style, level }: WishesContentProps) {
   );
 }
 
+function WatchingsContent({ status, style, level }: WatchingsContentProps) {
+  const profile = useAuth((state) => state.profile);
+
+  const {
+    data: watchings,
+    hasNextPage,
+    fetchNextPage,
+  } = useSuspenseInfiniteQuery<WatchingEnrichedType>({
+    queryKey: ["watchings", "projects", status, style, level],
+    tableName: "watchings",
+    columns: `
+      project:projects(
+        *, 
+        profile:profiles(*), 
+        song:songs(*),
+        bookings:bookings(*), 
+        watchings:watchings(*)
+      )
+    `,
+    pageSize: 10,
+    trailingQuery: (query) => {
+      query = query
+        .eq("user_id", profile?.id)
+        .eq("project.bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED);
+      if (status) query = query.eq("project.status", status);
+      if (style) query = query.eq("project.style", style);
+      if (level) query = query.eq("project.level", level);
+      return query;
+    },
+  });
+
+  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
+    <Tile
+      imageSource={data.song.artworkUrl}
+      title={data.song.name}
+      subtitle={data.song.artistName}
+      metadata={`${data.style} • ${data.level}`}
+      previewUrl={data.song.previewUrl}
+      rightContent={
+        <>
+          <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
+          <ProjectStatus data={data} />
+        </>
+      }
+      onPress={() => router.push(`/(student)/classes/${data.id}`)}
+    />
+  );
+
+  const sections: SectionListData<ProjectEnrichedType>[] = [
+    {
+      title: "Watchings",
+      data: watchings.map((watching) => watching.project),
+      render: renderTile,
+    },
+  ];
+
+  return (
+    <SectionListView
+      sections={sections}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+    />
+  );
+}
+
 export default function Wishes() {
-  const [status, setStatus] = useState<WishStatusType>();
+  const [type, setType] = useState<WishWatchType>(WISH_WATCH.WISH);
+  const [wishStatus, setWishStatus] = useState<WishStatusType>();
+  const [projectStatus, setProjectStatus] = useState<ProjectStatusType>();
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
   const options: ChipBarItemProps[] = [
     {
+      label: "Type",
+      value: type,
+      options: WISH_WATCH,
+      modal: false,
+      onValueChange: setType,
+    },
+    {
       label: "Status",
-      value: status,
+      value: type === WISH_WATCH.WISH ? wishStatus : projectStatus,
       modal: true,
-      options: WISH_STATUS,
-      onValueChange: setStatus,
+      options: type === WISH_WATCH.WISH ? WISH_STATUS : PROJECT_STATUS,
+      onValueChange:
+        type === WISH_WATCH.WISH ? setWishStatus : setProjectStatus,
     },
     {
       label: "Style",
@@ -153,7 +243,15 @@ export default function Wishes() {
     <View style={styles.container}>
       <ChipBar padding items={options} />
       <Boundary>
-        <WishesContent status={status} style={style} level={level} />
+        {type === WISH_WATCH.WISH ? (
+          <WishesContent status={wishStatus} style={style} level={level} />
+        ) : (
+          <WatchingsContent
+            status={projectStatus}
+            style={style}
+            level={level}
+          />
+        )}
       </Boundary>
     </View>
   );

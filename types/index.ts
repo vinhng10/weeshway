@@ -7,6 +7,7 @@ import {
   TIME,
   TRACK,
   WISH_STATUS,
+  WISH_WATCH,
 } from "@/constants";
 
 type ValueOf<T> = T[keyof T];
@@ -19,6 +20,7 @@ export type WishStatusType = ValueOf<typeof WISH_STATUS>;
 export type TimeType = ValueOf<typeof TIME>;
 export type TrackType = ValueOf<typeof TRACK>;
 export type RoleType = ValueOf<typeof ROLE>;
+export type WishWatchType = ValueOf<typeof WISH_WATCH>;
 
 export type OptionItem = {
   key: string;
@@ -164,5 +166,9 @@ export type RecommendationEnrichedType = RecommendationType & {
 };
 
 export type BookingEnrichedType = BookingType & {
+  project: ProjectEnrichedType;
+};
+
+export type WatchingEnrichedType = WatchingType & {
   project: ProjectEnrichedType;
 };

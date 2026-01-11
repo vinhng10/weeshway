@@ -100,3 +100,8 @@ export const TIME = {
   UPCOMING: "Upcoming",
   PAST: "Past",
 } as const;
+
+export const WISH_WATCH = {
+  WISH: "Wish",
+  WATCHING: "Watching",
+} as const;
