@@ -206,7 +206,7 @@ function ProjectContent() {
         <Button
           label={"Studio"}
           onPress={() =>
-            router.navigate(`/(teacher)/projects/${projectId}/studio`)
+            router.navigate(`./${projectId}/studio`)
           }
           style={[styles.button, styles.primary]}
         />

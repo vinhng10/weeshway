@@ -78,7 +78,7 @@ function ExploreContent({ style, level }: ExploreContentProps) {
       subtitle={data.song.artistName}
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
-      onPress={() => router.navigate(`/(teacher)/explore/${data.id}`)}
+      onPress={() => router.navigate(`/(teacher)/(explore)/wishes/${data.id}`)}
     />
   );
 

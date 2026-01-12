@@ -7,23 +7,11 @@ export default function WishLayout() {
   return (
     <Stack
       screenOptions={{
-        headerTitleStyle: {
-          color: theme.colors.typography,
-        },
-        headerStyle: {
-          backgroundColor: theme.colors.background,
-        },
+        headerShown: false,
         contentStyle: {
           backgroundColor: theme.colors.background,
         },
       }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack>
+    />
   );
 }
