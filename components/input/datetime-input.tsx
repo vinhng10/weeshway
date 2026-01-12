@@ -26,12 +26,14 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
   const [date, setDate] = useState(startAt ?? new Date());
   const [startTime, setStartTime] = useState(startAt ?? new Date());
   const [endTime, setEndTime] = useState(endAt ?? new Date());
+  const [error, setError] = useState<string>();
 
   const handlePress = () => {
+    setError(undefined);
     setVisible(true);
   };
 
-  const handleModal = () => {
+  const handleClose = () => {
     setVisible(false);
   };
 
@@ -54,6 +56,13 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
       endTime.getMinutes()
     );
 
+    // Validate that start time is not greater than end time
+    if (finalStartTime >= finalEndTime) {
+      setError("Start time must be before end time");
+      return;
+    }
+
+    setError(undefined);
     onValueChange(finalStartTime, finalEndTime);
     setVisible(false);
   };
@@ -85,10 +94,10 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
         animationType="slide"
         presentationStyle="overFullScreen"
         transparent={true}
-        onRequestClose={handleModal}
+        onRequestClose={handleClose}
       >
         <View style={styles.modalContainer}>
-          <Header title="Date & Time" onPress={handleModal} />
+          <Header title="Date & Time" onPress={handleClose} />
 
           <View style={styles.modalContent}>
             {/* Date Input */}
@@ -109,7 +118,10 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
               <DateTimeBoxInput
                 label="Start Time"
                 value={startTime}
-                onValueChange={setStartTime}
+                onValueChange={(value) => {
+                  setStartTime(value);
+                  setError(undefined);
+                }}
                 icon="timer.circle.fill"
                 mode="time"
                 editable={editable}
@@ -117,13 +129,23 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
               <DateTimeBoxInput
                 label="End Time"
                 value={endTime}
-                onValueChange={setEndTime}
+                onValueChange={(value) => {
+                  setEndTime(value);
+                  setError(undefined);
+                }}
                 icon="timer.circle.fill"
                 mode="time"
                 minimumDate={startTime}
                 editable={editable}
               />
             </View>
+
+            {/* Error Message */}
+            {error && (
+              <ThemedText color="danger" style={styles.errorText}>
+                {error}
+              </ThemedText>
+            )}
           </View>
         </View>
 
@@ -167,5 +189,10 @@ const styles = StyleSheet.create((theme, rt) => ({
   row: {
     flexDirection: "row",
     gap: theme.gap(2),
+  },
+  errorText: {
+    marginTop: theme.gap(1),
+    paddingHorizontal: theme.gap(2),
+    textAlign: "center",
   },
 }));

@@ -38,7 +38,7 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
     if (loading) {
       return (
         <View style={styles.messageContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color="#FFFFFF" />
         </View>
       );
     }

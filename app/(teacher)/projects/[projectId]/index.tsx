@@ -110,7 +110,7 @@ function ProjectContent() {
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       // Navigate back to projects list
-      router.navigate(`/(teacher)/projects/`);
+      router.back();
     } catch (error: any) {
       console.error("Error updating project:", error);
       // You might want to show an error message to the user here

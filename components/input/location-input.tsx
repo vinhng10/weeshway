@@ -132,7 +132,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     if (loading) {
       return (
         <View style={styles.messageContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color="#FFFFFF" />
         </View>
       );
     }

@@ -50,7 +50,7 @@ export function Video({ source }: VideoProps) {
     <Pressable onPress={handlePress} disabled={isLoading}>
       <View style={[styles.container, styles.indicator]}>
         {source && isLoading ? (
-          <ActivityIndicator size="small" color="#666" />
+          <ActivityIndicator size="small" color="#FFFFFF" />
         ) : (
           thumbnailUri && (
             <Image source={{ uri: thumbnailUri }} style={styles.container} />
