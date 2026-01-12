@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { MenuItem } from "../menu-item";
 import { ThemedText } from "../themed-text";
-import { Tile } from "../tile";
 import { IconSymbol } from "../ui/icon-symbol";
 import { TextBoxInput } from "./box-input";
 import { Button } from "./button";
@@ -205,7 +205,8 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
             data={locations}
             keyExtractor={(item) => item.id}
             renderItem={({ item: location }) => (
-              <Tile
+              <MenuItem
+                icon="location.app.fill"
                 title={location.displayName || "Unknown"}
                 subtitle={
                   location.shortFormattedAddress ||
@@ -213,6 +214,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
                   ""
                 }
                 onPress={() => handleLocationPress(location)}
+                showChevron={false}
               />
             )}
             ListEmptyComponent={renderEmptyState}
