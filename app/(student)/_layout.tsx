@@ -21,7 +21,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="classes"
+        name="(classes)"
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
@@ -30,7 +30,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="wishes"
+        name="(wishes)"
         options={{
           title: "Wishes",
           tabBarIcon: ({ color }) => (
@@ -39,7 +39,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="bookings"
+        name="(bookings)"
         options={{
           title: "Bookings",
           headerShown: false,

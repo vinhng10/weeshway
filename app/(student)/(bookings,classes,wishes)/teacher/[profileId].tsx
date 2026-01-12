@@ -87,7 +87,7 @@ function TeacherProfileContent() {
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
       status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`/(student)/classes/${data.id}`)}
+      onPress={() => router.dismissTo(`../classes/${data.id}`)}
     />
   );
 
