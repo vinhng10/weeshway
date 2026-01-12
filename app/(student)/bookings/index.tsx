@@ -77,7 +77,7 @@ function BookingsContent({ time }: BookingsContentProps) {
         <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
       }
       status={<ProjectStatus data={data} />}
-      onPress={() => router.push(`/(student)/classes/${data.id}`)}
+      onPress={() => router.navigate(`/(student)/classes/${data.id}`)}
     />
   );
 

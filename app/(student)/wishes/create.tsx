@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks";
 import { supabase } from "@/supabase";
 import { LevelType, SongType, StyleType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -20,7 +20,6 @@ import { StyleSheet } from "react-native-unistyles";
 export default function MakeAWish() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const [style, setStyle] = useState<StyleType>(STYLE.HIPHOP);

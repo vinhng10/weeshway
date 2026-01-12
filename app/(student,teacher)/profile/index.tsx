@@ -7,33 +7,32 @@ import {
 } from "@/components";
 import { ROLE } from "@/constants";
 import { useAuth, useRole } from "@/hooks";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Profile() {
   const profile = useAuth((state) => state.profile);
   const signOut = useAuth((state) => state.signOut);
-  const router = useRouter();
 
   const role = useRole((state) => state.role);
   const setRole = useRole((state) => state.setRole);
   const rolePath = role === ROLE.STUDENT ? "student" : "teacher";
 
   const handleAccount = () => {
-    router.push(`/(${rolePath})/profile/account`);
+    router.navigate(`/(${rolePath})/profile/account`);
   };
 
   const handleNotifications = () => {
-    // router.push("/(tabs)/profile/notifications");
+    // router.navigate("/(tabs)/profile/notifications");
   };
 
   const handleWallet = () => {
-    router.push(`/(${rolePath})/profile/wallet`);
+    router.navigate(`/(${rolePath})/profile/wallet`);
   };
 
   const handleDataPrivacy = () => {
-    // router.push("/(tabs)/profile/data-privacy");
+    // router.navigate("/(tabs)/profile/data-privacy");
   };
 
   const handleSignOut = async () => {

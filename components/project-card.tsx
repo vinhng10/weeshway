@@ -71,7 +71,7 @@ export const ProjectCard = ({ data }: CardProps) => {
   };
 
   const handlePress = () => {
-    router.push(`/(student)/classes/${data.id}`);
+    router.navigate(`/(student)/classes/${data.id}`);
   };
 
   // Compute booking and wish status

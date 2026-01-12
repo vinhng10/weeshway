@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ThemedText } from "./themed-text";
@@ -13,8 +13,6 @@ export const Header: React.FunctionComponent<HeaderProps> = ({
   title,
   onPress,
 }) => {
-  const router = useRouter();
-
   return (
     <View style={styles.container}>
       <Pressable onPress={onPress ?? router.back} style={styles.backButton}>

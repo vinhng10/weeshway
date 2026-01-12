@@ -110,7 +110,7 @@ function ProjectContent() {
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       // Navigate back to projects list
-      router.push(`/(teacher)/projects/`);
+      router.navigate(`/(teacher)/projects/`);
     } catch (error: any) {
       console.error("Error updating project:", error);
       // You might want to show an error message to the user here
@@ -205,7 +205,9 @@ function ProjectContent() {
         />
         <Button
           label={"Studio"}
-          onPress={() => router.push(`/(teacher)/projects/${projectId}/studio`)}
+          onPress={() =>
+            router.navigate(`/(teacher)/projects/${projectId}/studio`)
+          }
           style={[styles.button, styles.primary]}
         />
       </View>

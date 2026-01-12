@@ -29,7 +29,7 @@ function WishContent() {
     // Store the wish data in the temporary data store
     setData<WishEnrichedType>(data);
     // Navigate to create project screen
-    router.push("/(teacher)/projects/create");
+    router.navigate("/(teacher)/projects/create");
   };
 
   return (

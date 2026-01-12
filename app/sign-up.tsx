@@ -1,6 +1,6 @@
 import { Button, TextInput, ThemedText } from "@/components";
 import { useAuth } from "@/hooks";
-import { Link, useRouter } from "expo-router";
+import { Link, router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -11,7 +11,6 @@ export default function CreateAccountScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const signUp = useAuth((state) => state.signUp);
-  const router = useRouter();
 
   const handleSignUp = async () => {
     if (!email || !password || !confirmPassword) {

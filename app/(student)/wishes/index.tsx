@@ -95,7 +95,7 @@ function WishesContent({ style, level }: WishesContentProps) {
           </View>
         )
       }
-      onPress={() => router.push(`/(student)/wishes/${data.id}`)}
+      onPress={() => router.navigate(`/(student)/wishes/${data.id}`)}
     />
   );
 
@@ -146,7 +146,7 @@ function WishesContent({ style, level }: WishesContentProps) {
         stickyBottom
         label="Make A Wish"
         onPress={() => {
-          router.push("/(student)/wishes/create");
+          router.navigate("/(student)/wishes/create");
         }}
       />
     </>
@@ -195,7 +195,7 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
         <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
       }
       status={<ProjectStatus data={data} />}
-      onPress={() => router.push(`/(student)/classes/${data.id}`)}
+      onPress={() => router.navigate(`/(student)/classes/${data.id}`)}
     />
   );
 
