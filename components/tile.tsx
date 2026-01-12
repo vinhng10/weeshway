@@ -61,22 +61,19 @@ export const Tile: React.FunctionComponent<TileProps> = ({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
       >
-        {avatar && <View style={styles.avatar}>{avatar}</View>}
         <View style={styles.leftContainer}>
-          {imageSource && (
-            <View style={styles.avatarContainer}>
-              <Avatar source={imageSource} size="large" shape="square" />
-              {previewUrl && (
-                <View style={styles.playButtonOverlay}>
-                  <IconButton
-                    icon={isPlaying ? "pause" : "play"}
-                    iconSize={24}
-                    onPress={handleAudioPlayer}
-                  />
-                </View>
-              )}
-            </View>
-          )}
+          <View style={styles.avatarContainer}>
+            <Avatar source={imageSource} size="large" shape="square" />
+            {previewUrl && (
+              <View style={styles.playButtonOverlay}>
+                <IconButton
+                  icon={isPlaying ? "pause" : "play"}
+                  iconSize={24}
+                  onPress={handleAudioPlayer}
+                />
+              </View>
+            )}
+          </View>
           <View style={styles.textContainer}>
             <ThemedText type="h5" numberOfLines={1} ellipsizeMode="tail">
               {title}
@@ -86,18 +83,16 @@ export const Tile: React.FunctionComponent<TileProps> = ({
                 {subtitle}
               </ThemedText>
             )}
-
-            {(metadata || status) && (
-              <View style={styles.row}>
-                {metadata && (
-                  <ThemedText numberOfLines={1} ellipsizeMode="tail">
-                    {metadata}
-                  </ThemedText>
-                )}
-                {status}
-              </View>
+            {metadata && (
+              <ThemedText numberOfLines={1} ellipsizeMode="tail">
+                {metadata}
+              </ThemedText>
             )}
           </View>
+        </View>
+        <View style={styles.rightContainer}>
+          <View>{avatar}</View>
+          <View>{status}</View>
         </View>
       </LinearGradient>
     </Pressable>
@@ -106,18 +101,11 @@ export const Tile: React.FunctionComponent<TileProps> = ({
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "stretch",
     padding: theme.gap(1),
     borderRadius: theme.gap(2),
-  },
-  avatar: {
-    position: "absolute",
-    top: theme.gap(1),
-    right: theme.gap(1),
-    zIndex: 1,
   },
   leftContainer: {
     flex: 1,
@@ -125,21 +113,18 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "flex-start",
     alignItems: "center",
     gap: theme.gap(1),
-    minWidth: 0,
+  },
+  rightContainer: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
   },
   textContainer: {
     flex: 1,
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "flex-start",
     gap: theme.gap(0.5),
-    minWidth: 0,
-  },
-  row: {
-    alignSelf: "stretch",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
   avatarContainer: {
     position: "relative",
