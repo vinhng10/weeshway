@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { ThemedText } from "../themed-text";
 import { IconSymbol, IconSymbolName } from "../ui/icon-symbol";
 import { Options } from "./options";
-import { TextInput } from "./text-input";
+import { TextInput, TextInputProps } from "./text-input";
 
 export const formatDate = (date?: Date, compact: boolean = false): string => {
   if (!date) return "";
@@ -63,38 +63,21 @@ interface BaseBoxInputProps {
 }
 
 // TextBoxInput variant
-interface TextBoxInputProps extends BaseBoxInputProps {
-  placeholder?: string;
-  multiline?: boolean;
-}
+interface TextBoxInputProps extends BaseBoxInputProps, TextInputProps {}
 
 export const TextBoxInput: React.FunctionComponent<TextBoxInputProps> = ({
   label,
-  value,
   onValueChange,
-  placeholder,
   editable = true,
-  multiline,
+  ...rest
 }) => {
-  const textInputRef = useRef<any>(null);
-
-  const handlePress = () => {
-    if (editable) {
-      textInputRef.current?.focus();
-    }
-  };
-
   return (
-    <BaseBoxInput label={label} onPress={handlePress} editable={editable}>
+    <BaseBoxInput label={label} editable={editable}>
       <TextInput
-        ref={textInputRef}
         type="h5"
-        value={value}
         onChangeText={onValueChange}
-        placeholder={placeholder}
         style={styles.textInput}
-        editable={editable}
-        multiline={multiline}
+        {...rest}
       />
     </BaseBoxInput>
   );

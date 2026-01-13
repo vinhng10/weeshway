@@ -9,7 +9,7 @@ import {
   IntBoxInput,
   LocationInput,
   SelectBoxInput,
-  TextInput,
+  TextBoxInput,
   Tile,
 } from "@/components";
 import {
@@ -31,7 +31,6 @@ import { StyleSheet } from "react-native-unistyles";
 function ProjectContent() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const profile = useAuth((state) => state.profile);
-  const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const queryClient = useQueryClient();
 
   const { data, refetch, isRefetching } = useSuspenseQuery<ProjectEnrichedType>(
@@ -47,14 +46,13 @@ function ProjectContent() {
           .eq("user_id", profile?.id)
           .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
           .single();
-
         if (error) throw error;
         return data;
       },
     }
   );
 
-  // Initialize state directly with project data - no useEffect needed!
+  // Form State
   const [name, setName] = useState(data.name);
   const [description, setDescription] = useState(data.description);
   const [status, setStatus] = useState<ProjectStatusType>(data.status);
@@ -63,17 +61,62 @@ function ProjectContent() {
   const [price, setPrice] = useState(
     data.price ? (data.price * 0.01).toString() : ""
   );
-  const [spots, setSpots] = useState<string>(
-    data.spots ? data.spots.toString() : ""
-  );
+  const [spots, setSpots] = useState(data.spots?.toString() ?? "");
   const [startAt, setStartAt] = useState(
     data.startAt ? new Date(data.startAt) : undefined
   );
   const [endAt, setEndAt] = useState(
     data.endAt ? new Date(data.endAt) : undefined
   );
-  const [song, setSong] = useState(data.song);
   const [location, setLocation] = useState(data.location);
+
+  // Logic Flags
+  const wasReleased = data.status === PROJECT_STATUS.RELEASE;
+  const wasCanceled = data.status === PROJECT_STATUS.CANCEL;
+  const canEditDetails = !wasReleased && !wasCanceled;
+  const canEditStatus = !wasCanceled;
+  const isReleasable = !!(
+    style &&
+    level &&
+    Number(price) > 0 &&
+    Number(spots) > 0 &&
+    startAt &&
+    endAt &&
+    location
+  );
+
+  const handleSave = async () => {
+    // Can't save once canceled
+    if (wasCanceled) return;
+    // Can't release if not all fields are filled
+    if (status === PROJECT_STATUS.RELEASE && !isReleasable) return;
+    // Can't go back to draft if already released
+    if (status === PROJECT_STATUS.DRAFT && wasReleased) return;
+
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({
+          name: name ?? null,
+          status: status ?? null,
+          style: style ?? null,
+          level: level ?? null,
+          price: price ? Math.round(Number(price) * 100) : null,
+          spots: spots ? Number(spots) : null,
+          start_at: startAt ?? null,
+          end_at: endAt ?? null,
+          description: description ?? null,
+          location_id: location?.id ?? null,
+        })
+        .eq("id", projectId);
+      if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ["projects"] });
+      router.back();
+    } catch (error) {
+      console.error("Error saving project:", error);
+    }
+  };
 
   const options: ChipBarItemProps[] = [
     {
@@ -81,45 +124,9 @@ function ProjectContent() {
       value: status,
       options: PROJECT_STATUS,
       modal: false,
-      onValueChange: setStatus,
+      onValueChange: canEditStatus ? setStatus : undefined,
     },
   ];
-
-  const handleSave = async () => {
-    if (!isLoggedIn || !profile || !projectId || !data) {
-      console.error("Error: User not logged in or project ID missing");
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("projects")
-        .update({
-          name: name ?? null,
-          status: status,
-          style: style ?? null,
-          level: level ?? null,
-          price: price ? Math.round(Number(price) * 100) : null,
-          spots: spots ? Number(spots) : null,
-          start_at: startAt,
-          end_at: endAt,
-          description: description ?? null,
-          location_id: location?.id,
-        })
-        .eq("id", projectId);
-
-      if (error) throw error;
-
-      // Invalidate and refetch the project query
-      await queryClient.invalidateQueries({ queryKey: ["projects"] });
-
-      // Navigate back to projects list
-      router.back();
-    } catch (error: any) {
-      console.error("Error updating project:", error);
-      // You might want to show an error message to the user here
-    }
-  };
 
   return (
     <>
@@ -133,21 +140,19 @@ function ProjectContent() {
         }
       >
         {/* Song Tile */}
-        {song && (
-          <Tile
-            imageSource={song.artworkUrl}
-            title={song.name}
-            subtitle={song.artistName}
-            previewUrl={song.previewUrl}
-            onPress={() => {}}
-          />
-        )}
+        <Tile
+          imageSource={data.song.artworkUrl}
+          title={data.song.name}
+          subtitle={data.song.artistName}
+          previewUrl={data.song.previewUrl}
+        />
 
         {/* Project Name Input */}
-        <TextInput
-          placeholder="Project name..."
+        <TextBoxInput
+          label="Name"
           value={name}
-          onChangeText={setName}
+          onValueChange={setName}
+          editable={canEditDetails}
         />
 
         {/* Toggle Button Group for Status */}
@@ -160,19 +165,31 @@ function ProjectContent() {
             value={style}
             options={STYLE}
             onValueChange={setStyle}
+            editable={canEditDetails}
           />
           <SelectBoxInput
             label="Level"
             value={level}
             options={LEVEL}
             onValueChange={setLevel}
+            editable={canEditDetails}
           />
         </View>
 
         {/* Price and Spots Info Fields */}
         <View style={styles.row}>
-          <FloatBoxInput label="Price" value={price} onValueChange={setPrice} />
-          <IntBoxInput label="Spots" value={spots} onValueChange={setSpots} />
+          <FloatBoxInput
+            label="Price"
+            value={price}
+            onValueChange={setPrice}
+            editable={canEditDetails}
+          />
+          <IntBoxInput
+            label="Spots"
+            value={spots}
+            onValueChange={setSpots}
+            editable={canEditDetails}
+          />
         </View>
 
         {/* Date & Time Row */}
@@ -184,6 +201,7 @@ function ProjectContent() {
             setStartAt(startTime);
             setEndAt(endTime);
           }}
+          editable={canEditDetails}
         />
 
         {/* Location Row */}
@@ -191,27 +209,30 @@ function ProjectContent() {
           label="Location"
           value={location}
           onValueChange={setLocation}
+          editable={canEditDetails}
         />
 
         {/* Project Description Input */}
-        <TextInput
-          placeholder="Project description ..."
+        <TextBoxInput
+          label="Description"
           value={description}
-          onChangeText={setDescription}
+          onValueChange={setDescription}
           multiline
           numberOfLines={4}
+          editable={canEditDetails}
         />
       </KeyboardAwareScrollView>
 
       {/* Save Changes Buttons */}
       <View style={[styles.buttonContainer, styles.row]}>
         <Button
-          label={"Save Changes"}
+          label="Save"
           onPress={handleSave}
           style={styles.button}
+          disabled={wasCanceled}
         />
         <Button
-          label={"Studio"}
+          label="Studio"
           onPress={() => router.navigate(`./${projectId}/studio`)}
           style={[styles.button, styles.primary]}
         />

@@ -3,7 +3,6 @@ import {
   Boundary,
   Button,
   Checkout,
-  ChipBar,
   ChipBarItemProps,
   DateTimeInput,
   FloatBoxInput,
@@ -11,7 +10,6 @@ import {
   IntBoxInput,
   LocationInput,
   TextBoxInput,
-  TextInput,
   ThemedText,
 } from "@/components";
 import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
@@ -145,8 +143,10 @@ function ClassContent() {
           <ThemedText type="h3">{data.profile.fullName}</ThemedText>
         </Pressable>
 
-        {/* Toggle Button Group for Status */}
-        <ChipBar items={options} />
+        {/* Project Name */}
+        {data.name && (
+          <TextBoxInput label="Name" value={data.name} editable={false} />
+        )}
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
@@ -184,8 +184,8 @@ function ClassContent() {
         />
 
         {/* Project Description Input */}
-        <TextInput
-          placeholder="Project description ..."
+        <TextBoxInput
+          label="Description"
           value={data.description}
           editable={false}
           multiline
