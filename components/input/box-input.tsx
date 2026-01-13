@@ -1,5 +1,5 @@
 import { DAY, MONTH } from "@/constants";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { StyleSheet } from "react-native-unistyles";
@@ -68,11 +68,10 @@ interface TextBoxInputProps extends BaseBoxInputProps, TextInputProps {}
 export const TextBoxInput: React.FunctionComponent<TextBoxInputProps> = ({
   label,
   onValueChange,
-  editable = true,
   ...rest
 }) => {
   return (
-    <BaseBoxInput label={label} editable={editable}>
+    <BaseBoxInput label={label} editable={rest.editable}>
       <TextInput
         type="h5"
         onChangeText={onValueChange}
@@ -139,25 +138,13 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
 };
 
 // IntBoxInput variant
-interface IntBoxInputProps extends BaseBoxInputProps {
-  placeholder?: string;
-}
+interface IntBoxInputProps extends BaseBoxInputProps, TextInputProps {}
 
 export const IntBoxInput: React.FunctionComponent<IntBoxInputProps> = ({
   label,
-  value,
   onValueChange,
-  placeholder,
-  editable = true,
+  ...rest
 }) => {
-  const textInputRef = useRef<any>(null);
-
-  const handlePress = () => {
-    if (editable) {
-      textInputRef.current?.focus();
-    }
-  };
-
   const handleTextChange = (text: string) => {
     if (!onValueChange) return;
 
@@ -169,41 +156,26 @@ export const IntBoxInput: React.FunctionComponent<IntBoxInputProps> = ({
   };
 
   return (
-    <BaseBoxInput label={label} onPress={handlePress} editable={editable}>
+    <BaseBoxInput label={label} editable={rest.editable}>
       <TextInput
-        ref={textInputRef}
         type="h5"
-        value={value}
         onChangeText={handleTextChange}
-        placeholder={placeholder}
         style={styles.textInput}
-        editable={editable}
         keyboardType="numeric"
+        {...rest}
       />
     </BaseBoxInput>
   );
 };
 
 // FloatBoxInput variant
-interface FloatBoxInputProps extends BaseBoxInputProps {
-  placeholder?: string;
-}
+interface FloatBoxInputProps extends BaseBoxInputProps, TextInputProps {}
 
 export const FloatBoxInput: React.FunctionComponent<FloatBoxInputProps> = ({
   label,
-  value,
   onValueChange,
-  placeholder,
-  editable = true,
+  ...rest
 }) => {
-  const textInputRef = useRef<any>(null);
-
-  const handlePress = () => {
-    if (editable) {
-      textInputRef.current?.focus();
-    }
-  };
-
   const handleTextChange = (text: string) => {
     if (!onValueChange) return;
 
@@ -220,16 +192,13 @@ export const FloatBoxInput: React.FunctionComponent<FloatBoxInputProps> = ({
   };
 
   return (
-    <BaseBoxInput label={label} onPress={handlePress} editable={editable}>
+    <BaseBoxInput label={label} editable={rest.editable}>
       <TextInput
-        ref={textInputRef}
         type="h5"
-        value={value}
         onChangeText={handleTextChange}
-        placeholder={placeholder}
         style={styles.textInput}
-        editable={editable}
         keyboardType="numeric"
+        {...rest}
       />
     </BaseBoxInput>
   );
