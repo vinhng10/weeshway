@@ -1,6 +1,11 @@
-import { ThemedText } from "./themed-text";
-import { SectionList, SectionListData, View } from "react-native";
+import {
+  RefreshControl,
+  SectionList,
+  SectionListData,
+  View,
+} from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { ThemedText } from "./themed-text";
 
 // Extend SectionListData to include a render function
 
@@ -8,12 +13,16 @@ interface SectionListViewProps<ItemT> {
   sections: ReadonlyArray<SectionListData<ItemT>>;
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
+  refetch?: () => void;
+  isRefetching?: boolean;
 }
 
 export function SectionListView<ItemT>({
   sections,
   hasNextPage,
   fetchNextPage,
+  refetch,
+  isRefetching,
 }: SectionListViewProps<ItemT>) {
   return (
     <SectionList
@@ -30,6 +39,12 @@ export function SectionListView<ItemT>({
         if (hasNextPage && fetchNextPage) fetchNextPage();
       }}
       onEndReachedThreshold={0.5}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching ?? false}
+          onRefresh={refetch}
+        />
+      }
     />
   );
 }

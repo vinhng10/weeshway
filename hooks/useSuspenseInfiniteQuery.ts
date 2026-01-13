@@ -79,6 +79,7 @@ export function useSuspenseInfiniteQuery<TData = unknown>({
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
     refetch: query.refetch,
+    isRefetching: query.isRefetching,
     isFetchingNextPage: query.isFetchingNextPage,
   };
 }

@@ -34,7 +34,7 @@ interface ProjectsContentProps {
 function ProjectsContent({ status, style, level }: ProjectsContentProps) {
   const profile = useAuth((state) => state.profile);
 
-  const { data, hasNextPage, fetchNextPage } =
+  const { data, hasNextPage, fetchNextPage, refetch, isRefetching } =
     useSuspenseInfiniteQuery<ProjectEnrichedType>({
       queryKey: ["projects", status, style, level],
       tableName: "projects",
@@ -90,7 +90,9 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
       status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`/(teacher)/(projects)/projects/${data.id}`)}
+      onPress={() =>
+        router.navigate(`/(teacher)/(projects)/projects/${data.id}`)
+      }
     />
   );
 
@@ -113,6 +115,8 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
         sections={sections}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
+        refetch={refetch}
+        isRefetching={isRefetching}
       />
 
       <Button

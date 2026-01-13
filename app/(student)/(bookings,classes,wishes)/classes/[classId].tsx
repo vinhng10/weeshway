@@ -21,7 +21,7 @@ import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassContent() {
@@ -31,29 +31,31 @@ function ClassContent() {
   const queryClient = useQueryClient();
   const formatMoney = useLocales((state) => state.formatMoney);
 
-  const { data } = useSuspenseQuery<ProjectEnrichedType>({
-    queryKey: ["classes", classId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select(
-          `*, 
+  const { data, refetch, isRefetching } = useSuspenseQuery<ProjectEnrichedType>(
+    {
+      queryKey: ["classes", classId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("projects")
+          .select(
+            `*, 
           profile:profiles(*), 
           song:songs(*), 
           location:locations(*), 
           bookings:bookings(*),
           watchings:watchings(*)
         `
-        )
-        .eq("id", classId)
-        .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
-        .eq("watchings.user_id", profile?.id)
-        .single();
+          )
+          .eq("id", classId)
+          .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
+          .eq("watchings.user_id", profile?.id)
+          .single();
 
-      if (error) throw error;
-      return data;
-    },
-  });
+        if (error) throw error;
+        return data;
+      },
+    }
+  );
 
   const handleBook = () => {
     setVisible(true);
@@ -123,6 +125,9 @@ function ClassContent() {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        }
       >
         {/* Song Card */}
         <Pressable

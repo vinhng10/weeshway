@@ -28,6 +28,8 @@ function HomeContent() {
     data: projects,
     hasNextPage,
     fetchNextPage,
+    refetch: refetchProjects,
+    isRefetching: isRefetchingProjects,
   } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
     queryKey: ["projects", "home"],
     tableName: "projects",
@@ -54,7 +56,11 @@ function HomeContent() {
     },
   });
 
-  const { data: stats } = useSuspenseQuery<StatsType[][]>({
+  const {
+    data: stats,
+    refetch: refetchStats,
+    isRefetching: isRefetchingStats,
+  } = useSuspenseQuery<StatsType[][]>({
     queryKey: ["projects", "stats"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -122,6 +128,11 @@ function HomeContent() {
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
+      refetch={() => {
+        refetchProjects();
+        refetchStats();
+      }}
+      isRefetching={isRefetchingProjects || isRefetchingStats}
     />
   );
 }

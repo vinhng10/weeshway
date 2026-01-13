@@ -24,7 +24,7 @@ import { ProjectEnrichedType, ProjectStatusType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { View } from "react-native";
+import { RefreshControl, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -34,21 +34,25 @@ function ProjectContent() {
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const queryClient = useQueryClient();
 
-  const { data } = useSuspenseQuery<ProjectEnrichedType>({
-    queryKey: ["projects", projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select(`*, song:songs(*), location:locations(*), bookings:bookings(*)`)
-        .eq("id", projectId)
-        .eq("user_id", profile?.id)
-        .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
-        .single();
+  const { data, refetch, isRefetching } = useSuspenseQuery<ProjectEnrichedType>(
+    {
+      queryKey: ["projects", projectId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("projects")
+          .select(
+            `*, song:songs(*), location:locations(*), bookings:bookings(*)`
+          )
+          .eq("id", projectId)
+          .eq("user_id", profile?.id)
+          .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
+          .single();
 
-      if (error) throw error;
-      return data;
-    },
-  });
+        if (error) throw error;
+        return data;
+      },
+    }
+  );
 
   // Initialize state directly with project data - no useEffect needed!
   const [name, setName] = useState(data.name);
@@ -124,6 +128,9 @@ function ProjectContent() {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        }
       >
         {/* Song Tile */}
         {song && (
@@ -205,9 +212,7 @@ function ProjectContent() {
         />
         <Button
           label={"Studio"}
-          onPress={() =>
-            router.navigate(`./${projectId}/studio`)
-          }
+          onPress={() => router.navigate(`./${projectId}/studio`)}
           style={[styles.button, styles.primary]}
         />
       </View>

@@ -24,7 +24,11 @@ interface ExploreContentProps {
 function ExploreContent({ style, level }: ExploreContentProps) {
   const [centroidId, setCentroidId] = useState<number>();
 
-  const { data: bubbles } = useSuspenseQuery<BubbleType[]>({
+  const {
+    data: bubbles,
+    refetch: refetchBubbles,
+    isRefetching: isRefetchingBubbles,
+  } = useSuspenseQuery<BubbleType[]>({
     queryKey: ["bubbles", style, level],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_bubbles", {
@@ -40,6 +44,8 @@ function ExploreContent({ style, level }: ExploreContentProps) {
     data: wishes,
     hasNextPage,
     fetchNextPage,
+    refetch: refetchWishes,
+    isRefetching: isRefetchingWishes,
   } = useSuspenseInfiniteRpc<WishEnrichedType>({
     queryKey: ["wishes", style, level, centroidId],
     rpcFunction: "get_nearby_wishes",
@@ -101,6 +107,11 @@ function ExploreContent({ style, level }: ExploreContentProps) {
         sections={sections}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
+        refetch={() => {
+          refetchBubbles();
+          refetchWishes();
+        }}
+        isRefetching={isRefetchingBubbles || isRefetchingWishes}
       />
       <LocationPermission />
     </>

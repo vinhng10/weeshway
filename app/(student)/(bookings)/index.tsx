@@ -26,6 +26,8 @@ function BookingsContent({ time }: BookingsContentProps) {
     data: bookings,
     hasNextPage,
     fetchNextPage,
+    refetch,
+    isRefetching,
   } = useSuspenseInfiniteQuery<BookingEnrichedType>({
     queryKey: ["classes", "bookings", time],
     tableName: "bookings",
@@ -94,6 +96,8 @@ function BookingsContent({ time }: BookingsContentProps) {
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
+      refetch={refetch}
+      isRefetching={isRefetching}
     />
   );
 }

@@ -3,14 +3,14 @@ import { useSuspenseQuery, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
   const setData = useTempDataStore((state) => state.setData);
 
-  const { data } = useSuspenseQuery<WishEnrichedType>({
+  const { data, refetch, isRefetching } = useSuspenseQuery<WishEnrichedType>({
     queryKey: ["wishes", "explore", wishId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,6 +37,9 @@ function WishContent() {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        }
       >
         <WishInfo data={data} />
       </ScrollView>

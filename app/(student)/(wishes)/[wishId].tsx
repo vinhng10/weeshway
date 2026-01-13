@@ -10,19 +10,20 @@ import { useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishRecommendationEnrichedType } from "@/types";
 import { useLocalSearchParams } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
 
-  const { data } = useSuspenseQuery<WishRecommendationEnrichedType>({
-    queryKey: ["wishes", "recommendations", wishId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("wishes")
-        .select(
-          `*, 
+  const { data, refetch, isRefetching } =
+    useSuspenseQuery<WishRecommendationEnrichedType>({
+      queryKey: ["wishes", "recommendations", wishId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("wishes")
+          .select(
+            `*, 
           song:songs(*), 
           recommendations:recommendations(
             project:projects(
@@ -34,19 +35,22 @@ function WishContent() {
               watchings:watchings(*)
             )
           )`
-        )
-        .eq("id", wishId)
-        .single();
+          )
+          .eq("id", wishId)
+          .single();
 
-      if (error) throw error;
-      return data;
-    },
-  });
+        if (error) throw error;
+        return data;
+      },
+    });
 
   return (
     <ScrollView
       contentContainerStyle={styles.scrollContainer}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+      }
     >
       {/* Top Classes Container */}
       {data.recommendations && data.recommendations.length > 0 ? (

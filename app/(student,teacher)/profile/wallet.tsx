@@ -47,7 +47,7 @@ function StudentWalletContent() {
   const profile = useAuth((state) => state.profile);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const { data, refetch } = useSuspenseQuery<PaymentMethod[]>({
+  const { data, refetch, isRefetching } = useSuspenseQuery<PaymentMethod[]>({
     queryKey: ["payment-methods"],
     queryFn: async () => {
       const { data, error } =
@@ -142,7 +142,11 @@ function StudentWalletContent() {
 
   return (
     <>
-      <SectionListView sections={sections} />
+      <SectionListView
+        sections={sections}
+        refetch={refetch}
+        isRefetching={isRefetching}
+      />
       <Button label="Manage" onPress={handleSetup} stickyBottom />
     </>
   );
@@ -180,7 +184,7 @@ function TeacherWalletContent() {
     },
   ];
 
-  const { data, refetch } = useSuspenseQuery<AccountResponse>({
+  const { data, refetch, isRefetching } = useSuspenseQuery<AccountResponse>({
     queryKey: ["profile", "stripe"],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke<AccountResponse>(
@@ -304,7 +308,11 @@ function TeacherWalletContent() {
 
   return onboardingComplete ? (
     <>
-      <SectionListView sections={externalAccountsSections} />
+      <SectionListView
+        sections={externalAccountsSections}
+        refetch={refetch}
+        isRefetching={isRefetching}
+      />
       <Button
         label="Stripe Dashboard"
         onPress={handleOpenDashboard}
@@ -313,7 +321,11 @@ function TeacherWalletContent() {
     </>
   ) : (
     <>
-      <SectionListView sections={onboardingSections as any} />
+      <SectionListView
+        sections={onboardingSections as any}
+        refetch={refetch}
+        isRefetching={isRefetching}
+      />
       <Button label="Setup" onPress={handleStartOnboarding} stickyBottom />
     </>
   );

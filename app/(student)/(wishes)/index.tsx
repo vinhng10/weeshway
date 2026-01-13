@@ -46,7 +46,7 @@ interface WatchingsContentProps {
 function WishesContent({ style, level }: WishesContentProps) {
   const profile = useAuth((state) => state.profile);
 
-  const { data, hasNextPage, fetchNextPage } =
+  const { data, hasNextPage, fetchNextPage, refetch, isRefetching } =
     useSuspenseInfiniteQuery<WishRecommendationEnrichedType>({
       queryKey: ["wishes", "recommendations", style, level],
       tableName: "wishes",
@@ -141,6 +141,8 @@ function WishesContent({ style, level }: WishesContentProps) {
         sections={sections}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
+        refetch={refetch}
+        isRefetching={isRefetching}
       />
       <Button
         stickyBottom
@@ -160,6 +162,8 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
     data: watchings,
     hasNextPage,
     fetchNextPage,
+    refetch,
+    isRefetching,
   } = useSuspenseInfiniteQuery<WatchingEnrichedType>({
     queryKey: ["watchings", "projects", status, style, level],
     tableName: "watchings",
@@ -212,6 +216,8 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
+      refetch={refetch}
+      isRefetching={isRefetching}
     />
   );
 }

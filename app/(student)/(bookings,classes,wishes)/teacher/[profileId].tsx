@@ -19,7 +19,11 @@ import { StyleSheet } from "react-native-unistyles";
 function TeacherProfileContent() {
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
 
-  const { data: profile } = useSuspenseQuery<ProfileEnrichedType>({
+  const {
+    data: profile,
+    refetch: refetchProfile,
+    isRefetching: isRefetchingProfile,
+  } = useSuspenseQuery<ProfileEnrichedType>({
     queryKey: ["classes", "profiles", profileId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,6 +41,8 @@ function TeacherProfileContent() {
     data: projects,
     hasNextPage,
     fetchNextPage,
+    refetch: refetchProjects,
+    isRefetching: isRefetchingProjects,
   } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
     queryKey: ["classes", "profiles", profileId, "projects"],
     tableName: "projects",
@@ -114,6 +120,11 @@ function TeacherProfileContent() {
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
+      refetch={() => {
+        refetchProfile();
+        refetchProjects();
+      }}
+      isRefetching={isRefetchingProfile || isRefetchingProjects}
     />
   );
 }

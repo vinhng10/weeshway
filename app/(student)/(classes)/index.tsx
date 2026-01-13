@@ -37,7 +37,11 @@ interface ClassesContentProps {
 function ClassesContent({ status, style, level }: ClassesContentProps) {
   const profile = useAuth((state) => state.profile);
 
-  const { data: recommendations } = useSuspenseQuery<ProjectEnrichedType[][]>({
+  const {
+    data: recommendations,
+    refetch: refetchRecommendations,
+    isRefetching: isRefetchingRecommendations,
+  } = useSuspenseQuery<ProjectEnrichedType[][]>({
     queryKey: ["classes", "recommendations", status, style, level],
     queryFn: async () => {
       let query = supabase
@@ -77,6 +81,8 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
     data: projects,
     hasNextPage,
     fetchNextPage,
+    refetch: refetchProjects,
+    isRefetching: isRefetchingProjects,
   } = useSuspenseInfiniteRpc<ProjectEnrichedType>({
     queryKey: ["classes", "projects", status, style, level],
     rpcFunction: "get_nearby_classes",
@@ -139,6 +145,11 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
+      refetch={() => {
+        refetchRecommendations();
+        refetchProjects();
+      }}
+      isRefetching={isRefetchingRecommendations || isRefetchingProjects}
     />
   );
 }
