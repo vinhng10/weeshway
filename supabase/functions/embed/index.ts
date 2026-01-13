@@ -1,6 +1,6 @@
 import postgres from "postgres";
 import { z } from "zod";
-import { handleError } from "../_shared/errors.ts";
+import { handleError, HttpError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
@@ -41,7 +41,7 @@ async function processJob(job: z.infer<typeof jobSchema>) {
       SELECT id, preview_url FROM public.songs WHERE id = ${job.id} FOR UPDATE
     `;
 
-    if (!song) throw new Error(`Song ${job.id} not found`);
+    if (!song) throw new HttpError(`Song ${job.id} not found`, 404);
 
     // 2. Generate embedding (External Call)
     const embedding = await generateEmbedding(song.preview_url);
@@ -94,8 +94,9 @@ Deno.serve(async (req) => {
         try {
           await processJob(job);
           completedJobs.push(job);
-        } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : "Unknown error";
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : "Unknown error";
           failedJobs.push({ ...job, error: message });
         }
       }
@@ -128,8 +129,11 @@ Deno.serve(async (req) => {
         "X-Failed-Jobs": failedJobs.length.toString(),
       }
     );
-  } catch (err: unknown) {
-    const { message, status } = handleError("Embedding Processing Error", err);
+  } catch (error: unknown) {
+    const { message, status } = handleError(
+      "Embedding Processing Error",
+      error
+    );
     return jsonResponse({ error: message }, status);
   }
 });

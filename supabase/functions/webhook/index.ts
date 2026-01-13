@@ -80,8 +80,8 @@ Deno.serve(async (req) => {
 
     await handler(event);
     return jsonResponse({ received: true });
-  } catch (err: unknown) {
-    const { message, status } = handleError("Webhook Error", err);
+  } catch (error: unknown) {
+    const { message, status } = handleError("Webhook Error", error);
     return jsonResponse({ error: message }, status);
   }
 });

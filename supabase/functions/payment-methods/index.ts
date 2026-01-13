@@ -27,8 +27,11 @@ Deno.serve(async (req) => {
     }));
 
     return jsonResponse({ paymentMethods });
-  } catch (err: unknown) {
-    const { message, status } = handleError("List Payment Methods Error", err);
+  } catch (error: unknown) {
+    const { message, status } = handleError(
+      "List Payment Methods Error",
+      error
+    );
     return jsonResponse({ error: message }, status);
   }
 });

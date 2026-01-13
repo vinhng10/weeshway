@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { z } from "zod";
 import { authenticateRequest, getUserProfile } from "../_shared/auth.ts";
-import { handleError } from "../_shared/errors.ts";
+import { handleError, HttpError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Global Clients ---
@@ -28,7 +28,7 @@ Deno.serve(async (req: Request) => {
     const accountId = profile.stripe_account_id;
 
     if (!accountId) {
-      throw new Error("Stripe account not found. Please sign up first.");
+      throw new HttpError("Stripe account not found. Please sign up first.", 404);
     }
 
     // D. Stripe Operations
@@ -67,8 +67,8 @@ Deno.serve(async (req: Request) => {
     });
 
     return jsonResponse({ url: accountLink.url });
-  } catch (err: unknown) {
-    const { message, status } = handleError("Onboarding Error", err);
+  } catch (error: unknown) {
+    const { message, status } = handleError("Onboarding Error", error);
     return jsonResponse({ error: message }, status);
   }
 });

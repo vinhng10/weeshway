@@ -16,8 +16,8 @@ Deno.serve(async (req) => {
     const loginLink = await stripe.accounts.createLoginLink(stripeAccountId);
 
     return jsonResponse({ url: loginLink.url });
-  } catch (err: unknown) {
-    const { message, status } = handleError("Dashboard Link Error", err);
+  } catch (error: unknown) {
+    const { message, status } = handleError("Dashboard Link Error", error);
     return jsonResponse({ error: message }, status);
   }
 });

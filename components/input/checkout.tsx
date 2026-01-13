@@ -3,6 +3,7 @@ import { useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileType, ProjectEnrichedType } from "@/types";
 import { PaymentMethodLayout, useStripe } from "@stripe/stripe-react-native";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import { Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -58,11 +59,16 @@ export function Checkout({
         body: { projectId: project.id, spots },
       });
 
-    if (
-      error ||
-      !data?.paymentIntentClientSecret ||
-      !data.customerSessionClientSecret
-    ) {
+    if (error) {
+      if (error instanceof FunctionsHttpError) {
+        const errorMessage = await error.context.json();
+        throw new Error(errorMessage.error);
+      } else {
+        throw new Error("Error occurred. Please try again.");
+      }
+    }
+
+    if (!data?.paymentIntentClientSecret || !data.customerSessionClientSecret) {
       throw new Error("Error occurred. Please try again.");
     }
 

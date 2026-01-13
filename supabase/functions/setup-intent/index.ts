@@ -23,8 +23,8 @@ Deno.serve(async (req) => {
     return jsonResponse({
       setupIntentClientSecret: setupIntent.client_secret,
     });
-  } catch (err: unknown) {
-    const { message, status } = handleError("Setup Intent Error", err);
+  } catch (error: unknown) {
+    const { message, status } = handleError("Setup Intent Error", error);
     return jsonResponse({ error: message }, status);
   }
 });

@@ -1,19 +1,20 @@
 import { z } from "zod";
 
 /**
- * Extracts a safe error message from an unknown error
+ * Custom HTTP Error class that extends Error with a status code
  */
-export function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (typeof error === "string") return error;
-  return "Internal Server Error";
-}
+export class HttpError extends Error {
+  public readonly statusCode: number;
 
-/**
- * Logs an error with context
- */
-export function logError(context: string, error: unknown): void {
-  console.error(`${context}:`, error);
+  constructor(message: string, statusCode: number = 500) {
+    super(message);
+    this.name = "HttpError";
+    this.statusCode = statusCode;
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, HttpError);
+    }
+  }
 }
 
 /**
@@ -22,20 +23,27 @@ export function logError(context: string, error: unknown): void {
  */
 export function handleError(
   context: string,
-  error: unknown,
-  defaultStatus = 500
+  error: unknown
 ): { message: string; status: number } {
-  logError(context, error);
+  console.error(`${context}:`, error);
+
+  // Check for custom HttpError first
+  if (error instanceof HttpError) {
+    return { message: error.message, status: error.statusCode };
+  }
 
   // Check for Zod validation errors (400)
   if (error instanceof z.ZodError) {
-    return { message: getErrorMessage(error), status: 400 };
+    return { message: error.message, status: 400 };
   }
 
-  const message = getErrorMessage(error);
+  // Extract message from error, with fallback for non-Error types
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+      ? error
+      : "Internal Server Error";
 
-  // Special case: signature errors are 400
-  const status = message.includes("signature") ? 400 : defaultStatus;
-
-  return { message, status };
+  return { message, status: 500 };
 }

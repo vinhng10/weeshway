@@ -38,17 +38,17 @@ Deno.serve(async (req) => {
       onboardingComplete,
       externalAccounts,
     });
-  } catch (err: unknown) {
+  } catch (error: unknown) {
     // Handle Stripe-specific error for missing account configuration
-    if (err instanceof Stripe.errors.StripeError) {
-      if (err.code === "v2_account_missing_configuration") {
+    if (error instanceof Stripe.errors.StripeError) {
+      if (error.code === "v2_account_missing_configuration") {
         return jsonResponse(
           { onboardingComplete: false, externalAccounts: [] },
           200
         );
       }
     }
-    const { message, status } = handleError("Retrieve Account Error", err);
+    const { message, status } = handleError("Retrieve Account Error", error);
     return jsonResponse({ error: message }, status);
   }
 });

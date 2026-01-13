@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { z } from "zod";
 import { createServiceRoleClient } from "../_shared/auth.ts";
-import { handleError } from "../_shared/errors.ts";
+import { handleError, HttpError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Clients & Configuration ---
@@ -41,24 +41,24 @@ Deno.serve(async (req) => {
     });
 
     // 2. Link to Supabase Profile
-    const { error: dbError } = await supabase
+    const { error } = await supabase
       .from("profiles")
       .update({ stripe_account_id: account.id })
       .eq("id", userId);
 
     // 3. Atomic Rollback: If DB update fails, close the Stripe account
-    if (dbError) {
+    if (error) {
       await stripe.v2.core.accounts.close(account.id, {
         applied_configurations: ["customer"],
       });
-      throw new Error(`Profile sync failed: ${dbError.message}`);
+      throw new HttpError(error.message, 500);
     }
 
     return jsonResponse({ accountId: account.id });
-  } catch (err: unknown) {
+  } catch (error: unknown) {
     const { message, status } = handleError(
       "Stripe Account Creation Error",
-      err
+      error
     );
     return jsonResponse({ error: message }, status);
   }

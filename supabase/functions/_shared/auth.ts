@@ -3,6 +3,7 @@ import {
   SupabaseClient,
   User,
 } from "npm:@supabase/supabase-js@2";
+import { HttpError } from "./errors.ts";
 
 export type AuthContext = {
   supabase: SupabaseClient;
@@ -19,7 +20,7 @@ export type ProfileWithStripe = {
  */
 export async function authenticateRequest(req: Request): Promise<AuthContext> {
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader) throw new Error("Missing authorization header");
+  if (!authHeader) throw new HttpError("Unauthorized", 401);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -36,7 +37,7 @@ export async function authenticateRequest(req: Request): Promise<AuthContext> {
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) throw new Error("Unauthorized");
+  if (authError || !user) throw new HttpError("Unauthorized", 401);
 
   return { supabase, user };
 }
@@ -54,7 +55,7 @@ export async function getUserProfile(
     .eq("id", userId)
     .single();
 
-  if (profileError) throw new Error("Failed to fetch user profile");
+  if (profileError) throw new HttpError("Failed to fetch user profile", 500);
 
   return profile;
 }
@@ -70,7 +71,7 @@ export async function getStripeAccountId(
   const profile = await getUserProfile(supabase, userId);
 
   if (!profile.stripe_account_id) {
-    throw new Error("Stripe account not set up");
+    throw new HttpError("Stripe account not set up", 404);
   }
 
   return profile.stripe_account_id;

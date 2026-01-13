@@ -29,8 +29,8 @@ Deno.serve(async (req) => {
       customerId: stripeAccountId,
       clientSecret: customerSession.client_secret,
     });
-  } catch (err: unknown) {
-    const { message, status } = handleError("Setup Session Error", err);
+  } catch (error: unknown) {
+    const { message, status } = handleError("Setup Session Error", error);
     return jsonResponse({ error: message }, status);
   }
 });
