@@ -3,7 +3,7 @@ export const PIXELS_PER_SECOND = 30;
 export const TICK_INTERVAL = 5;
 export const DEBOUNCE_TIME = 500;
 export const RETURN_URL = "https://vinhng10.github.io";
-export const SUPABASE_URL = "http://10.0.0.25:54321";
+export const SUPABASE_URL = "http://192.168.1.200:54321";
 export const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
 export const STRIPE_PUBLISHABLE_KEY =

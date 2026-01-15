@@ -107,7 +107,7 @@ function HomeContent() {
       )}`}
       previewUrl={data.song.previewUrl}
       status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`/(teacher)/(home)/projects/${data.id}`)}
+      onPress={() => router.navigate(`./projects/${data.id}`)}
     />
   );
 

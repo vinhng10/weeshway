@@ -91,7 +91,7 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
       previewUrl={data.song.previewUrl}
       status={<ProjectStatus data={data} />}
       onPress={() =>
-        router.navigate(`/(teacher)/(projects)/projects/${data.id}`)
+        router.navigate(`./projects/${data.id}`)
       }
     />
   );
@@ -122,7 +122,7 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
       <Button
         stickyBottom
         label="Create Project"
-        onPress={() => router.navigate("/(teacher)/(projects)/create")}
+        onPress={() => router.navigate("./create")}
       />
     </>
   );

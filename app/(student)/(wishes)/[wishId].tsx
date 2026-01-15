@@ -24,17 +24,17 @@ function WishContent() {
           .from("wishes")
           .select(
             `*, 
-          song:songs(*), 
-          recommendations:recommendations(
-            project:projects(
-              *, 
-              profile:profiles(*), 
-              song:songs(*), 
-              location:locations(*),
-              bookings:bookings(*),
-              watchings:watchings(*)
-            )
-          )`
+            song:songs(*), 
+            recommendations:recommendations(
+              project:projects(
+                *, 
+                profile:profiles(*), 
+                song:songs(*), 
+                location:locations(*),
+                bookings:bookings(*),
+                watchings:watchings(*)
+              )
+            )`
           )
           .eq("id", wishId)
           .single();

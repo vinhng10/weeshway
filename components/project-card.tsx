@@ -69,7 +69,7 @@ export const ProjectCard = ({ data }: CardProps) => {
   };
 
   const handlePress = () => {
-    router.navigate(`/(student)/classes/${data.id}`);
+    router.navigate(`./classes/${data.id}`);
   };
 
   // Compute booking and wish status

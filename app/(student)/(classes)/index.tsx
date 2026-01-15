@@ -121,7 +121,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
         <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
       }
       status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`/(student)/(classes)/classes/${data.id}`)}
+      onPress={() => router.navigate(`./classes/${data.id}`)}
     />
   );
 

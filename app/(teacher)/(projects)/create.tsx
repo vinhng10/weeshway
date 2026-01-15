@@ -110,7 +110,7 @@ export default function CreateProject() {
           status: status,
           style: style,
           level: level,
-          price: price ?? Math.round(Number(price) * 100),
+          price: price,
           spots: spots,
           description: description?.trim(),
           start_at: startAt,
