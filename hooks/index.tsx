@@ -2,6 +2,7 @@ export * from "./useAudioPlayerStore";
 export * from "./useAuth";
 export * from "./useLocales";
 export * from "./useLocationSearch";
+export * from "./useOnboarding";
 export * from "./useRole";
 export * from "./useSongSearch";
 export * from "./useStudioStore";

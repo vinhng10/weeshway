@@ -45,6 +45,9 @@ export type ProfileType = {
   avatarUrl?: string;
   videoUrls?: string[];
   stripeAccountId: string;
+  location?: string;
+  country?: string;
+  expoPushToken?: string;
 };
 
 export type ItemType = {

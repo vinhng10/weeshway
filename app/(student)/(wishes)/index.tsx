@@ -5,6 +5,7 @@ import {
   Button,
   ChipBar,
   ChipBarItemProps,
+  NotificationsPermission,
   ProjectStatus,
   SectionListView,
   Tile,
@@ -274,6 +275,7 @@ export default function Wishes() {
           />
         )}
       </Boundary>
+      <NotificationsPermission />
     </View>
   );
 }

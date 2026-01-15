@@ -1,12 +1,12 @@
 import {
   Boundary,
+  Bullet,
   Button,
   Header,
   MenuItem,
   SectionListView,
   ThemedText,
 } from "@/components";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { RETURN_URL, ROLE } from "@/constants";
 import { useAuth, useLocales, useRole, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
@@ -247,12 +247,7 @@ function TeacherWalletContent() {
   };
 
   const renderRequirement = (item: RequirementItem): React.ReactElement => {
-    return (
-      <View style={styles.requirementItem}>
-        <IconSymbol name="checkmark.circle" size={20} color="#10B981" />
-        <ThemedText>{item.text}</ThemedText>
-      </View>
-    );
+    return <Bullet text={item.text} />;
   };
 
   const renderHeader = (content: string): React.ReactElement => {
@@ -322,7 +317,7 @@ function TeacherWalletContent() {
   ) : (
     <>
       <SectionListView
-        sections={onboardingSections as any}
+        sections={onboardingSections}
         refetch={refetch}
         isRefetching={isRefetching}
       />
@@ -353,10 +348,5 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-  },
-  requirementItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.gap(1),
   },
 }));

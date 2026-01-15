@@ -65,9 +65,7 @@ export const ProjectCard = ({ data }: CardProps) => {
 
   const handleCheckoutExit = async () => {
     setVisible(false);
-    await queryClient.invalidateQueries({
-      queryKey: ["classes"],
-    });
+    await queryClient.invalidateQueries({ queryKey: ["classes"] });
   };
 
   const handlePress = () => {

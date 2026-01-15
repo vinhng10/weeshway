@@ -1,95 +1,104 @@
-import { useAuth, useLocales } from "@/hooks";
+import { ROLE } from "@/constants";
+import { useAuth, useLocales, useOnboarding, useRole } from "@/hooks";
 import { supabase } from "@/supabase";
+import { ProfileType } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Location from "expo-location";
-import { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Bullet } from "../bullet";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
+export async function syncLocation(
+  profile: ProfileType | null,
+  country: string | null
+): Promise<void> {
+  if (!profile?.id || !country) return;
+
+  try {
+    const { status } = await Location.getForegroundPermissionsAsync();
+    let newLocation: string | null = null;
+
+    if (status === Location.PermissionStatus.GRANTED) {
+      const { coords } = await Location.getCurrentPositionAsync();
+      newLocation = `POINT(${coords.longitude} ${coords.latitude})`;
+    }
+
+    // Only update if country or location has changed
+    const countryChanged = profile.country !== country;
+    const locationChanged = profile.location !== newLocation;
+
+    if (!countryChanged && !locationChanged) return;
+
+    const data = { country, location: newLocation };
+
+    const { error } = await supabase
+      .from("profiles")
+      .update(data)
+      .eq("id", profile.id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("Location update failed:", error);
+  }
+}
+
 export const LocationPermission = () => {
-  const [visible, setVisible] = useState(false);
+  const prompted = useOnboarding((state) => state.prompted.location);
+  const setPrompted = useOnboarding((state) => state.setPrompted);
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const country = useLocales((state) => state.country);
+  const role = useRole((state) => state.role);
+  const queryClient = useQueryClient();
 
-  const updateLocation = async (status: Location.PermissionStatus) => {
-    if (!profile?.id || !country) return;
+  if (prompted) return null;
 
+  const handleAction = async (request: boolean) => {
     try {
-      const updateData: { country: string; location: string | null } = {
-        country,
-        location: null,
-      };
-
-      if (status === Location.PermissionStatus.GRANTED) {
-        const { coords } = await Location.getCurrentPositionAsync();
-        updateData.location = `POINT(${coords.longitude} ${coords.latitude})`;
+      if (request) {
+        await Location.requestForegroundPermissionsAsync();
       }
-
-      const { error } = await supabase
-        .from("profiles")
-        .update(updateData)
-        .eq("id", profile.id);
-
-      if (error) throw error;
+      await syncLocation(profile, country);
       await fetchProfile();
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const handleRequestPermission = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      await updateLocation(status);
     } finally {
-      setVisible(false);
+      // This is the source of truth that prevents it from ever showing again
+      setPrompted("location", true);
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
     }
   };
-
-  const handleClose = async () => {
-    try {
-      await updateLocation(Location.PermissionStatus.DENIED);
-    } finally {
-      setVisible(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!profile?.id) return;
-
-    async function checkAndUpdateLocation() {
-      const { status } = await Location.getForegroundPermissionsAsync();
-
-      if (status === Location.PermissionStatus.UNDETERMINED) {
-        setVisible(true);
-      } else {
-        await updateLocation(status);
-      }
-    }
-
-    checkAndUpdateLocation();
-  }, []);
 
   return (
     <Modal
-      visible={visible}
+      visible={!prompted}
       animationType="slide"
       presentationStyle="overFullScreen"
       transparent={true}
-      onRequestClose={handleClose}
+      onRequestClose={() => handleAction(false)}
     >
-      <Pressable style={styles.container} onPress={handleClose} />
+      <Pressable style={styles.container} onPress={() => handleAction(false)} />
       <View style={styles.sheet}>
-        <ThemedText type="h2">Location Access</ThemedText>
-        <ThemedText type="h5" color="dimmed">
-          Find fun classes nearby and let local teachers fulfill your dream
-          classes by letting us know where you are.
-        </ThemedText>
+        <ThemedText type="h2">Explore What's Nearby</ThemedText>
+        <ThemedText type="h5" color="dimmed">Share your location to:</ThemedText>
+        {role === ROLE.STUDENT ? (
+          <>
+            <Bullet text={"Unlock fun classes around the corner"} />
+            <Bullet text={"Let local teachers bring your dream to life"} />
+          </>
+        ) : (
+          <>
+            <Bullet text={"Explore what your local students are wishing for"} />
+            <Bullet text={"Launch new classes where the demand is highest"} />
+          </>
+        )}
 
-        <Button label="Allow" onPress={handleRequestPermission} />
-        <Button outlined label="Not Now" onPress={handleClose} />
+        <Button label="Allow" onPress={() => handleAction(true)} />
+        <Button
+          outlined
+          label="Maybe Later"
+          onPress={() => handleAction(false)}
+        />
       </View>
     </Modal>
   );

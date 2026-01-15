@@ -1,8 +1,6 @@
+import { syncLocation, syncPushToken } from "@/components";
 import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
-import { useAudioPlayerStore } from "@/hooks/useAudioPlayerStore";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocales } from "@/hooks/useLocales";
-import { useRole } from "@/hooks/useRole";
+import { useAudioPlayerStore, useAuth, useLocales, useRole } from "@/hooks";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
@@ -17,7 +15,9 @@ const queryClient = new QueryClient();
 function RootNavigator() {
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const initialize = useAuth((state) => state.initialize);
+  const profile = useAuth((state) => state.profile);
   const fetchExchangeRates = useLocales((state) => state.fetchExchangeRates);
+  const country = useLocales((state) => state.country);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const pause = useAudioPlayerStore((state) => state.pause);
   const player = useAudioPlayer();
@@ -40,6 +40,16 @@ function RootNavigator() {
   useEffect(() => {
     fetchExchangeRates();
   }, [fetchExchangeRates]);
+
+  // Sync location once when user is logged in
+  useEffect(() => {
+    syncLocation(profile, country);
+  }, [isLoggedIn, country]);
+
+  // Sync push token once when user is logged in
+  useEffect(() => {
+    syncPushToken(profile);
+  }, [isLoggedIn]);
 
   // Pause audio player on navigation
   useEffect(() => {

@@ -102,19 +102,16 @@ function ExploreContent({ style, level }: ExploreContentProps) {
   ];
 
   return (
-    <>
-      <SectionListView
-        sections={sections}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        refetch={() => {
-          refetchBubbles();
-          refetchWishes();
-        }}
-        isRefetching={isRefetchingBubbles || isRefetchingWishes}
-      />
-      <LocationPermission />
-    </>
+    <SectionListView
+      sections={sections}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+      refetch={() => {
+        refetchBubbles();
+        refetchWishes();
+      }}
+      isRefetching={isRefetchingBubbles || isRefetchingWishes}
+    />
   );
 }
 
@@ -145,6 +142,7 @@ export default function Explore() {
       <Boundary>
         <ExploreContent />
       </Boundary>
+      <LocationPermission />
     </View>
   );
 }

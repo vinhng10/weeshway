@@ -1,6 +1,7 @@
 import {
   Boundary,
   formatTime,
+  NotificationsPermission,
   ProjectStatus,
   SectionListView,
   ThemedText,
@@ -147,6 +148,7 @@ export default function Home() {
       <Boundary>
         <HomeContent />
       </Boundary>
+      <NotificationsPermission />
     </View>
   );
 }

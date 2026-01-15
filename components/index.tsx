@@ -3,6 +3,7 @@ export { Avatar, type AvatarProps } from "./avatar";
 export { AvatarGroup, type AvatarGroupProps } from "./avatar-group";
 export { Boundary } from "./boundary";
 export { BubbleChart } from "./bubble-chart";
+export { Bullet } from "./bullet";
 export { Carousel } from "./carousel";
 export { Chip } from "./chip";
 export { ChipBar, ChipBarItem, type ChipBarItemProps } from "./chip-bar";
@@ -14,8 +15,8 @@ export { ProjectStatus } from "./project-status";
 export { SectionListView } from "./section-list";
 export { SongCard } from "./song-card";
 export {
-  ThemedText,
   styles as textStyles,
+  ThemedText,
   type ThemedTextProps,
 } from "./themed-text";
 export { ThemedView, type ThemedViewProps } from "./themed-view";
