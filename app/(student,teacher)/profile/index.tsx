@@ -8,7 +8,7 @@ import {
 import { ROLE } from "@/constants";
 import { useAuth, useRole } from "@/hooks";
 import { router } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { Linking, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Profile() {
@@ -23,9 +23,7 @@ export default function Profile() {
     router.navigate(`/(${rolePath})/profile/account`);
   };
 
-  const handleNotifications = () => {
-    // router.navigate("/(tabs)/profile/notifications");
-  };
+  const handleDeviceSettings = async () => await Linking.openSettings();
 
   const handleWallet = () => {
     router.navigate(`/(${rolePath})/profile/wallet`);
@@ -71,12 +69,12 @@ export default function Profile() {
         showsVerticalScrollIndicator={false}
       >
         <MenuItem icon="person.fill" title="Account" onPress={handleAccount} />
-        <MenuItem
-          icon="bell"
-          title="Notifications"
-          onPress={handleNotifications}
-        />
         <MenuItem icon="wallet.pass" title="Wallet" onPress={handleWallet} />
+        <MenuItem
+          icon="gear"
+          title="Settings"
+          onPress={handleDeviceSettings}
+        />
         <MenuItem
           icon="shield.fill"
           title="Data Privacy"

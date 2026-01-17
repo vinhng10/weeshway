@@ -31,7 +31,7 @@ const MAPPING = {
   "music.note": "musical-notes",
   sharedwithyou: "share-social-sharp",
   heart: "heart",
-  bell: "notifications",
+  gear: "settings",
   "wallet.pass": "wallet",
   "shield.fill": "shield",
   "rectangle.portrait.and.arrow.right": "log-out",
