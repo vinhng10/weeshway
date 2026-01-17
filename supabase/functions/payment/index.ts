@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
         supabase
           .from("projects")
           .select(
-            "id, price, currency, spots, teacher:profiles!inner(stripe_account_id)"
+            "id, price, currency, spots, teacher:profiles!inner(stripe_account_id)",
           )
           .eq("id", projectId)
           .single()
@@ -39,7 +39,8 @@ Deno.serve(async (req) => {
         supabase
           .from("bookings")
           .select("id, user_id, spots, stripe_payment_intent_id, status")
-          .eq("project_id", projectId),
+          .eq("project_id", projectId)
+          .in("status", ["Succeeded", "Processing"]),
       ]);
 
     // 3. Guards
@@ -66,7 +67,7 @@ Deno.serve(async (req) => {
         remainingSpots > 0
           ? `Only ${remainingSpots} spots left`
           : "Class is already full",
-        406
+        406,
       );
     }
 
@@ -105,7 +106,7 @@ Deno.serve(async (req) => {
     let intent: Stripe.PaymentIntent;
     const spotsChanged = booking && booking.spots !== spots;
 
-    if (booking?.stripe_payment_intent_id && booking.status !== "Canceled") {
+    if (booking?.stripe_payment_intent_id && booking.status === "Processing") {
       if (spotsChanged) {
         // Update existing payment intent with new amount
         intent = await stripe.paymentIntents.update(
@@ -118,13 +119,13 @@ Deno.serve(async (req) => {
               project_id: project.id,
               spots,
             },
-          }
+          },
         );
         await supabase.from("bookings").update({ spots }).eq("id", booking.id);
       } else {
         // Retrieve existing payment intent
         intent = await stripe.paymentIntents.retrieve(
-          booking.stripe_payment_intent_id
+          booking.stripe_payment_intent_id,
         );
       }
     } else {

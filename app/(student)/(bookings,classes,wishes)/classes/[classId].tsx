@@ -4,7 +4,6 @@ import {
   Button,
   ButtonGroup,
   Checkout,
-  ChipBarItemProps,
   DateTimeInput,
   FloatBoxInput,
   Hero,
@@ -38,15 +37,18 @@ function ClassContent() {
           .from("projects")
           .select(
             `*, 
-              profile:profiles(*), 
-              song:songs(*), 
-              location:locations(*), 
-              bookings:bookings(*),
-              watchings:watchings(*)
-            `,
+            profile:profiles(*), 
+            song:songs(*), 
+            location:locations(*), 
+            bookings:bookings(*),
+            watchings:watchings(*)
+          `,
           )
           .eq("id", classId)
-          .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
+          .in("bookings.status", [
+            STRIPE_PAYMENT_STATUS.SUCCEEDED,
+            STRIPE_PAYMENT_STATUS.REFUNDING,
+          ])
           .eq("watchings.user_id", profile?.id)
           .single();
 
@@ -56,13 +58,20 @@ function ClassContent() {
     },
   );
 
-  const handleBook = () => {
-    setVisible(true);
-  };
+  const userBooking = data.bookings.find((b) => b.userId === profile?.id);
+  const isBooked = !!userBooking;
+  const isRefunding = userBooking?.status === STRIPE_PAYMENT_STATUS.REFUNDING;
+  const isReleased = data.status === PROJECT_STATUS.RELEASE;
+  const isWatching = data.watchings.some((w) => w.userId === profile?.id);
+
+  const succeededBookingsCount = data.bookings.filter(
+    (b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED,
+  ).length;
+
+  const handleBook = () => setVisible(true);
 
   const handleWatch = async () => {
     if (!profile?.id) return;
-
     try {
       const watching = data.watchings.find((w) => w.userId === profile.id);
       const { error } = watching
@@ -73,47 +82,43 @@ function ClassContent() {
           });
 
       if (error) throw error;
-
       await queryClient.invalidateQueries({ queryKey: ["classes"] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error toggling wish:", error);
     }
   };
 
   const handleCheckoutExit = async () => {
     setVisible(false);
-    await queryClient.invalidateQueries({
-      queryKey: ["classes"],
-    });
+    await queryClient.invalidateQueries({ queryKey: ["classes"] });
   };
 
-  const options: ChipBarItemProps[] = [
-    {
-      label: "Status",
-      value: data.status,
-      options: PROJECT_STATUS,
-      modal: false,
-    },
-  ];
+  const handleRefund = async () => {
+    if (!userBooking?.id) return;
+    try {
+      const { error } = await supabase.functions.invoke("refund", {
+        body: { bookingId: userBooking.id },
+      });
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ["classes"] });
+    } catch (error) {
+      console.error("Refund error:", error);
+    }
+  };
 
-  const userBooking = data.bookings.find(
-    (b) =>
-      b.userId === profile?.id &&
-      b.projectId === data.id &&
-      b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED,
-  );
-  const booked = !!userBooking;
-  const watching = data.watchings.some((w) => w.userId === profile?.id);
-  const spots = userBooking?.spots ?? 0;
-  const released = data.status === PROJECT_STATUS.RELEASE;
-  const label = booked
-    ? `Booked x${spots}`
-    : released
+  const buttonLabel = isBooked
+    ? `Booked x${userBooking.spots}`
+    : isReleased
       ? "Book"
-      : watching
+      : isWatching
         ? "Unwatch"
         : "Watch";
-  const onPress = booked ? undefined : released ? handleBook : handleWatch;
+
+  const handlePress = isBooked
+    ? undefined
+    : isReleased
+      ? handleBook
+      : handleWatch;
 
   return (
     <View style={styles.container}>
@@ -131,15 +136,13 @@ function ClassContent() {
         {/* Song Card */}
         <Pressable
           style={styles.teacherContainer}
-          onPress={() => {
-            router.navigate(`../teacher/${data.profile.id}`);
-          }}
+          onPress={() => router.navigate(`../teacher/${data.profile.id}`)}
         >
           <Avatar
             source={data.profile.avatarUrl}
             size="large"
             shape="circle"
-            bordered={true}
+            bordered
           />
           <ThemedText type="h3">{data.profile.fullName}</ThemedText>
         </Pressable>
@@ -164,7 +167,7 @@ function ClassContent() {
           />
           <IntBoxInput
             label="Spots"
-            value={`${data.bookings.length} / ${data.spots ?? 0}`}
+            value={`${succeededBookingsCount} / ${data.spots ?? 0}`}
             editable={false}
           />
         </View>
@@ -194,14 +197,24 @@ function ClassContent() {
         />
       </ScrollView>
 
-      {/* Button */}
-      <ButtonGroup stickyBottom>
-        <Button outlined label={"Cancel"} />
-        <Button label={label} onPress={onPress} disabled={booked} />
-      </ButtonGroup>
+      {isRefunding ? (
+        <Button stickyBottom label="Refunding" disabled />
+      ) : isBooked ? (
+        <ButtonGroup stickyBottom>
+          <Button outlined label="Refund" onPress={handleRefund} />
+          <Button label={buttonLabel} onPress={handlePress} disabled />
+        </ButtonGroup>
+      ) : (
+        <Button
+          stickyBottom
+          label={buttonLabel}
+          onPress={handlePress}
+          disabled={isBooked}
+        />
+      )}
 
       <Checkout
-        visible={visible && !booked}
+        visible={visible && !isBooked}
         onExit={handleCheckoutExit}
         customer={profile}
         project={data}

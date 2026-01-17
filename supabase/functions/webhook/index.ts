@@ -14,7 +14,7 @@ type EventHandler = (event: Stripe.Event) => Promise<void> | void;
 async function upsertBooking(
   paymentIntentId: string,
   status: string,
-  metadata: Stripe.PaymentIntent["metadata"] = {}
+  metadata: Stripe.PaymentIntent["metadata"] = {},
 ) {
   const { error } = await supabase.from("bookings").upsert(
     {
@@ -27,7 +27,7 @@ async function upsertBooking(
     {
       onConflict: "stripe_payment_intent_id",
       ignoreDuplicates: status === "Processing",
-    }
+    },
   );
 
   if (error) console.error(`DB error (${status}):`, error.message);
@@ -51,6 +51,14 @@ const handlers: Record<string, EventHandler> = {
     const pi = event.data.object as Stripe.PaymentIntent;
     await upsertBooking(pi.id, "Canceled", pi.metadata);
   },
+  "charge.refunded": async (event) => {
+    const charge = event.data.object as Stripe.Charge;
+    await upsertBooking(
+      charge.payment_intent as string,
+      "Refunded",
+      charge.metadata,
+    );
+  },
 };
 
 // --- Main Handler ---
@@ -69,7 +77,7 @@ Deno.serve(async (req) => {
     const event = await stripe.webhooks.constructEventAsync(
       rawBody,
       signature,
-      WEBHOOK_SECRET
+      WEBHOOK_SECRET,
     );
 
     const handler = handlers[event.type];

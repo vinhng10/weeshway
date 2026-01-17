@@ -1,4 +1,4 @@
-import { PROJECT_STATUS } from "@/constants";
+import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
 import { ProjectEnrichedType } from "@/types";
 import { Chip } from "./chip";
 import { IconSymbolName } from "./ui/icon-symbol";
@@ -18,9 +18,11 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
       break;
     case PROJECT_STATUS.RELEASE:
       icon = "person.fill";
-      label = data.bookings
-        ? `${data.bookings.length} | ${data.spots}`
-        : `${data.spots}`;
+      const succeededCount =
+        data.bookings?.filter(
+          (b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED,
+        ).length ?? 0;
+      label = `${succeededCount} | ${data.spots}`;
       break;
   }
 

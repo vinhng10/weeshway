@@ -44,7 +44,10 @@ function BookingsContent({ time }: BookingsContentProps) {
     trailingQuery: (query) => {
       query = query
         .eq("user_id", profile?.id)
-        .eq("status", STRIPE_PAYMENT_STATUS.SUCCEEDED);
+        .in("status", [
+          STRIPE_PAYMENT_STATUS.SUCCEEDED,
+          STRIPE_PAYMENT_STATUS.REFUNDING,
+        ]);
 
       const now = new Date();
       const todayEnd = new Date();
