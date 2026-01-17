@@ -37,12 +37,12 @@ function ClassContent() {
           .from("projects")
           .select(
             `*, 
-          profile:profiles(*), 
-          song:songs(*), 
-          location:locations(*), 
-          bookings:bookings(*),
-          watchings:watchings(*)
-        `
+              profile:profiles(*), 
+              song:songs(*), 
+              location:locations(*), 
+              bookings:bookings(*),
+              watchings:watchings(*)
+            `
           )
           .eq("id", classId)
           .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)

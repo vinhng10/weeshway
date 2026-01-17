@@ -32,4 +32,3 @@ export * from "./studio";
 
 // UI Components
 export { IconSymbol, type IconSymbolName } from "./ui/icon-symbol";
-export { useBottomTabOverflow } from "./ui/tab-bar-background";
