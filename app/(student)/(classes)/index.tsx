@@ -60,7 +60,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
         )
         .eq("wish.user_id", profile?.id)
         .eq("project.bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
-        .limit(20); 
+        .limit(20);
 
       if (style) {
         query = query.eq("project.style", style);
@@ -131,17 +131,17 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
   const sections: SectionListData<
     ProjectEnrichedType | ProjectEnrichedType[]
   >[] = [
-    {
-      title: "You might like",
-      data: recommendations,
-      render: renderCarousel,
-    },
-    {
-      title: "Upcoming",
-      data: projects,
-      render: renderTile,
-    },
-  ];
+      {
+        title: "You might like",
+        data: recommendations,
+        render: renderCarousel,
+      },
+      {
+        title: "Upcoming",
+        data: projects,
+        render: renderTile,
+      },
+    ];
 
   return (
     <SectionListView
