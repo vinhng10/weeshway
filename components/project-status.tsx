@@ -19,9 +19,9 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
     case PROJECT_STATUS.RELEASE:
       icon = "person.fill";
       const succeededCount =
-        data.bookings?.filter(
-          (b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED,
-        ).length ?? 0;
+        data.bookings
+          ?.filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
+          .reduce((acc, b) => acc + (b.spots || 0), 0) ?? 0;
       label = `${succeededCount} | ${data.spots}`;
       break;
   }

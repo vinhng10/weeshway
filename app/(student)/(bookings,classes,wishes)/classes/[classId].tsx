@@ -64,9 +64,9 @@ function ClassContent() {
   const isReleased = data.status === PROJECT_STATUS.RELEASE;
   const isWatching = data.watchings.some((w) => w.userId === profile?.id);
 
-  const succeededBookingsCount = data.bookings.filter(
-    (b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED,
-  ).length;
+  const succeededBookingsCount = data.bookings
+    .filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
+    .reduce((acc, b) => acc + (b.spots || 0), 0);
 
   const handleBook = () => setVisible(true);
 
