@@ -2,6 +2,7 @@ import {
   Avatar,
   Boundary,
   Button,
+  ButtonGroup,
   Checkout,
   ChipBarItemProps,
   DateTimeInput,
@@ -42,7 +43,7 @@ function ClassContent() {
               location:locations(*), 
               bookings:bookings(*),
               watchings:watchings(*)
-            `
+            `,
           )
           .eq("id", classId)
           .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
@@ -52,7 +53,7 @@ function ClassContent() {
         if (error) throw error;
         return data;
       },
-    }
+    },
   );
 
   const handleBook = () => {
@@ -99,7 +100,7 @@ function ClassContent() {
     (b) =>
       b.userId === profile?.id &&
       b.projectId === data.id &&
-      b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
+      b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED,
   );
   const booked = !!userBooking;
   const watching = data.watchings.some((w) => w.userId === profile?.id);
@@ -108,10 +109,10 @@ function ClassContent() {
   const label = booked
     ? `Booked x${spots}`
     : released
-    ? "Book"
-    : watching
-    ? "Unwatch"
-    : "Watch";
+      ? "Book"
+      : watching
+        ? "Unwatch"
+        : "Watch";
   const onPress = booked ? undefined : released ? handleBook : handleWatch;
 
   return (
@@ -194,7 +195,10 @@ function ClassContent() {
       </ScrollView>
 
       {/* Button */}
-      <Button stickyBottom label={label} onPress={onPress} disabled={booked} />
+      <ButtonGroup stickyBottom>
+        <Button outlined label={"Cancel"} />
+        <Button label={label} onPress={onPress} disabled={booked} />
+      </ButtonGroup>
 
       <Checkout
         visible={visible && !booked}

@@ -1,6 +1,7 @@
 import {
   Boundary,
   Button,
+  ButtonGroup,
   ChipBar,
   ChipBarItemProps,
   DateTimeInput,
@@ -40,7 +41,7 @@ function ProjectContent() {
         const { data, error } = await supabase
           .from("projects")
           .select(
-            `*, song:songs(*), location:locations(*), bookings:bookings(*)`
+            `*, song:songs(*), location:locations(*), bookings:bookings(*)`,
           )
           .eq("id", projectId)
           .eq("user_id", profile?.id)
@@ -49,7 +50,7 @@ function ProjectContent() {
         if (error) throw error;
         return data;
       },
-    }
+    },
   );
 
   // Form State
@@ -59,14 +60,14 @@ function ProjectContent() {
   const [style, setStyle] = useState(data.style);
   const [level, setLevel] = useState(data.level);
   const [price, setPrice] = useState(
-    data.price ? (data.price * 0.01).toString() : ""
+    data.price ? (data.price * 0.01).toString() : "",
   );
   const [spots, setSpots] = useState(data.spots?.toString() ?? "");
   const [startAt, setStartAt] = useState(
-    data.startAt ? new Date(data.startAt) : undefined
+    data.startAt ? new Date(data.startAt) : undefined,
   );
   const [endAt, setEndAt] = useState(
-    data.endAt ? new Date(data.endAt) : undefined
+    data.endAt ? new Date(data.endAt) : undefined,
   );
   const [location, setLocation] = useState(data.location);
 
@@ -224,19 +225,14 @@ function ProjectContent() {
       </KeyboardAwareScrollView>
 
       {/* Save Changes Buttons */}
-      <View style={[styles.buttonContainer, styles.row]}>
-        <Button
-          label="Save"
-          onPress={handleSave}
-          style={styles.button}
-          disabled={wasCanceled}
-        />
+      <ButtonGroup stickyBottom>
+        <Button label="Save" onPress={handleSave} disabled={wasCanceled} />
         <Button
           label="Studio"
           onPress={() => router.navigate(`./${projectId}/studio`)}
-          style={[styles.button, styles.primary]}
+          style={styles.primary}
         />
-      </View>
+      </ButtonGroup>
     </>
   );
 }
@@ -266,14 +262,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   row: {
     flexDirection: "row",
     gap: theme.gap(2),
-  },
-  buttonContainer: {
-    position: "absolute",
-    bottom: theme.gap(2),
-    paddingHorizontal: theme.gap(2),
-  },
-  button: {
-    flex: 1,
   },
   primary: {
     backgroundColor: theme.colors.primary,

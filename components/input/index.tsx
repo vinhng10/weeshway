@@ -1,5 +1,6 @@
 export * from "./box-input";
 export * from "./button";
+export * from "./button-group";
 export * from "./checkout";
 export * from "./datetime-input";
 export * from "./icon-button";
