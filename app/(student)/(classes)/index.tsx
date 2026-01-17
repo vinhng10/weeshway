@@ -60,7 +60,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
         )
         .eq("wish.user_id", profile?.id)
         .eq("project.bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
-        .limit(10);
+        .limit(20); 
 
       if (style) {
         query = query.eq("project.style", style);
@@ -72,9 +72,11 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data.length > 0
-        ? [data.map((recommendation) => recommendation.project)]
-        : [];
+      if (!data || data.length === 0) return [];
+      const uniqueProjects = Array.from(
+        new Map(data.map((r) => [r.project.id, r.project])).values()
+      );
+      return [uniqueProjects];
     },
   });
 
