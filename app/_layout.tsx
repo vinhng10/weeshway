@@ -1,6 +1,6 @@
 import { syncLocation, syncPushToken } from "@/components";
 import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
-import { useAudioPlayerStore, useAuth, useLocales, useRole } from "@/hooks";
+import { useAudioPlayerStore, useAuth, useLocales, useNotificationObserver, useRole } from "@/hooks";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
@@ -8,7 +8,15 @@ import { Stack, usePathname } from "expo-router";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
-import "react-native-reanimated";
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from "react-native-reanimated";
+
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false, // Reanimated runs in strict mode by default
+});
 
 const queryClient = new QueryClient();
 
@@ -24,6 +32,7 @@ function RootNavigator() {
   const status = useAudioPlayerStatus(player);
   const role = useRole((state) => state.role);
   const pathname = usePathname();
+  useNotificationObserver();
 
   // Initialize audio player on mount
   useEffect(() => {

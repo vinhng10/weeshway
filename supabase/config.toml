@@ -374,6 +374,6 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
-[functions.push]
+[functions.notify]
 enabled = true
 verify_jwt = false

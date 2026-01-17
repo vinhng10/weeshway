@@ -2,6 +2,7 @@ export * from "./useAudioPlayerStore";
 export * from "./useAuth";
 export * from "./useLocales";
 export * from "./useLocationSearch";
+export * from "./useNotificationObserver";
 export * from "./useOnboarding";
 export * from "./useRole";
 export * from "./useSongSearch";
@@ -12,3 +13,4 @@ export * from "./useSuspenseQuery";
 export * from "./useTempDataStore";
 export * from "./useVoiceCommands";
 export * from "./useWakeWordDetection";
+

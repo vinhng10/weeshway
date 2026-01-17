@@ -47,7 +47,8 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
       let query = supabase
         .from("recommendations")
         .select(
-          `*, 
+          `*,
+          wish:wishes(user_id),
           project:projects!inner(
             *, 
             profile:profiles(*), 
@@ -57,7 +58,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
             watchings:watchings(*)
           )`
         )
-        .eq("user_id", profile?.id)
+        .eq("wish.user_id", profile?.id)
         .eq("project.bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
         .limit(10);
 

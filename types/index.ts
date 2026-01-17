@@ -106,7 +106,6 @@ export type LocationType = {
 export type RecommendationType = {
   id: number;
   createdAt: Date;
-  userId: string;
   wishId: number;
   projectId: number;
   score: number;

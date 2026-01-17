@@ -60,7 +60,7 @@ async function processJob(job: z.infer<typeof jobSchema>) {
     `;
 
     // 4. Cleanup queue
-    await sql`SELECT util.dequeue_embeddings(${QUEUE_NAME}, ${job.jobId})`;
+    await sql`SELECT util.dequeue(${QUEUE_NAME}, ${job.jobId})`;
 
     return job;
   });
@@ -68,15 +68,14 @@ async function processJob(job: z.infer<typeof jobSchema>) {
 
 // --- 3. Main Handler ---
 Deno.serve(async (req) => {
-  // Guard Clauses
-  if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
-    return new Response("Unauthorized", { status: 403 });
-  }
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
   try {
+    // Guard Clauses
+    if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
+      throw new HttpError("Unauthorized", 403);
+    }
+    if (req.method !== "POST") {
+      throw new HttpError("Method Not Allowed", 405);
+    }
     const rawBody = await req.json().catch(() => []);
     const result = z.array(jobSchema).safeParse(rawBody);
 
