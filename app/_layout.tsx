@@ -4,7 +4,7 @@ import { useAudioPlayerStore, useAuth, useLocales, useNotificationObserver, useR
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import { Stack, usePathname } from "expo-router";
+import { Stack, useSegments } from "expo-router";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -31,7 +31,7 @@ function RootNavigator() {
   const player = useAudioPlayer();
   const status = useAudioPlayerStatus(player);
   const role = useRole((state) => state.role);
-  const pathname = usePathname();
+  const segments = useSegments();
   useNotificationObserver();
 
   // Initialize audio player on mount
@@ -63,7 +63,7 @@ function RootNavigator() {
   // Pause audio player on navigation
   useEffect(() => {
     pause();
-  }, [pathname]);
+  }, [segments]);
 
   return (
     <Stack>
