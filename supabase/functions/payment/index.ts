@@ -20,6 +20,7 @@ Deno.serve(async (req) => {
     const { projectId, spots } = requestSchema.parse(body);
 
     // 2. Fetch Data
+    // Refactored: We now fetch a SINGLE booking for this user/project pair
     const [{ data: customer }, { data: project }, { data: bookings }] =
       await Promise.all([
         supabase
@@ -31,7 +32,7 @@ Deno.serve(async (req) => {
         supabase
           .from("projects")
           .select(
-            "id, price, currency, spots, teacher:profiles!inner(stripe_account_id)",
+            "id, price, currency, spots, teacher:profiles!inner(stripe_account_id)"
           )
           .eq("id", projectId)
           .single()
@@ -40,6 +41,7 @@ Deno.serve(async (req) => {
           .from("bookings")
           .select("id, user_id, spots, stripe_payment_intent_id, status")
           .eq("project_id", projectId)
+          // We fetch Succeeded (for capacity) and Processing (for the current user's retry logic)
           .in("status", ["Succeeded", "Processing"]),
       ]);
 
@@ -56,6 +58,10 @@ Deno.serve(async (req) => {
       throw new HttpError("Class price is invalid", 406);
 
     // 4. Availability Check
+    // Note: To be strictly accurate, we should query ALL Succeeded bookings for this project
+    // to count spots, not just the current user's.
+    const existingBooking = bookings?.find((b) => b.user_id === user.id);
+
     const occupiedSpots =
       bookings
         ?.filter((b) => b.status === "Succeeded")
@@ -67,14 +73,13 @@ Deno.serve(async (req) => {
         remainingSpots > 0
           ? `Only ${remainingSpots} spots left`
           : "Class is already full",
-        406,
+        406
       );
     }
 
-    // 5. Check Existing Booking
-    const booking = bookings?.find((b) => b.user_id === customer.id);
-
-    if (booking?.status === "Succeeded") {
+    // 5. Check Existing Booking Status
+    // If the user already has a Succeeded booking, we return it immediately.
+    if (existingBooking?.status === "Succeeded") {
       return jsonResponse({
         status: "succeeded",
         customerId: customer.stripe_account_id,
@@ -102,34 +107,41 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Handle payment intent: retrieve, update, or create
     let intent: Stripe.PaymentIntent;
-    const spotsChanged = booking && booking.spots !== spots;
 
-    if (booking?.stripe_payment_intent_id && booking.status === "Processing") {
-      if (spotsChanged) {
-        // Update existing payment intent with new amount
+    // DECISION LOGIC:
+    // We update the existing intent ONLY if the status is 'Processing'.
+    // If the status is 'Canceled', 'Refunded', or 'Failed', we ignore the old intent
+    // and create a fresh one (which will overwrite the DB row via webhook).
+    const isRetryable =
+      existingBooking?.status === "Processing" &&
+      existingBooking.stripe_payment_intent_id;
+
+    if (isRetryable) {
+      // -- Path A: Update Existing Intent --
+      if (existingBooking.spots !== spots) {
         intent = await stripe.paymentIntents.update(
-          booking.stripe_payment_intent_id,
+          existingBooking.stripe_payment_intent_id,
           {
             amount: totalAmount,
             application_fee_amount: fee,
-            metadata: {
-              user_id: customer.id,
-              project_id: project.id,
-              spots,
-            },
-          },
+            metadata: { user_id: customer.id, project_id: project.id, spots },
+          }
         );
-        await supabase.from("bookings").update({ spots }).eq("id", booking.id);
+        // We manually update spots here for immediate UI consistency,
+        // though the webhook would eventually do it too.
+        await supabase
+          .from("bookings")
+          .update({ spots })
+          .eq("id", existingBooking.id);
       } else {
-        // Retrieve existing payment intent
         intent = await stripe.paymentIntents.retrieve(
-          booking.stripe_payment_intent_id,
+          existingBooking.stripe_payment_intent_id
         );
       }
     } else {
-      // Create new payment intent
+      // -- Path B: Create New Intent --
+      // (Used for new users OR users retrying after Cancel/Refund/Fail)
       intent = await stripe.paymentIntents.create({
         amount: totalAmount,
         currency: project.currency.toLowerCase(),

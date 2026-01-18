@@ -4,6 +4,7 @@ import {
   Button,
   ButtonGroup,
   Checkout,
+  Chip,
   DateTimeInput,
   FloatBoxInput,
   Hero,
@@ -63,6 +64,7 @@ function ClassContent() {
   const isRefunding = userBooking?.status === STRIPE_PAYMENT_STATUS.REFUNDING;
   const isReleased = data.status === PROJECT_STATUS.RELEASE;
   const isWatching = data.watchings.some((w) => w.userId === profile?.id);
+  const isCanceled = data.status === PROJECT_STATUS.CANCEL;
 
   const succeededBookingsCount = data.bookings
     .filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
@@ -135,7 +137,7 @@ function ClassContent() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
       >
-        {/* Song Card */}
+        {/* Avatar and Name */}
         <Pressable
           style={styles.teacherContainer}
           onPress={() => router.navigate(`../teacher/${data.profile.id}`)}
@@ -153,6 +155,10 @@ function ClassContent() {
         {data.name && (
           <TextBoxInput label="Name" value={data.name} editable={false} />
         )}
+
+        <View style={styles.row}>
+          <Chip label={data.status} color="light" size="large" />
+        </View>
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
@@ -199,7 +205,7 @@ function ClassContent() {
         />
       </ScrollView>
 
-      {isRefunding ? (
+      {isCanceled ? null : isRefunding ? (
         <Button stickyBottom label="Refunding" disabled />
       ) : isBooked ? (
         <ButtonGroup stickyBottom>

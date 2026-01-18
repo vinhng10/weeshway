@@ -47,6 +47,7 @@ function BookingsContent({ time }: BookingsContentProps) {
         .in("status", [
           STRIPE_PAYMENT_STATUS.SUCCEEDED,
           STRIPE_PAYMENT_STATUS.REFUNDING,
+          STRIPE_PAYMENT_STATUS.REFUNDED,
         ]);
 
       const now = new Date();
