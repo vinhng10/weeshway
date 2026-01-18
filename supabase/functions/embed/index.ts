@@ -6,7 +6,6 @@ import { jsonResponse } from "../_shared/response.ts";
 // --- 1. Configuration & Clients ---
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
 const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET_KEY");
-const QUEUE_NAME = "embedding_jobs";
 const CONCURRENCY_LIMIT = 4;
 
 const jobSchema = z.object({
@@ -60,7 +59,7 @@ async function processJob(job: z.infer<typeof jobSchema>) {
     `;
 
     // 4. Cleanup queue
-    await sql`SELECT util.dequeue(${QUEUE_NAME}, ${job.jobId})`;
+    await sql`SELECT util.dequeue('embedding_jobs', ${job.jobId})`;
 
     return job;
   });

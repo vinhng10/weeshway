@@ -377,3 +377,7 @@ verify_jwt = false
 [functions.notify]
 enabled = true
 verify_jwt = false
+
+[functions.refund]
+enabled = true
+verify_jwt = false

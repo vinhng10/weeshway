@@ -1,48 +1,110 @@
+import postgres from "postgres";
 import Stripe from "stripe";
 import { z } from "zod";
-import { authenticateRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
+// --- 1. Configuration & Clients ---
+const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
+const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET_KEY");
 
-const requestSchema = z.object({
-  bookingId: z.number().positive(),
+const jobSchema = z.object({
+  jobId: z.number(),
+  id: z.number(),
 });
+const failedJobSchema = jobSchema.extend({
+  error: z.string(),
+});
+type Job = z.infer<typeof jobSchema>;
+type FailedJob = z.infer<typeof failedJobSchema>;
 
+// --- 2. Core Logic Helpers ---
+/**
+ * Processes a single refund job atomically
+ */
+async function processJob(job: Job) {
+  return await sql.begin(async () => {
+    // 1. Fetch booking data
+    const [booking] = await sql`
+      SELECT id, stripe_payment_intent_id
+      FROM public.bookings
+      WHERE id = ${job.id} AND status = 'Refunding'
+      FOR UPDATE
+    `;
+
+    if (!booking) {
+      throw new HttpError(
+        `Booking ${job.id} not found or not in Succeeded status`,
+        404
+      );
+    }
+
+    if (!booking.stripe_payment_intent_id) {
+      throw new HttpError(`Booking ${job.id} has no payment intent`, 400);
+    }
+
+    // 2. Create Stripe refund with reverse_transfer and jobId in metadata
+    const refund = await stripe.refunds.create({
+      payment_intent: booking.stripe_payment_intent_id,
+      reverse_transfer: true,
+      metadata: {
+        jobId: job.jobId.toString(),
+        bookingId: booking.id.toString(),
+      },
+    });
+
+    return { ...job, refundId: refund.id, status: refund.status };
+  });
+}
+
+// --- 3. Main Handler ---
 Deno.serve(async (req) => {
   try {
-    const { supabase } = await authenticateRequest(req);
+    // Guard Clauses
+    if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
+      throw new HttpError("Unauthorized", 403);
+    }
+    if (req.method !== "POST") {
+      throw new HttpError("Method Not Allowed", 405);
+    }
 
-    // 1. Parse & Validate Input
-    const body = await req.json();
-    const { bookingId } = requestSchema.parse(body);
+    const rawBody = await req.json().catch(() => []);
+    const result = z.array(jobSchema).safeParse(rawBody);
 
-    // 2. Set booking status to Refunding and fetch the user's succeeded booking
-    const { data } = await supabase
-      .from("bookings")
-      .update({ status: "Refunding" })
-      .eq("id", bookingId)
-      .select("id, stripe_payment_intent_id")
-      .single()
-      .throwOnError();
+    if (!result.success) {
+      return jsonResponse({ error: z.treeifyError(result.error) }, 400);
+    }
 
-    if (!data?.stripe_payment_intent_id)
-      throw new HttpError("No booking found to refund", 404);
+    const pendingJobs = result.data;
+    if (!pendingJobs.length) {
+      return jsonResponse({ completed: 0, failed: 0 });
+    }
 
-    // 3. Create Stripe refund with reverse_transfer
-    const refund = await stripe.refunds.create({
-      payment_intent: data.stripe_payment_intent_id,
-      reverse_transfer: true,
-    });
+    const completedJobs: Array<
+      Job & { refundId: string; status: string | null }
+    > = [];
+    const failedJobs: FailedJob[] = [];
+
+    // Process jobs sequentially (refunds should be handled carefully)
+    for (const job of pendingJobs) {
+      try {
+        const result = await processJob(job);
+        completedJobs.push(result);
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
+        failedJobs.push({ ...job, error: message });
+      }
+    }
 
     return jsonResponse({
-      refundId: refund.id,
-      status: refund.status,
-      bookingId,
+      completed: completedJobs.length,
+      failed: failedJobs.length,
+      details: { completedJobs, failedJobs },
     });
-  } catch (error) {
-    const { message, status } = handleError("Refund Error", error);
+  } catch (error: unknown) {
+    const { message, status } = handleError("Refund Processing Error", error);
     return jsonResponse({ error: message }, status);
   }
 });

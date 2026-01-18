@@ -42,7 +42,7 @@ function ClassContent() {
             location:locations(*), 
             bookings:bookings(*),
             watchings:watchings(*)
-          `,
+          `
           )
           .eq("id", classId)
           .in("bookings.status", [
@@ -55,7 +55,7 @@ function ClassContent() {
         if (error) throw error;
         return data;
       },
-    },
+    }
   );
 
   const userBooking = data.bookings.find((b) => b.userId === profile?.id);
@@ -96,10 +96,12 @@ function ClassContent() {
   const handleRefund = async () => {
     if (!userBooking?.id) return;
     try {
-      const { error } = await supabase.functions.invoke("refund", {
-        body: { bookingId: userBooking.id },
-      });
-      if (error) throw error;
+      await supabase
+        .from("bookings")
+        .update({ status: STRIPE_PAYMENT_STATUS.REFUNDING })
+        .eq("id", userBooking.id)
+        .throwOnError();
+
       await queryClient.invalidateQueries({ queryKey: ["classes"] });
     } catch (error) {
       console.error("Refund error:", error);

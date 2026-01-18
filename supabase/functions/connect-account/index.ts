@@ -17,15 +17,14 @@ const requestSchema = z.object({
 
 // --- 2. Main Handler ---
 Deno.serve(async (req) => {
-  // Security & Method Guards
-  if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
-    return new Response("Forbidden", { status: 403 });
-  }
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
   try {
+    // Security & Method Guards
+    if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
+      throw new HttpError("Unauthorized", 403);
+    }
+    if (req.method !== "POST") {
+      throw new HttpError("Method Not Allowed", 405);
+    }
     const body = await req.json();
     const { userId, email } = requestSchema.parse(body);
 
