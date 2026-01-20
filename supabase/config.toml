@@ -381,3 +381,31 @@ verify_jwt = false
 [functions.refund]
 enabled = true
 verify_jwt = false
+
+[functions.account]
+enabled = true
+verify_jwt = false
+
+[functions.dashboard]
+enabled = true
+verify_jwt = false
+
+[functions.onboard]
+enabled = true
+verify_jwt = false
+
+[functions.payment]
+enabled = true
+verify_jwt = false
+
+[functions.payment-methods]
+enabled = true
+verify_jwt = false
+
+[functions.setup-intent]
+enabled = true
+verify_jwt = false
+
+[functions.setup-session]
+enabled = true
+verify_jwt = false

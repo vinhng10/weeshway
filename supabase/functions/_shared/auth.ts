@@ -1,9 +1,16 @@
+import * as jose from "jose";
 import {
   createClient,
   SupabaseClient,
   User,
-} from "npm:@supabase/supabase-js@2";
+} from "supabase";
 import { HttpError } from "./errors.ts";
+
+const SUPABASE_JWT_ISSUER = "http://127.0.0.1:54321/auth/v1";
+
+const SUPABASE_JWT_KEYS = jose.createRemoteJWKSet(
+  new URL(Deno.env.get("SUPABASE_URL")! + "/auth/v1/.well-known/jwks.json")
+);
 
 export type AuthContext = {
   supabase: SupabaseClient;
@@ -16,15 +23,49 @@ export type ProfileWithStripe = {
 };
 
 /**
- * Authenticates the request and returns the Supabase client and user
+ * Extracts the Bearer token from the Authorization header
+ * Returns both the full header and the token
+ */
+function getAuthToken(req: Request): { header: string; token: string } {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) {
+    throw new Error("Missing authorization header");
+  }
+  const [bearer, token] = authHeader.split(" ");
+  if (bearer !== "Bearer") {
+    throw new Error(`Auth header is not 'Bearer {token}'`);
+  }
+  return { header: authHeader, token };
+}
+
+/**
+ * Verifies the Supabase JWT token using asymmetric key verification
+ * Throws an error if the token is invalid
+ */
+async function verifySupabaseJWT(jwt: string) {
+  return await jose.jwtVerify(jwt, SUPABASE_JWT_KEYS, {
+    issuer: SUPABASE_JWT_ISSUER,
+  });
+}
+
+/**
+ * Authenticates client-facing requests using JWT verification
+ * For use in edge functions that are called directly by clients
  */
 export async function authenticateRequest(req: Request): Promise<AuthContext> {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) throw new HttpError("Unauthorized", 401);
+  // Extract and verify JWT token
+  const { header: authHeader, token } = getAuthToken(req);
 
+  try {
+    await verifySupabaseJWT(token);
+  } catch (_error) {
+    throw new HttpError("Unauthorized", 401);
+  }
+
+  // Create authenticated Supabase client
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
+    Deno.env.get("SB_PUBLISHABLE_KEY")!,
     {
       global: {
         headers: { Authorization: authHeader },
@@ -32,14 +73,35 @@ export async function authenticateRequest(req: Request): Promise<AuthContext> {
     }
   );
 
+  // Retrieve user from authenticated session
   const {
     data: { user },
-    error: authError,
+    error,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) throw new HttpError("Unauthorized", 401);
+  if (error || !user) {
+    throw new HttpError("Unauthorized", 401);
+  }
 
   return { supabase, user };
+}
+
+/**
+ * Authenticates backend-only requests using X-Internal-Secret-Key header
+ * For use in edge functions that are only called by your backend services
+ * (e.g., cron jobs, internal webhooks, scheduled tasks)
+ */
+export function authenticateInternalRequest(req: Request): void {
+  const secretKey = req.headers.get("X-Internal-Secret-Key");
+  const expectedSecret = Deno.env.get("INTERNAL_SECRET_KEY");
+
+  if (!secretKey || !expectedSecret) {
+    throw new HttpError("Missing internal secret key", 401);
+  }
+
+  if (secretKey !== expectedSecret) {
+    throw new HttpError("Unauthorized", 403);
+  }
 }
 
 /**
@@ -96,6 +158,6 @@ export async function authenticateAndGetStripeAccount(
 export function createServiceRoleClient(): SupabaseClient {
   return createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    Deno.env.get("SB_SECRET_KEY")!
   );
 }

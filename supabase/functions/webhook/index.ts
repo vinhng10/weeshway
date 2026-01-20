@@ -45,7 +45,6 @@ async function handleEvent(event: Stripe.Event): Promise<void> {
   switch (event.type) {
     case "payment_intent.created": {
       const pi = event.data.object;
-      console.log("===> payment_intent.created", pi.id);
       await upsertBooking(pi.id, "Processing", pi.metadata);
       break;
     }

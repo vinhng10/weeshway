@@ -1,14 +1,15 @@
 import Stripe from "stripe";
 import { z } from "zod";
-import { createServiceRoleClient } from "../_shared/auth.ts";
+import {
+  authenticateInternalRequest,
+  createServiceRoleClient,
+} from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Clients & Configuration ---
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 const supabase = createServiceRoleClient();
-
-const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET_KEY");
 
 const requestSchema = z.object({
   userId: z.uuid(),
@@ -19,9 +20,8 @@ const requestSchema = z.object({
 Deno.serve(async (req) => {
   try {
     // Security & Method Guards
-    if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
-      throw new HttpError("Unauthorized", 403);
-    }
+    authenticateInternalRequest(req);
+
     if (req.method !== "POST") {
       throw new HttpError("Method Not Allowed", 405);
     }

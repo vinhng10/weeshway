@@ -1,11 +1,11 @@
 import postgres from "postgres";
 import { z } from "zod";
+import { authenticateInternalRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
-const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET_KEY");
 const CONCURRENCY_LIMIT = 4;
 
 const jobSchema = z.object({
@@ -69,9 +69,8 @@ async function processJob(job: z.infer<typeof jobSchema>) {
 Deno.serve(async (req) => {
   try {
     // Guard Clauses
-    if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
-      throw new HttpError("Unauthorized", 403);
-    }
+    authenticateInternalRequest(req);
+
     if (req.method !== "POST") {
       throw new HttpError("Method Not Allowed", 405);
     }

@@ -1,13 +1,13 @@
 import postgres from "postgres";
 import Stripe from "stripe";
 import { z } from "zod";
+import { authenticateInternalRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
-const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET_KEY");
 
 const jobSchema = z.object({
   jobId: z.number(),
@@ -62,9 +62,8 @@ async function processJob(job: Job) {
 Deno.serve(async (req) => {
   try {
     // Guard Clauses
-    if (req.headers.get("X-Internal-Secret-Key") !== INTERNAL_SECRET) {
-      throw new HttpError("Unauthorized", 403);
-    }
+    authenticateInternalRequest(req);
+
     if (req.method !== "POST") {
       throw new HttpError("Method Not Allowed", 405);
     }
