@@ -190,6 +190,7 @@ export default function Track({ type, useStudioStore }: TrackProps) {
       return;
     }
 
+    const rate = parseFloat(playbackRate);
     const wasAnimating = isAnimatingRef.current;
     isAnimatingRef.current = true;
     cancelAnimation(offset);
@@ -203,14 +204,14 @@ export default function Track({ type, useStudioStore }: TrackProps) {
       if (selectedItems.length > 0) {
         (async () => {
           await sync(selectedItems[0].startTime);
-          animateFrom(selectedItems[0].startTime, playbackRate);
+          animateFrom(selectedItems[0].startTime, rate);
         })();
       } else {
-        animateFrom(offsetToTime(offset.value), playbackRate);
+        animateFrom(offsetToTime(offset.value), rate);
       }
     } else {
       // Rate changed mid-playback — resume from current position
-      animateFrom(offsetToTime(offset.value), playbackRate);
+      animateFrom(offsetToTime(offset.value), rate);
     }
   }, [shouldPlay, isActive, playbackRate]);
 
