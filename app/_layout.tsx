@@ -1,6 +1,12 @@
 import { syncLocation, syncPushToken } from "@/components";
 import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
-import { useAudioPlayerStore, useAuth, useLocales, useNotificationObserver, useRole } from "@/hooks";
+import {
+  useAudioPlayerStore,
+  useAuth,
+  useLocales,
+  useNotificationObserver,
+  useRole,
+} from "@/hooks";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";

@@ -1,8 +1,7 @@
-import { Button } from "../input/button";
-import { IconButton } from "../input/icon-button";
-import { ThemedText } from "../themed-text";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { IconButton } from "../input/icon-button";
+import { ThemedText } from "../themed-text";
 
 interface DisplayAreaProps {
   recognizing: boolean;
@@ -17,19 +16,12 @@ export const DisplayArea = ({
 }: DisplayAreaProps) => {
   return (
     <View style={styles.container}>
-      <IconButton icon="camera.fill" iconSize={36} style={styles.icon} />
-
-      <Button
-        label="Open Camera"
-        style={styles.button}
-        onPress={onOpenCamera}
-      />
-
-      {recognizing && (
-        <View style={styles.transcriptContainer}>
-          <ThemedText type="h5">{transcript || "Listening..."}</ThemedText>
-        </View>
-      )}
+      <View style={styles.comingSoonContainer}>
+        <IconButton icon="sparkles" iconSize={48} type="transparent" />
+        <ThemedText type="h3" style={styles.comingSoonTitle}>
+          More Features Coming Soon
+        </ThemedText>
+      </View>
     </View>
   );
 };
@@ -42,20 +34,13 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     gap: theme.gap(2),
   },
-  icon: {
-    width: theme.gap(10),
-    height: theme.gap(10),
+  comingSoonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    maxWidth: "50%",
+    gap: theme.gap(2),
   },
-  button: {
-    backgroundColor: theme.colors.primary,
-  },
-  transcriptContainer: {
-    position: "absolute",
-    bottom: theme.gap(2.5),
-    alignSelf: "center",
-    padding: theme.gap(2),
-    borderRadius: theme.gap(2),
-    backgroundColor: theme.colors.foreground,
-    maxWidth: "90%",
+  comingSoonTitle: {
+    textAlign: "center",
   },
 }));

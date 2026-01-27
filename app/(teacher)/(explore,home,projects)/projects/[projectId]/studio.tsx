@@ -2,6 +2,7 @@
 import { ControlBar, DisplayArea, Header, Track } from "@/components";
 import { TRACK } from "@/constants";
 import { createStudioStore, useAudioPlayerStore } from "@/hooks";
+import { RecordingPresets, useAudioRecorder, useAudioRecorderState } from "expo-audio";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { View } from "react-native";
@@ -46,6 +47,11 @@ export default function Studio() {
     shouldPlay,
     setShouldPlay,
     pickAndLoadAudio,
+    setRecorder,
+    isRecording,
+    requestRecordingPermission,
+    startRecording,
+    stopRecording,
     didJustFinish,
   } = useAudioPlayerStore(
     useShallow((state) => ({
@@ -56,12 +62,25 @@ export default function Studio() {
       shouldPlay: state.shouldPlay,
       setShouldPlay: state.setShouldPlay,
       pickAndLoadAudio: state.pickAndLoadAudio,
+      setRecorder: state.setRecorder,
+      isRecording: state.recorderState?.isRecording === true,
+      requestRecordingPermission: state.requestRecordingPermission,
+      startRecording: state.startRecording,
+      stopRecording: state.stopRecording,
       didJustFinish: state.didJustFinish(activeSource),
     }))
   );
 
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(audioRecorder);
+
+  useEffect(() => {
+    setRecorder(audioRecorder, recorderState);
+  }, [audioRecorder, recorderState, setRecorder]);
+
   useEffect(() => {
     syncFromServer();
+    requestRecordingPermission();
     return () => {
       setShouldPlay(false);
       pause();
@@ -100,16 +119,30 @@ export default function Studio() {
     }
   };
 
+  const handleRecordAudio = async () => {
+    if (studio.activeTrack !== TRACK.COUNT) return;
+
+    if (isRecording) {
+      const trackState = await stopRecording(studio.count.source);
+      if (trackState) initialize(trackState);
+      return;
+    }
+
+    await startRecording();
+  };
+
   return (
     <View style={styles.container}>
       <Header title="Studio" />
 
       <View style={styles.studioContainer}>
-        <DisplayArea recognizing={true} transcript="" />
+        <DisplayArea recognizing={false} transcript="" />
 
         <ControlBar
           isPlaying={isPlaying}
+          isRecording={isRecording}
           onLoadAudio={handleLoadAudio}
+          onRecordAudio={handleRecordAudio}
           onTogglePlayback={handleTogglePlayback}
           onSplit={handleSplit}
           onMerge={handleMerge}

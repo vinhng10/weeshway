@@ -1,11 +1,13 @@
-import { IconButton } from "../input/icon-button";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { IconButton } from "../input/icon-button";
 
 interface ControlBarProps {
   isPlaying: boolean;
+  isRecording: boolean;
   wakeWordEnabled: boolean;
   onLoadAudio: any;
+  onRecordAudio: any;
   onTogglePlayback: any;
   onSplit: any;
   onMerge: any;
@@ -14,8 +16,10 @@ interface ControlBarProps {
 
 export const ControlBar = ({
   isPlaying,
+  isRecording,
   wakeWordEnabled,
   onLoadAudio,
+  onRecordAudio,
   onTogglePlayback,
   onSplit,
   onMerge,
@@ -26,6 +30,13 @@ export const ControlBar = ({
       <IconButton
         icon={"folder.fill"}
         onPress={onLoadAudio}
+        iconSize={26}
+        type="transparent"
+      />
+
+      <IconButton
+        icon={isRecording ? "mic.slash" : "mic"}
+        onPress={onRecordAudio}
         iconSize={26}
         type="transparent"
       />
@@ -51,13 +62,13 @@ export const ControlBar = ({
         type="transparent"
       />
 
-      <IconButton
+      {/* <IconButton
         icon={"sparkles"}
         onPress={onToggleWakeWord}
         iconSize={26}
         type="transparent"
         style={wakeWordEnabled ? styles.enabled : undefined}
-      />
+      /> */}
     </View>
   );
 };

@@ -29,7 +29,7 @@ export default function Profile() {
     router.navigate(`/(${rolePath})/profile/wallet`);
   };
 
-  const handleDataPrivacy = () => {
+  const handleTermsAndConditions = () => {
     // router.navigate("/(tabs)/profile/data-privacy");
   };
 
@@ -70,15 +70,11 @@ export default function Profile() {
       >
         <MenuItem icon="person.fill" title="Account" onPress={handleAccount} />
         <MenuItem icon="wallet.pass" title="Wallet" onPress={handleWallet} />
-        <MenuItem
-          icon="gear"
-          title="Settings"
-          onPress={handleDeviceSettings}
-        />
+        <MenuItem icon="gear" title="Settings" onPress={handleDeviceSettings} />
         <MenuItem
           icon="shield.fill"
-          title="Data Privacy"
-          onPress={handleDataPrivacy}
+          title="Terms & Conditions"
+          onPress={handleTermsAndConditions}
         />
         <MenuItem
           icon="rectangle.portrait.and.arrow.right"

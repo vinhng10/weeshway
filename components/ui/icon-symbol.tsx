@@ -18,7 +18,6 @@ export type IconSymbolName = keyof typeof MAPPING;
  */
 const MAPPING = {
   "house.fill": "home",
-  "wand.and.sparkles": "color-wand",
   "circle.grid.2x2.fill": "grid",
   "person.fill": "person-sharp",
   play: "play",
@@ -47,6 +46,8 @@ const MAPPING = {
   "compass.drawing": "compass",
   "creditcard.fill": "card",
   "checkmark.circle": "checkmark-circle",
+  mic: "mic",
+  "mic.slash": "mic-off"
 } as IconMapping;
 
 /**
