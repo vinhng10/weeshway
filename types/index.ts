@@ -4,6 +4,7 @@ import {
   ROLE,
   STRIPE_PAYMENT_STATUS,
   STYLE,
+  TEMPO,
   TIME,
   TRACK,
   WISH_STATUS,
@@ -21,6 +22,7 @@ export type TimeType = ValueOf<typeof TIME>;
 export type TrackType = ValueOf<typeof TRACK>;
 export type RoleType = ValueOf<typeof ROLE>;
 export type WishWatchType = ValueOf<typeof WISH_WATCH>;
+export type TempoType = ValueOf<typeof TEMPO>;
 
 export type OptionItem = {
   key: string;

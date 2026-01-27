@@ -1,4 +1,6 @@
+import { TEMPO } from "@/constants";
 import { TrackState } from "@/hooks/useStudioStore";
+import { TempoType } from "@/types";
 import {
   AudioModule,
   setAudioModeAsync,
@@ -33,6 +35,8 @@ interface AudioPlayerState {
   requestRecordingPermission: () => Promise<boolean>;
   startRecording: () => Promise<void>;
   stopRecording: (previousSource?: string) => Promise<TrackState | null>;
+  playbackRate: TempoType;
+  setPlaybackRate: (rate: TempoType) => void;
 }
 
 const persistAudioFile = (uri: string) => {
@@ -69,6 +73,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   shouldPlay: false,
   recorder: undefined,
   recorderState: undefined,
+  playbackRate: TEMPO["1.0"],
   setPlayer: (player: AudioPlayer, status: AudioStatus) => {
     set({ player, status });
   },
@@ -186,5 +191,14 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
       }
     }
     return trackState;
+  },
+  setPlaybackRate: (rate: TempoType) => {
+    const { player } = get();
+    const numericRate = parseFloat(rate);
+    if (player && !isNaN(numericRate)) {
+      player.shouldCorrectPitch = true;
+      player.setPlaybackRate(numericRate, "high");
+    }
+    set({ playbackRate: rate });
   },
 }));

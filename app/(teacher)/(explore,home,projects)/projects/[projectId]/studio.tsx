@@ -52,6 +52,8 @@ export default function Studio() {
     requestRecordingPermission,
     startRecording,
     stopRecording,
+    playbackRate,
+    setPlaybackRate,
     didJustFinish,
   } = useAudioPlayerStore(
     useShallow((state) => ({
@@ -67,6 +69,8 @@ export default function Studio() {
       requestRecordingPermission: state.requestRecordingPermission,
       startRecording: state.startRecording,
       stopRecording: state.stopRecording,
+      playbackRate: state.playbackRate,
+      setPlaybackRate: state.setPlaybackRate,
       didJustFinish: state.didJustFinish(activeSource),
     }))
   );
@@ -141,6 +145,8 @@ export default function Studio() {
         <ControlBar
           isPlaying={isPlaying}
           isRecording={isRecording}
+          playbackRate={playbackRate}
+          onPlaybackRateChange={setPlaybackRate}
           onLoadAudio={handleLoadAudio}
           onRecordAudio={handleRecordAudio}
           onTogglePlayback={handleTogglePlayback}

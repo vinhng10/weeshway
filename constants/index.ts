@@ -107,3 +107,9 @@ export const WISH_WATCH = {
   WISH: "Wish",
   WATCHING: "Watching",
 } as const;
+
+export const TEMPO = {
+  "0.5": "0.5x",
+  "0.75": "0.75x",
+  "1.0": "1x",
+} as const;
