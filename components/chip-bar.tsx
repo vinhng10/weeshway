@@ -45,7 +45,7 @@ export const ChipBarItem = ({
           size={"large"}
           color={chipColor}
           label={chipLabel}
-          icon="chevron.down"
+          icon="chevron-down"
           onPress={handleModal}
         />
         {options && (

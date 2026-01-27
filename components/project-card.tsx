@@ -12,10 +12,10 @@ import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
 import { Avatar } from "./avatar";
 import { Chip } from "./chip";
+import { IconSymbol } from "./icon-symbol";
 import { Button, Checkout, formatDate, formatTime, IconButton } from "./input";
 import { ProjectStatus } from "./project-status";
 import { ThemedText } from "./themed-text";
-import { IconSymbol } from "./ui/icon-symbol";
 
 interface CardProps {
   data: ProjectEnrichedType;
@@ -86,10 +86,10 @@ export const ProjectCard = ({ data }: CardProps) => {
   const label = booked
     ? `Booked x${spots}`
     : released
-    ? "Book"
-    : watching
-    ? "Unwatch"
-    : "Watch";
+      ? "Book"
+      : watching
+        ? "Unwatch"
+        : "Watch";
   const onPress = booked ? undefined : released ? handleBook : handleWatch;
 
   return (
@@ -141,11 +141,7 @@ export const ProjectCard = ({ data }: CardProps) => {
             <View style={styles.rowGroup}>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
-                  <IconSymbol
-                    name="location.app.fill"
-                    size={16}
-                    color="#FFFFFF"
-                  />
+                  <IconSymbol name="location-sharp" size={16} color="#FFFFFF" />
                   <ThemedText>{data.location?.displayName}</ThemedText>
                 </View>
                 <ThemedText>
@@ -154,11 +150,7 @@ export const ProjectCard = ({ data }: CardProps) => {
               </View>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
-                  <IconSymbol
-                    name="timer.circle.fill"
-                    size={16}
-                    color="#FFFFFF"
-                  />
+                  <IconSymbol name="time" size={16} color="#FFFFFF" />
                   <ThemedText>
                     {data.startAt && data.endAt
                       ? `${formatDate(

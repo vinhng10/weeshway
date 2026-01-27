@@ -157,7 +157,7 @@ export default function Account() {
               <Video source={videoUrl} />
               <View style={styles.overlay}>
                 <IconButton
-                  icon="xmark"
+                  icon="close"
                   iconSize={32}
                   onPress={() => handleRemoveVideo(index)}
                 />
@@ -170,7 +170,7 @@ export default function Account() {
               <Video source={null} />
               <View style={styles.overlay}>
                 <IconButton
-                  icon="plus"
+                  icon="add"
                   iconSize={32}
                   onPress={handleVideoPicker}
                 />

@@ -31,4 +31,4 @@ export * from "./input";
 export * from "./studio";
 
 // UI Components
-export { IconSymbol, type IconSymbolName } from "./ui/icon-symbol";
+export { IconSymbol, type IconSymbolName } from "./icon-symbol";

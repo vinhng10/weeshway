@@ -26,7 +26,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={28} name="home" color={color} />
           ),
         }}
       />
@@ -45,7 +45,7 @@ export default function TabLayout() {
           title: "Bookings",
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="circle.grid.2x2.fill" color={color} />
+            <IconSymbol size={28} name="grid" color={color} />
           ),
         }}
       />
@@ -54,7 +54,7 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.fill" color={color} />
+            <IconSymbol size={28} name="person-sharp" color={color} />
           ),
         }}
       />

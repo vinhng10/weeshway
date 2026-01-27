@@ -1,7 +1,7 @@
 import { Pressable, View } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
+import { IconSymbol, IconSymbolName } from "./icon-symbol";
 import { ThemedText, styles as textStyles } from "./themed-text";
-import { IconSymbol, IconSymbolName } from "./ui/icon-symbol";
 
 type ProfileMenuItemProps = {
   icon: IconSymbolName;
@@ -41,7 +41,7 @@ export function MenuItem({
         )}
       </View>
       {showChevron && (
-        <IconSymbol style={textStyles.style} name="chevron.right" />
+        <IconSymbol style={textStyles.style} name="chevron-forward" />
       )}
     </Pressable>
   );

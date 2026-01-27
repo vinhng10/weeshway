@@ -125,7 +125,7 @@ function StudentWalletContent() {
     const brand = item.brand.charAt(0).toUpperCase() + item.brand.slice(1);
     return (
       <MenuItem
-        icon="creditcard.fill"
+        icon="card"
         title={`${brand}     •••• ${item.last4}`}
         showChevron={false}
       />
@@ -261,7 +261,7 @@ function TeacherWalletContent() {
     const subtitle = `•••• ${item.last4} (${item.currency.toUpperCase()})`;
     return (
       <MenuItem
-        icon="creditcard.fill"
+        icon="card"
         title={title}
         subtitle={subtitle}
         showChevron={false}

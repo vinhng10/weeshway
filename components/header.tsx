@@ -1,8 +1,8 @@
 import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { IconSymbol } from "./icon-symbol";
 import { ThemedText } from "./themed-text";
-import { IconSymbol } from "./ui/icon-symbol";
 
 type HeaderProps = {
   title?: string;
@@ -16,7 +16,7 @@ export const Header: React.FunctionComponent<HeaderProps> = ({
   return (
     <View style={styles.container}>
       <Pressable onPress={onPress ?? router.back} style={styles.backButton}>
-        <IconSymbol name="chevron.left" size={32} color="#FFFFFF" />
+        <IconSymbol name="chevron-back" size={32} color="#FFFFFF" />
       </Pressable>
       <ThemedText type="h4">{title}</ThemedText>
     </View>

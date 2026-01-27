@@ -46,7 +46,7 @@ export const ControlBar = ({
     <View style={styles.container}>
       <View style={styles.iconRow}>
         <IconButton
-          icon={"folder.fill"}
+          icon="folder"
           onPress={onLoadAudio}
           iconSize={26}
           type="transparent"
@@ -67,14 +67,14 @@ export const ControlBar = ({
         />
 
         <IconButton
-          icon={"scissors"}
+          icon="split-cells"
           onPress={onSplit}
           iconSize={26}
           type="transparent"
         />
 
         <IconButton
-          icon={"arrow.merge"}
+          icon="merge-cells"
           onPress={onMerge}
           iconSize={26}
           type="transparent"

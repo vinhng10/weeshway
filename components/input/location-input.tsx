@@ -13,9 +13,9 @@ import {
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { IconSymbol } from "../icon-symbol";
 import { MenuItem } from "../menu-item";
 import { ThemedText } from "../themed-text";
-import { IconSymbol } from "../ui/icon-symbol";
 import { TextBoxInput } from "./box-input";
 import { Button } from "./button";
 import { TextInput } from "./text-input";
@@ -168,11 +168,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     <>
       <Pressable style={styles.container} onPress={handlePress}>
         <View style={styles.iconContainer}>
-          <IconSymbol
-            style={styles.icon}
-            name={"location.app.fill"}
-            size={24}
-          />
+          <IconSymbol style={styles.icon} name="location-sharp" size={24} />
         </View>
         <View style={styles.content}>
           <ThemedText color="dimmed">{label}</ThemedText>
@@ -206,7 +202,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
             keyExtractor={(item) => item.id}
             renderItem={({ item: location }) => (
               <MenuItem
-                icon="location.app.fill"
+                icon="location-sharp"
                 title={location.displayName || "Unknown"}
                 subtitle={
                   location.shortFormattedAddress ||

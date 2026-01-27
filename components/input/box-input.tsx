@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { StyleSheet } from "react-native-unistyles";
+import { IconSymbol, IconSymbolName } from "../icon-symbol";
 import { ThemedText } from "../themed-text";
-import { IconSymbol, IconSymbolName } from "../ui/icon-symbol";
 import { Options } from "./options";
 import { TextInput, TextInputProps } from "./text-input";
 
@@ -117,7 +117,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
   return (
     <BaseBoxInput
       label={label}
-      icon={editable ? "chevron.down" : undefined}
+      icon={editable ? "chevron-down" : undefined}
       onPress={handlePress}
       editable={editable}
     >

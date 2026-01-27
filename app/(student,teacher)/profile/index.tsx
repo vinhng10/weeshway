@@ -68,16 +68,16 @@ export default function Profile() {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <MenuItem icon="person.fill" title="Account" onPress={handleAccount} />
-        <MenuItem icon="wallet.pass" title="Wallet" onPress={handleWallet} />
-        <MenuItem icon="gear" title="Settings" onPress={handleDeviceSettings} />
+        <MenuItem icon="person-sharp" title="Account" onPress={handleAccount} />
+        <MenuItem icon="wallet" title="Wallet" onPress={handleWallet} />
+        <MenuItem icon="settings" title="Settings" onPress={handleDeviceSettings} />
         <MenuItem
-          icon="shield.fill"
+          icon="shield"
           title="Terms & Conditions"
           onPress={handleTermsAndConditions}
         />
         <MenuItem
-          icon="rectangle.portrait.and.arrow.right"
+          icon="log-out"
           title="Sign Out"
           onPress={handleSignOut}
           showChevron={false}

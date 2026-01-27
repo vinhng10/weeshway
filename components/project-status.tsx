@@ -1,7 +1,7 @@
 import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
 import { ProjectEnrichedType } from "@/types";
 import { Chip } from "./chip";
-import { IconSymbolName } from "./ui/icon-symbol";
+import { IconSymbolName } from "./icon-symbol";
 
 interface ProjectStatusProps {
   data: ProjectEnrichedType;
@@ -17,7 +17,7 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
       label = `${data.watchings.length}`;
       break;
     case PROJECT_STATUS.RELEASE:
-      icon = "person.fill";
+      icon = "person-sharp";
       const succeededCount =
         data.bookings
           ?.filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)

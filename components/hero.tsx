@@ -41,7 +41,7 @@ export const Hero = ({ data, onShare }: HeroProps) => {
             </ThemedText>
           </View>
           <View style={styles.buttonContainer}>
-            <IconButton icon="sharedwithyou" iconSize={24} onPress={onShare} />
+            <IconButton icon="share-social-sharp" iconSize={24} onPress={onShare} />
             <IconButton
               icon={isPlaying ? "pause" : "play"}
               iconSize={36}

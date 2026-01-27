@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { IconSymbol } from "../icon-symbol";
 import { ThemedText } from "../themed-text";
-import { IconSymbol } from "../ui/icon-symbol";
 import { IconButton } from "./icon-button";
 
 type SpotsSelectorProps = {
@@ -26,12 +26,12 @@ export function SpotsSelector({
   return (
     <View style={[styles.row, styles.container]}>
       <View style={[styles.row, styles.spotsLabel]}>
-        <IconSymbol name="person.fill" size={20} color="#FFFFFF" />
+        <IconSymbol name="person-sharp" size={20} color="#FFFFFF" />
         <ThemedText type="h3">Spots</ThemedText>
       </View>
       <View style={[styles.row, styles.quantitySelector]}>
         <IconButton
-          icon="minus"
+          icon="remove"
           onPress={handleDecrement}
           iconSize={20}
           type="transparent"
@@ -39,7 +39,7 @@ export function SpotsSelector({
         />
         <ThemedText type="h3">{spots}</ThemedText>
         <IconButton
-          icon="plus"
+          icon="add"
           onPress={handleIncrement}
           iconSize={20}
           type="transparent"

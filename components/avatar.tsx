@@ -5,7 +5,7 @@ import {
 } from "expo-image-picker";
 import { Pressable, View } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
-import { IconSymbol } from "./ui/icon-symbol";
+import { IconSymbol } from "./icon-symbol";
 
 export type AvatarProps = ImageProps &
   UnistylesVariants<typeof styles> & {
@@ -59,7 +59,7 @@ export function Avatar({
       <Image source={source} style={[styles.avatar, style]} {...rest} />
       {editable && onSourceChange && (
         <View style={styles.cameraButton}>
-          <IconSymbol name="camera.fill" size={16} />
+          <IconSymbol name="camera" size={16} />
         </View>
       )}
     </Pressable>

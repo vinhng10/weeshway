@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { IconSymbol } from "../icon-symbol";
 import { ThemedText } from "../themed-text";
-import { IconSymbol } from "../ui/icon-symbol";
 import { DateTimeBoxInput, formatDate, formatTime } from "./box-input";
 import { Button } from "./button";
 
@@ -71,11 +71,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
     <>
       <Pressable style={styles.container} onPress={handlePress}>
         <View style={styles.iconContainer}>
-          <IconSymbol
-            style={styles.icon}
-            name={"timer.circle.fill"}
-            size={24}
-          />
+          <IconSymbol style={styles.icon} name="time" size={24} />
         </View>
         <View style={styles.content}>
           <ThemedText color="dimmed">{label}</ThemedText>
@@ -122,7 +118,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
                   setStartTime(value);
                   setError(undefined);
                 }}
-                icon="timer.circle.fill"
+                icon="time"
                 mode="time"
                 editable={editable}
               />
@@ -133,7 +129,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
                   setEndTime(value);
                   setError(undefined);
                 }}
-                icon="timer.circle.fill"
+                icon="time"
                 mode="time"
                 minimumDate={startTime}
                 editable={editable}
