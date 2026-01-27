@@ -2,7 +2,7 @@
 import { PIXELS_PER_SECOND, TICK_INTERVAL } from "@/constants";
 import { useAudioPlayerStore, type StudioStoreHook } from "@/hooks";
 import { ItemType, TrackType } from "@/types";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Dimensions, Pressable, View } from "react-native";
 import Animated, {
   cancelAnimation,
@@ -49,6 +49,12 @@ type TrackProps = {
 const Cursor = () => <View style={styles.cursor} />;
 
 export default function Track({ type, useStudioStore }: TrackProps) {
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const offset = useSharedValue(0);
+  const isAnimatingRef = useRef(false);
+
+  useDerivedValue(() => scrollTo(scrollRef, offset.value, 0, false));
+
   const { source, items, toggle, isActive, setActive } = useStudioStore(
     useShallow((state) => ({
       source: state.studio[type].source,
@@ -59,17 +65,25 @@ export default function Track({ type, useStudioStore }: TrackProps) {
     }))
   );
 
-  const { player, pause, replace, shouldPlay, setShouldPlay, didJustFinish } =
-    useAudioPlayerStore(
-      useShallow((state) => ({
-        player: state.player,
-        pause: state.pause,
-        replace: state.replace,
-        shouldPlay: state.shouldPlay,
-        setShouldPlay: state.setShouldPlay,
-        didJustFinish: state.didJustFinish(source),
-      }))
-    );
+  const {
+    player,
+    pause,
+    replace,
+    shouldPlay,
+    setShouldPlay,
+    didJustFinish,
+    playbackRate,
+  } = useAudioPlayerStore(
+    useShallow((state) => ({
+      player: state.player,
+      pause: state.pause,
+      replace: state.replace,
+      shouldPlay: state.shouldPlay,
+      setShouldPlay: state.setShouldPlay,
+      didJustFinish: state.didJustFinish(source),
+      playbackRate: state.playbackRate,
+    }))
+  );
 
   styles.useVariants({ disabled: !isActive });
 
@@ -78,20 +92,15 @@ export default function Track({ type, useStudioStore }: TrackProps) {
     [items]
   );
 
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const offset = useSharedValue(0);
-
-  useDerivedValue(() => scrollTo(scrollRef, offset.value, 0, false));
-
   const sync = async (time: number) => {
     await player?.seekTo(time);
     offset.value = timeToOffset(time);
   };
 
-  const createAnimations = (selectedItems: ItemType[]) => {
+  const createAnimations = (selectedItems: ItemType[], rate: number) => {
     return selectedItems.flatMap((item, i) => {
       const isLast = i === selectedItems.length - 1;
-      const duration = (item.endTime - item.startTime) * 1000;
+      const duration = ((item.endTime - item.startTime) * 1000) / rate;
       const targetOffset = timeToOffset(item.endTime);
 
       const itemAnimation = withTiming(
@@ -131,6 +140,32 @@ export default function Track({ type, useStudioStore }: TrackProps) {
     });
   };
 
+  const animateFrom = (fromTime: number, rate: number) => {
+    const selectedItems = items
+      .filter((item) => item.selected)
+      .sort((a, b) => a.startTime - b.startTime);
+
+    if (selectedItems.length > 0) {
+      const remaining = selectedItems.filter((it) => it.endTime > fromTime);
+      if (remaining.length === 0) return;
+
+      const first = remaining[0];
+      const clipped =
+        fromTime > first.startTime
+          ? [{ ...first, startTime: fromTime }, ...remaining.slice(1)]
+          : remaining;
+
+      offset.value = withSequence(...createAnimations(clipped, rate));
+    } else {
+      const remainingTime = duration - fromTime;
+      if (remainingTime <= 0) return;
+      offset.value = withTiming(timeToOffset(duration), {
+        duration: (remainingTime * 1000) / rate,
+        easing: Easing.linear,
+      });
+    }
+  };
+
   const handlePress = async () => {
     if (isActive) return;
     setShouldPlay(false);
@@ -147,32 +182,37 @@ export default function Track({ type, useStudioStore }: TrackProps) {
     },
   });
 
-  // Handle playback state changes from parent
+  // Handle playback start, stop, and rate changes
   useEffect(() => {
     if (!isActive || !shouldPlay) {
       cancelAnimation(offset);
+      isAnimatingRef.current = false;
       return;
     }
 
-    // Start playback - use the ref to get latest items
-    (async () => {
+    const wasAnimating = isAnimatingRef.current;
+    isAnimatingRef.current = true;
+    cancelAnimation(offset);
+
+    if (!wasAnimating) {
+      // Starting playback — seek to first selected item or play from cursor
       const selectedItems = items
         .filter((item) => item.selected)
         .sort((a, b) => a.startTime - b.startTime);
 
       if (selectedItems.length > 0) {
-        await sync(selectedItems[0].startTime);
-        offset.value = withSequence(...createAnimations(selectedItems));
+        (async () => {
+          await sync(selectedItems[0].startTime);
+          animateFrom(selectedItems[0].startTime, playbackRate);
+        })();
       } else {
-        const currentTime = offsetToTime(offset.value);
-        const remainingTime = duration - currentTime;
-        offset.value = withTiming(timeToOffset(duration), {
-          duration: remainingTime * 1000,
-          easing: Easing.linear,
-        });
+        animateFrom(offsetToTime(offset.value), playbackRate);
       }
-    })();
-  }, [shouldPlay, isActive]);
+    } else {
+      // Rate changed mid-playback — resume from current position
+      animateFrom(offsetToTime(offset.value), playbackRate);
+    }
+  }, [shouldPlay, isActive, playbackRate]);
 
   useEffect(() => {
     if (didJustFinish) {
