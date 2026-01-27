@@ -35,10 +35,10 @@ export const ControlBar = ({
       />
 
       <IconButton
-        icon={isRecording ? "mic.slash" : "mic"}
+        icon={"mic"}
         onPress={onRecordAudio}
         iconSize={26}
-        type="transparent"
+        type={isRecording ? "danger" : "transparent"}
       />
 
       <IconButton

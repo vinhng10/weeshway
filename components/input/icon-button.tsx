@@ -49,6 +49,12 @@ const styles = StyleSheet.create((theme) => ({
         transparent: {
           backgroundColor: "transparent",
         },
+        danger: {
+          backgroundColor: "transparent",
+        },
+        primary: {
+          backgroundColor: "transparent",
+        },
       },
       disabled: {
         true: {
@@ -65,6 +71,12 @@ const styles = StyleSheet.create((theme) => ({
         },
         transparent: {
           color: theme.colors.typography,
+        },
+        danger: {
+          color: theme.colors.danger,
+        },
+        primary: {
+          color: theme.colors.primary,
         },
       },
     },
