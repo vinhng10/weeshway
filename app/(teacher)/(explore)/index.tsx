@@ -13,7 +13,7 @@ import { supabase } from "@/supabase";
 import { BubbleType, LevelType, StyleType, WishEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
-import { SectionListData, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface ExploreContentProps {
@@ -88,7 +88,7 @@ function ExploreContent({ style, level }: ExploreContentProps) {
     />
   );
 
-  const sections: SectionListData<BubbleType[] | WishEnrichedType>[] = [
+  const sections = [
     {
       title: "Explore",
       data: [bubbles],

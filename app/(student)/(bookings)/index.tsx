@@ -12,7 +12,7 @@ import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
 import { BookingEnrichedType, ProjectEnrichedType, TimeType } from "@/types";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { SectionListData, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface BookingsContentProps {
@@ -87,7 +87,7 @@ function BookingsContent({ time }: BookingsContentProps) {
     />
   );
 
-  const sections: SectionListData<ProjectEnrichedType>[] = [
+  const sections = [
     {
       title: "Bookings",
       data: projects,

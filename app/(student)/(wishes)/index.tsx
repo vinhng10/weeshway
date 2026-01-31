@@ -30,7 +30,7 @@ import {
 } from "@/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { SectionListData, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface WishesContentProps {
@@ -123,7 +123,7 @@ function WishesContent({ style, level }: WishesContentProps) {
     return { wishesWithClass, otherWishes };
   }, [data]);
 
-  const sections: SectionListData<WishRecommendationEnrichedType>[] = [
+  const sections = [
     {
       title: "Class Available",
       data: wishesWithClass,
@@ -204,7 +204,7 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
     />
   );
 
-  const sections: SectionListData<ProjectEnrichedType>[] = [
+  const sections = [
     {
       title: "Watchings",
       data: watchings.map((watching) => watching.project),

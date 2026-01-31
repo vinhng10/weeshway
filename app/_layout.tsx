@@ -30,7 +30,6 @@ function RootNavigator() {
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const initialize = useAuth((state) => state.initialize);
   const profile = useAuth((state) => state.profile);
-  const fetchExchangeRates = useLocales((state) => state.fetchExchangeRates);
   const country = useLocales((state) => state.country);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const pause = useAudioPlayerStore((state) => state.pause);
@@ -50,11 +49,6 @@ function RootNavigator() {
     const unsubscribe = initialize();
     return unsubscribe;
   }, [initialize]);
-
-  // Initialize exchange rates on mount
-  useEffect(() => {
-    fetchExchangeRates();
-  }, [fetchExchangeRates]);
 
   // Sync location once when user is logged in
   useEffect(() => {

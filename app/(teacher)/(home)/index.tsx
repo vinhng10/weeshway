@@ -17,7 +17,7 @@ import {
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType, StatsType } from "@/types";
 import { router } from "expo-router";
-import { SectionListData, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function HomeContent() {
@@ -61,7 +61,7 @@ function HomeContent() {
     data: stats,
     refetch: refetchStats,
     isRefetching: isRefetchingStats,
-  } = useSuspenseQuery<StatsType[][]>({
+  } = useSuspenseQuery({
     queryKey: ["projects", "stats"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -70,32 +70,29 @@ function HomeContent() {
         .eq("user_id", profile?.id);
 
       if (error) throw error;
-      return [data];
+
+      const stats = data as StatsType[];
+      const amounts = await Promise.all(
+        stats.map((s) => exchangeMoney(s.totalEarnings, s.currency))
+      );
+      const totalEarnings = amounts.reduce((a, b) => a + b, 0);
+      const bookingCount = stats.reduce((sum, s) => sum + s.bookingCount, 0);
+
+      return { totalEarnings, bookingCount };
     },
   });
 
-  const renderStats = (data: StatsType[]) => {
-    let totalEarnings = 0;
-    let bookingCount = 0;
-
-    for (let i = 0; i < data.length; i++) {
-      const stats = data[i];
-      totalEarnings += exchangeMoney(stats.totalEarnings, stats.currency);
-      bookingCount += stats.bookingCount;
-    }
-
-    return (
-      <View style={styles.statsContainer}>
-        <ThemedText color="dimmed">Earnings This Month</ThemedText>
-        <ThemedText type="h1" color="primary">
-          {formatMoney(totalEarnings)}
-        </ThemedText>
-        <ThemedText type="h3" color="dimmed">
-          {bookingCount} {bookingCount > 1 ? "bookings" : "booking"}
-        </ThemedText>
-      </View>
-    );
-  };
+  const renderStats = (data: { totalEarnings: number; bookingCount: number }) => (
+    <View style={styles.statsContainer}>
+      <ThemedText color="dimmed">Earnings This Month</ThemedText>
+      <ThemedText type="h1" color="primary">
+        {formatMoney(data.totalEarnings)}
+      </ThemedText>
+      <ThemedText type="h3" color="dimmed">
+        {data.bookingCount} {data.bookingCount > 1 ? "bookings" : "booking"}
+      </ThemedText>
+    </View>
+  );
 
   const renderTile = (data: ProjectEnrichedType) => (
     <Tile
@@ -111,10 +108,10 @@ function HomeContent() {
     />
   );
 
-  const sections: SectionListData<ProjectEnrichedType | StatsType[]>[] = [
+  const sections = [
     {
       title: "Overview",
-      data: stats,
+      data: [stats],
       render: renderStats,
     },
     {

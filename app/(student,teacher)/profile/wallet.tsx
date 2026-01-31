@@ -132,7 +132,7 @@ function StudentWalletContent() {
     );
   };
 
-  const sections: SectionListData<PaymentMethod>[] = [
+  const sections = [
     {
       title: "Payment Methods",
       data: data,
@@ -187,9 +187,8 @@ function TeacherWalletContent() {
   const { data, refetch, isRefetching } = useSuspenseQuery<AccountResponse>({
     queryKey: ["profile", "stripe"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke<AccountResponse>(
-        "account"
-      );
+      const { data, error } =
+        await supabase.functions.invoke<AccountResponse>("account");
       if (error) throw error;
       if (!data) throw new Error("Failed to retrieve account");
       return data;
@@ -228,9 +227,8 @@ function TeacherWalletContent() {
     if (!profile?.stripeAccountId || !onboardingComplete) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke<StripeResponse>(
-        "dashboard"
-      );
+      const { data, error } =
+        await supabase.functions.invoke<StripeResponse>("dashboard");
 
       if (error) throw error;
 

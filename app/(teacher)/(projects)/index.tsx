@@ -22,7 +22,7 @@ import {
 } from "@/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { SectionListData, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface ProjectsContentProps {
@@ -90,13 +90,11 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
       metadata={`${data.style} • ${data.level}`}
       previewUrl={data.song.previewUrl}
       status={<ProjectStatus data={data} />}
-      onPress={() =>
-        router.navigate(`./projects/${data.id}`)
-      }
+      onPress={() => router.navigate(`./projects/${data.id}`)}
     />
   );
 
-  const sections: SectionListData<ProjectEnrichedType>[] = [
+  const sections = [
     {
       title: "This Week",
       data: thisWeekProjects,

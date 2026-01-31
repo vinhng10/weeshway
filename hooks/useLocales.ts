@@ -4,27 +4,29 @@ import { create } from "zustand";
 interface LocaleState {
   currency: string;
   country: string;
-  exchangeRates: Record<string, number>;
-  fetchExchangeRates: () => Promise<void>;
+  ratesCache: Record<string, Record<string, number>>;
   formatMoney: (amount?: number, fromCurrency?: string) => string;
-  exchangeMoney: (amount?: number, fromCurrency?: string) => number;
+  exchangeMoney: (
+    amount?: number,
+    fromCurrency?: string,
+    toCurrency?: string
+  ) => Promise<number>;
 }
 
 const locale = getLocales()[0];
 
+async function fetchRates(base: string): Promise<Record<string, number>> {
+  const response = await fetch(
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${base.toLowerCase()}.json`
+  );
+  const data = await response.json();
+  return data[base.toLowerCase()];
+}
+
 export const useLocales = create<LocaleState>((set, get) => ({
   currency: locale.currencyCode ?? "USD",
   country: locale.regionCode ?? "US",
-  exchangeRates: {},
-
-  fetchExchangeRates: async () => {
-    const currency = get().currency;
-    const response = await fetch(
-      `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currency.toLowerCase()}.json`
-    );
-    const data = await response.json();
-    set({ exchangeRates: data[currency.toLowerCase()] });
-  },
+  ratesCache: {},
 
   formatMoney: (amount?: number, currency?: string) => {
     if (!amount) amount = 0;
@@ -37,17 +39,28 @@ export const useLocales = create<LocaleState>((set, get) => ({
     return formatter.format(amount * 0.01);
   },
 
-  exchangeMoney: (amount?: number, fromCurrency?: string) => {
+  exchangeMoney: async (
+    amount?: number,
+    fromCurrency?: string,
+    toCurrency?: string
+  ) => {
     if (!amount) return 0;
-    const { currency, exchangeRates } = get();
+    const { currency, ratesCache } = get();
     if (!fromCurrency) fromCurrency = currency;
+    if (!toCurrency) toCurrency = currency;
+    if (fromCurrency === toCurrency) return amount;
 
-    const rate = exchangeRates[fromCurrency.toLowerCase()];
+    const key = fromCurrency.toLowerCase();
+    let rates = ratesCache[key];
+
+    if (!rates) {
+      rates = await fetchRates(fromCurrency);
+      set({ ratesCache: { ...get().ratesCache, [key]: rates } });
+    }
+
+    const rate = rates[toCurrency.toLowerCase()];
     if (!rate) return amount;
 
-    // Convert from foreign currency to user's currency
-    // exchangeRates[fromCurrency] is the rate FROM userCurrency TO fromCurrency
-    // So to convert FROM fromCurrency TO userCurrency, we need 1 / rate
-    return (amount * 100) / (rate * 100);
+    return amount * rate;
   },
 }));

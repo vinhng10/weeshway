@@ -9,21 +9,21 @@ import { ThemedText } from "./themed-text";
 
 // Extend SectionListData to include a render function
 
-interface SectionListViewProps<ItemT> {
-  sections: ReadonlyArray<SectionListData<ItemT>>;
+interface SectionListViewProps {
+  sections: ReadonlyArray<SectionListData<any>>;
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   refetch?: () => void;
   isRefetching?: boolean;
 }
 
-export function SectionListView<ItemT>({
+export function SectionListView({
   sections,
   hasNextPage,
   fetchNextPage,
   refetch,
   isRefetching,
-}: SectionListViewProps<ItemT>) {
+}: SectionListViewProps) {
   return (
     <SectionList
       sections={sections.filter((section) => section.data.length > 0)}

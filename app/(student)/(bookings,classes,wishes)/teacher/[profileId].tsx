@@ -13,7 +13,7 @@ import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
-import { SectionListData, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function TeacherProfileContent() {
@@ -97,9 +97,7 @@ function TeacherProfileContent() {
     />
   );
 
-  const sections: SectionListData<
-    ProfileEnrichedType | ProjectEnrichedType | string[]
-  >[] = [
+  const sections = [
     {
       data: [profile],
       render: renderProfile,

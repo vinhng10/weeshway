@@ -25,7 +25,7 @@ import {
 } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
-import { SectionListData, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 interface ClassesContentProps {
@@ -128,20 +128,18 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
     />
   );
 
-  const sections: SectionListData<
-    ProjectEnrichedType | ProjectEnrichedType[]
-  >[] = [
-      {
-        title: "You might like",
-        data: recommendations,
-        render: renderCarousel,
-      },
-      {
-        title: "Upcoming",
-        data: projects,
-        render: renderTile,
-      },
-    ];
+  const sections = [
+    {
+      title: "You might like",
+      data: recommendations,
+      render: renderCarousel,
+    },
+    {
+      title: "Upcoming",
+      data: projects,
+      render: renderTile,
+    },
+  ];
 
   return (
     <SectionListView
