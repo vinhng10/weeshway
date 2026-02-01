@@ -1,10 +1,52 @@
 import Stripe from "stripe";
 import { z } from "zod";
-import { authenticateRequest } from "../_shared/auth.ts";
+import { authenticateRequest, createServiceRoleClient } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
+
+type Fees = { spotFee: number; stripeFee: number; usdRates: Record<string, number> };
+
+async function getFees(): Promise<Fees> {
+  const defaults = { spotFee: 50, stripeFee: 5, usdRates: {} as Record<string, number> };
+  try {
+    const supabase = createServiceRoleClient();
+    const [{ data }, ratesRes] = await Promise.all([
+      supabase.from("fees").select("key, value"),
+      fetch(
+        "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json"
+      ),
+    ]);
+    const rates = await ratesRes.json();
+    const map = Object.fromEntries(
+      (data ?? []).map((r: { key: string; value: number }) => [r.key, r.value])
+    );
+    return {
+      spotFee: map.spot_fee ?? defaults.spotFee,
+      stripeFee: map.stripe_fee ?? defaults.stripeFee,
+      usdRates: rates.usd ?? {},
+    };
+  } catch {
+    return defaults;
+  }
+}
+
+// Triangulate any pair through USD: rate(A→B) = rate(USD→B) / rate(USD→A)
+function exchange(
+  amount: number,
+  fromCurrency: string,
+  toCurrency: string,
+  usdRates: Record<string, number>
+): number {
+  if (fromCurrency.toLowerCase() === toCurrency.toLowerCase()) return amount;
+  const from = fromCurrency.toLowerCase();
+  const to = toCurrency.toLowerCase();
+  const rateFrom = from === "usd" ? 1 : usdRates[from];
+  const rateTo = to === "usd" ? 1 : usdRates[to];
+  if (!rateFrom || !rateTo) return amount;
+  return Math.round(amount * (rateTo / rateFrom));
+}
 
 const requestSchema = z.object({
   projectId: z.number().positive(),
@@ -87,10 +129,12 @@ Deno.serve(async (req) => {
     }
 
     // 6. Calculate Financials
+    const fees = await getFees();
+    const feePerSpot = exchange(fees.spotFee, "USD", project.currency, fees.usdRates);
     const spotAmount = project.price * spots;
-    const feeAmount = 50 * spots;
+    const feeAmount = feePerSpot * spots;
     const totalAmount = spotAmount + feeAmount;
-    const fee = Math.round(totalAmount * 0.05) + feeAmount;
+    const fee = Math.round(totalAmount * (fees.stripeFee / 100)) + feeAmount;
 
     // 7. Execute Stripe Operations
     const session = await stripe.customerSessions.create({

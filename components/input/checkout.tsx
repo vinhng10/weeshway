@@ -35,6 +35,8 @@ export function Checkout({
 }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const formatMoney = useLocales((state) => state.formatMoney);
+  const spotFee = useLocales((state) => state.spotFee);
+  const exchange = useLocales((state) => state.exchange);
 
   // States to manage separate stages
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,7 @@ export function Checkout({
   const currency = project.currency;
   const amount = project.price ?? 0;
   const spotAmount = amount * spots;
-  const feeAmount = 50 * spots;
+  const feeAmount = exchange(spotFee, "USD", currency) * spots;
   const totalAmount = spotAmount + feeAmount;
 
   const fetchPaymentSheetParams = async () => {

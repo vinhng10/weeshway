@@ -31,6 +31,7 @@ function RootNavigator() {
   const initialize = useAuth((state) => state.initialize);
   const profile = useAuth((state) => state.profile);
   const country = useLocales((state) => state.country);
+  const initFees = useLocales((state) => state.initFees);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const pause = useAudioPlayerStore((state) => state.pause);
   const player = useAudioPlayer();
@@ -49,6 +50,11 @@ function RootNavigator() {
     const unsubscribe = initialize();
     return unsubscribe;
   }, [initialize]);
+
+  // Fetch spot fee and USD exchange rates on mount
+  useEffect(() => {
+    initFees();
+  }, [initFees]);
 
   // Sync location once when user is logged in
   useEffect(() => {

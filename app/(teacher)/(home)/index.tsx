@@ -23,7 +23,8 @@ import { StyleSheet } from "react-native-unistyles";
 function HomeContent() {
   const profile = useAuth((state) => state.profile);
   const formatMoney = useLocales((state) => state.formatMoney);
-  const exchangeMoney = useLocales((state) => state.exchangeMoney);
+  const exchange = useLocales((state) => state.exchange);
+  const currency = useLocales((state) => state.currency);
 
   const {
     data: projects,
@@ -70,29 +71,29 @@ function HomeContent() {
         .eq("user_id", profile?.id);
 
       if (error) throw error;
-
-      const stats = data as StatsType[];
-      const amounts = await Promise.all(
-        stats.map((s) => exchangeMoney(s.totalEarnings, s.currency))
-      );
-      const totalEarnings = amounts.reduce((a, b) => a + b, 0);
-      const bookingCount = stats.reduce((sum, s) => sum + s.bookingCount, 0);
-
-      return { totalEarnings, bookingCount };
+      return [data];
     },
   });
 
-  const renderStats = (data: { totalEarnings: number; bookingCount: number }) => (
-    <View style={styles.statsContainer}>
-      <ThemedText color="dimmed">Earnings This Month</ThemedText>
-      <ThemedText type="h1" color="primary">
-        {formatMoney(data.totalEarnings)}
-      </ThemedText>
-      <ThemedText type="h3" color="dimmed">
-        {data.bookingCount} {data.bookingCount > 1 ? "bookings" : "booking"}
-      </ThemedText>
-    </View>
-  );
+  const renderStats = (data: StatsType[]) => {
+    const totalEarnings = data.reduce(
+      (sum, s) => sum + exchange(s.totalEarnings, s.currency, currency),
+      0
+    );
+    const bookingCount = data.reduce((sum, s) => sum + s.bookingCount, 0);
+
+    return (
+      <View style={styles.statsContainer}>
+        <ThemedText color="dimmed">Earnings This Month</ThemedText>
+        <ThemedText type="h1" color="primary">
+          {formatMoney(totalEarnings)}
+        </ThemedText>
+        <ThemedText type="h3" color="dimmed">
+          {bookingCount} {bookingCount > 1 ? "bookings" : "booking"}
+        </ThemedText>
+      </View>
+    );
+  };
 
   const renderTile = (data: ProjectEnrichedType) => (
     <Tile
@@ -111,7 +112,7 @@ function HomeContent() {
   const sections = [
     {
       title: "Overview",
-      data: [stats],
+      data: stats,
       render: renderStats,
     },
     {
