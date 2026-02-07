@@ -49,3 +49,5 @@ dataconnect
 *.log
 *.pte
 mocks
+snippets
+backups

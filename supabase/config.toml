@@ -116,11 +116,6 @@ file_size_limit = "50MiB"
 allowed_mime_types = ["image/*", "video/*"]
 objects_path = "./profiles"
 
-[storage.buckets.locations]
-public = true
-file_size_limit = "50MiB"
-allowed_mime_types = ["image/*"]
-objects_path = "./locations"
 
 [auth]
 enabled = true
