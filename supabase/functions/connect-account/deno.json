@@ -2,8 +2,8 @@
   "imports": {
     "stripe": "jsr:stripe",
     "zod": "jsr:zod",
-    "jose": "jsr:@panva/jose",
-    "supabase": "jsr:@supabase/supabase-js",
-    "postgres": "jsr:postgres"
+    "jose": "npm:jose",
+    "supabase": "npm:@supabase/supabase-js",
+    "postgres": "npm:postgres"
   }
 }
