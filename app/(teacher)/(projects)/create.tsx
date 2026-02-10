@@ -128,7 +128,9 @@ export default function CreateProject() {
       if (error) throw error;
 
       // Invalidate and refetch the project query
-      await queryClient.invalidateQueries({ queryKey: ["projects"] });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("projects"),
+      });
 
       // Reset temporary data store before navigating
       reset();

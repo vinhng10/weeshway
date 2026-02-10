@@ -113,7 +113,9 @@ function ProjectContent() {
         .eq("id", projectId);
       if (error) throw error;
 
-      await queryClient.invalidateQueries({ queryKey: ["projects"] });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("projects"),
+      });
       router.back();
     } catch (error) {
       console.error("Error saving project:", error);

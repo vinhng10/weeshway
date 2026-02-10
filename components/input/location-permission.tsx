@@ -65,7 +65,9 @@ export const LocationPermission = () => {
     } finally {
       // This is the source of truth that prevents it from ever showing again
       setPrompted("location", true);
-      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("classes"),
+      });
     }
   };
 

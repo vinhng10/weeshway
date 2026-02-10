@@ -57,7 +57,9 @@ export const ProjectCard = ({ data }: CardProps) => {
 
       if (error) throw error;
 
-      await queryClient.invalidateQueries({ queryKey: ["classes"] });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("classes"),
+      });
     } catch (error: any) {
       console.error("Error toggling wish:", error);
     }
@@ -65,7 +67,9 @@ export const ProjectCard = ({ data }: CardProps) => {
 
   const handleCheckoutExit = async () => {
     setVisible(false);
-    await queryClient.invalidateQueries({ queryKey: ["classes"] });
+    await queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey.includes("classes"),
+    });
   };
 
   const handlePress = () => {

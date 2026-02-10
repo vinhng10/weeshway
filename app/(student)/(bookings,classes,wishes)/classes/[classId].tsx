@@ -84,7 +84,9 @@ function ClassContent() {
           });
 
       if (error) throw error;
-      await queryClient.invalidateQueries({ queryKey: ["classes"] });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("classes"),
+      });
     } catch (error) {
       console.error("Error toggling wish:", error);
     }
@@ -92,7 +94,9 @@ function ClassContent() {
 
   const handleCheckoutExit = async () => {
     setVisible(false);
-    await queryClient.invalidateQueries({ queryKey: ["classes"] });
+    await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("classes"),
+      });
   };
 
   const handleRefund = async () => {
@@ -104,7 +108,9 @@ function ClassContent() {
         .eq("id", userBooking.id)
         .throwOnError();
 
-      await queryClient.invalidateQueries({ queryKey: ["classes"] });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("classes"),
+      });
     } catch (error) {
       console.error("Refund error:", error);
     }

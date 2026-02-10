@@ -60,7 +60,9 @@ export default function MakeAWish() {
       }
 
       // Invalidate wishes queries to refresh the list
-      await queryClient.invalidateQueries({ queryKey: ["wishes"] });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("wishes"),
+      });
 
       // Navigate back or show success message
       router.back();

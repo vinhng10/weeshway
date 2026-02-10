@@ -18,7 +18,7 @@ function WishContent() {
 
   const { data, refetch, isRefetching } =
     useSuspenseQuery<WishRecommendationEnrichedType>({
-      queryKey: ["wishes", "recommendations", wishId],
+      queryKey: ["wishes", "recommendations", "classes", wishId],
       queryFn: async () => {
         const { data, error } = await supabase
           .from("wishes")
