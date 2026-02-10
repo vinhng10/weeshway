@@ -2,6 +2,7 @@ import {
   Boundary,
   Carousel,
   Header,
+  TextInput,
   ThemedText,
   Tile,
   WishInfo,
@@ -71,9 +72,12 @@ function WishContent() {
               metadata={`${data.style} • ${data.level}`}
               previewUrl={data.song.previewUrl}
             />
-            <View style={styles.descriptionContainer}>
-              <ThemedText>{data.description}</ThemedText>
-            </View>
+            <TextInput
+              multiline
+              numberOfLines={4}
+              value={data.description}
+              editable={false}
+            />
           </View>
         </>
       ) : (

@@ -32,6 +32,8 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.foreground,
     borderRadius: theme.gap(2),
     padding: theme.gap(2),
+    includeFontPadding: false,
+    textAlignVertical: "center",
     variants: {
       multiline: {
         true: {

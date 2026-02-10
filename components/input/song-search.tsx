@@ -64,10 +64,13 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
 
   return (
     <>
-      <TextInput
-        placeholder="What song is in your mind?"
+      <ThemedText
+        color="dimmed"
         onPress={() => setVisible(true)}
-      />
+        style={styles.container}
+      >
+        What song is in your mind?
+      </ThemedText>
 
       <Modal
         visible={visible}
@@ -112,6 +115,11 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
 };
 
 const styles = StyleSheet.create((theme, rt) => ({
+  container: {
+    backgroundColor: theme.colors.foreground,
+    padding: theme.gap(2),
+    borderRadius: theme.gap(2),
+  },
   modalContainer: {
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),

@@ -2,7 +2,8 @@ import { Button, TextInput, ThemedText } from "@/components";
 import { useAuth } from "@/hooks";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function CreateAccountScreen() {
@@ -40,9 +41,10 @@ export default function CreateAccountScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <ThemedText type="h1" style={styles.title}>
           Sign Up
@@ -103,7 +105,7 @@ export default function CreateAccountScreen() {
             </ThemedText>
           </Link>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

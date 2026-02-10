@@ -121,7 +121,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
       onPress={handlePress}
       editable={editable}
     >
-      <ThemedText type="h5">{value}</ThemedText>
+      <ThemedText type="h5">{value || " "}</ThemedText>
       {options && onValueChange && (
         <Options
           visible={visible}
