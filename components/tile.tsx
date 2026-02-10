@@ -2,7 +2,7 @@ import { WISH_STATUS } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks";
 import { WishStatusType } from "@/types";
 import { ImageProps } from "expo-image";
-import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
+import { LinearGradientProps } from "expo-linear-gradient";
 import React, { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -55,11 +55,11 @@ export const Tile: React.FunctionComponent<TileProps> = ({
 
   return (
     <Pressable onPress={onPress}>
-      <LinearGradient
+      <View
         style={styles.container}
-        colors={getBackgroundColor()}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+        // colors={getBackgroundColor()}
+        // start={{ x: 0, y: 0 }}
+        // end={{ x: 1, y: 0 }}
       >
         <View style={styles.leftContainer}>
           <View style={styles.avatarContainer}>
@@ -94,7 +94,7 @@ export const Tile: React.FunctionComponent<TileProps> = ({
           <View>{avatar}</View>
           <View>{status}</View>
         </View>
-      </LinearGradient>
+      </View>
     </Pressable>
   );
 };
@@ -106,6 +106,7 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "stretch",
     padding: theme.gap(1),
     borderRadius: theme.gap(2),
+    backgroundColor: theme.colors.foreground,
   },
   leftContainer: {
     flex: 1,
