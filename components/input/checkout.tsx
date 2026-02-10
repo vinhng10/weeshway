@@ -6,7 +6,7 @@ import { PaymentMethodLayout, useStripe } from "@stripe/stripe-react-native";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import { Modal, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Header } from "../header";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
@@ -34,6 +34,7 @@ export function Checkout({
   project,
 }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { theme } = useUnistyles();
   const formatMoney = useLocales((state) => state.formatMoney);
   const spotFee = useLocales((state) => state.spotFee);
   const exchange = useLocales((state) => state.exchange);
@@ -110,6 +111,33 @@ export function Checkout({
           returnURL: RETURN_URL,
           paymentMethodOrder: ["card"],
           paymentMethodLayout: PaymentMethodLayout.Horizontal,
+          appearance: {
+            colors: {
+              primary: theme.colors.primary,
+              background: theme.colors.background,
+              componentBackground: theme.colors.foreground,
+              componentBorder: theme.colors.dimmed,
+              componentDivider: theme.colors.dimmed,
+              primaryText: theme.colors.typography,
+              secondaryText: theme.colors.tint,
+              componentText: theme.colors.typography,
+              placeholderText: theme.colors.tint,
+              icon: theme.colors.tint,
+              error: theme.colors.danger,
+            },
+            shapes: {
+              borderRadius: theme.gap(2),
+            },
+            primaryButton: {
+              colors: {
+                background: theme.colors.typography,
+                text: theme.colors.background,
+              },
+              shapes: {
+                borderRadius: theme.gap(2),
+              },
+            },
+          },
         });
 
         if (error) throw new Error(error.message);
