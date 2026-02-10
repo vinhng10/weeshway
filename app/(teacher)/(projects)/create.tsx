@@ -95,6 +95,11 @@ export default function CreateProject() {
       return;
     }
 
+    if (status === PROJECT_STATUS.RELEASE && !profile.onboardingComplete) {
+      console.error("Error: Stripe onboarding incomplete");
+      return;
+    }
+
     try {
       const { error } = await supabase.rpc("create_project_with_song", {
         p_song_data: {

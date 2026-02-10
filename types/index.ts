@@ -47,6 +47,7 @@ export type ProfileType = {
   avatarUrl?: string;
   videoUrls?: string[];
   stripeAccountId: string;
+  onboardingComplete: boolean;
   location?: string;
   country?: string;
   expoPushToken?: string;

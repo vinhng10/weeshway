@@ -41,7 +41,7 @@ function ProjectContent() {
         const { data, error } = await supabase
           .from("projects")
           .select(
-            `*, song:songs(*), location:locations(*), bookings:bookings(*)`,
+            `*, song:songs(*), location:locations(*), bookings:bookings(*)`
           )
           .eq("id", projectId)
           .eq("user_id", profile?.id)
@@ -50,7 +50,7 @@ function ProjectContent() {
         if (error) throw error;
         return data;
       },
-    },
+    }
   );
 
   // Form State
@@ -60,14 +60,14 @@ function ProjectContent() {
   const [style, setStyle] = useState(data.style);
   const [level, setLevel] = useState(data.level);
   const [price, setPrice] = useState(
-    data.price ? (data.price * 0.01).toString() : "",
+    data.price ? (data.price * 0.01).toString() : ""
   );
   const [spots, setSpots] = useState(data.spots?.toString() ?? "");
   const [startAt, setStartAt] = useState(
-    data.startAt ? new Date(data.startAt) : undefined,
+    data.startAt ? new Date(data.startAt) : undefined
   );
   const [endAt, setEndAt] = useState(
-    data.endAt ? new Date(data.endAt) : undefined,
+    data.endAt ? new Date(data.endAt) : undefined
   );
   const [location, setLocation] = useState(data.location);
 
@@ -77,6 +77,7 @@ function ProjectContent() {
   const canEditDetails = !wasReleased && !wasCanceled;
   const canEditStatus = !wasCanceled;
   const isReleasable = !!(
+    profile?.onboardingComplete &&
     style &&
     level &&
     Number(price) > 0 &&

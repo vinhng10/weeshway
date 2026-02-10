@@ -10,7 +10,8 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 Deno.serve(async (req) => {
   try {
     // Authenticate and get Stripe account ID
-    const { stripeAccountId } = await authenticateAndGetStripeAccount(req);
+    const { supabase, user, stripeAccountId } =
+      await authenticateAndGetStripeAccount(req);
 
     // Retrieve the connected account with external accounts expanded
     const account = await stripe.accounts.retrieve(stripeAccountId);
@@ -33,6 +34,14 @@ Deno.serve(async (req) => {
             last4: bankAccount.last4,
           };
         }) || [];
+
+    // Sync onboarding status to profile
+    if (onboardingComplete) {
+      await supabase
+        .from("profiles")
+        .update({ onboarding_complete: true })
+        .eq("id", user.id);
+    }
 
     return jsonResponse({
       onboardingComplete,
