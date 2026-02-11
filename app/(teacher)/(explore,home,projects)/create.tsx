@@ -86,17 +86,29 @@ export default function CreateProject() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      useAlertStore.getState().show("Login Required", "Please sign in to your account to continue.");
+      useAlertStore
+        .getState()
+        .show("Login Required", "Please sign in to your account to continue.");
       return;
     }
 
     if (!song) {
-      useAlertStore.getState().show("Song Required", "Please search and select a song before creating a project.");
+      useAlertStore
+        .getState()
+        .show(
+          "Song Required",
+          "Please search and select a song before creating a project."
+        );
       return;
     }
 
     if (status === PROJECT_STATUS.RELEASE && !profile.onboardingComplete) {
-      useAlertStore.getState().show("Setup Incomplete", "Please complete your Stripe payment setup in Wallet before releasing a project.");
+      useAlertStore
+        .getState()
+        .show(
+          "Setup Incomplete",
+          "Please complete your Stripe payment setup in Wallet before releasing a project."
+        );
       return;
     }
 
@@ -138,7 +150,12 @@ export default function CreateProject() {
       // Navigate back to projects list
       router.back();
     } catch {
-      useAlertStore.getState().show("Creation Failed", "Couldn't create your project. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Creation Failed",
+          "Couldn't create your project. Please try again."
+        );
     }
   };
 
