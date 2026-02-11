@@ -13,7 +13,7 @@ import {
   Tile,
 } from "@/components";
 import { LEVEL, PROJECT_STATUS, STYLE } from "@/constants";
-import { useAuth, useLocales, useTempDataStore } from "@/hooks";
+import { useAlertStore, useAuth, useLocales, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   LevelType,
@@ -86,17 +86,17 @@ export default function CreateProject() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      console.error("Error: User not logged in");
+      useAlertStore.getState().show("Error", "Please log in to continue.");
       return;
     }
 
     if (!song) {
-      console.error("Error: Song is required");
+      useAlertStore.getState().show("Error", "Please select a song.");
       return;
     }
 
     if (status === PROJECT_STATUS.RELEASE && !profile.onboardingComplete) {
-      console.error("Error: Stripe onboarding incomplete");
+      useAlertStore.getState().show("Error", "Please complete Stripe onboarding first.");
       return;
     }
 
@@ -137,9 +137,8 @@ export default function CreateProject() {
 
       // Navigate back to projects list
       router.back();
-    } catch (error: any) {
-      console.error("Error creating project:", error);
-      // You might want to show an error message to the user here
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to create project. Please try again.");
     }
   };
 

@@ -1,3 +1,4 @@
+import { useAlertStore } from "@/hooks";
 import { Image, type ImageProps } from "expo-image";
 import {
   launchImageLibraryAsync,
@@ -32,7 +33,7 @@ export function Avatar({
       // Request permissions
       const { status } = await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        console.error("Error requesting media library permissions:", status);
+        useAlertStore.getState().show("Error", "Media library permission is required.");
         return;
       }
 
@@ -49,8 +50,8 @@ export function Avatar({
         const uri = asset.uri;
         onSourceChange(uri);
       }
-    } catch (error) {
-      console.error("Error picking image:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to pick image. Please try again.");
     }
   };
 

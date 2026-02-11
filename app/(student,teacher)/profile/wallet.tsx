@@ -8,7 +8,7 @@ import {
   ThemedText,
 } from "@/components";
 import { RETURN_URL, ROLE } from "@/constants";
-import { useAuth, useLocales, useRole, useSuspenseQuery } from "@/hooks";
+import { useAlertStore, useAuth, useLocales, useRole, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   ClientSecretProvider,
@@ -106,7 +106,7 @@ function StudentWalletContent() {
         });
 
         if (error) {
-          console.error("CustomerSheet initialization error:", error);
+          useAlertStore.getState().show("Error", "Failed to initialize payment setup. Please try again.");
           return;
         }
         setIsInitialized(true);
@@ -116,8 +116,8 @@ function StudentWalletContent() {
       if (error && error.code !== CustomerSheetError.Canceled) throw error;
 
       await refetch();
-    } catch (err: any) {
-      console.error("Error presenting CustomerSheet:", err);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to open payment setup. Please try again.");
     }
   };
 
@@ -218,8 +218,8 @@ function TeacherWalletContent() {
 
       await refetch();
       await fetchProfile();
-    } catch (error: any) {
-      console.error("Error launching onboarding:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to start onboarding. Please try again.");
     }
   };
 
@@ -239,8 +239,8 @@ function TeacherWalletContent() {
       }
 
       await WebBrowser.openAuthSessionAsync(dashboardUrl, RETURN_URL);
-    } catch (error: any) {
-      console.error("Error opening dashboard:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to open dashboard. Please try again.");
     }
   };
 

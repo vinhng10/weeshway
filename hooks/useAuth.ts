@@ -1,4 +1,5 @@
 import { supabase } from "@/supabase";
+import { useAlertStore } from "./useAlertStore";
 import { ProfileType } from "@/types";
 import { Session } from "@supabase/supabase-js";
 import camelcaseKeys from "camelcase-keys";
@@ -41,7 +42,7 @@ export const useAuth = create<AuthState>((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      console.error("Profile fetch failed:", error);
+      useAlertStore.getState().show("Error", "Failed to load profile. Please try again.");
       set({ profile: null, isLoading: false });
     }
   },

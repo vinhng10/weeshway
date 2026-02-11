@@ -1,5 +1,5 @@
 import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
-import { useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
+import { useAlertStore, useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -60,8 +60,8 @@ export const ProjectCard = ({ data }: CardProps) => {
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("classes"),
       });
-    } catch (error: any) {
-      console.error("Error toggling wish:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to update watch list. Please try again.");
     }
   };
 

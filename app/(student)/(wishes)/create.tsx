@@ -7,7 +7,7 @@ import {
   TextInput,
 } from "@/components";
 import { LEVEL, STYLE } from "@/constants";
-import { useAuth } from "@/hooks";
+import { useAlertStore, useAuth } from "@/hooks";
 import { supabase } from "@/supabase";
 import { LevelType, SongType, StyleType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,12 +29,12 @@ export default function MakeAWish() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      console.error("Error: User not logged in");
+      useAlertStore.getState().show("Error", "Please log in to continue.");
       return;
     }
 
     if (!song) {
-      console.error("Error: Song is required");
+      useAlertStore.getState().show("Error", "Please select a song.");
       return;
     }
 
@@ -66,8 +66,8 @@ export default function MakeAWish() {
 
       // Navigate back or show success message
       router.back();
-    } catch (error: any) {
-      console.error("Error creating wish:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to create wish. Please try again.");
     }
   };
 

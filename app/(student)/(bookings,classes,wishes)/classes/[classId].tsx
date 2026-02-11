@@ -14,7 +14,7 @@ import {
   ThemedText,
 } from "@/components";
 import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
-import { useAuth, useLocales, useSuspenseQuery } from "@/hooks";
+import { useAlertStore, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -87,8 +87,8 @@ function ClassContent() {
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("classes"),
       });
-    } catch (error) {
-      console.error("Error toggling wish:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to update watch list. Please try again.");
     }
   };
 
@@ -111,8 +111,8 @@ function ClassContent() {
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("classes"),
       });
-    } catch (error) {
-      console.error("Refund error:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to request refund. Please try again.");
     }
   };
 

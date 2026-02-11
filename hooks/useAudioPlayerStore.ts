@@ -1,4 +1,5 @@
 import { TEMPO } from "@/constants";
+import { useAlertStore } from "./useAlertStore";
 import { TrackState } from "@/hooks/useStudioStore";
 import { TempoType } from "@/types";
 import {
@@ -143,7 +144,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
         items: [{ startTime: 0, endTime: duration, selected: false }],
       };
     } catch (error) {
-      console.error("Error loading audio file:", error);
+      useAlertStore.getState().show("Error", "Failed to load audio file. Please try again.");
       return null;
     }
   },
@@ -154,7 +155,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
 
       return await get().loadAudioFromUri(result.assets[0].uri);
     } catch (error) {
-      console.error("Error picking and loading audio file:", error);
+      useAlertStore.getState().show("Error", "Failed to load audio file. Please try again.");
       return null;
     }
   },

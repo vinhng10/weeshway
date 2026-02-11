@@ -19,7 +19,7 @@ import {
   STRIPE_PAYMENT_STATUS,
   STYLE,
 } from "@/constants";
-import { useAuth, useSuspenseQuery } from "@/hooks";
+import { useAlertStore, useAuth, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType, ProjectStatusType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -117,8 +117,8 @@ function ProjectContent() {
         predicate: (query) => query.queryKey.includes("projects"),
       });
       router.back();
-    } catch (error) {
-      console.error("Error saving project:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to save project. Please try again.");
     }
   };
 

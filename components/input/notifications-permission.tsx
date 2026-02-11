@@ -97,12 +97,19 @@ export const NotificationsPermission = () => {
           </>
         )}
 
-        <Button label="Allow" onPress={() => handleAction(true)} />
-        <Button
-          outlined
-          label="Maybe Later"
-          onPress={() => handleAction(false)}
-        />
+        <View style={styles.row}>
+          <Button
+            style={styles.button}
+            outlined
+            label="Later"
+            onPress={() => handleAction(false)}
+          />
+          <Button
+            style={styles.button}
+            label="Allow"
+            onPress={() => handleAction(true)}
+          />
+        </View>
       </View>
     </Modal>
   );
@@ -121,5 +128,12 @@ const styles = StyleSheet.create((theme, rt) => ({
     borderTopRightRadius: theme.gap(2),
     gap: theme.gap(2),
     backgroundColor: theme.colors.foreground,
+  },
+  row: {
+    flexDirection: "row",
+    gap: theme.gap(2),
+  },
+  button: {
+    flex: 1,
   },
 }));

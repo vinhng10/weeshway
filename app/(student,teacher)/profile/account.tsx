@@ -6,7 +6,7 @@ import {
   TextBoxInput,
   Video,
 } from "@/components";
-import { useAuth } from "@/hooks";
+import { useAlertStore, useAuth } from "@/hooks";
 import { supabase, uploadMedia } from "@/supabase";
 import {
   launchImageLibraryAsync,
@@ -51,7 +51,7 @@ export default function Account() {
       // Request permissions
       const { status } = await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        console.error("Error requesting media library permissions:", status);
+        useAlertStore.getState().show("Error", "Media library permission is required.");
         return;
       }
 
@@ -67,8 +67,8 @@ export default function Account() {
         const uri = asset.uri;
         setVideoUrls((prev) => [...prev, uri]);
       }
-    } catch (error) {
-      console.error("Error picking video:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to pick video. Please try again.");
     }
   };
 
@@ -78,7 +78,7 @@ export default function Account() {
 
   const handleSave = async () => {
     if (!profile || !isLoggedIn) {
-      console.error("Error: User not logged in");
+      useAlertStore.getState().show("Error", "Please log in to continue.");
       return;
     }
 
@@ -125,8 +125,8 @@ export default function Account() {
 
       await fetchProfile();
       router.back();
-    } catch (error: any) {
-      console.error("Error updating profile:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to update profile. Please try again.");
     }
   };
 

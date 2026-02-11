@@ -1,4 +1,4 @@
-import { useLocationSearch } from "@/hooks";
+import { useAlertStore, useLocationSearch } from "@/hooks";
 import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
 import React, { useState } from "react";
@@ -123,8 +123,8 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
       if (onValueChange) onValueChange(location);
       setVisible(false);
       setQuery("");
-    } catch (err) {
-      console.error(err);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to select location. Please try again.");
     }
   };
 

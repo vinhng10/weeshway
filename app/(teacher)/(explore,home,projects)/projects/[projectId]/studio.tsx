@@ -1,7 +1,7 @@
 // Studio.tsx
 import { ControlBar, DisplayArea, Header, Track } from "@/components";
 import { TRACK } from "@/constants";
-import { createStudioStore, useAudioPlayerStore } from "@/hooks";
+import { createStudioStore, useAlertStore, useAudioPlayerStore } from "@/hooks";
 import { RecordingPresets, useAudioRecorder, useAudioRecorderState } from "expo-audio";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo } from "react";
@@ -118,8 +118,8 @@ export default function Studio() {
         // Save the new source and items to the studio store
         initialize(trackState);
       }
-    } catch (error) {
-      console.error("Error picking audio file:", error);
+    } catch {
+      useAlertStore.getState().show("Error", "Failed to load audio file. Please try again.");
     }
   };
 

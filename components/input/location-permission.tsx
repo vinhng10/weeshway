@@ -82,11 +82,15 @@ export const LocationPermission = () => {
       <Pressable style={styles.container} onPress={() => handleAction(false)} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Explore What's Nearby</ThemedText>
-        <ThemedText type="h5" color="dimmed">Share your location to:</ThemedText>
+        <ThemedText type="h5" color="dimmed">
+          Share your location to:
+        </ThemedText>
         {role === ROLE.STUDENT ? (
           <>
-            <Bullet text={"Unlock fun classes around the corner"} />
-            <Bullet text={"Let local teachers bring your dream to life"} />
+            <Bullet text={"Find fun classes around the corner"} />
+            <Bullet
+              text={"Let local teachers bring your dream classes to life"}
+            />
           </>
         ) : (
           <>
@@ -95,12 +99,19 @@ export const LocationPermission = () => {
           </>
         )}
 
-        <Button label="Allow" onPress={() => handleAction(true)} />
-        <Button
-          outlined
-          label="Maybe Later"
-          onPress={() => handleAction(false)}
-        />
+        <View style={styles.row}>
+          <Button
+            style={styles.button}
+            outlined
+            label="Later"
+            onPress={() => handleAction(false)}
+          />
+          <Button
+            style={styles.button}
+            label="Allow"
+            onPress={() => handleAction(true)}
+          />
+        </View>
       </View>
     </Modal>
   );
@@ -119,5 +130,12 @@ const styles = StyleSheet.create((theme, rt) => ({
     borderTopRightRadius: theme.gap(2),
     gap: theme.gap(2),
     backgroundColor: theme.colors.foreground,
+  },
+  row: {
+    flexDirection: "row",
+    gap: theme.gap(2),
+  },
+  button: {
+    flex: 1,
   },
 }));
