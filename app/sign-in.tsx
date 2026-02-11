@@ -14,7 +14,7 @@ export default function SignIn() {
 
   const handleSignIn = async () => {
     if (!email || !password) {
-      setError("Please enter both email and password");
+      setError("Please enter both email and password.");
       return;
     }
 
@@ -23,7 +23,10 @@ export default function SignIn() {
     try {
       await signIn(email, password);
     } catch (error: any) {
-      setError(error.message || "Failed to sign in");
+      setError(
+        error.message ||
+          "Couldn't sign in. Please check your credentials and try again."
+      );
     }
   };
 
@@ -39,7 +42,7 @@ export default function SignIn() {
         </ThemedText>
 
         {error ? (
-          <ThemedText color="danger" style={styles.error}>
+          <ThemedText type="h5" color="danger" style={styles.error}>
             {error}
           </ThemedText>
         ) : null}
@@ -108,12 +111,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   error: {
     textAlign: "center",
-    marginBottom: theme.gap(2),
-    backgroundColor: "rgba(255, 107, 107, 0.1)",
-    padding: theme.gap(2),
-    borderRadius: theme.gap(2),
-    borderWidth: 1,
-    borderColor: "rgba(255, 107, 107, 0.2)",
   },
   signup: {
     flexDirection: "row",

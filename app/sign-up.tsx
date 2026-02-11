@@ -15,17 +15,17 @@ export default function CreateAccountScreen() {
 
   const handleSignUp = async () => {
     if (!email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
+      setError("Please fill in all fields.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Passwords don't match.");
       return;
     }
 
     if (password.length < 6) {
-      setError("Password should be at least 6 characters");
+      setError("Password must be at least 6 characters.");
       return;
     }
 
@@ -35,7 +35,7 @@ export default function CreateAccountScreen() {
       await signUp(email, password);
       router.replace("/sign-in");
     } catch (error: any) {
-      setError(error.message || "Failed to create account");
+      setError(error.message || "Couldn't create your account. Please try again.");
     }
   };
 
@@ -51,7 +51,7 @@ export default function CreateAccountScreen() {
         </ThemedText>
 
         {error ? (
-          <ThemedText color="danger" style={styles.error}>
+          <ThemedText type="h5" color="danger" style={styles.error}>
             {error}
           </ThemedText>
         ) : null}
@@ -133,12 +133,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   error: {
     textAlign: "center",
-    marginBottom: theme.gap(2),
-    backgroundColor: "rgba(255, 107, 107, 0.1)",
-    padding: theme.gap(2),
-    borderRadius: theme.gap(2),
-    borderWidth: 1,
-    borderColor: "rgba(255, 107, 107, 0.2)",
   },
   signin: {
     flexDirection: "row",
