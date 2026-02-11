@@ -88,7 +88,7 @@ function ClassContent() {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlertStore.getState().show("Error", "Failed to update watch list. Please try again.");
+      useAlertStore.getState().show("Watch List", "Couldn't update your watch list. Please try again.");
     }
   };
 
@@ -112,7 +112,7 @@ function ClassContent() {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlertStore.getState().show("Error", "Failed to request refund. Please try again.");
+      useAlertStore.getState().show("Refund Failed", "Couldn't process your refund request. Please try again.");
     }
   };
 

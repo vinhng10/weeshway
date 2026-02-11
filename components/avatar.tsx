@@ -33,7 +33,7 @@ export function Avatar({
       // Request permissions
       const { status } = await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        useAlertStore.getState().show("Error", "Media library permission is required.");
+        useAlertStore.getState().show("Permission Needed", "Please allow access to your photo library to upload an image.");
         return;
       }
 
@@ -51,7 +51,7 @@ export function Avatar({
         onSourceChange(uri);
       }
     } catch {
-      useAlertStore.getState().show("Error", "Failed to pick image. Please try again.");
+      useAlertStore.getState().show("Upload Failed", "Couldn't load your image. Please try again.");
     }
   };
 

@@ -144,7 +144,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
         items: [{ startTime: 0, endTime: duration, selected: false }],
       };
     } catch (error) {
-      useAlertStore.getState().show("Error", "Failed to load audio file. Please try again.");
+      useAlertStore.getState().show("Playback Error", "Couldn't load the audio file. Please try again.");
       return null;
     }
   },
@@ -155,7 +155,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
 
       return await get().loadAudioFromUri(result.assets[0].uri);
     } catch (error) {
-      useAlertStore.getState().show("Error", "Failed to load audio file. Please try again.");
+      useAlertStore.getState().show("Playback Error", "Couldn't load the audio file. Please try again.");
       return null;
     }
   },

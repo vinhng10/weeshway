@@ -106,7 +106,7 @@ function StudentWalletContent() {
         });
 
         if (error) {
-          useAlertStore.getState().show("Error", "Failed to initialize payment setup. Please try again.");
+          useAlertStore.getState().show("Payment Setup", "Couldn't initialize the payment setup. Please try again.");
           return;
         }
         setIsInitialized(true);
@@ -117,7 +117,7 @@ function StudentWalletContent() {
 
       await refetch();
     } catch {
-      useAlertStore.getState().show("Error", "Failed to open payment setup. Please try again.");
+      useAlertStore.getState().show("Payment Setup", "Couldn't open the payment setup. Please try again.");
     }
   };
 
@@ -219,7 +219,7 @@ function TeacherWalletContent() {
       await refetch();
       await fetchProfile();
     } catch {
-      useAlertStore.getState().show("Error", "Failed to start onboarding. Please try again.");
+      useAlertStore.getState().show("Onboarding Failed", "Couldn't start the Stripe setup. Please try again.");
     }
   };
 
@@ -240,7 +240,7 @@ function TeacherWalletContent() {
 
       await WebBrowser.openAuthSessionAsync(dashboardUrl, RETURN_URL);
     } catch {
-      useAlertStore.getState().show("Error", "Failed to open dashboard. Please try again.");
+      useAlertStore.getState().show("Dashboard Unavailable", "Couldn't open the Stripe dashboard. Please try again.");
     }
   };
 

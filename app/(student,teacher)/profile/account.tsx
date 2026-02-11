@@ -51,7 +51,7 @@ export default function Account() {
       // Request permissions
       const { status } = await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        useAlertStore.getState().show("Error", "Media library permission is required.");
+        useAlertStore.getState().show("Permission Needed", "Please allow access to your photo library to upload a video.");
         return;
       }
 
@@ -68,7 +68,7 @@ export default function Account() {
         setVideoUrls((prev) => [...prev, uri]);
       }
     } catch {
-      useAlertStore.getState().show("Error", "Failed to pick video. Please try again.");
+      useAlertStore.getState().show("Upload Failed", "Couldn't load your video. Please try again.");
     }
   };
 
@@ -78,7 +78,7 @@ export default function Account() {
 
   const handleSave = async () => {
     if (!profile || !isLoggedIn) {
-      useAlertStore.getState().show("Error", "Please log in to continue.");
+      useAlertStore.getState().show("Login Required", "Please sign in to your account to continue.");
       return;
     }
 
@@ -126,7 +126,7 @@ export default function Account() {
       await fetchProfile();
       router.back();
     } catch {
-      useAlertStore.getState().show("Error", "Failed to update profile. Please try again.");
+      useAlertStore.getState().show("Save Failed", "Couldn't save your profile changes. Please try again.");
     }
   };
 

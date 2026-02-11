@@ -124,7 +124,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
       setVisible(false);
       setQuery("");
     } catch {
-      useAlertStore.getState().show("Error", "Failed to select location. Please try again.");
+      useAlertStore.getState().show("Location Error", "Couldn't save the selected location. Please try again.");
     }
   };
 

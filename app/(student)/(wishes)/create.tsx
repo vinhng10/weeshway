@@ -29,12 +29,12 @@ export default function MakeAWish() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      useAlertStore.getState().show("Error", "Please log in to continue.");
+      useAlertStore.getState().show("Login Required", "Please sign in to your account to continue.");
       return;
     }
 
     if (!song) {
-      useAlertStore.getState().show("Error", "Please select a song.");
+      useAlertStore.getState().show("Song Required", "Please search and select a song before making a wish.");
       return;
     }
 
@@ -67,7 +67,7 @@ export default function MakeAWish() {
       // Navigate back or show success message
       router.back();
     } catch {
-      useAlertStore.getState().show("Error", "Failed to create wish. Please try again.");
+      useAlertStore.getState().show("Creation Failed", "Couldn't create your wish. Please try again.");
     }
   };
 

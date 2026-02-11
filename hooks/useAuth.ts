@@ -42,7 +42,7 @@ export const useAuth = create<AuthState>((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      useAlertStore.getState().show("Error", "Failed to load profile. Please try again.");
+      useAlertStore.getState().show("Profile Error", "Couldn't load your profile. Please try again.");
       set({ profile: null, isLoading: false });
     }
   },

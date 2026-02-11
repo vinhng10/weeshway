@@ -118,7 +118,7 @@ function ProjectContent() {
       });
       router.back();
     } catch {
-      useAlertStore.getState().show("Error", "Failed to save project. Please try again.");
+      useAlertStore.getState().show("Save Failed", "Couldn't save your project changes. Please try again.");
     }
   };
 

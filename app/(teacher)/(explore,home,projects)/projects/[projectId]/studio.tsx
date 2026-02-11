@@ -119,7 +119,7 @@ export default function Studio() {
         initialize(trackState);
       }
     } catch {
-      useAlertStore.getState().show("Error", "Failed to load audio file. Please try again.");
+      useAlertStore.getState().show("Playback Error", "Couldn't load the audio file. Please try again.");
     }
   };
 
