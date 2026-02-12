@@ -87,7 +87,7 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
       imageSource={data.song.artworkUrl}
       title={data.song.name ?? data.name}
       subtitle={data.song.artistName ?? ""}
-      metadata={`${data.style} • ${data.level}`}
+      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
       previewUrl={data.song.previewUrl}
       status={<ProjectStatus data={data} />}
       onPress={() => router.navigate(`./projects/${data.id}`)}

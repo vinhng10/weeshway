@@ -140,7 +140,7 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <ThemedText type="h1" style={styles.greeting}>
-        Hello, {profile?.fullName}!
+        Hello {profile?.fullName}!
       </ThemedText>
       <Boundary>
         <HomeContent />

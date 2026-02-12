@@ -83,7 +83,7 @@ function ExploreContent({ style, level }: ExploreContentProps) {
       imageSource={data.song.artworkUrl}
       title={data.song.name}
       subtitle={data.song.artistName}
-      metadata={`${data.style} • ${data.level}`}
+      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
       previewUrl={data.song.previewUrl}
       onPress={() => router.navigate(`./wishes/${data.id}`)}
     />

@@ -89,7 +89,7 @@ function TeacherProfileContent() {
       imageSource={data.song.artworkUrl}
       title={data.song.name}
       subtitle={data.song.artistName}
-      metadata={`${data.style} • ${data.level}`}
+      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
       previewUrl={data.song.previewUrl}
       status={<ProjectStatus data={data} />}
       onPress={() => router.dismissTo(`../classes/${data.id}`)}

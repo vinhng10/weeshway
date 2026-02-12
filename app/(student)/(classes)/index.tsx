@@ -116,7 +116,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
       imageSource={data.song.artworkUrl}
       title={data.song.name}
       subtitle={data.song.artistName}
-      metadata={`${data.style} • ${data.level}`}
+      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
       previewUrl={data.song.previewUrl}
       avatar={
         <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
