@@ -1,4 +1,4 @@
-import { syncLocation, syncPushToken, GlobalAlertModal } from "@/components";
+import { GlobalAlertModal, syncLocation, syncPushToken } from "@/components";
 import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
 import {
   useAudioPlayerStore,
@@ -96,8 +96,8 @@ export default function Root() {
       <KeyboardProvider>
         <StripeProvider
           publishableKey={STRIPE_PUBLISHABLE_KEY}
-          merchantIdentifier="merchant.com.anonymous.danceai"
-          urlScheme="danceai"
+          merchantIdentifier="merchant.com.weeshway.weeshway"
+          urlScheme="weeshway"
         >
           <QueryClientProvider client={queryClient}>
             <RootNavigator />

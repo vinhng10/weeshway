@@ -104,7 +104,7 @@ export function Checkout({
       // Initialize payment sheet if needed
       if (!isInitialized) {
         const { error } = await initPaymentSheet({
-          merchantDisplayName: "DanceAI",
+          merchantDisplayName: "WeeshWay",
           customerId,
           paymentIntentClientSecret,
           customerSessionClientSecret,
