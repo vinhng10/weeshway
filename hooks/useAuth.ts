@@ -1,9 +1,9 @@
 import { supabase } from "@/supabase";
-import { useAlertStore } from "./useAlertStore";
 import { ProfileType } from "@/types";
 import { Session } from "@supabase/supabase-js";
 import camelcaseKeys from "camelcase-keys";
 import { create } from "zustand";
+import { useAlertStore } from "./useAlertStore";
 
 interface AuthState {
   session: Session | null;
@@ -29,20 +29,21 @@ export const useAuth = create<AuthState>((set, get) => ({
     }
 
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
-        .single();
-
-      if (error) throw error;
+        .single()
+        .throwOnError();
 
       set({
         profile: camelcaseKeys(data, { deep: true }) as ProfileType,
         isLoading: false,
       });
     } catch (error) {
-      useAlertStore.getState().show("Profile Error", "Couldn't load your profile. Please try again.");
+      useAlertStore
+        .getState()
+        .show("Profile Error", "Couldn't load your profile. Please try again.");
       set({ profile: null, isLoading: false });
     }
   },

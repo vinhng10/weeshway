@@ -26,13 +26,12 @@ function TeacherProfileContent() {
   } = useSuspenseQuery<ProfileEnrichedType>({
     queryKey: ["classes", "profiles", profileId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select(`*`)
         .eq("id", profileId)
-        .single();
-
-      if (error) throw error;
+        .single()
+        .throwOnError();
       return data;
     },
   });

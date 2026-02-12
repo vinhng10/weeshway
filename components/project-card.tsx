@@ -1,5 +1,10 @@
 import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
-import { useAlertStore, useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
+import {
+  useAlertStore,
+  useAudioPlayerStore,
+  useAuth,
+  useLocales,
+} from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -48,20 +53,30 @@ export const ProjectCard = ({ data }: CardProps) => {
 
     try {
       const watching = data.watchings.find((w) => w.userId === profile.id);
-      const { error } = watching
-        ? await supabase.from("watchings").delete().eq("id", watching.id)
-        : await supabase.from("watchings").insert({
-            user_id: profile.id,
-            project_id: data.id,
-          });
-
-      if (error) throw error;
+      watching
+        ? await supabase
+            .from("watchings")
+            .delete()
+            .eq("id", watching.id)
+            .throwOnError()
+        : await supabase
+            .from("watchings")
+            .insert({
+              user_id: profile.id,
+              project_id: data.id,
+            })
+            .throwOnError();
 
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlertStore.getState().show("Watch List", "Couldn't update your watch list. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Watch List",
+          "Couldn't update your watch list. Please try again."
+        );
     }
   };
 

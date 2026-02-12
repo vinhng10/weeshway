@@ -34,13 +34,13 @@ function ClassContent() {
     {
       queryKey: ["classes", classId],
       queryFn: async () => {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("projects")
           .select(
-            `*, 
-            profile:profiles(*), 
-            song:songs(*), 
-            location:locations(*), 
+            `*,
+            profile:profiles(*),
+            song:songs(*),
+            location:locations(*),
             bookings:bookings(*),
             watchings:watchings(*)
           `
@@ -51,9 +51,8 @@ function ClassContent() {
             STRIPE_PAYMENT_STATUS.REFUNDING,
           ])
           .eq("watchings.user_id", profile?.id)
-          .single();
-
-        if (error) throw error;
+          .single()
+          .throwOnError();
         return data;
       },
     }
@@ -76,27 +75,37 @@ function ClassContent() {
     if (!profile?.id) return;
     try {
       const watching = data.watchings.find((w) => w.userId === profile.id);
-      const { error } = watching
-        ? await supabase.from("watchings").delete().eq("id", watching.id)
-        : await supabase.from("watchings").insert({
-            user_id: profile.id,
-            project_id: data.id,
-          });
-
-      if (error) throw error;
+      watching
+        ? await supabase
+            .from("watchings")
+            .delete()
+            .eq("id", watching.id)
+            .throwOnError()
+        : await supabase
+            .from("watchings")
+            .insert({
+              user_id: profile.id,
+              project_id: data.id,
+            })
+            .throwOnError();
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlertStore.getState().show("Watch List", "Couldn't update your watch list. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Watch List",
+          "Couldn't update your watch list. Please try again."
+        );
     }
   };
 
   const handleCheckoutExit = async () => {
     setVisible(false);
     await queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey.includes("classes"),
-      });
+      predicate: (query) => query.queryKey.includes("classes"),
+    });
   };
 
   const handleRefund = async () => {
@@ -112,7 +121,12 @@ function ClassContent() {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlertStore.getState().show("Refund Failed", "Couldn't process your refund request. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Refund Failed",
+          "Couldn't process your refund request. Please try again."
+        );
     }
   };
 

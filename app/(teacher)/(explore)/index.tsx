@@ -31,11 +31,12 @@ function ExploreContent({ style, level }: ExploreContentProps) {
   } = useSuspenseQuery<BubbleType[]>({
     queryKey: ["bubbles", style, level],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_bubbles", {
-        p_style: style,
-        p_level: level,
-      });
-      if (error) throw error;
+      const { data } = await supabase
+        .rpc("get_bubbles", {
+          p_style: style,
+          p_level: level,
+        })
+        .throwOnError();
       return data;
     },
   });

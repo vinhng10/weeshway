@@ -69,9 +69,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
         query = query.eq("project.level", level);
       }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
+      const { data } = await query.throwOnError();
       if (!data || data.length === 0) return [];
       const uniqueProjects = Array.from(
         new Map(data.map((r) => [r.project.id, r.project])).values()

@@ -48,9 +48,7 @@ export function useSuspenseInfiniteQuery<TData = unknown>({
       // Fetch one extra item to check if there's more data
       query = query.limit(pageSize + 1);
 
-      const { data, error } = await query;
-
-      if (error) throw error;
+      const { data } = await query.throwOnError();
 
       const rawData = data == null ? [] : data;
 

@@ -1,36 +1,43 @@
 import {
   Boundary,
+  Button,
+  ButtonGroup,
   Carousel,
   Header,
-  TextInput,
+  SelectBoxInput,
+  TextBoxInput,
   ThemedText,
   Tile,
-  WishInfo,
 } from "@/components";
-import { useSuspenseQuery } from "@/hooks";
+import { LEVEL, STYLE } from "@/constants";
+import { useAlertStore, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishRecommendationEnrichedType } from "@/types";
-import { useLocalSearchParams } from "expo-router";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
+import { RefreshControl, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
 function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
+  const queryClient = useQueryClient();
 
   const { data, refetch, isRefetching } =
     useSuspenseQuery<WishRecommendationEnrichedType>({
       queryKey: ["wishes", "recommendations", "classes", wishId],
       queryFn: async () => {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("wishes")
           .select(
-            `*, 
-            song:songs(*), 
+            `*,
+            song:songs(*),
             recommendations:recommendations(
               project:projects(
-                *, 
-                profile:profiles(*), 
-                song:songs(*), 
+                *,
+                profile:profiles(*),
+                song:songs(*),
                 location:locations(*),
                 bookings:bookings(*),
                 watchings:watchings(*)
@@ -38,24 +45,72 @@ function WishContent() {
             )`
           )
           .eq("id", wishId)
-          .single();
-
-        if (error) throw error;
+          .single()
+          .throwOnError();
         return data;
       },
     });
 
+  const [style, setStyle] = useState(data.style);
+  const [level, setLevel] = useState(data.level);
+  const [description, setDescription] = useState(data.description);
+
+  const hasRecommendations =
+    data.recommendations && data.recommendations.length > 0;
+
+  const handleSave = async () => {
+    try {
+      await supabase
+        .from("wishes")
+        .update({
+          style: style ?? null,
+          level: level ?? null,
+          description: description ?? null,
+        })
+        .eq("id", wishId)
+        .throwOnError();
+
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("wishes"),
+      });
+      router.back();
+    } catch {
+      useAlertStore
+        .getState()
+        .show(
+          "Save Failed",
+          "Couldn't save your wish changes. Please try again."
+        );
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await supabase.from("wishes").delete().eq("id", wishId).throwOnError();
+
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("wishes"),
+      });
+      router.back();
+    } catch {
+      useAlertStore
+        .getState()
+        .show("Delete Failed", "Couldn't delete your wish. Please try again.");
+    }
+  };
+
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-      }
-    >
-      {/* Top Classes Container */}
-      {data.recommendations && data.recommendations.length > 0 ? (
-        <>
+    <>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        }
+      >
+        {/* Recommended Classes */}
+        {hasRecommendations && (
           <View style={styles.section}>
             <ThemedText type="h4">Classes</ThemedText>
             <Carousel
@@ -64,26 +119,46 @@ function WishContent() {
               )}
             />
           </View>
-          <View style={styles.wishContainer}>
-            <Tile
-              imageSource={data.song.artworkUrl}
-              title={data.song.name}
-              subtitle={data.song.artistName}
-              metadata={`${data.style} • ${data.level}`}
-              previewUrl={data.song.previewUrl}
-            />
-            <TextInput
-              multiline
-              numberOfLines={4}
-              value={data.description}
-              editable={false}
-            />
-          </View>
-        </>
-      ) : (
-        <WishInfo data={data} />
-      )}
-    </ScrollView>
+        )}
+
+        {/* Song Tile (read-only) */}
+        <Tile
+          imageSource={data.song.artworkUrl}
+          title={data.song.name}
+          subtitle={data.song.artistName}
+          previewUrl={data.song.previewUrl}
+        />
+
+        {/* Editable Fields */}
+        <View style={styles.row}>
+          <SelectBoxInput
+            label="Style"
+            value={style}
+            options={STYLE}
+            onValueChange={setStyle}
+          />
+          <SelectBoxInput
+            label="Level"
+            value={level}
+            options={LEVEL}
+            onValueChange={setLevel}
+          />
+        </View>
+
+        <TextBoxInput
+          label="Description"
+          value={description}
+          onValueChange={setDescription}
+          multiline
+          numberOfLines={4}
+        />
+      </KeyboardAwareScrollView>
+
+      <ButtonGroup stickyBottom>
+        <Button label="Delete" onPress={handleDelete} outlined />
+        <Button label="Save" onPress={handleSave} />
+      </ButtonGroup>
+    </>
   );
 }
 
@@ -108,14 +183,9 @@ const styles = StyleSheet.create((theme, rt) => ({
     padding: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
-  descriptionContainer: {
-    height: theme.gap(12),
-    padding: theme.gap(1),
-    backgroundColor: theme.colors.foreground,
-    borderRadius: theme.gap(2),
-  },
-  wishContainer: {
-    gap: theme.gap(1),
+  row: {
+    flexDirection: "row",
+    gap: theme.gap(2),
   },
   section: {
     gap: theme.gap(1),

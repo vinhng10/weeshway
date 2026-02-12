@@ -113,31 +113,31 @@ export default function CreateProject() {
     }
 
     try {
-      const { error } = await supabase.rpc("create_project_with_song", {
-        p_song_data: {
-          id: song.id,
-          name: song.name,
-          artist_name: song.artistName,
-          artwork_url: song.artworkUrl,
-          preview_url: song.previewUrl,
-          genre: song.genre,
-        },
-        p_project_data: {
-          name: name?.trim(),
-          status: status,
-          style: style,
-          level: level,
-          price: price,
-          spots: spots,
-          description: description?.trim(),
-          start_at: startAt,
-          end_at: endAt,
-          location_id: location?.id,
-          currency: currency,
-        },
-      });
-
-      if (error) throw error;
+      await supabase
+        .rpc("create_project_with_song", {
+          p_song_data: {
+            id: song.id,
+            name: song.name,
+            artist_name: song.artistName,
+            artwork_url: song.artworkUrl,
+            preview_url: song.previewUrl,
+            genre: song.genre,
+          },
+          p_project_data: {
+            name: name?.trim(),
+            status: status,
+            style: style,
+            level: level,
+            price: price,
+            spots: spots,
+            description: description?.trim(),
+            start_at: startAt,
+            end_at: endAt,
+            location_id: location?.id,
+            currency: currency,
+          },
+        })
+        .throwOnError();
 
       // Invalidate and refetch the project query
       await queryClient.invalidateQueries({

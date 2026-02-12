@@ -38,7 +38,7 @@ function ProjectContent() {
     {
       queryKey: ["projects", projectId],
       queryFn: async () => {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("projects")
           .select(
             `*, song:songs(*), location:locations(*), bookings:bookings(*)`
@@ -46,8 +46,8 @@ function ProjectContent() {
           .eq("id", projectId)
           .eq("user_id", profile?.id)
           .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
-          .single();
-        if (error) throw error;
+          .single()
+          .throwOnError();
         return data;
       },
     }
@@ -96,7 +96,7 @@ function ProjectContent() {
     if (status === PROJECT_STATUS.DRAFT && wasReleased) return;
 
     try {
-      const { error } = await supabase
+      await supabase
         .from("projects")
         .update({
           name: name ?? null,
@@ -110,15 +110,20 @@ function ProjectContent() {
           description: description ?? null,
           location_id: location?.id ?? null,
         })
-        .eq("id", projectId);
-      if (error) throw error;
+        .eq("id", projectId)
+        .throwOnError();
 
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("projects"),
       });
       router.back();
     } catch {
-      useAlertStore.getState().show("Save Failed", "Couldn't save your project changes. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Save Failed",
+          "Couldn't save your project changes. Please try again."
+        );
     }
   };
 

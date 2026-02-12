@@ -65,12 +65,11 @@ function HomeContent() {
   } = useSuspenseQuery({
     queryKey: ["projects", "stats"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("stats")
         .select("*")
-        .eq("user_id", profile?.id);
-
-      if (error) throw error;
+        .eq("user_id", profile?.id)
+        .throwOnError();
       return [data];
     },
   });

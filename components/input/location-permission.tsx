@@ -33,12 +33,11 @@ export async function syncLocation(
 
     const data = { country, location: newLocation };
 
-    const { error } = await supabase
+    await supabase
       .from("profiles")
       .update(data)
-      .eq("id", profile.id);
-
-    if (error) throw error;
+      .eq("id", profile.id)
+      .throwOnError();
   } catch (error) {
     console.error("Location update failed:", error);
   }

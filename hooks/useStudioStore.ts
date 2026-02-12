@@ -132,26 +132,25 @@ export const createStudioStore = (projectId: number) =>
         syncToServer: async () => {
           try {
             const { studio } = get();
-            const { error } = await supabase
+            await supabase
               .from("projects")
               .update({
                 song_items: studio.song.items,
                 count_items: studio.count.items,
               })
-              .eq("id", projectId);
-            if (error) throw error;
+              .eq("id", projectId)
+              .throwOnError();
           } catch (error) {}
         },
 
         syncFromServer: async () => {
           try {
-            const { data, error } = await supabase
+            const { data } = await supabase
               .from("projects")
               .select(`*, song:songs(*)`)
               .eq("id", projectId)
-              .single();
-
-            if (error) throw error;
+              .single()
+              .throwOnError();
 
             if (data) {
               const result = camelcaseKeys(data, { deep: true });

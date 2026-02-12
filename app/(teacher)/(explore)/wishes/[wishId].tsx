@@ -13,13 +13,12 @@ function WishContent() {
   const { data, refetch, isRefetching } = useSuspenseQuery<WishEnrichedType>({
     queryKey: ["wishes", "explore", wishId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("wishes")
         .select(`*, song:songs(*)`)
         .eq("id", wishId)
-        .single();
-
-      if (error) throw error;
+        .single()
+        .throwOnError();
       return data;
     },
     enabled: !!wishId,

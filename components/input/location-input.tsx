@@ -100,7 +100,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
         : null;
 
       // Upsert location to database
-      const { error } = await supabase
+      await supabase
         .from("locations")
         .upsert(
           {
@@ -116,15 +116,19 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
           { ignoreDuplicates: true }
         )
         .select()
-        .maybeSingle();
-
-      if (error) throw error;
+        .maybeSingle()
+        .throwOnError();
 
       if (onValueChange) onValueChange(location);
       setVisible(false);
       setQuery("");
     } catch {
-      useAlertStore.getState().show("Location Error", "Couldn't save the selected location. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Location Error",
+          "Couldn't save the selected location. Please try again."
+        );
     }
   };
 

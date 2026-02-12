@@ -38,12 +38,11 @@ export async function syncPushToken(
 
     // Only hit Supabase if the token has actually changed
     if (profile.expoPushToken !== token) {
-      const { error } = await supabase
+      await supabase
         .from("profiles")
         .update({ expo_push_token: token })
-        .eq("id", profile.id);
-
-      if (error) throw error;
+        .eq("id", profile.id)
+        .throwOnError();
     }
   } catch (error) {
     console.error("Push token sync failed:", error);
@@ -85,7 +84,9 @@ export const NotificationsPermission = () => {
       <Pressable style={styles.container} onPress={() => handleAction(false)} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Stay Notified</ThemedText>
-        <ThemedText type="h5" color="dimmed">Enable notifications to:</ThemedText>
+        <ThemedText type="h5" color="dimmed">
+          Enable notifications to:
+        </ThemedText>
         {role === ROLE.STUDENT ? (
           <>
             <Bullet text={"Know when we've found classes you'll love"} />

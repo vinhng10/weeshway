@@ -4,7 +4,7 @@ import {
   SelectBoxInput,
   SongCard,
   SongSearch,
-  TextInput,
+  TextBoxInput,
 } from "@/components";
 import { LEVEL, STYLE } from "@/constants";
 import { useAlertStore, useAuth } from "@/hooks";
@@ -29,12 +29,19 @@ export default function MakeAWish() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      useAlertStore.getState().show("Login Required", "Please sign in to your account to continue.");
+      useAlertStore
+        .getState()
+        .show("Login Required", "Please sign in to your account to continue.");
       return;
     }
 
     if (!song) {
-      useAlertStore.getState().show("Song Required", "Please search and select a song before making a wish.");
+      useAlertStore
+        .getState()
+        .show(
+          "Song Required",
+          "Please search and select a song before making a wish."
+        );
       return;
     }
 
@@ -67,7 +74,12 @@ export default function MakeAWish() {
       // Navigate back or show success message
       router.back();
     } catch {
-      useAlertStore.getState().show("Creation Failed", "Couldn't create your wish. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Creation Failed",
+          "Couldn't create your wish. Please try again."
+        );
     }
   };
 
@@ -106,12 +118,12 @@ export default function MakeAWish() {
         </View>
 
         {/* Wish Description */}
-        <TextInput
-          placeholder="What do you wish for?"
-          multiline
-          numberOfLines={4}
+        <TextBoxInput
+          label="Description"
           value={description}
           onChangeText={setDescription}
+          multiline
+          numberOfLines={4}
         />
       </KeyboardAwareScrollView>
 
