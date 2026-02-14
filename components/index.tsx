@@ -2,6 +2,7 @@
 export { Avatar, type AvatarProps } from "./avatar";
 export { AvatarGroup, type AvatarGroupProps } from "./avatar-group";
 export { Boundary } from "./boundary";
+export { Branding } from "./branding";
 export { BubbleChart } from "./bubble-chart";
 export { Bullet } from "./bullet";
 export { Carousel } from "./carousel";

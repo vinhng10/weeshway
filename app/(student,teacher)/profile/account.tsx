@@ -22,7 +22,6 @@ export default function Account() {
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
 
-  const [username, setUsername] = useState(profile?.username || "");
   const [fullName, setFullName] = useState(profile?.fullName || "");
   const [bio, setBio] = useState(profile?.bio || "");
   const [avatarUri, setAvatarUri] = useState<string | null>(
@@ -111,7 +110,6 @@ export default function Account() {
       const { error } = await supabase
         .from("profiles")
         .update({
-          username: username.trim(),
           full_name: fullName.trim(),
           bio: bio.trim(),
           avatar_url: avatarUrl,
@@ -182,11 +180,6 @@ export default function Account() {
         {/* Form */}
         <View style={styles.form}>
           <TextBoxInput
-            label="Username"
-            value={username}
-            onValueChange={setUsername}
-          />
-          <TextBoxInput
             label="Full Name"
             value={fullName}
             onValueChange={setFullName}
@@ -200,7 +193,7 @@ export default function Account() {
         </View>
       </ScrollView>
 
-      <Button label={"Save Changes"} onPress={handleSave} stickyBottom />
+      <Button label={"Save"} onPress={handleSave} stickyBottom />
     </View>
   );
 }

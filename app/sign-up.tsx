@@ -1,12 +1,13 @@
-import { Button, TextInput, ThemedText } from "@/components";
+import { Branding, Button, TextInput, ThemedText } from "@/components";
 import { useAuth } from "@/hooks";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { Image, View } from "react-native";
+import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function CreateAccountScreen() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -14,17 +15,27 @@ export default function CreateAccountScreen() {
   const signUp = useAuth((state) => state.signUp);
 
   const handleSignUp = async () => {
-    if (!email || !password || !confirmPassword) {
+    const trimmedName = fullName.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+
+    if (
+      !trimmedName ||
+      !trimmedEmail ||
+      !trimmedPassword ||
+      !trimmedConfirmPassword
+    ) {
       setError("Please fill in all fields.");
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (trimmedPassword !== trimmedConfirmPassword) {
       setError("Passwords don't match.");
       return;
     }
 
-    if (password.length < 6) {
+    if (trimmedPassword.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
     }
@@ -32,7 +43,7 @@ export default function CreateAccountScreen() {
     setError("");
 
     try {
-      await signUp(email, password);
+      await signUp(trimmedEmail, trimmedPassword, trimmedName);
       router.replace("/sign-in");
     } catch (error: any) {
       setError(
@@ -48,19 +59,22 @@ export default function CreateAccountScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.branding}>
-          <Image
-            source={require("@/assets/images/icon.png")}
-            style={styles.logo}
-          />
-          <ThemedText type="h1">WeeshWay</ThemedText>
-        </View>
+        <Branding />
 
         {error ? (
           <ThemedText type="h5" color="danger" style={styles.error}>
             {error}
           </ThemedText>
         ) : null}
+
+        <TextInput
+          type="h5"
+          placeholder="Full Name"
+          value={fullName}
+          onChangeText={setFullName}
+          autoComplete="name"
+          autoCorrect={false}
+        />
 
         <TextInput
           type="h5"
@@ -129,16 +143,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   title: {
     textAlign: "center",
-  },
-  branding: {
-    alignItems: "center",
-    gap: theme.gap(1),
-    paddingVertical: theme.gap(4),
-  },
-  logo: {
-    width: theme.gap(10),
-    height: theme.gap(10),
-    borderRadius: theme.gap(2),
   },
   input: {
     marginBottom: theme.gap(2),

@@ -5,6 +5,7 @@ import {
   useAuth,
   useLocales,
   useNotificationObserver,
+  useOnboarding,
   useRole,
 } from "@/hooks";
 import { StripeProvider } from "@stripe/stripe-react-native";
@@ -37,6 +38,7 @@ function RootNavigator() {
   const player = useAudioPlayer();
   const status = useAudioPlayerStatus(player);
   const role = useRole((state) => state.role);
+  const roleSelected = useOnboarding((state) => state.prompted.role);
   const segments = useSegments();
   useNotificationObserver();
 
@@ -79,11 +81,16 @@ function RootNavigator() {
         <Stack.Screen name="sign-up" options={{ headerShown: false }} />
       </Stack.Protected>
 
+      {/* Onboarding screen for users who haven't selected a role */}
+      <Stack.Protected guard={isLoggedIn && !roleSelected}>
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      </Stack.Protected>
+
       {/* Screens for authenticated users */}
-      <Stack.Protected guard={isLoggedIn && role === ROLE.STUDENT}>
+      <Stack.Protected guard={isLoggedIn && roleSelected && role === ROLE.STUDENT}>
         <Stack.Screen name="(student)" options={{ headerShown: false }} />
       </Stack.Protected>
-      <Stack.Protected guard={isLoggedIn && role === ROLE.TEACHER}>
+      <Stack.Protected guard={isLoggedIn && roleSelected && role === ROLE.TEACHER}>
         <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>

@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 interface PromptedState {
+  role: boolean;
   location: boolean;
   notifications: boolean;
 }
@@ -16,6 +17,7 @@ export const useOnboarding = create<OnboardingState>()(
   persist(
     (set) => ({
       prompted: {
+        role: false,
         location: false,
         notifications: false,
       },

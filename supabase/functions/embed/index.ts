@@ -261,7 +261,6 @@ function parseMp4(buffer: ArrayBuffer): Mp4ParseResult {
 
 // --- Decode M4A to mono PCM using FAAD2 ---
 
-// deno-lint-ignore no-explicit-any
 async function decodeM4a(
   fileBuffer: ArrayBuffer
 ): Promise<{ samples: Float32Array; sampleRate: number }> {

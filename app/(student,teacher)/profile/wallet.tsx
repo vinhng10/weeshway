@@ -8,7 +8,13 @@ import {
   ThemedText,
 } from "@/components";
 import { RETURN_URL, ROLE } from "@/constants";
-import { useAlertStore, useAuth, useLocales, useRole, useSuspenseQuery } from "@/hooks";
+import {
+  useAlertStore,
+  useAuth,
+  useLocales,
+  useRole,
+  useSuspenseQuery,
+} from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   ClientSecretProvider,
@@ -19,7 +25,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { useMemo, useState } from "react";
 import { SectionListData, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 type StripeResponse = {
   url?: string;
@@ -45,6 +51,7 @@ type PaymentMethodsResponse = {
 
 function StudentWalletContent() {
   const profile = useAuth((state) => state.profile);
+  const { theme } = useUnistyles();
   const [isInitialized, setIsInitialized] = useState(false);
 
   const { data, refetch, isRefetching } = useSuspenseQuery<PaymentMethod[]>({
@@ -103,10 +110,42 @@ function StudentWalletContent() {
             paymentMethodTypes: ["card"],
           },
           clientSecretProvider,
+          appearance: {
+            colors: {
+              primary: theme.colors.primary,
+              background: theme.colors.background,
+              componentBackground: theme.colors.foreground,
+              componentBorder: theme.colors.dimmed,
+              componentDivider: theme.colors.dimmed,
+              primaryText: theme.colors.typography,
+              secondaryText: theme.colors.tint,
+              componentText: theme.colors.typography,
+              placeholderText: theme.colors.tint,
+              icon: theme.colors.tint,
+              error: theme.colors.danger,
+            },
+            shapes: {
+              borderRadius: theme.gap(2),
+            },
+            primaryButton: {
+              colors: {
+                background: theme.colors.typography,
+                text: theme.colors.background,
+              },
+              shapes: {
+                borderRadius: theme.gap(2),
+              },
+            },
+          },
         });
 
         if (error) {
-          useAlertStore.getState().show("Payment Setup", "Couldn't initialize the payment setup. Please try again.");
+          useAlertStore
+            .getState()
+            .show(
+              "Payment Setup",
+              "Couldn't initialize the payment setup. Please try again."
+            );
           return;
         }
         setIsInitialized(true);
@@ -117,7 +156,12 @@ function StudentWalletContent() {
 
       await refetch();
     } catch {
-      useAlertStore.getState().show("Payment Setup", "Couldn't open the payment setup. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Payment Setup",
+          "Couldn't open the payment setup. Please try again."
+        );
     }
   };
 
@@ -219,7 +263,12 @@ function TeacherWalletContent() {
       await refetch();
       await fetchProfile();
     } catch {
-      useAlertStore.getState().show("Onboarding Failed", "Couldn't start the Stripe setup. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Onboarding Failed",
+          "Couldn't start the Stripe setup. Please try again."
+        );
     }
   };
 
@@ -240,7 +289,12 @@ function TeacherWalletContent() {
 
       await WebBrowser.openAuthSessionAsync(dashboardUrl, RETURN_URL);
     } catch {
-      useAlertStore.getState().show("Dashboard Unavailable", "Couldn't open the Stripe dashboard. Please try again.");
+      useAlertStore
+        .getState()
+        .show(
+          "Dashboard Unavailable",
+          "Couldn't open the Stripe dashboard. Please try again."
+        );
     }
   };
 
