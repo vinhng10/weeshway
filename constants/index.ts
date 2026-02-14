@@ -2,13 +2,14 @@ export const DUCKING_VOLUME = 0.1;
 export const PIXELS_PER_SECOND = 30;
 export const TICK_INTERVAL = 5;
 export const DEBOUNCE_TIME = 500;
-export const RETURN_URL = "https://vinhng10.github.io";
-export const SUPABASE_URL = "http://192.168.1.200:54321";
+export const RETURN_URL = process.env.EXPO_PUBLIC_RETURN_URL!;
+export const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 export const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+  process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 export const STRIPE_PUBLISHABLE_KEY =
-  "pk_test_51ShVfcKFOPkzrjS9Gtrjm5RwkYpqhlSkWKBXt7BOJlK92UYi0MEloUnb9RaHSRt0FZlb2ookth7QfCxKBNq2bg8V00I08ol1mn";
-export const GOOGLE_PLACES_API_KEY = "AIzaSyBfs9q-TjvY_K4jrNGGnu6A8KNTlavLDiw";
+  process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
+export const GOOGLE_PLACES_API_KEY =
+  process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY!;
 
 export const STYLE = {
   BACHATA: "Bachata",
