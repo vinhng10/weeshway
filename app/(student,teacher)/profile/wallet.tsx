@@ -266,8 +266,8 @@ function TeacherWalletContent() {
       useAlertStore
         .getState()
         .show(
-          "Onboarding Failed",
-          "Couldn't start the Stripe setup. Please try again."
+          "Setup Failed",
+          "Couldn't start the wallet setup. Please try again."
         );
     }
   };
@@ -293,7 +293,7 @@ function TeacherWalletContent() {
         .getState()
         .show(
           "Dashboard Unavailable",
-          "Couldn't open the Stripe dashboard. Please try again."
+          "Couldn't open your payment dashboard. Please try again."
         );
     }
   };

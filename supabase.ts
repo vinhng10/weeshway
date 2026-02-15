@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { File } from "expo-file-system";
 import Storage from "expo-native-storage";
+import { AppState } from "react-native";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "./constants";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -10,6 +11,14 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     persistSession: true,
     detectSessionInUrl: false,
   },
+});
+
+AppState.addEventListener("change", (state) => {
+  if (state === "active") {
+    supabase.auth.startAutoRefresh();
+  } else {
+    supabase.auth.stopAutoRefresh();
+  }
 });
 
 /**

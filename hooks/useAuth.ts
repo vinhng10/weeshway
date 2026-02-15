@@ -62,11 +62,13 @@ export const useAuth = create<AuthState>((set, get) => ({
     // 2. Setup the listener for all future auth events
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       set({ session });
 
       if (event === "SIGNED_IN" && session) {
-        await get().fetchProfile();
+        // Do not await inside onAuthStateChange — it blocks the auth flow
+        // and can deadlock when fetchProfile needs the token being set up.
+        get().fetchProfile();
       } else if (event === "SIGNED_OUT") {
         set({ profile: null, session: null, isLoading: false });
       }

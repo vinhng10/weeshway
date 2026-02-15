@@ -106,8 +106,8 @@ export default function CreateProject() {
       useAlertStore
         .getState()
         .show(
-          "Setup Incomplete",
-          "Please complete your Stripe payment setup in Wallet before releasing a project."
+          "Wallet Setup Required",
+          "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started."
         );
       return;
     }

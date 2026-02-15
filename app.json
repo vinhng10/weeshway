@@ -53,7 +53,9 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
+          "fonts": [
+            "./assets/fonts/MomoTrustDisplay-Regular.ttf"
+          ]
         }
       ],
       [
@@ -83,9 +85,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "db31b941-c4f2-4e6d-a77e-23f6174e8d57"
+        "projectId": "90a2d6ca-dbb8-495f-beb6-63d81d1cdf79"
       }
     },
-    "owner": "vinhng10"
+    "owner": "weeshway-ai"
   }
 }
