@@ -1,12 +1,9 @@
 import * as jose from "jose";
-import {
-  createClient,
-  SupabaseClient,
-  User,
-} from "supabase";
+import { createClient, SupabaseClient, User } from "supabase";
 import { HttpError } from "./errors.ts";
 
-const SUPABASE_JWT_ISSUER = "http://127.0.0.1:54321/auth/v1";
+const SUPABASE_JWT_ISSUER =
+  Deno.env.get("SB_JWT_ISSUER") ?? Deno.env.get("SUPABASE_URL") + "/auth/v1";
 
 const SUPABASE_JWT_KEYS = jose.createRemoteJWKSet(
   new URL(Deno.env.get("SUPABASE_URL")! + "/auth/v1/.well-known/jwks.json")
