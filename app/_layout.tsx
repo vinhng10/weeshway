@@ -79,6 +79,7 @@ function RootNavigator() {
       <Stack.Protected guard={!isLoggedIn}>
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="sign-up" options={{ headerShown: false }} />
+        <Stack.Screen name="verify-otp" options={{ headerShown: false }} />
       </Stack.Protected>
 
       {/* Onboarding screen for users who haven't selected a role */}

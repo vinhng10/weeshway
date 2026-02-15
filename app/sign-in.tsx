@@ -1,6 +1,6 @@
 import { Branding, Button, TextInput, ThemedText } from "@/components";
 import { useAuth } from "@/hooks";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -23,6 +23,10 @@ export default function SignIn() {
     try {
       await signIn(email, password);
     } catch (error: any) {
+      if (error.message === "Email not confirmed") {
+        router.replace({ pathname: "/verify-otp", params: { email } });
+        return;
+      }
       setError(
         error.message ||
           "Couldn't sign in. Please check your credentials and try again."

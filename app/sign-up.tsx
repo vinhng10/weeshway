@@ -44,7 +44,7 @@ export default function CreateAccountScreen() {
 
     try {
       await signUp(trimmedEmail, trimmedPassword, trimmedName);
-      router.replace("/sign-in");
+      router.replace({ pathname: "/verify-otp", params: { email: trimmedEmail } });
     } catch (error: any) {
       setError(
         error.message || "Couldn't create your account. Please try again."

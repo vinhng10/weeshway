@@ -11,6 +11,8 @@ interface AuthState {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  verifyOtp: (email: string, token: string) => Promise<void>;
+  resendOtp: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   initialize: () => () => void;
   fetchProfile: () => Promise<void>;
@@ -91,6 +93,23 @@ export const useAuth = create<AuthState>((set, get) => ({
       email,
       password,
       options: { data: { full_name: fullName } },
+    });
+    if (error) throw error;
+  },
+
+  verifyOtp: async (email, token) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "signup",
+    });
+    if (error) throw error;
+  },
+
+  resendOtp: async (email) => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
     });
     if (error) throw error;
   },
