@@ -127,11 +127,15 @@ function ProjectContent() {
     }
   };
 
+  const statusOptions = wasReleased
+    ? { RELEASE: PROJECT_STATUS.RELEASE, CANCEL: PROJECT_STATUS.CANCEL }
+    : PROJECT_STATUS;
+
   const options: ChipBarItemProps[] = [
     {
       label: "Status",
       value: status,
-      options: PROJECT_STATUS,
+      options: statusOptions,
       modal: false,
       onValueChange: canEditStatus ? setStatus : undefined,
     },

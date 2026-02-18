@@ -53,9 +53,7 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/MomoTrustDisplay-Regular.ttf"
-          ]
+          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
         }
       ],
       [
