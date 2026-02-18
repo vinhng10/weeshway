@@ -12,7 +12,13 @@ import {
   TextInput,
   Tile,
 } from "@/components";
-import { LEVEL, PROJECT_STATUS, STYLE } from "@/constants";
+import {
+  LEVEL,
+  PROJECT_ACTION_TO_STATUS,
+  PROJECT_STATUS,
+  PROJECT_STATUS_TO_ACTION,
+  STYLE,
+} from "@/constants";
 import { useAlertStore, useAuth, useLocales, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
@@ -77,10 +83,11 @@ export default function CreateProject() {
   const options: ChipBarItemProps[] = [
     {
       label: "Status",
-      value: status,
-      options: PROJECT_STATUS,
+      value: PROJECT_STATUS_TO_ACTION[status],
+      options: PROJECT_STATUS_TO_ACTION,
       modal: false,
-      onValueChange: setStatus,
+      onValueChange: (verb: string) =>
+        setStatus(PROJECT_ACTION_TO_STATUS[verb] as ProjectStatusType),
     },
   ];
 
@@ -102,7 +109,7 @@ export default function CreateProject() {
       return;
     }
 
-    if (status === PROJECT_STATUS.RELEASE && !profile.onboardingComplete) {
+    if (status === PROJECT_STATUS.RELEASED && !profile.onboardingComplete) {
       useAlertStore
         .getState()
         .show(

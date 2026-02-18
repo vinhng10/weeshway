@@ -44,9 +44,33 @@ export const LEVEL = {
 
 export const PROJECT_STATUS = {
   DRAFT: "Draft",
-  RELEASE: "Release",
-  CANCEL: "Cancel",
+  RELEASED: "Released",
+  CANCELED: "Canceled",
 } as const;
+
+// Maps each passive DB status to the active verb shown to teachers in action chips.
+// Pass as ChipBar `options` — Object.values gives ["Draft", "Release", "Cancel"].
+// Pass PROJECT_STATUS_TO_ACTION[status] as ChipBar `value` for correct highlighting.
+export const PROJECT_STATUS_TO_ACTION: Record<string, string> = {
+  [PROJECT_STATUS.DRAFT]: "Draft",
+  [PROJECT_STATUS.RELEASED]: "Release",
+  [PROJECT_STATUS.CANCELED]: "Cancel",
+};
+
+// Reverse of PROJECT_STATUS_TO_ACTION — maps action verb back to DB value.
+// Use in ChipBar onValueChange to convert the selected verb to a DB status.
+export const PROJECT_ACTION_TO_STATUS: Record<string, string> = {
+  Draft: PROJECT_STATUS.DRAFT,
+  Release: PROJECT_STATUS.RELEASED,
+  Cancel: PROJECT_STATUS.CANCELED,
+};
+
+// Allowed forward transitions per status (can never move backwards).
+export const PROJECT_STATUS_TRANSITIONS: Record<string, string[]> = {
+  [PROJECT_STATUS.DRAFT]:    [PROJECT_STATUS.DRAFT, PROJECT_STATUS.RELEASED, PROJECT_STATUS.CANCELED],
+  [PROJECT_STATUS.RELEASED]: [PROJECT_STATUS.RELEASED, PROJECT_STATUS.CANCELED],
+  [PROJECT_STATUS.CANCELED]: [PROJECT_STATUS.CANCELED],
+};
 
 export const STRIPE_PAYMENT_STATUS = {
   SUCCEEDED: "Succeeded",

@@ -50,7 +50,7 @@ function HomeContent() {
 
       query = query
         .eq("user_id", profile?.id)
-        .eq("status", PROJECT_STATUS.RELEASE)
+        .eq("status", PROJECT_STATUS.RELEASED)
         .lte("start_at", todayEnd.toISOString())
         .gte("end_at", now.toISOString())
         .order("start_at", { ascending: true });

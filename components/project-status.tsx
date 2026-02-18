@@ -16,7 +16,7 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
       icon = "heart";
       label = `${data.watchings.length}`;
       break;
-    case PROJECT_STATUS.RELEASE:
+    case PROJECT_STATUS.RELEASED:
       icon = "person-sharp";
       const succeededCount =
         data.bookings

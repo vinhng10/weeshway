@@ -98,7 +98,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
     trailingQuery: (query) => {
       query = query
         .or(`start_at.is.null,start_at.gte.${new Date().toISOString()}`)
-        .neq("status", PROJECT_STATUS.CANCEL)
+        .neq("status", PROJECT_STATUS.CANCELED)
         .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED);
       if (status) query = query.eq("status", status);
       if (style) query = query.eq("style", style);

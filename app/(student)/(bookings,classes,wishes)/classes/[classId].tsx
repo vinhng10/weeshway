@@ -61,9 +61,9 @@ function ClassContent() {
   const userBooking = data.bookings.find((b) => b.userId === profile?.id);
   const isBooked = !!userBooking;
   const isRefunding = userBooking?.status === STRIPE_PAYMENT_STATUS.REFUNDING;
-  const isReleased = data.status === PROJECT_STATUS.RELEASE;
+  const isReleased = data.status === PROJECT_STATUS.RELEASED;
   const isWatching = data.watchings.some((w) => w.userId === profile?.id);
-  const isCanceled = data.status === PROJECT_STATUS.CANCEL;
+  const isCanceled = data.status === PROJECT_STATUS.CANCELED;
 
   const succeededBookingsCount = data.bookings
     .filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
@@ -120,12 +120,13 @@ function ClassContent() {
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("classes"),
       });
-    } catch {
+    } catch (error: any) {
       useAlertStore
         .getState()
         .show(
           "Refund Failed",
-          "Couldn't process your refund request. Please try again."
+          error?.message ??
+            "Couldn't process your refund request. Please try again."
         );
     }
   };

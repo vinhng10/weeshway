@@ -101,7 +101,7 @@ export const ProjectCard = ({ data }: CardProps) => {
   const booked = !!userBooking;
   const watching = data.watchings.some((w) => w.userId === profile?.id);
   const spots = userBooking?.spots ?? 0;
-  const released = data.status === PROJECT_STATUS.RELEASE;
+  const released = data.status === PROJECT_STATUS.RELEASED;
   const label = booked
     ? `Booked x${spots}`
     : released

@@ -15,7 +15,10 @@ import {
 } from "@/components";
 import {
   LEVEL,
+  PROJECT_ACTION_TO_STATUS,
   PROJECT_STATUS,
+  PROJECT_STATUS_TO_ACTION,
+  PROJECT_STATUS_TRANSITIONS,
   STRIPE_PAYMENT_STATUS,
   STYLE,
 } from "@/constants";
@@ -72,8 +75,8 @@ function ProjectContent() {
   const [location, setLocation] = useState(data.location);
 
   // Logic Flags
-  const wasReleased = data.status === PROJECT_STATUS.RELEASE;
-  const wasCanceled = data.status === PROJECT_STATUS.CANCEL;
+  const wasReleased = data.status === PROJECT_STATUS.RELEASED;
+  const wasCanceled = data.status === PROJECT_STATUS.CANCELED;
   const canEditDetails = !wasReleased && !wasCanceled;
   const canEditStatus = !wasCanceled;
   const isReleasable = !!(
@@ -87,11 +90,33 @@ function ProjectContent() {
     location
   );
 
+  const handleDelete = async () => {
+    try {
+      await supabase
+        .from("projects")
+        .delete()
+        .eq("id", projectId)
+        .throwOnError();
+
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("projects"),
+      });
+      router.back();
+    } catch {
+      useAlertStore
+        .getState()
+        .show(
+          "Delete Failed",
+          "Couldn't delete the project. Please try again."
+        );
+    }
+  };
+
   const handleSave = async () => {
     // Can't save once canceled
     if (wasCanceled) return;
     // Can't release if not all fields are filled
-    if (status === PROJECT_STATUS.RELEASE && !isReleasable) return;
+    if (status === PROJECT_STATUS.RELEASED && !isReleasable) return;
     // Can't go back to draft if already released
     if (status === PROJECT_STATUS.DRAFT && wasReleased) return;
 
@@ -127,17 +152,21 @@ function ProjectContent() {
     }
   };
 
-  const statusOptions = wasReleased
-    ? { RELEASE: PROJECT_STATUS.RELEASE, CANCEL: PROJECT_STATUS.CANCEL }
-    : PROJECT_STATUS;
-
   const options: ChipBarItemProps[] = [
     {
       label: "Status",
-      value: status,
-      options: statusOptions,
+      value: PROJECT_STATUS_TO_ACTION[status],
+      options: Object.fromEntries(
+        PROJECT_STATUS_TRANSITIONS[data.status].map((s) => [
+          s,
+          PROJECT_STATUS_TO_ACTION[s],
+        ])
+      ),
       modal: false,
-      onValueChange: canEditStatus ? setStatus : undefined,
+      onValueChange: canEditStatus
+        ? (verb: string) =>
+            setStatus(PROJECT_ACTION_TO_STATUS[verb] as ProjectStatusType)
+        : undefined,
     },
   ];
 
@@ -238,7 +267,11 @@ function ProjectContent() {
 
       {/* Save Changes Buttons */}
       <ButtonGroup stickyBottom>
-        <Button label="Save" onPress={handleSave} disabled={wasCanceled} />
+        {wasCanceled ? (
+          <Button label="Delete" onPress={handleDelete} outlined />
+        ) : (
+          <Button label="Save" onPress={handleSave} />
+        )}
         <Button
           label="Studio"
           onPress={() => router.navigate(`./${projectId}/studio`)}
