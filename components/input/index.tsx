@@ -1,4 +1,4 @@
-export { Alert, GlobalAlert } from "./alert";
+export { Alert } from "./alert";
 export {
   DateTimeBoxInput,
   FloatBoxInput,

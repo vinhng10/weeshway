@@ -4,34 +4,24 @@ import { StyleSheet } from "react-native-unistyles";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
-type AlertProps = {
-  visible: boolean;
-  title?: string;
-  message: string;
-  onClose: () => void;
-  /** Optional label for the confirm/primary action button */
-  confirmLabel?: string;
-  /** If provided, shows a confirm button alongside dismiss */
-  onConfirm?: () => void;
-};
+export const Alert = () => {
+  const { visible, title, message, confirmLabel, onConfirm, hide } =
+    useAlert();
 
-export const Alert: React.FunctionComponent<AlertProps> = ({
-  visible,
-  title,
-  message,
-  onClose,
-  confirmLabel,
-  onConfirm,
-}) => {
+  const handleConfirm = () => {
+    hide();
+    onConfirm?.();
+  };
+
   return (
     <Modal
       visible={visible}
       animationType="slide"
       presentationStyle="overFullScreen"
       transparent={true}
-      onRequestClose={onClose}
+      onRequestClose={hide}
     >
-      <Pressable style={styles.container} onPress={onClose} />
+      <Pressable style={styles.container} onPress={hide} />
       <View style={styles.sheet}>
         {title && <ThemedText type="h4">{title}</ThemedText>}
         <ThemedText type="h5" color="dimmed">
@@ -44,27 +34,20 @@ export const Alert: React.FunctionComponent<AlertProps> = ({
                 style={styles.button}
                 outlined
                 label="Cancel"
-                onPress={onClose}
+                onPress={hide}
               />
               <Button
                 style={styles.button}
                 label={confirmLabel ?? "Confirm"}
-                onPress={onConfirm}
+                onPress={handleConfirm}
               />
             </>
           ) : (
-            <Button style={styles.button} label="OK" onPress={onClose} />
+            <Button style={styles.button} label="OK" onPress={hide} />
           )}
         </View>
       </View>
     </Modal>
-  );
-};
-
-export const GlobalAlert = () => {
-  const { visible, title, message, hide } = useAlert();
-  return (
-    <Alert visible={visible} title={title} message={message} onClose={hide} />
   );
 };
 

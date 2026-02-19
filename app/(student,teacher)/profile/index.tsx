@@ -1,5 +1,4 @@
 import {
-  Alert,
   Avatar,
   ChipBar,
   ChipBarItemProps,
@@ -9,7 +8,6 @@ import {
 import { ROLE } from "@/constants";
 import { useAlert, useAuth, useRole } from "@/hooks";
 import { router } from "expo-router";
-import { useState } from "react";
 import { Linking, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -17,8 +15,6 @@ export default function Profile() {
   const profile = useAuth((state) => state.profile);
   const signOut = useAuth((state) => state.signOut);
   const deleteAccount = useAuth((state) => state.deleteAccount);
-
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const role = useRole((state) => state.role);
   const setRole = useRole((state) => state.setRole);
@@ -42,19 +38,27 @@ export default function Profile() {
     router.replace("../sign-in");
   };
 
-  const handleDeleteAccount = async () => {
-    setShowDeleteConfirm(false);
-    try {
-      await deleteAccount();
-      router.replace("../sign-in");
-    } catch {
-      useAlert
-        .getState()
-        .show(
-          "Delete Failed",
-          "Couldn't delete your account. Please try again."
-        );
-    }
+  const handleDeleteAccountPress = () => {
+    useAlert.getState().show(
+      "Delete Account",
+      "This will permanently delete your account and all associated data. This action cannot be undone.",
+      {
+        confirmLabel: "Delete",
+        onConfirm: async () => {
+          try {
+            await deleteAccount();
+            router.replace("../sign-in");
+          } catch {
+            useAlert
+              .getState()
+              .show(
+                "Delete Failed",
+                "Couldn't delete your account. Please try again."
+              );
+          }
+        },
+      }
+    );
   };
 
   const options: ChipBarItemProps[] = [
@@ -105,20 +109,11 @@ export default function Profile() {
         <MenuItem
           icon="trash"
           title="Delete Account"
-          onPress={() => setShowDeleteConfirm(true)}
+          onPress={handleDeleteAccountPress}
           showChevron={false}
           color="danger"
         />
       </ScrollView>
-
-      <Alert
-        visible={showDeleteConfirm}
-        title="Delete Account"
-        message="This will permanently delete your account and all associated data. This action cannot be undone."
-        confirmLabel="Delete"
-        onConfirm={handleDeleteAccount}
-        onClose={() => setShowDeleteConfirm(false)}
-      />
     </View>
   );
 }

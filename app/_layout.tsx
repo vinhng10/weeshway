@@ -1,4 +1,4 @@
-import { GlobalAlert, syncLocation, syncPushToken } from "@/components";
+import { Alert, syncLocation, syncPushToken } from "@/components";
 import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
 import {
   useAudioPlayerStore,
@@ -113,7 +113,7 @@ export default function Root() {
         >
           <QueryClientProvider client={queryClient}>
             <RootNavigator />
-            <GlobalAlert />
+            <Alert />
           </QueryClientProvider>
         </StripeProvider>
       </KeyboardProvider>
