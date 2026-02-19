@@ -1,4 +1,5 @@
 import {
+  Alert,
   Avatar,
   ChipBar,
   ChipBarItemProps,
@@ -6,14 +7,18 @@ import {
   ThemedText,
 } from "@/components";
 import { ROLE } from "@/constants";
-import { useAuth, useRole } from "@/hooks";
+import { useAlert, useAuth, useRole } from "@/hooks";
 import { router } from "expo-router";
+import { useState } from "react";
 import { Linking, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Profile() {
   const profile = useAuth((state) => state.profile);
   const signOut = useAuth((state) => state.signOut);
+  const deleteAccount = useAuth((state) => state.deleteAccount);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const role = useRole((state) => state.role);
   const setRole = useRole((state) => state.setRole);
@@ -29,11 +34,27 @@ export default function Profile() {
     router.navigate(`/(${rolePath})/profile/wallet`);
   };
 
-  const handlePolicies = () => router.navigate(`/(${rolePath})/profile/policies`);
+  const handlePolicies = () =>
+    router.navigate(`/(${rolePath})/profile/policies`);
 
   const handleSignOut = async () => {
     await signOut();
     router.replace("../sign-in");
+  };
+
+  const handleDeleteAccount = async () => {
+    setShowDeleteConfirm(false);
+    try {
+      await deleteAccount();
+      router.replace("../sign-in");
+    } catch {
+      useAlert
+        .getState()
+        .show(
+          "Delete Failed",
+          "Couldn't delete your account. Please try again."
+        );
+    }
   };
 
   const options: ChipBarItemProps[] = [
@@ -68,7 +89,11 @@ export default function Profile() {
       >
         <MenuItem icon="person-sharp" title="Account" onPress={handleAccount} />
         <MenuItem icon="wallet" title="Wallet" onPress={handleWallet} />
-        <MenuItem icon="settings" title="Settings" onPress={handleDeviceSettings} />
+        <MenuItem
+          icon="settings"
+          title="Settings"
+          onPress={handleDeviceSettings}
+        />
         <MenuItem icon="shield" title="Policies" onPress={handlePolicies} />
         <MenuItem
           icon="log-out"
@@ -77,7 +102,23 @@ export default function Profile() {
           showChevron={false}
           color="danger"
         />
+        <MenuItem
+          icon="trash"
+          title="Delete Account"
+          onPress={() => setShowDeleteConfirm(true)}
+          showChevron={false}
+          color="danger"
+        />
       </ScrollView>
+
+      <Alert
+        visible={showDeleteConfirm}
+        title="Delete Account"
+        message="This will permanently delete your account and all associated data. This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDeleteAccount}
+        onClose={() => setShowDeleteConfirm(false)}
+      />
     </View>
   );
 }

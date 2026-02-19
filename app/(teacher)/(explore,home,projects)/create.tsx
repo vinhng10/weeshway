@@ -19,7 +19,7 @@ import {
   PROJECT_STATUS_TO_ACTION,
   STYLE,
 } from "@/constants";
-import { useAlertStore, useAuth, useLocales, useTempDataStore } from "@/hooks";
+import { useAlert, useAuth, useLocales, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   LevelType,
@@ -93,14 +93,14 @@ export default function CreateProject() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      useAlertStore
+      useAlert
         .getState()
         .show("Login Required", "Please sign in to your account to continue.");
       return;
     }
 
     if (!song) {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Song Required",
@@ -110,7 +110,7 @@ export default function CreateProject() {
     }
 
     if (status === PROJECT_STATUS.RELEASED && !profile.onboardingComplete) {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Wallet Setup Required",
@@ -157,7 +157,7 @@ export default function CreateProject() {
       // Navigate back to projects list
       router.back();
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Creation Failed",

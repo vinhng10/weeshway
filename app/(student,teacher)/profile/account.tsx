@@ -6,7 +6,7 @@ import {
   TextBoxInput,
   Video,
 } from "@/components";
-import { useAlertStore, useAuth } from "@/hooks";
+import { useAlert, useAuth } from "@/hooks";
 import { supabase, uploadMedia } from "@/supabase";
 import {
   launchImageLibraryAsync,
@@ -22,7 +22,6 @@ export default function Account() {
   const email = useAuth((state) => state.session?.user.email ?? "");
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
-
   const [fullName, setFullName] = useState(profile?.fullName || "");
   const [bio, setBio] = useState(profile?.bio || "");
   const [avatarUri, setAvatarUri] = useState<string | null>(
@@ -51,7 +50,12 @@ export default function Account() {
       // Request permissions
       const { status } = await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        useAlertStore.getState().show("Permission Needed", "Please allow access to your photo library to upload a video.");
+        useAlert
+          .getState()
+          .show(
+            "Permission Needed",
+            "Please allow access to your photo library to upload a video."
+          );
         return;
       }
 
@@ -68,7 +72,9 @@ export default function Account() {
         setVideoUrls((prev) => [...prev, uri]);
       }
     } catch {
-      useAlertStore.getState().show("Upload Failed", "Couldn't load your video. Please try again.");
+      useAlert
+        .getState()
+        .show("Upload Failed", "Couldn't load your video. Please try again.");
     }
   };
 
@@ -78,7 +84,9 @@ export default function Account() {
 
   const handleSave = async () => {
     if (!profile || !isLoggedIn) {
-      useAlertStore.getState().show("Login Required", "Please sign in to your account to continue.");
+      useAlert
+        .getState()
+        .show("Login Required", "Please sign in to your account to continue.");
       return;
     }
 
@@ -125,7 +133,12 @@ export default function Account() {
       await fetchProfile();
       router.back();
     } catch {
-      useAlertStore.getState().show("Save Failed", "Couldn't save your profile changes. Please try again.");
+      useAlert
+        .getState()
+        .show(
+          "Save Failed",
+          "Couldn't save your profile changes. Please try again."
+        );
     }
   };
 
@@ -180,11 +193,7 @@ export default function Account() {
 
         {/* Form */}
         <View style={styles.form}>
-          <TextBoxInput
-            label="Email"
-            value={email}
-            editable={false}
-          />
+          <TextBoxInput label="Email" value={email} editable={false} />
           <TextBoxInput
             label="Full Name"
             value={fullName}

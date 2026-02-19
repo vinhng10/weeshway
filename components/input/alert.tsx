@@ -1,10 +1,10 @@
-import { useAlertStore } from "@/hooks/useAlertStore";
+import { useAlert } from "@/hooks/useAlert";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
-type AlertModalProps = {
+type AlertProps = {
   visible: boolean;
   title?: string;
   message: string;
@@ -15,7 +15,7 @@ type AlertModalProps = {
   onConfirm?: () => void;
 };
 
-export const AlertModal: React.FunctionComponent<AlertModalProps> = ({
+export const Alert: React.FunctionComponent<AlertProps> = ({
   visible,
   title,
   message,
@@ -61,15 +61,10 @@ export const AlertModal: React.FunctionComponent<AlertModalProps> = ({
   );
 };
 
-export const GlobalAlertModal = () => {
-  const { visible, title, message, hide } = useAlertStore();
+export const GlobalAlert = () => {
+  const { visible, title, message, hide } = useAlert();
   return (
-    <AlertModal
-      visible={visible}
-      title={title}
-      message={message}
-      onClose={hide}
-    />
+    <Alert visible={visible} title={title} message={message} onClose={hide} />
   );
 };
 

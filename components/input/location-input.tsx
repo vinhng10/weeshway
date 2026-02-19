@@ -1,4 +1,4 @@
-import { useAlertStore, useLocationSearch } from "@/hooks";
+import { useAlert, useLocationSearch } from "@/hooks";
 import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
 import React, { useState } from "react";
@@ -123,7 +123,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
       setVisible(false);
       setQuery("");
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Location Error",

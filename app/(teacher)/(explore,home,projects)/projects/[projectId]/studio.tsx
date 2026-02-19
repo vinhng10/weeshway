@@ -1,8 +1,12 @@
 // Studio.tsx
 import { ControlBar, DisplayArea, Header, Track } from "@/components";
 import { TRACK } from "@/constants";
-import { createStudioStore, useAlertStore, useAudioPlayerStore } from "@/hooks";
-import { RecordingPresets, useAudioRecorder, useAudioRecorderState } from "expo-audio";
+import { createStudioStore, useAlert, useAudioPlayerStore } from "@/hooks";
+import {
+  RecordingPresets,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from "expo-audio";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { View } from "react-native";
@@ -119,7 +123,12 @@ export default function Studio() {
         initialize(trackState);
       }
     } catch {
-      useAlertStore.getState().show("Playback Error", "Couldn't load the audio file. Please try again.");
+      useAlert
+        .getState()
+        .show(
+          "Playback Error",
+          "Couldn't load the audio file. Please try again."
+        );
     }
   };
 

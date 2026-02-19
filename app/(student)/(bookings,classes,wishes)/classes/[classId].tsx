@@ -14,7 +14,7 @@ import {
   ThemedText,
 } from "@/components";
 import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
-import { useAlertStore, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
+import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -92,7 +92,7 @@ function ClassContent() {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Watch List",
@@ -121,7 +121,7 @@ function ClassContent() {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch (error: any) {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Refund Failed",

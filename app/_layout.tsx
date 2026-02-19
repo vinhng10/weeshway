@@ -1,4 +1,4 @@
-import { GlobalAlertModal, syncLocation, syncPushToken } from "@/components";
+import { GlobalAlert, syncLocation, syncPushToken } from "@/components";
 import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
 import {
   useAudioPlayerStore,
@@ -88,10 +88,14 @@ function RootNavigator() {
       </Stack.Protected>
 
       {/* Screens for authenticated users */}
-      <Stack.Protected guard={isLoggedIn && roleSelected && role === ROLE.STUDENT}>
+      <Stack.Protected
+        guard={isLoggedIn && roleSelected && role === ROLE.STUDENT}
+      >
         <Stack.Screen name="(student)" options={{ headerShown: false }} />
       </Stack.Protected>
-      <Stack.Protected guard={isLoggedIn && roleSelected && role === ROLE.TEACHER}>
+      <Stack.Protected
+        guard={isLoggedIn && roleSelected && role === ROLE.TEACHER}
+      >
         <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
@@ -109,7 +113,7 @@ export default function Root() {
         >
           <QueryClientProvider client={queryClient}>
             <RootNavigator />
-            <GlobalAlertModal />
+            <GlobalAlert />
           </QueryClientProvider>
         </StripeProvider>
       </KeyboardProvider>

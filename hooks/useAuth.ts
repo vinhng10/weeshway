@@ -3,7 +3,7 @@ import { ProfileType } from "@/types";
 import { Session } from "@supabase/supabase-js";
 import camelcaseKeys from "camelcase-keys";
 import { create } from "zustand";
-import { useAlertStore } from "./useAlertStore";
+import { useAlert } from "./useAlert";
 
 interface AuthState {
   session: Session | null;
@@ -14,6 +14,7 @@ interface AuthState {
   verifyOtp: (email: string, token: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   initialize: () => () => void;
   fetchProfile: () => Promise<void>;
 }
@@ -43,7 +44,7 @@ export const useAuth = create<AuthState>((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      useAlertStore
+      useAlert
         .getState()
         .show("Profile Error", "Couldn't load your profile. Please try again.");
       set({ profile: null, isLoading: false });
@@ -117,5 +118,11 @@ export const useAuth = create<AuthState>((set, get) => ({
   signOut: async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+  },
+
+  deleteAccount: async () => {
+    const { error } = await supabase.functions.invoke("delete-account");
+    if (error) throw error;
+    await supabase.auth.signOut();
   },
 }));

@@ -1,5 +1,4 @@
 import { TEMPO } from "@/constants";
-import { useAlertStore } from "./useAlertStore";
 import { TrackState } from "@/hooks/useStudioStore";
 import { TempoType } from "@/types";
 import {
@@ -13,6 +12,7 @@ import {
 import * as DocumentPicker from "expo-document-picker";
 import { Directory, File, Paths } from "expo-file-system";
 import { create } from "zustand";
+import { useAlert } from "./useAlert";
 
 interface AudioPlayerState {
   player?: AudioPlayer;
@@ -144,7 +144,12 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
         items: [{ startTime: 0, endTime: duration, selected: false }],
       };
     } catch (error) {
-      useAlertStore.getState().show("Playback Error", "Couldn't load the audio file. Please try again.");
+      useAlert
+        .getState()
+        .show(
+          "Playback Error",
+          "Couldn't load the audio file. Please try again."
+        );
       return null;
     }
   },
@@ -155,7 +160,12 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
 
       return await get().loadAudioFromUri(result.assets[0].uri);
     } catch (error) {
-      useAlertStore.getState().show("Playback Error", "Couldn't load the audio file. Please try again.");
+      useAlert
+        .getState()
+        .show(
+          "Playback Error",
+          "Couldn't load the audio file. Please try again."
+        );
       return null;
     }
   },

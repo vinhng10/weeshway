@@ -7,7 +7,7 @@ import {
   TextBoxInput,
 } from "@/components";
 import { LEVEL, STYLE } from "@/constants";
-import { useAlertStore, useAuth } from "@/hooks";
+import { useAlert, useAuth } from "@/hooks";
 import { supabase } from "@/supabase";
 import { LevelType, SongType, StyleType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,14 +29,14 @@ export default function MakeAWish() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      useAlertStore
+      useAlert
         .getState()
         .show("Login Required", "Please sign in to your account to continue.");
       return;
     }
 
     if (!song) {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Song Required",
@@ -74,7 +74,7 @@ export default function MakeAWish() {
       // Navigate back or show success message
       router.back();
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Creation Failed",

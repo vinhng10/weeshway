@@ -8,7 +8,7 @@ interface AlertState {
   hide: () => void;
 }
 
-export const useAlertStore = create<AlertState>()((set) => ({
+export const useAlert = create<AlertState>()((set) => ({
   visible: false,
   title: "",
   message: "",

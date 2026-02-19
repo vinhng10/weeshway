@@ -10,7 +10,7 @@ import {
   Tile,
 } from "@/components";
 import { LEVEL, STYLE } from "@/constants";
-import { useAlertStore, useSuspenseQuery } from "@/hooks";
+import { useAlert, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishRecommendationEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -75,7 +75,7 @@ function WishContent() {
       });
       router.back();
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Save Failed",
@@ -93,7 +93,7 @@ function WishContent() {
       });
       router.back();
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show("Delete Failed", "Couldn't delete your wish. Please try again.");
     }

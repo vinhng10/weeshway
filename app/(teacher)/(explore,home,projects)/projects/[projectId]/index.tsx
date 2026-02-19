@@ -22,7 +22,7 @@ import {
   STRIPE_PAYMENT_STATUS,
   STYLE,
 } from "@/constants";
-import { useAlertStore, useAuth, useSuspenseQuery } from "@/hooks";
+import { useAlert, useAuth, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType, ProjectStatusType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -103,7 +103,7 @@ function ProjectContent() {
       });
       router.back();
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Delete Failed",
@@ -143,7 +143,7 @@ function ProjectContent() {
       });
       router.back();
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Save Failed",

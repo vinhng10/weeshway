@@ -1,10 +1,5 @@
 import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
-import {
-  useAlertStore,
-  useAudioPlayerStore,
-  useAuth,
-  useLocales,
-} from "@/hooks";
+import { useAlert, useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -71,7 +66,7 @@ export const ProjectCard = ({ data }: CardProps) => {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Watch List",

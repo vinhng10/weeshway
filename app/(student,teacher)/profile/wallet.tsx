@@ -9,7 +9,7 @@ import {
 } from "@/components";
 import { RETURN_URL, ROLE } from "@/constants";
 import {
-  useAlertStore,
+  useAlert,
   useAuth,
   useLocales,
   useRole,
@@ -140,7 +140,7 @@ function StudentWalletContent() {
         });
 
         if (error) {
-          useAlertStore
+          useAlert
             .getState()
             .show(
               "Payment Setup",
@@ -156,7 +156,7 @@ function StudentWalletContent() {
 
       await refetch();
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Payment Setup",
@@ -263,7 +263,7 @@ function TeacherWalletContent() {
       await refetch();
       await fetchProfile();
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Setup Failed",
@@ -289,7 +289,7 @@ function TeacherWalletContent() {
 
       await WebBrowser.openAuthSessionAsync(dashboardUrl, RETURN_URL);
     } catch {
-      useAlertStore
+      useAlert
         .getState()
         .show(
           "Dashboard Unavailable",
