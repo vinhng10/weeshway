@@ -2,6 +2,7 @@ export const DUCKING_VOLUME = 0.1;
 export const PIXELS_PER_SECOND = 30;
 export const TICK_INTERVAL = 5;
 export const DEBOUNCE_TIME = 500;
+export const WEBSITE_URL = process.env.EXPO_PUBLIC_WEBSITE_URL!;
 export const RETURN_URL = process.env.EXPO_PUBLIC_RETURN_URL!;
 export const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 export const SUPABASE_PUBLISHABLE_KEY =
@@ -67,7 +68,11 @@ export const PROJECT_ACTION_TO_STATUS: Record<string, string> = {
 
 // Allowed forward transitions per status (can never move backwards).
 export const PROJECT_STATUS_TRANSITIONS: Record<string, string[]> = {
-  [PROJECT_STATUS.DRAFT]:    [PROJECT_STATUS.DRAFT, PROJECT_STATUS.RELEASED, PROJECT_STATUS.CANCELED],
+  [PROJECT_STATUS.DRAFT]: [
+    PROJECT_STATUS.DRAFT,
+    PROJECT_STATUS.RELEASED,
+    PROJECT_STATUS.CANCELED,
+  ],
   [PROJECT_STATUS.RELEASED]: [PROJECT_STATUS.RELEASED, PROJECT_STATUS.CANCELED],
   [PROJECT_STATUS.CANCELED]: [PROJECT_STATUS.CANCELED],
 };

@@ -51,6 +51,7 @@ export type ProfileType = {
   location?: string;
   country?: string;
   expoPushToken?: string;
+  policiesAgreedAt?: Date;
 };
 
 export type ItemType = {

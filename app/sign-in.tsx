@@ -90,7 +90,7 @@ export default function SignIn() {
   );
 }
 
-const styles = StyleSheet.create((theme, rt) => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -100,12 +100,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     justifyContent: "center",
     padding: theme.gap(2),
     gap: theme.gap(2),
-  },
-  title: {
-    textAlign: "center",
-  },
-  input: {
-    marginBottom: theme.gap(2),
   },
   button: {
     marginTop: theme.gap(2),

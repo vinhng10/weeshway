@@ -1,8 +1,9 @@
 import { Branding, Button, TextInput, ThemedText } from "@/components";
+import { WEBSITE_URL } from "@/constants";
 import { useAuth } from "@/hooks";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { View } from "react-native";
+import { Linking, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -44,7 +45,10 @@ export default function CreateAccountScreen() {
 
     try {
       await signUp(trimmedEmail, trimmedPassword, trimmedName);
-      router.replace({ pathname: "/verify-otp", params: { email: trimmedEmail } });
+      router.replace({
+        pathname: "/verify-otp",
+        params: { email: trimmedEmail },
+      });
     } catch (error: any) {
       setError(
         error.message || "Couldn't create your account. Please try again."
@@ -115,6 +119,28 @@ export default function CreateAccountScreen() {
           style={[styles.button]}
         />
 
+        <View style={styles.consent}>
+          <ThemedText type="h5" color="dimmed">
+            By continuing, you agree to our
+          </ThemedText>
+          <ThemedText type="h5" color="dimmed">
+            <ThemedText
+              type="h5"
+              onPress={() => Linking.openURL(`${WEBSITE_URL}/terms`)}
+            >
+              Terms
+            </ThemedText>{" "}
+            and{" "}
+            <ThemedText
+              type="h5"
+              onPress={() => Linking.openURL(`${WEBSITE_URL}/privacy`)}
+            >
+              Privacy
+            </ThemedText>
+            .
+          </ThemedText>
+        </View>
+
         <View style={styles.signin}>
           <ThemedText type="h5" color="dimmed">
             Already have an account?
@@ -130,7 +156,7 @@ export default function CreateAccountScreen() {
   );
 }
 
-const styles = StyleSheet.create((theme, rt) => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -141,14 +167,12 @@ const styles = StyleSheet.create((theme, rt) => ({
     padding: theme.gap(2),
     gap: theme.gap(2),
   },
-  title: {
-    textAlign: "center",
-  },
-  input: {
-    marginBottom: theme.gap(2),
-  },
   button: {
     marginTop: theme.gap(2),
+  },
+  consent: {
+    alignItems: "center",
+    gap: theme.gap(0.5),
   },
   error: {
     textAlign: "center",

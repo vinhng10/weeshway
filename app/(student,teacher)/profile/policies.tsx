@@ -1,10 +1,11 @@
 import { Header, MenuItem } from "@/components";
+import { WEBSITE_URL } from "@/constants";
 import { Linking, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function Policies() {
-  const handleTerms = () => Linking.openURL("https://weeshway.com/terms.html");
-  const handlePrivacy = () => Linking.openURL("https://weeshway.com/privacy.html");
+  const handleTerms = () => Linking.openURL(`${WEBSITE_URL}/terms`);
+  const handlePrivacy = () => Linking.openURL(`${WEBSITE_URL}/privacy`);
 
   return (
     <View style={styles.container}>
