@@ -19,6 +19,7 @@ import { StyleSheet } from "react-native-unistyles";
 
 export default function Account() {
   const profile = useAuth((state) => state.profile);
+  const email = useAuth((state) => state.session?.user.email ?? "");
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
 
@@ -179,6 +180,11 @@ export default function Account() {
 
         {/* Form */}
         <View style={styles.form}>
+          <TextBoxInput
+            label="Email"
+            value={email}
+            editable={false}
+          />
           <TextBoxInput
             label="Full Name"
             value={fullName}

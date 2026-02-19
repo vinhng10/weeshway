@@ -29,9 +29,7 @@ export default function Profile() {
     router.navigate(`/(${rolePath})/profile/wallet`);
   };
 
-  const handleTermsAndConditions = () => {
-    // router.navigate("/(tabs)/profile/data-privacy");
-  };
+  const handlePolicies = () => router.navigate(`/(${rolePath})/profile/policies`);
 
   const handleSignOut = async () => {
     await signOut();
@@ -71,11 +69,7 @@ export default function Profile() {
         <MenuItem icon="person-sharp" title="Account" onPress={handleAccount} />
         <MenuItem icon="wallet" title="Wallet" onPress={handleWallet} />
         <MenuItem icon="settings" title="Settings" onPress={handleDeviceSettings} />
-        <MenuItem
-          icon="shield"
-          title="Terms & Conditions"
-          onPress={handleTermsAndConditions}
-        />
+        <MenuItem icon="shield" title="Policies" onPress={handlePolicies} />
         <MenuItem
           icon="log-out"
           title="Sign Out"
