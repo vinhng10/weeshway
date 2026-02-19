@@ -1,5 +1,5 @@
 // Studio.tsx
-import { ControlBar, DisplayArea, Header, Track } from "@/components";
+import { Button, ControlBar, Header, Track } from "@/components";
 import { TRACK } from "@/constants";
 import { createStudioStore, useAlert, useAudioPlayerStore } from "@/hooks";
 import {
@@ -7,8 +7,8 @@ import {
   useAudioRecorder,
   useAudioRecorderState,
 } from "expo-audio";
-import { useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo } from "react";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
@@ -86,17 +86,19 @@ export default function Studio() {
     setRecorder(audioRecorder, recorderState);
   }, [audioRecorder, recorderState, setRecorder]);
 
-  useEffect(() => {
-    syncFromServer();
-    requestRecordingPermission();
-    return () => {
-      setShouldPlay(false);
-      pause();
-      player?.seekTo(0);
-      reset();
-      syncToServer();
-    };
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      syncFromServer();
+      requestRecordingPermission();
+
+      return () => {
+        setShouldPlay(false);
+        pause();
+        player?.seekTo(0);
+        reset();
+      };
+    }, [])
+  );
 
   const handleSplit = () => {
     if (!player) return;
@@ -149,7 +151,7 @@ export default function Studio() {
       <Header title="Studio" />
 
       <View style={styles.studioContainer}>
-        <DisplayArea recognizing={false} transcript="" />
+        <Button label="Save" stickyBottom onPress={syncToServer} />
 
         <ControlBar
           isPlaying={isPlaying}

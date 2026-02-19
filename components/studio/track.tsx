@@ -99,34 +99,18 @@ export default function Track({ type, useStudioStore }: TrackProps) {
 
   const createAnimations = (selectedItems: ItemType[], rate: number) => {
     return selectedItems.flatMap((item, i) => {
-      const isLast = i === selectedItems.length - 1;
-      const duration = ((item.endTime - item.startTime) * 1000) / rate;
-      const targetOffset = timeToOffset(item.endTime);
+      const itemAnimation = withTiming(timeToOffset(item.endTime), {
+        duration: ((item.endTime - item.startTime) * 1000) / rate,
+        easing: Easing.linear,
+      });
 
-      const itemAnimation = withTiming(
-        targetOffset,
-        { duration, easing: Easing.linear },
-        isLast
-          ? (finished) => {
-              "worklet";
-              if (finished) {
-                scheduleOnRN(pause);
-                scheduleOnRN(setShouldPlay, false);
-              }
-            }
-          : undefined
-      );
-
-      const nextItem = selectedItems[i + 1];
-      const hasGap = nextItem && item.endTime < nextItem.startTime;
-
-      if (hasGap) {
-        const nextStartTime = nextItem.startTime;
+      const next = selectedItems[i + 1];
+      if (next && item.endTime < next.startTime) {
         const seek = async () => {
-          await player?.seekTo(nextStartTime);
+          await player?.seekTo(next.startTime);
         };
         const gapAnimation = withTiming(
-          timeToOffset(nextStartTime),
+          timeToOffset(next.startTime),
           { duration: 0, easing: Easing.linear },
           () => {
             "worklet";
@@ -155,7 +139,33 @@ export default function Track({ type, useStudioStore }: TrackProps) {
           ? [{ ...first, startTime: fromTime }, ...remaining.slice(1)]
           : remaining;
 
-      offset.value = withSequence(...createAnimations(clipped, rate));
+      const leadIn =
+        fromTime < first.startTime
+          ? [
+              withTiming(timeToOffset(first.startTime), {
+                duration: ((first.startTime - fromTime) * 1000) / rate,
+                easing: Easing.linear,
+              }),
+            ]
+          : [];
+
+      const trailOut = withTiming(
+        timeToOffset(clipped[clipped.length - 1].endTime + 5),
+        { duration: 5000 / rate, easing: Easing.linear },
+        (finished) => {
+          "worklet";
+          if (finished) {
+            scheduleOnRN(pause);
+            scheduleOnRN(setShouldPlay, false);
+          }
+        }
+      );
+
+      offset.value = withSequence(
+        ...leadIn,
+        ...createAnimations(clipped, rate),
+        trailOut
+      );
     } else {
       const remainingTime = duration - fromTime;
       if (remainingTime <= 0) return;
@@ -203,8 +213,9 @@ export default function Track({ type, useStudioStore }: TrackProps) {
 
       if (selectedItems.length > 0) {
         (async () => {
-          await sync(selectedItems[0].startTime);
-          animateFrom(selectedItems[0].startTime, rate);
+          const leadInTime = Math.max(0, selectedItems[0].startTime - 5);
+          await sync(leadInTime);
+          animateFrom(leadInTime, rate);
         })();
       } else {
         animateFrom(offsetToTime(offset.value), rate);
@@ -232,56 +243,68 @@ export default function Track({ type, useStudioStore }: TrackProps) {
 
   return (
     <Animated.View style={styles.container}>
-      <Animated.ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        onScroll={scrollHandler}
-        scrollEnabled={isActive}
-      >
-        <Pressable onPress={handlePress} style={styles.scrollContent}>
-          <Animated.View style={styles.tickRow}>
-            {Array.from(
-              { length: Math.ceil(duration / TICK_INTERVAL) },
-              (_, i) => {
-                const time = i * TICK_INTERVAL;
-                return (
-                  <ThemedText
-                    key={i}
-                    style={[styles.tick, { left: timeToOffset(time) }]}
-                  >
-                    {formatTime(time)}
-                  </ThemedText>
-                );
-              }
-            )}
-          </Animated.View>
-          <Animated.View style={styles.itemRow}>
-            {items.map((item, i) => (
-              <Item
-                key={i}
-                index={i}
-                item={item}
-                onPress={() => toggle(i)}
-                disabled={!isActive}
-              />
-            ))}
-          </Animated.View>
-        </Pressable>
-      </Animated.ScrollView>
-      <Cursor />
+      <ThemedText type="h4" style={styles.label}>
+        {type.charAt(0).toUpperCase() + type.slice(1)}
+      </ThemedText>
+      <Animated.View style={styles.track}>
+        <Animated.ScrollView
+          ref={scrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          onScroll={scrollHandler}
+          scrollEnabled={isActive}
+        >
+          <Pressable onPress={handlePress} style={styles.scrollContent}>
+            <Animated.View style={styles.tickRow}>
+              {Array.from(
+                { length: Math.ceil(duration / TICK_INTERVAL) },
+                (_, i) => {
+                  const time = i * TICK_INTERVAL;
+                  return (
+                    <ThemedText
+                      key={i}
+                      style={[styles.tick, { left: timeToOffset(time) }]}
+                    >
+                      {formatTime(time)}
+                    </ThemedText>
+                  );
+                }
+              )}
+            </Animated.View>
+            <Animated.View style={styles.itemRow}>
+              {items.map((item, i) => (
+                <Item
+                  key={i}
+                  index={i}
+                  item={item}
+                  onPress={() => toggle(i)}
+                  disabled={!isActive}
+                />
+              ))}
+            </Animated.View>
+          </Pressable>
+        </Animated.ScrollView>
+        <Cursor />
+      </Animated.View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    height: theme.gap(11),
     variants: {
       disabled: {
         true: { opacity: 0.2 },
       },
     },
+  },
+  label: {
+    paddingHorizontal: theme.gap(1),
+    paddingVertical: theme.gap(0.5),
+    backgroundColor: theme.colors.foreground,
+  },
+  track: {
+    height: theme.gap(11),
   },
   scrollContent: {
     paddingHorizontal: width / 2,

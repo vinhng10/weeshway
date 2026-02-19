@@ -39,26 +39,28 @@ export default function Profile() {
   };
 
   const handleDeleteAccountPress = () => {
-    useAlert.getState().show(
-      "Delete Account",
-      "This will permanently delete your account and all associated data. This action cannot be undone.",
-      {
-        confirmLabel: "Delete",
-        onConfirm: async () => {
-          try {
-            await deleteAccount();
-            router.replace("../sign-in");
-          } catch {
-            useAlert
-              .getState()
-              .show(
-                "Delete Failed",
-                "Couldn't delete your account. Please try again."
-              );
-          }
-        },
-      }
-    );
+    useAlert
+      .getState()
+      .show(
+        "Delete Account",
+        "This will permanently delete your account and all associated data. This action cannot be undone.",
+        {
+          confirmLabel: "Delete",
+          onConfirm: async () => {
+            try {
+              await deleteAccount();
+              router.replace("../sign-in");
+            } catch {
+              useAlert
+                .getState()
+                .show(
+                  "Delete Failed",
+                  "Couldn't delete your account. Please try again."
+                );
+            }
+          },
+        }
+      );
   };
 
   const options: ChipBarItemProps[] = [
@@ -104,7 +106,6 @@ export default function Profile() {
           title="Sign Out"
           onPress={handleSignOut}
           showChevron={false}
-          color="danger"
         />
         <MenuItem
           icon="trash"
