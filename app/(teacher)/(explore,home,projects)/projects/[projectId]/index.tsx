@@ -102,13 +102,12 @@ function ProjectContent() {
         predicate: (query) => query.queryKey.includes("projects"),
       });
       router.back();
-    } catch {
-      useAlert
-        .getState()
-        .show(
-          "Delete Failed",
-          "Couldn't delete the project. Please try again."
-        );
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Couldn't delete the project. Please try again.";
+      useAlert.getState().show("Delete Failed", message);
     }
   };
 
