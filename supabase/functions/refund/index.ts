@@ -25,17 +25,18 @@ type FailedJob = z.infer<typeof failedJobSchema>;
  */
 async function processJob(job: Job) {
   return await sql.begin(async () => {
-    // 1. Fetch booking data
+    // 1. Fetch booking data with project price to calculate refund amount
     const [booking] = await sql`
-      SELECT id, stripe_payment_intent_id
-      FROM public.bookings
-      WHERE id = ${job.id} AND status = 'Refunding'
+      SELECT b.id, b.stripe_payment_intent_id, b.spots, p.price
+      FROM public.bookings b
+      JOIN public.projects p ON p.id = b.project_id
+      WHERE b.id = ${job.id} AND b.status = 'Refunding'
       FOR UPDATE
     `;
 
     if (!booking) {
       throw new HttpError(
-        `Booking ${job.id} not found or not in Succeeded status`,
+        `Booking ${job.id} not found or not in Refunding status`,
         404
       );
     }
@@ -44,10 +45,15 @@ async function processJob(job: Job) {
       throw new HttpError(`Booking ${job.id} has no payment intent`, 400);
     }
 
-    // 2. Create Stripe refund with reverse_transfer and jobId in metadata
+    // Refund only the class price (spots × price), keeping the spot fee
+    const refundAmount = booking.spots * booking.price;
+
+    // 2. Create Stripe refund — keep spot fee, return class price to student
     const refund = await stripe.refunds.create({
       payment_intent: booking.stripe_payment_intent_id,
+      amount: refundAmount,
       reverse_transfer: true,
+      refund_application_fee: false,
       metadata: {
         jobId: job.jobId.toString(),
         bookingId: booking.id.toString(),
