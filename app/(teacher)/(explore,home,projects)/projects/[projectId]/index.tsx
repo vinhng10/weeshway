@@ -22,7 +22,7 @@ import {
   STRIPE_PAYMENT_STATUS,
   STYLE,
 } from "@/constants";
-import { useAlert, useAuth, useSuspenseQuery } from "@/hooks";
+import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType, ProjectStatusType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -36,6 +36,7 @@ function ProjectContent() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const profile = useAuth((state) => state.profile);
   const queryClient = useQueryClient();
+  const transactionFee = useLocales((state) => state.transactionFee);
 
   const { data, refetch, isRefetching } = useSuspenseQuery<ProjectEnrichedType>(
     {
@@ -79,8 +80,8 @@ function ProjectContent() {
   const wasCanceled = data.status === PROJECT_STATUS.CANCELED;
   const canEditDetails = !wasReleased && !wasCanceled;
   const canEditStatus = !wasCanceled;
-  const isReleasable = !!(
-    profile?.onboardingComplete &&
+  const isOnboarded = !!profile?.onboardingComplete;
+  const isFieldsComplete = !!(
     style &&
     level &&
     Number(price) > 0 &&
@@ -112,43 +113,88 @@ function ProjectContent() {
   };
 
   const handleSave = async () => {
-    // Can't save once canceled
-    if (wasCanceled) return;
-    // Can't release if not all fields are filled
-    if (status === PROJECT_STATUS.RELEASED && !isReleasable) return;
-    // Can't go back to draft if already released
-    if (status === PROJECT_STATUS.DRAFT && wasReleased) return;
-
-    try {
-      await supabase
-        .from("projects")
-        .update({
-          name: name ?? null,
-          status: status ?? null,
-          style: style ?? null,
-          level: level ?? null,
-          price: price ? Math.round(Number(price) * 100) : null,
-          spots: spots ? Number(spots) : null,
-          start_at: startAt ?? null,
-          end_at: endAt ?? null,
-          description: description ?? null,
-          location_id: location?.id ?? null,
-        })
-        .eq("id", projectId)
-        .throwOnError();
-
-      await queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey.includes("projects"),
-      });
-      router.back();
-    } catch {
+    if (wasCanceled) {
       useAlert
         .getState()
         .show(
-          "Save Failed",
-          "Couldn't save your project changes. Please try again."
+          "Project Canceled",
+          "This project has been canceled and can no longer be edited. You can delete it if you no longer need it."
         );
+      return;
     }
+    if (status === PROJECT_STATUS.DRAFT && wasReleased) {
+      useAlert
+        .getState()
+        .show(
+          "Already Released",
+          "This project has already been released to students and can't be moved back to draft."
+        );
+      return;
+    }
+    if (status === PROJECT_STATUS.RELEASED && !isOnboarded) {
+      useAlert
+        .getState()
+        .show(
+          "Wallet Setup Required",
+          "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started."
+        );
+      return;
+    }
+    if (status === PROJECT_STATUS.RELEASED && !isFieldsComplete) {
+      useAlert
+        .getState()
+        .show(
+          "Not Ready to Release",
+          "Before releasing, make sure you've filled in the style, level, price, spots, date, and location."
+        );
+      return;
+    }
+
+    const doSave = async () => {
+      try {
+        await supabase
+          .from("projects")
+          .update({
+            name: name ?? null,
+            status: status ?? null,
+            style: style ?? null,
+            level: level ?? null,
+            price: price ? Math.round(Number(price) * 100) : null,
+            spots: spots ? Number(spots) : null,
+            start_at: startAt ?? null,
+            end_at: endAt ?? null,
+            description: description ?? null,
+            location_id: location?.id ?? null,
+          })
+          .eq("id", projectId)
+          .throwOnError();
+
+        await queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey.includes("projects"),
+        });
+        router.back();
+      } catch {
+        useAlert
+          .getState()
+          .show(
+            "Save Failed",
+            "Couldn't save your project changes. Please try again."
+          );
+      }
+    };
+
+    if (status === PROJECT_STATUS.CANCELED) {
+      useAlert
+        .getState()
+        .show(
+          "Cancel This Class?",
+          `Booked students will receive full refunds. A ${transactionFee}% processing fee on the class price will be deducted per booking. This cannot be undone.`,
+          { confirmLabel: "Cancel Class", onConfirm: doSave }
+        );
+      return;
+    }
+
+    await doSave();
   };
 
   const options: ChipBarItemProps[] = [

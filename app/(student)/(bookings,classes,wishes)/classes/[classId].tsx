@@ -29,6 +29,7 @@ function ClassContent() {
   const [visible, setVisible] = useState(false);
   const queryClient = useQueryClient();
   const formatMoney = useLocales((state) => state.formatMoney);
+  const transactionFee = useLocales((state) => state.transactionFee);
 
   const { data, refetch, isRefetching } = useSuspenseQuery<ProjectEnrichedType>(
     {
@@ -108,7 +109,7 @@ function ClassContent() {
     });
   };
 
-  const handleRefund = async () => {
+  const doCancel = async () => {
     if (!userBooking?.id) return;
     try {
       await supabase
@@ -124,11 +125,21 @@ function ClassContent() {
       useAlert
         .getState()
         .show(
-          "Refund Failed",
+          "Cancel Failed",
           error?.message ??
             "Couldn't process your refund request. Please try again."
         );
     }
+  };
+
+  const handleCancel = () => {
+    useAlert
+      .getState()
+      .show(
+        "Cancel Your Booking?",
+        `A ${transactionFee}% cancellation fee applies — you'll be refunded the class price minus ${transactionFee}%. The booking fee is non-refundable. This cannot be undone.`,
+        { confirmLabel: "Cancel Booking", onConfirm: doCancel }
+      );
   };
 
   const buttonLabel = isBooked
@@ -230,7 +241,7 @@ function ClassContent() {
         <Button stickyBottom label="Refunding" disabled />
       ) : isBooked ? (
         <ButtonGroup stickyBottom>
-          <Button outlined label="Refund" onPress={handleRefund} />
+          <Button outlined label="Cancel" onPress={handleCancel} />
           <Button label={buttonLabel} onPress={handlePress} disabled />
         </ButtonGroup>
       ) : (

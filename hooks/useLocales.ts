@@ -5,11 +5,16 @@ import { create } from "zustand";
 interface LocaleState {
   currency: string;
   country: string;
-  spotFee: number;
+  bookingFee: number;
+  transactionFee: number;
   usdRates: Record<string, number>;
   initFees: () => Promise<void>;
   formatMoney: (amount?: number, fromCurrency?: string) => string;
-  exchange: (amount: number, fromCurrency: string, toCurrency: string) => number;
+  exchange: (
+    amount: number,
+    fromCurrency: string,
+    toCurrency: string
+  ) => number;
 }
 
 const locale = getLocales()[0];
@@ -17,20 +22,25 @@ const locale = getLocales()[0];
 export const useLocales = create<LocaleState>((set, get) => ({
   currency: locale.currencyCode ?? "USD",
   country: locale.regionCode ?? "US",
-  spotFee: 50,
+  bookingFee: 50,
+  transactionFee: 5,
   usdRates: {},
 
   initFees: async () => {
     try {
       const [{ data }, ratesRes] = await Promise.all([
-        supabase.from("fees").select("value").eq("key", "spot_fee").single(),
+        supabase.from("fees").select("key, value"),
         fetch(
           "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json"
         ),
       ]);
       const rates = await ratesRes.json();
+      const map = Object.fromEntries(
+        (data ?? []).map((r) => [r.key, r.value])
+      );
       set({
-        spotFee: data?.value ?? 50,
+        bookingFee: map.booking_fee ?? 50,
+        transactionFee: map.transaction_fee ?? 5,
         usdRates: rates.usd ?? {},
       });
     } catch {

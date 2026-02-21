@@ -36,7 +36,7 @@ export function Checkout({
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { theme } = useUnistyles();
   const formatMoney = useLocales((state) => state.formatMoney);
-  const spotFee = useLocales((state) => state.spotFee);
+  const bookingFee = useLocales((state) => state.bookingFee);
   const exchange = useLocales((state) => state.exchange);
 
   // States to manage separate stages
@@ -48,9 +48,9 @@ export function Checkout({
 
   const currency = project.currency;
   const amount = project.price ?? 0;
-  const spotAmount = amount * spots;
-  const feeAmount = exchange(spotFee, "USD", currency) * spots;
-  const totalAmount = spotAmount + feeAmount;
+  const price = amount * spots;
+  const fee = exchange(bookingFee, "USD", currency) * spots;
+  const total = price + fee;
 
   const fetchPaymentSheetParams = async () => {
     if (amount <= 0) {
@@ -219,23 +219,19 @@ export function Checkout({
           <View style={styles.priceBreakdown}>
             <View style={[styles.row, styles.priceRow]}>
               <ThemedText type="h3">Price</ThemedText>
-              <ThemedText type="h3">
-                {formatMoney(spotAmount, currency)}
-              </ThemedText>
+              <ThemedText type="h3">{formatMoney(price, currency)}</ThemedText>
             </View>
             <View style={[styles.row, styles.priceRow]}>
               <ThemedText type="h3" color="dimmed">
                 Fee
               </ThemedText>
               <ThemedText type="h3" color="dimmed">
-                {formatMoney(feeAmount, currency)}
+                {formatMoney(fee, currency)}
               </ThemedText>
             </View>
             <View style={styles.divider} />
             <View style={styles.totalRow}>
-              <ThemedText type="h1">
-                {formatMoney(totalAmount, currency)}
-              </ThemedText>
+              <ThemedText type="h1">{formatMoney(total, currency)}</ThemedText>
             </View>
           </View>
 

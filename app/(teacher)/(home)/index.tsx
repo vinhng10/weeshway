@@ -25,6 +25,7 @@ function HomeContent() {
   const formatMoney = useLocales((state) => state.formatMoney);
   const exchange = useLocales((state) => state.exchange);
   const currency = useLocales((state) => state.currency);
+  const transactionFee = useLocales((state) => state.transactionFee);
 
   const {
     data: projects,
@@ -76,7 +77,12 @@ function HomeContent() {
 
   const renderStats = (data: StatsType[]) => {
     const totalEarnings = data.reduce(
-      (sum, s) => sum + exchange(s.totalEarnings, s.currency, currency),
+      (sum, s) =>
+        sum +
+        Math.round(
+          exchange(s.totalEarnings, s.currency, currency) *
+            (1 - transactionFee / 100)
+        ),
       0
     );
     const bookingCount = data.reduce((sum, s) => sum + s.bookingCount, 0);

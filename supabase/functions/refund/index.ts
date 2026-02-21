@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { authenticateInternalRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
+import { exchange, getFees } from "../_shared/fees.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
@@ -21,15 +22,31 @@ type FailedJob = z.infer<typeof failedJobSchema>;
 
 // --- 2. Core Logic Helpers ---
 /**
- * Processes a single refund job atomically
+ * Processes a single refund job atomically.
+ *
+ * Fee policy (refund_application_fee is always false — platform keeps the spot
+ * fee, then handles it per initiator):
+ *
+ * - student-initiated: student bears the Stripe fee.
+ *   Amount = classPrice × spots × (1 - transactionFee%). Teacher's transfer is
+ *   partially reversed by the same proportion.
+ *
+ * - teacher-initiated: student gets a full refund (no amount specified).
+ *   Platform keeps the spot fee, then transfers it back to the teacher.
+ *   Teacher effectively bears the 5% Stripe processing fee on the class price
+ *   (they receive the spot fee but not the reversed Stripe cost).
  */
 async function processJob(job: Job) {
+  const { bookingFee, transactionFee, usdRates } = await getFees();
+
   return await sql.begin(async () => {
-    // 1. Fetch booking data with project price to calculate refund amount
+    // 1. Fetch booking data — refund_initiator is set by the validate_refund_eligibility trigger
     const [booking] = await sql`
-      SELECT b.id, b.stripe_payment_intent_id, b.spots, p.price
+      SELECT b.id, b.stripe_payment_intent_id, b.spots, b.refund_initiator,
+             p.price, p.currency, pr.stripe_account_id AS teacher_stripe_account_id
       FROM public.bookings b
       JOIN public.projects p ON p.id = b.project_id
+      JOIN public.profiles pr ON pr.id = p.user_id
       WHERE b.id = ${job.id} AND b.status = 'Refunding'
       FOR UPDATE
     `;
@@ -45,22 +62,75 @@ async function processJob(job: Job) {
       throw new HttpError(`Booking ${job.id} has no payment intent`, 400);
     }
 
-    // Refund only the class price (spots × price), keeping the spot fee
-    const refundAmount = booking.spots * booking.price;
+    if (!booking.refund_initiator) {
+      throw new HttpError(`Booking ${job.id} has no refund initiator`, 400);
+    }
 
-    // 2. Create Stripe refund — keep spot fee, return class price to student
-    const refund = await stripe.refunds.create({
-      payment_intent: booking.stripe_payment_intent_id,
-      amount: refundAmount,
-      reverse_transfer: true,
-      refund_application_fee: false,
-      metadata: {
-        jobId: job.jobId.toString(),
-        bookingId: booking.id.toString(),
-      },
-    });
+    const metadata = {
+      jobId: job.jobId.toString(),
+      bookingId: booking.id.toString(),
+      initiator: booking.refund_initiator,
+    };
 
-    return { ...job, refundId: refund.id, status: refund.status };
+    if (booking.refund_initiator === "Student") {
+      // Student-initiated: student bears the Stripe fee.
+      // Amount = classPrice × spots × (1 - transactionFee%). Teacher's transfer is
+      // partially reversed by the same proportion.
+      const price = booking.spots * booking.price;
+      const refundAmount = Math.round(price * (1 - transactionFee / 100));
+
+      const refund = await stripe.refunds.create({
+        payment_intent: booking.stripe_payment_intent_id,
+        amount: refundAmount,
+        reverse_transfer: true,
+        metadata,
+      });
+
+      return { ...job, refundId: refund.id, status: refund.status };
+    } else {
+      // Teacher-initiated: student gets full refund (no amount = full charge).
+      // Platform keeps the spot fee (refund_application_fee: false), then
+      // transfers it back to the teacher. Teacher effectively bears the 5%
+      // Stripe processing fee on the class price.
+      if (!booking.teacher_stripe_account_id) {
+        throw new HttpError(
+          `Booking ${job.id}: teacher has no Stripe account`,
+          400
+        );
+      }
+
+      const refund = await stripe.refunds.create({
+        payment_intent: booking.stripe_payment_intent_id,
+        reverse_transfer: true,
+        metadata,
+      });
+
+      const feePerSpot = exchange(
+        bookingFee,
+        "USD",
+        booking.currency,
+        usdRates
+      );
+      const bookingFeeAmount = feePerSpot * booking.spots;
+
+      const transfer = await stripe.transfers.create({
+        amount: bookingFeeAmount,
+        currency: booking.currency.toLowerCase(),
+        destination: booking.teacher_stripe_account_id,
+        metadata: {
+          jobId: job.jobId.toString(),
+          bookingId: booking.id.toString(),
+          reason: "spot_fee_compensation",
+        },
+      });
+
+      return {
+        ...job,
+        refundId: refund.id,
+        transferId: transfer.id,
+        status: refund.status,
+      };
+    }
   });
 }
 
@@ -87,7 +157,7 @@ Deno.serve(async (req) => {
     }
 
     const completedJobs: Array<
-      Job & { refundId: string; status: string | null }
+      Job & { refundId: string; transferId?: string; status: string | null }
     > = [];
     const failedJobs: FailedJob[] = [];
 
