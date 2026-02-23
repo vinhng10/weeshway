@@ -7,6 +7,7 @@ import {
   Chip,
   DateTimeInput,
   FloatBoxInput,
+  Header,
   Hero,
   IntBoxInput,
   LocationInput,
@@ -158,8 +159,7 @@ function ClassContent() {
 
   return (
     <View style={styles.container}>
-      {/* Hero Section with Song Image */}
-      <Hero data={data.song} onShare={() => {}} />
+      <Header title="Class" />
 
       {/* Scrollable Content */}
       <ScrollView
@@ -169,6 +169,9 @@ function ClassContent() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
       >
+        {/* Hero Section */}
+        <Hero data={data.song} />
+
         {/* Avatar and Name */}
         <Pressable
           style={styles.teacherContainer}

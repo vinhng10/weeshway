@@ -4,7 +4,6 @@ import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Header } from "./header";
 import { IconButton } from "./input/icon-button";
 import { ThemedText } from "./themed-text";
 
@@ -32,7 +31,6 @@ export const Hero = ({ data, onShare }: HeroProps) => {
         start={{ x: 0, y: 0.3 }}
         end={{ x: 0, y: 1 }}
       >
-        <Header />
         <View style={styles.contentContainer}>
           <View style={styles.songInfo}>
             <ThemedText type="h2">{data.name}</ThemedText>
@@ -41,7 +39,13 @@ export const Hero = ({ data, onShare }: HeroProps) => {
             </ThemedText>
           </View>
           <View style={styles.buttonContainer}>
-            <IconButton icon="share-social-sharp" iconSize={24} onPress={onShare} />
+            {onShare && (
+              <IconButton
+                icon="share-social-sharp"
+                iconSize={24}
+                onPress={onShare}
+              />
+            )}
             <IconButton
               icon={isPlaying ? "pause" : "play"}
               iconSize={36}
@@ -57,17 +61,12 @@ export const Hero = ({ data, onShare }: HeroProps) => {
 const styles = StyleSheet.create((theme) => ({
   background: {
     height: theme.gap(32),
+    marginHorizontal: -theme.gap(2),
+    marginTop: -theme.gap(2),
   },
   overlay: {
     flex: 1,
-    justifyContent: "space-between",
-  },
-  headerContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 1,
+    justifyContent: "flex-end",
   },
   contentContainer: {
     flexDirection: "row",

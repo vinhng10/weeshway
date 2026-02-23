@@ -7,6 +7,7 @@ import {
   DateTimeInput,
   FloatBoxInput,
   Header,
+  Hero,
   IntBoxInput,
   LocationInput,
   SelectBoxInput,
@@ -226,13 +227,8 @@ function ProjectContent() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
       >
-        {/* Song Tile */}
-        <Tile
-          imageSource={data.song.artworkUrl}
-          title={data.song.name}
-          subtitle={data.song.artistName}
-          previewUrl={data.song.previewUrl}
-        />
+        {/* Song Hero */}
+        <Hero data={data.song} />
 
         {/* Project Name Input */}
         <TextBoxInput
