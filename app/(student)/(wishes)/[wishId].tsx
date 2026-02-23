@@ -23,6 +23,7 @@ import { StyleSheet } from "react-native-unistyles";
 function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
   const queryClient = useQueryClient();
+  const showAlert = useAlert((state) => state.showAlert);
 
   const { data, refetch, isRefetching } =
     useSuspenseQuery<WishRecommendationEnrichedType>({
@@ -75,12 +76,10 @@ function WishContent() {
       });
       router.back();
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Save Failed",
-          "Couldn't save your wish changes. Please try again."
-        );
+      showAlert(
+        "Save Failed",
+        "Couldn't save your wish changes. Please try again."
+      );
     }
   };
 
@@ -93,9 +92,10 @@ function WishContent() {
       });
       router.back();
     } catch {
-      useAlert
-        .getState()
-        .show("Delete Failed", "Couldn't delete your wish. Please try again.");
+      showAlert(
+        "Delete Failed",
+        "Couldn't delete your wish. Please try again."
+      );
     }
   };
 

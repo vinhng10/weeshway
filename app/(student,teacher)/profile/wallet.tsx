@@ -52,6 +52,7 @@ type PaymentMethodsResponse = {
 function StudentWalletContent() {
   const profile = useAuth((state) => state.profile);
   const { theme } = useUnistyles();
+  const showAlert = useAlert((state) => state.showAlert);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const { data, refetch, isRefetching } = useSuspenseQuery<PaymentMethod[]>({
@@ -140,12 +141,10 @@ function StudentWalletContent() {
         });
 
         if (error) {
-          useAlert
-            .getState()
-            .show(
-              "Payment Setup",
-              "Couldn't initialize the payment setup. Please try again."
-            );
+          showAlert(
+            "Payment Setup",
+            "Couldn't initialize the payment setup. Please try again."
+          );
           return;
         }
         setIsInitialized(true);
@@ -156,12 +155,10 @@ function StudentWalletContent() {
 
       await refetch();
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Payment Setup",
-          "Couldn't open the payment setup. Please try again."
-        );
+      showAlert(
+        "Payment Setup",
+        "Couldn't open the payment setup. Please try again."
+      );
     }
   };
 
@@ -213,6 +210,7 @@ function TeacherWalletContent() {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const country = useLocales((state) => state.country);
+  const showAlert = useAlert((state) => state.showAlert);
   const headerContent = [
     "To receive payments from students, you need to complete your payment account setup with Stripe.",
   ];
@@ -263,12 +261,10 @@ function TeacherWalletContent() {
       await refetch();
       await fetchProfile();
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Setup Failed",
-          "Couldn't start the wallet setup. Please try again."
-        );
+      showAlert(
+        "Setup Failed",
+        "Couldn't start the wallet setup. Please try again."
+      );
     }
   };
 
@@ -289,12 +285,10 @@ function TeacherWalletContent() {
 
       await WebBrowser.openAuthSessionAsync(dashboardUrl, RETURN_URL);
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Dashboard Unavailable",
-          "Couldn't open your payment dashboard. Please try again."
-        );
+      showAlert(
+        "Dashboard Unavailable",
+        "Couldn't open your payment dashboard. Please try again."
+      );
     }
   };
 

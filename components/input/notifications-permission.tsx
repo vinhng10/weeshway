@@ -1,5 +1,5 @@
 import { ROLE } from "@/constants";
-import { useAuth, useOnboarding, useRole } from "@/hooks";
+import { useAlert, useAuth, useOnboarding, useRole } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileType } from "@/types";
 import Constants from "expo-constants";
@@ -44,9 +44,7 @@ export async function syncPushToken(
         .eq("id", profile.id)
         .throwOnError();
     }
-  } catch (error) {
-    console.error("Push token sync failed:", error);
-  }
+  } catch {}
 }
 
 export const NotificationsPermission = () => {
@@ -55,6 +53,7 @@ export const NotificationsPermission = () => {
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const role = useRole((state) => state.role);
+  const showAlert = useAlert((state) => state.showAlert);
 
   if (prompted) return null;
 
@@ -65,8 +64,11 @@ export const NotificationsPermission = () => {
       }
       await syncPushToken(profile);
       await fetchProfile();
-    } catch (error) {
-      console.error(error);
+    } catch {
+      showAlert(
+        "Notifications",
+        "Something went wrong enabling notifications. Please try again later."
+      );
     } finally {
       // This is the source of truth that prevents it from ever showing again
       setPrompted("notifications", true);

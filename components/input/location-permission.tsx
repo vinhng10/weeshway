@@ -38,9 +38,7 @@ export async function syncLocation(
       .update(data)
       .eq("id", profile.id)
       .throwOnError();
-  } catch (error) {
-    console.error("Location update failed:", error);
-  }
+  } catch {}
 }
 
 export const LocationPermission = () => {

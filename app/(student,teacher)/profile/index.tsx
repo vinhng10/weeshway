@@ -18,6 +18,7 @@ export default function Profile() {
 
   const role = useRole((state) => state.role);
   const setRole = useRole((state) => state.setRole);
+  const showAlert = useAlert((state) => state.showAlert);
   const rolePath = role === ROLE.STUDENT ? "student" : "teacher";
 
   const handleAccount = () => {
@@ -39,28 +40,24 @@ export default function Profile() {
   };
 
   const handleDeleteAccountPress = () => {
-    useAlert
-      .getState()
-      .show(
-        "Delete Account",
-        "This will permanently delete your account and all associated data. This action cannot be undone.",
-        {
-          confirmLabel: "Delete",
-          onConfirm: async () => {
-            try {
-              await deleteAccount();
-              router.replace("../sign-in");
-            } catch {
-              useAlert
-                .getState()
-                .show(
-                  "Delete Failed",
-                  "Couldn't delete your account. Please try again."
-                );
-            }
-          },
-        }
-      );
+    showAlert(
+      "Delete Account",
+      "This will permanently delete your account and all associated data. This action cannot be undone.",
+      {
+        confirmLabel: "Delete",
+        onConfirm: async () => {
+          try {
+            await deleteAccount();
+            router.replace("../sign-in");
+          } catch {
+            showAlert(
+              "Delete Failed",
+              "Couldn't delete your account. Please try again."
+            );
+          }
+        },
+      }
+    );
   };
 
   const options: ChipBarItemProps[] = [

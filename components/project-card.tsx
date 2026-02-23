@@ -32,6 +32,7 @@ export const ProjectCard = ({ data }: CardProps) => {
     }))
   );
   const formatMoney = useLocales((state) => state.formatMoney);
+  const showAlert = useAlert((state) => state.showAlert);
 
   const handleAudioPlayer = (e?: any) => {
     if (!data.song.previewUrl) return;
@@ -66,12 +67,10 @@ export const ProjectCard = ({ data }: CardProps) => {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Watch List",
-          "Couldn't update your watch list. Please try again."
-        );
+      showAlert(
+        "Watch List",
+        "Couldn't update your watch list. Please try again."
+      );
     }
   };
 

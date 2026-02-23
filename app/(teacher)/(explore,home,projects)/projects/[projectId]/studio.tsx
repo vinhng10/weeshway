@@ -79,6 +79,7 @@ export default function Studio() {
     }))
   );
 
+  const showAlert = useAlert((state) => state.showAlert);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(audioRecorder);
 
@@ -125,12 +126,10 @@ export default function Studio() {
         initialize(trackState);
       }
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Playback Error",
-          "Couldn't load the audio file. Please try again."
-        );
+      showAlert(
+        "Playback Error",
+        "Couldn't load the audio file. Please try again."
+      );
     }
   };
 

@@ -90,9 +90,7 @@ function VideoPlayerComponent({
 
   useEffect(() => {
     if (status === "readyToPlay" && !error) {
-      videoRef.current?.enterFullscreen().catch((err: any) => {
-        console.error("Failed to enter fullscreen:", err);
-      });
+      videoRef.current?.enterFullscreen().catch(() => {});
     }
   }, [status, error, videoRef]);
 

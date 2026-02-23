@@ -21,6 +21,7 @@ export default function MakeAWish() {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const queryClient = useQueryClient();
+  const showAlert = useAlert((state) => state.showAlert);
 
   const [style, setStyle] = useState<StyleType>(STYLE.HIPHOP);
   const [level, setLevel] = useState<LevelType>(LEVEL.BEGINNER);
@@ -29,19 +30,18 @@ export default function MakeAWish() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      useAlert
-        .getState()
-        .show("Login Required", "Please sign in to your account to continue.");
+      showAlert(
+        "Login Required",
+        "Please sign in to your account to continue."
+      );
       return;
     }
 
     if (!song) {
-      useAlert
-        .getState()
-        .show(
-          "Song Required",
-          "Please search and select a song before making a wish."
-        );
+      showAlert(
+        "Song Required",
+        "Please search and select a song before making a wish."
+      );
       return;
     }
 
@@ -74,12 +74,10 @@ export default function MakeAWish() {
       // Navigate back or show success message
       router.back();
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Creation Failed",
-          "Couldn't create your wish. Please try again."
-        );
+      showAlert(
+        "Creation Failed",
+        "Couldn't create your wish. Please try again."
+      );
     }
   };
 

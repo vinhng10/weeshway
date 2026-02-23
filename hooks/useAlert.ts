@@ -11,8 +11,8 @@ interface AlertState {
   message: string;
   confirmLabel?: string;
   onConfirm?: () => void;
-  show: (title: string, message: string, options?: AlertOptions) => void;
-  hide: () => void;
+  showAlert: (title: string, message: string, options?: AlertOptions) => void;
+  hideAlert: () => void;
 }
 
 export const useAlert = create<AlertState>()((set) => ({
@@ -21,9 +21,9 @@ export const useAlert = create<AlertState>()((set) => ({
   message: "",
   confirmLabel: undefined,
   onConfirm: undefined,
-  show: (title, message, options) =>
+  showAlert: (title, message, options) =>
     set({ visible: true, title, message, ...options }),
-  hide: () =>
+  hideAlert: () =>
     set({
       visible: false,
       title: "",

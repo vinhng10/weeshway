@@ -22,6 +22,7 @@ export default function Account() {
   const email = useAuth((state) => state.session?.user.email ?? "");
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
+  const showAlert = useAlert((state) => state.showAlert);
   const [fullName, setFullName] = useState(profile?.fullName || "");
   const [bio, setBio] = useState(profile?.bio || "");
   const [avatarUri, setAvatarUri] = useState<string | null>(
@@ -50,12 +51,10 @@ export default function Account() {
       // Request permissions
       const { status } = await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        useAlert
-          .getState()
-          .show(
-            "Permission Needed",
-            "Please allow access to your photo library to upload a video."
-          );
+        showAlert(
+          "Permission Needed",
+          "Please allow access to your photo library to upload a video."
+        );
         return;
       }
 
@@ -72,9 +71,7 @@ export default function Account() {
         setVideoUrls((prev) => [...prev, uri]);
       }
     } catch {
-      useAlert
-        .getState()
-        .show("Upload Failed", "Couldn't load your video. Please try again.");
+      showAlert("Upload Failed", "Couldn't load your video. Please try again.");
     }
   };
 
@@ -84,9 +81,10 @@ export default function Account() {
 
   const handleSave = async () => {
     if (!profile || !isLoggedIn) {
-      useAlert
-        .getState()
-        .show("Login Required", "Please sign in to your account to continue.");
+      showAlert(
+        "Login Required",
+        "Please sign in to your account to continue."
+      );
       return;
     }
 
@@ -133,12 +131,10 @@ export default function Account() {
       await fetchProfile();
       router.back();
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Save Failed",
-          "Couldn't save your profile changes. Please try again."
-        );
+      showAlert(
+        "Save Failed",
+        "Couldn't save your profile changes. Please try again."
+      );
     }
   };
 

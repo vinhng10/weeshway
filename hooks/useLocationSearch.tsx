@@ -96,7 +96,6 @@ export const useLocationSearch = (query: string) => {
             error:
               err instanceof Error ? err.message : "Failed to search locations",
           });
-          console.error("Search error:", err);
         }
       }
     }, DEBOUNCE_TIME);

@@ -5,11 +5,11 @@ import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
 export const Alert = () => {
-  const { visible, title, message, confirmLabel, onConfirm, hide } =
+  const { visible, title, message, confirmLabel, onConfirm, hideAlert } =
     useAlert();
 
   const handleConfirm = () => {
-    hide();
+    hideAlert();
     onConfirm?.();
   };
 
@@ -19,9 +19,9 @@ export const Alert = () => {
       animationType="slide"
       presentationStyle="overFullScreen"
       transparent={true}
-      onRequestClose={hide}
+      onRequestClose={hideAlert}
     >
-      <Pressable style={styles.container} onPress={hide} />
+      <Pressable style={styles.container} onPress={hideAlert} />
       <View style={styles.sheet}>
         {title && <ThemedText type="h4">{title}</ThemedText>}
         <ThemedText type="h5" color="dimmed">
@@ -34,7 +34,7 @@ export const Alert = () => {
                 style={styles.button}
                 outlined
                 label="Cancel"
-                onPress={hide}
+                onPress={hideAlert}
               />
               <Button
                 style={styles.button}
@@ -43,7 +43,7 @@ export const Alert = () => {
               />
             </>
           ) : (
-            <Button style={styles.button} label="OK" onPress={hide} />
+            <Button style={styles.button} label="OK" onPress={hideAlert} />
           )}
         </View>
       </View>

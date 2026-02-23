@@ -43,6 +43,7 @@ export default function CreateProject() {
   const queryClient = useQueryClient();
   const getData = useTempDataStore((state) => state.getData);
   const reset = useTempDataStore((state) => state.reset);
+  const showAlert = useAlert((state) => state.showAlert);
 
   // Initialize state with project data or defaults
   const [name, setName] = useState<string>();
@@ -93,29 +94,26 @@ export default function CreateProject() {
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
-      useAlert
-        .getState()
-        .show("Login Required", "Please sign in to your account to continue.");
+      showAlert(
+        "Login Required",
+        "Please sign in to your account to continue."
+      );
       return;
     }
 
     if (!song) {
-      useAlert
-        .getState()
-        .show(
-          "Song Required",
-          "Please search and select a song before creating a project."
-        );
+      showAlert(
+        "Song Required",
+        "Please search and select a song before creating a project."
+      );
       return;
     }
 
     if (status === PROJECT_STATUS.RELEASED && !profile.onboardingComplete) {
-      useAlert
-        .getState()
-        .show(
-          "Wallet Setup Required",
-          "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started."
-        );
+      showAlert(
+        "Wallet Setup Required",
+        "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started."
+      );
       return;
     }
 
@@ -157,12 +155,10 @@ export default function CreateProject() {
       // Navigate back to projects list
       router.back();
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Creation Failed",
-          "Couldn't create your project. Please try again."
-        );
+      showAlert(
+        "Creation Failed",
+        "Couldn't create your project. Please try again."
+      );
     }
   };
 

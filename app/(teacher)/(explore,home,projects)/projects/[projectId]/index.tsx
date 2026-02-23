@@ -38,6 +38,7 @@ function ProjectContent() {
   const profile = useAuth((state) => state.profile);
   const queryClient = useQueryClient();
   const transactionFee = useLocales((state) => state.transactionFee);
+  const showAlert = useAlert((state) => state.showAlert);
 
   const { data, refetch, isRefetching } = useSuspenseQuery<ProjectEnrichedType>(
     {
@@ -109,45 +110,37 @@ function ProjectContent() {
         error instanceof Error && error.message
           ? error.message
           : "Couldn't delete the project. Please try again.";
-      useAlert.getState().show("Delete Failed", message);
+      showAlert("Delete Failed", message);
     }
   };
 
   const handleSave = async () => {
     if (wasCanceled) {
-      useAlert
-        .getState()
-        .show(
-          "Project Canceled",
-          "This project has been canceled and can no longer be edited. You can delete it if you no longer need it."
-        );
+      showAlert(
+        "Project Canceled",
+        "This project has been canceled and can no longer be edited. You can delete it if you no longer need it."
+      );
       return;
     }
     if (status === PROJECT_STATUS.DRAFT && wasReleased) {
-      useAlert
-        .getState()
-        .show(
-          "Already Released",
-          "This project has already been released to students and can't be moved back to draft."
-        );
+      showAlert(
+        "Already Released",
+        "This project has already been released to students and can't be moved back to draft."
+      );
       return;
     }
     if (status === PROJECT_STATUS.RELEASED && !isOnboarded) {
-      useAlert
-        .getState()
-        .show(
-          "Wallet Setup Required",
-          "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started."
-        );
+      showAlert(
+        "Wallet Setup Required",
+        "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started."
+      );
       return;
     }
     if (status === PROJECT_STATUS.RELEASED && !isFieldsComplete) {
-      useAlert
-        .getState()
-        .show(
-          "Not Ready to Release",
-          "Before releasing, make sure you've filled in the style, level, price, spots, date, and location."
-        );
+      showAlert(
+        "Not Ready to Release",
+        "Before releasing, make sure you've filled in the style, level, price, spots, date, and location."
+      );
       return;
     }
 
@@ -175,23 +168,19 @@ function ProjectContent() {
         });
         router.back();
       } catch {
-        useAlert
-          .getState()
-          .show(
-            "Save Failed",
-            "Couldn't save your project changes. Please try again."
-          );
+        showAlert(
+          "Save Failed",
+          "Couldn't save your project changes. Please try again."
+        );
       }
     };
 
     if (status === PROJECT_STATUS.CANCELED) {
-      useAlert
-        .getState()
-        .show(
-          "Cancel This Class?",
-          `Booked students will receive full refunds. A ${transactionFee}% processing fee on the class price will be deducted per booking. This cannot be undone.`,
-          { confirmLabel: "Cancel Class", onConfirm: doSave }
-        );
+      showAlert(
+        "Cancel This Class?",
+        `Booked students will receive full refunds. A ${transactionFee}% processing fee on the class price will be deducted per booking. This cannot be undone.`,
+        { confirmLabel: "Cancel Class", onConfirm: doSave }
+      );
       return;
     }
 

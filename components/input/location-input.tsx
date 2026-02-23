@@ -86,6 +86,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
   onValueChange,
   editable = true,
 }) => {
+  const showAlert = useAlert((state) => state.showAlert);
   const [visible, setVisible] = useState(false);
   const [locationDetailVisible, setLocationDetailVisible] = useState(false);
   const [query, setQuery] = useState("");
@@ -123,12 +124,10 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
       setVisible(false);
       setQuery("");
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Location Error",
-          "Couldn't save the selected location. Please try again."
-        );
+      showAlert(
+        "Location Error",
+        "Couldn't save the selected location. Please try again."
+      );
     }
   };
 

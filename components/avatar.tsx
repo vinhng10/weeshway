@@ -25,6 +25,7 @@ export function Avatar({
   ...rest
 }: AvatarProps) {
   styles.useVariants({ size, bordered, shape });
+  const showAlert = useAlert((state) => state.showAlert);
 
   const handleImagePicker = async () => {
     if (!editable || !onSourceChange) return;
@@ -33,12 +34,10 @@ export function Avatar({
       // Request permissions
       const { status } = await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        useAlert
-          .getState()
-          .show(
-            "Permission Needed",
-            "Please allow access to your photo library to upload an image."
-          );
+        showAlert(
+          "Permission Needed",
+          "Please allow access to your photo library to upload an image."
+        );
         return;
       }
 
@@ -56,9 +55,7 @@ export function Avatar({
         onSourceChange(uri);
       }
     } catch {
-      useAlert
-        .getState()
-        .show("Upload Failed", "Couldn't load your image. Please try again.");
+      showAlert("Upload Failed", "Couldn't load your image. Please try again.");
     }
   };
 
