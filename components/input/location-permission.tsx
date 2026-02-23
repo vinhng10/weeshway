@@ -1,5 +1,5 @@
 import { ROLE } from "@/constants";
-import { useAuth, useLocales, useOnboarding, useRole } from "@/hooks";
+import { useAuth, useOnboarding, useRole } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,31 +11,22 @@ import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
 export async function syncLocation(
-  profile: ProfileType | null,
-  country: string | null
+  profile: ProfileType | null
 ): Promise<void> {
-  if (!profile?.id || !country) return;
+  if (!profile?.id) return;
 
   try {
     const { status } = await Location.getForegroundPermissionsAsync();
-    let newLocation: string | null = null;
+    if (status !== Location.PermissionStatus.GRANTED) return;
 
-    if (status === Location.PermissionStatus.GRANTED) {
-      const { coords } = await Location.getCurrentPositionAsync();
-      newLocation = `POINT(${coords.longitude} ${coords.latitude})`;
-    }
+    const { coords } = await Location.getCurrentPositionAsync();
+    const newLocation = `POINT(${coords.longitude} ${coords.latitude})`;
 
-    // Only update if country or location has changed
-    const countryChanged = profile.country !== country;
-    const locationChanged = profile.location !== newLocation;
-
-    if (!countryChanged && !locationChanged) return;
-
-    const data = { country, location: newLocation };
+    if (profile.location === newLocation) return;
 
     await supabase
       .from("profiles")
-      .update(data)
+      .update({ location: newLocation })
       .eq("id", profile.id)
       .throwOnError();
   } catch {}
@@ -46,7 +37,6 @@ export const LocationPermission = () => {
   const setPrompted = useOnboarding((state) => state.setPrompted);
   const profile = useAuth((state) => state.profile);
   const fetchProfile = useAuth((state) => state.fetchProfile);
-  const country = useLocales((state) => state.country);
   const role = useRole((state) => state.role);
   const queryClient = useQueryClient();
 
@@ -57,7 +47,7 @@ export const LocationPermission = () => {
       if (request) {
         await Location.requestForegroundPermissionsAsync();
       }
-      await syncLocation(profile, country);
+      await syncLocation(profile);
       await fetchProfile();
     } finally {
       // This is the source of truth that prevents it from ever showing again

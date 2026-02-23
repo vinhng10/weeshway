@@ -32,6 +32,8 @@ function RootNavigator() {
   const initialize = useAuth((state) => state.initialize);
   const profile = useAuth((state) => state.profile);
   const country = useLocales((state) => state.country);
+  const currency = useLocales((state) => state.currency);
+  const syncLocales = useLocales((state) => state.syncLocales);
   const initFees = useLocales((state) => state.initFees);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const pause = useAudioPlayerStore((state) => state.pause);
@@ -58,10 +60,15 @@ function RootNavigator() {
     initFees();
   }, [initFees]);
 
-  // Sync location once when user is logged in
+  // Sync country, currency, and credits conversion
   useEffect(() => {
-    syncLocation(profile, country);
-  }, [isLoggedIn, country]);
+    syncLocales(profile);
+  }, [isLoggedIn, country, currency]);
+
+  // Sync GPS location if permission granted
+  useEffect(() => {
+    syncLocation(profile);
+  }, [isLoggedIn]);
 
   // Sync push token once when user is logged in
   useEffect(() => {

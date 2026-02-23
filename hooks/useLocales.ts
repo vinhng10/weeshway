@@ -1,4 +1,5 @@
 import { supabase } from "@/supabase";
+import { ProfileType } from "@/types";
 import { getLocales } from "expo-localization";
 import { create } from "zustand";
 
@@ -9,6 +10,7 @@ interface LocaleState {
   transactionFee: number;
   usdRates: Record<string, number>;
   initFees: () => Promise<void>;
+  syncLocales: (profile: ProfileType | null) => Promise<void>;
   formatMoney: (amount?: number, fromCurrency?: string) => string;
   exchange: (
     amount: number,
@@ -35,9 +37,7 @@ export const useLocales = create<LocaleState>((set, get) => ({
         ),
       ]);
       const rates = await ratesRes.json();
-      const map = Object.fromEntries(
-        (data ?? []).map((r) => [r.key, r.value])
-      );
+      const map = Object.fromEntries((data ?? []).map((r) => [r.key, r.value]));
       set({
         bookingFee: map.booking_fee ?? 50,
         transactionFee: map.transaction_fee ?? 5,
@@ -46,6 +46,38 @@ export const useLocales = create<LocaleState>((set, get) => ({
     } catch {
       // keep defaults
     }
+  },
+
+  syncLocales: async (profile: ProfileType | null) => {
+    if (!profile?.id) return;
+
+    try {
+      const { country, currency, exchange } = get();
+      const updates: Record<string, unknown> = {};
+
+      if (profile.country !== country) {
+        updates.country = country;
+      }
+
+      if (profile.currency !== currency) {
+        updates.currency = currency;
+        if (profile.credits) {
+          updates.credits = exchange(
+            profile.credits,
+            profile.currency ?? "USD",
+            currency
+          );
+        }
+      }
+
+      if (Object.keys(updates).length === 0) return;
+
+      await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", profile.id)
+        .throwOnError();
+    } catch {}
   },
 
   formatMoney: (amount?: number, currency?: string) => {
