@@ -31,7 +31,7 @@ AppState.addEventListener("change", (state) => {
 export async function uploadMedia(
   bucket: string,
   mediaUri: string,
-  pathPrefix?: string
+  pathPrefix?: string,
 ): Promise<string> {
   // 1) Fetch the file
   const file = new File(mediaUri);

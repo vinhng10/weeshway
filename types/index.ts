@@ -125,6 +125,14 @@ export type BookingType = {
   stripePaymentIntentId: string;
   status: StripePaymentStatusType;
   spots: number;
+  checkedIn: boolean;
+  checkedInAt?: Date;
+  secret?: BookingSecretType | null;
+};
+
+export type BookingSecretType = {
+  bookingId: number;
+  checkInToken: string;
 };
 
 export type StatsType = {

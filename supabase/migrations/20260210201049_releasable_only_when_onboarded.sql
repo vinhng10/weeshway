@@ -102,4 +102,3 @@ using ((EXISTS ( SELECT 1
 CREATE TRIGGER recommend_on_project_upsert AFTER INSERT OR UPDATE OF status ON public.projects FOR EACH ROW EXECUTE FUNCTION util.enqueue('project_recommendation_jobs');
 
 CREATE TRIGGER manage_project_lifecycle BEFORE INSERT OR UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.manage_project_lifecycle();
-ALTER TABLE "public"."projects" DISABLE TRIGGER "manage_project_lifecycle";

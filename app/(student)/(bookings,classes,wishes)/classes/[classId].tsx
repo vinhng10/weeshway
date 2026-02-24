@@ -2,7 +2,6 @@ import {
   Avatar,
   Boundary,
   Button,
-  ButtonGroup,
   Checkout,
   Chip,
   DateTimeInput,
@@ -11,6 +10,7 @@ import {
   Hero,
   IntBoxInput,
   LocationInput,
+  QRCode,
   TextBoxInput,
   ThemedText,
 } from "@/components";
@@ -28,6 +28,7 @@ function ClassContent() {
   const { classId } = useLocalSearchParams<{ classId: string }>();
   const profile = useAuth((state) => state.profile);
   const [visible, setVisible] = useState(false);
+  const [qrVisible, setQrVisible] = useState(false);
   const queryClient = useQueryClient();
   const formatMoney = useLocales((state) => state.formatMoney);
   const transactionFee = useLocales((state) => state.transactionFee);
@@ -44,9 +45,9 @@ function ClassContent() {
             profile:profiles(*),
             song:songs(*),
             location:locations(*),
-            bookings:bookings(*),
+            bookings:bookings(*, secret:booking_secrets(*)),
             watchings:watchings(*)
-          `
+          `,
           )
           .eq("id", classId)
           .in("bookings.status", [
@@ -58,7 +59,7 @@ function ClassContent() {
           .throwOnError();
         return data;
       },
-    }
+    },
   );
 
   const userBooking = data.bookings.find((b) => b.userId === profile?.id);
@@ -97,7 +98,7 @@ function ClassContent() {
     } catch {
       showAlert(
         "Watch List",
-        "Couldn't update your watch list. Please try again."
+        "Couldn't update your watch list. Please try again.",
       );
     }
   };
@@ -125,7 +126,7 @@ function ClassContent() {
       showAlert(
         "Cancel Failed",
         error?.message ??
-          "Couldn't process your refund request. Please try again."
+          "Couldn't process your refund request. Please try again.",
       );
     }
   };
@@ -133,24 +134,14 @@ function ClassContent() {
   const handleCancel = () => {
     showAlert(
       "Cancel Your Booking?",
-      `A ${transactionFee}% cancellation fee applies — you'll be refunded the class price minus ${transactionFee}%. The booking fee is non-refundable. This cannot be undone.`,
-      { confirmLabel: "Cancel Booking", onConfirm: doCancel }
+      `A ${transactionFee}% cancellation fee applies. The booking fee is non-refundable. This cannot be undone.`,
+      { confirmLabel: "Confirm", onConfirm: doCancel },
     );
   };
 
-  const buttonLabel = isBooked
-    ? `Booked x${userBooking.spots}`
-    : isReleased
-      ? "Book"
-      : isWatching
-        ? "Unwatch"
-        : "Watch";
+  const buttonLabel = isReleased ? "Book" : isWatching ? "Unwatch" : "Watch";
 
-  const handlePress = isBooked
-    ? undefined
-    : isReleased
-      ? handleBook
-      : handleWatch;
+  const handlePress = isReleased ? handleBook : handleWatch;
 
   return (
     <View style={styles.container}>
@@ -188,6 +179,13 @@ function ClassContent() {
 
         <View style={styles.row}>
           <Chip label={data.status} color="light" size="large" />
+          {isBooked && (
+            <Chip
+              label={isRefunding ? "Refunding" : `Booked x${userBooking.spots}`}
+              color={isRefunding ? "danger" : "light"}
+              size="large"
+            />
+          )}
         </View>
 
         {/* Style and Level Selects */}
@@ -233,22 +231,21 @@ function ClassContent() {
           multiline
           numberOfLines={4}
         />
+
+        {/* Cancel button - shown below description when booked */}
+        {isBooked && !isRefunding && !isCanceled && (
+          <Button outlined label="Cancel Booking" onPress={handleCancel} />
+        )}
       </ScrollView>
 
-      {isCanceled ? null : isRefunding ? (
-        <Button stickyBottom label="Refunding" disabled />
-      ) : isBooked ? (
-        <ButtonGroup stickyBottom>
-          <Button outlined label="Cancel" onPress={handleCancel} />
-          <Button label={buttonLabel} onPress={handlePress} disabled />
-        </ButtonGroup>
-      ) : (
+      {isCanceled ? null : isRefunding ? null : isBooked ? (
         <Button
           stickyBottom
-          label={buttonLabel}
-          onPress={handlePress}
-          disabled={isBooked}
+          label="Show QR"
+          onPress={() => setQrVisible(true)}
         />
+      ) : (
+        <Button stickyBottom label={buttonLabel} onPress={handlePress} />
       )}
 
       <Checkout
@@ -257,6 +254,19 @@ function ClassContent() {
         customer={profile}
         project={data}
       />
+
+      {isBooked && userBooking.secret && (
+        <QRCode
+          visible={qrVisible}
+          onClose={() => setQrVisible(false)}
+          value={JSON.stringify({
+            bookingId: userBooking.id,
+            checkInToken: userBooking.secret.checkInToken,
+          })}
+          title="Check-in QR Code"
+          description="Show this to your teacher to check in"
+        />
+      )}
     </View>
   );
 }

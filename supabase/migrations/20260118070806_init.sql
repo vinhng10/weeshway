@@ -553,7 +553,9 @@ AS $function$BEGIN
 END;$function$
 ;
 
-create or replace view "public"."recommendations" as  SELECT ri.id,
+CREATE OR REPLACE VIEW "public"."recommendations"
+  WITH (security_invoker = true)
+  AS  SELECT ri.id,
     ri.created_at,
     ri.wish_id,
     ri.project_id,
@@ -563,7 +565,9 @@ create or replace view "public"."recommendations" as  SELECT ri.id,
   WHERE ((ri.created_at >= (now() - '3 mons'::interval)) AND (p.status <> 'Cancel'::public.status) AND (p.start_at >= now()));
 
 
-create or replace view "public"."stats" as  SELECT p.user_id,
+CREATE OR REPLACE VIEW "public"."stats"
+  WITH (security_invoker = true)
+  AS  SELECT p.user_id,
     sum(p.price) AS total_earnings,
     count(b.id) AS booking_count,
     p.currency,

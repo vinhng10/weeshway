@@ -13,6 +13,7 @@ export { Hero } from "./hero";
 export { MenuItem } from "./menu-item";
 export { ProjectCard } from "./project-card";
 export { ProjectStatus } from "./project-status";
+export { QRCode } from "./qr-code";
 export { SectionListView } from "./section-list";
 export { SongCard } from "./song-card";
 export {
