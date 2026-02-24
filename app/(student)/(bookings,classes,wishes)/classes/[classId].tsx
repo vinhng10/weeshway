@@ -31,6 +31,7 @@ function ClassContent() {
   const queryClient = useQueryClient();
   const formatMoney = useLocales((state) => state.formatMoney);
   const transactionFee = useLocales((state) => state.transactionFee);
+  const showAlert = useAlert((state) => state.showAlert);
 
   const { data, refetch, isRefetching } = useSuspenseQuery<ProjectEnrichedType>(
     {
@@ -94,12 +95,10 @@ function ClassContent() {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch {
-      useAlert
-        .getState()
-        .show(
-          "Watch List",
-          "Couldn't update your watch list. Please try again."
-        );
+      showAlert(
+        "Watch List",
+        "Couldn't update your watch list. Please try again."
+      );
     }
   };
 
@@ -123,24 +122,20 @@ function ClassContent() {
         predicate: (query) => query.queryKey.includes("classes"),
       });
     } catch (error: any) {
-      useAlert
-        .getState()
-        .show(
-          "Cancel Failed",
-          error?.message ??
-            "Couldn't process your refund request. Please try again."
-        );
+      showAlert(
+        "Cancel Failed",
+        error?.message ??
+          "Couldn't process your refund request. Please try again."
+      );
     }
   };
 
   const handleCancel = () => {
-    useAlert
-      .getState()
-      .show(
-        "Cancel Your Booking?",
-        `A ${transactionFee}% cancellation fee applies — you'll be refunded the class price minus ${transactionFee}%. The booking fee is non-refundable. This cannot be undone.`,
-        { confirmLabel: "Cancel Booking", onConfirm: doCancel }
-      );
+    showAlert(
+      "Cancel Your Booking?",
+      `A ${transactionFee}% cancellation fee applies — you'll be refunded the class price minus ${transactionFee}%. The booking fee is non-refundable. This cannot be undone.`,
+      { confirmLabel: "Cancel Booking", onConfirm: doCancel }
+    );
   };
 
   const buttonLabel = isBooked
