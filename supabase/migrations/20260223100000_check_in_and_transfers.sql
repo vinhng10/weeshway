@@ -66,7 +66,7 @@ DECLARE
   v_now timestamptz := now();
 BEGIN
   -- 1. Validate token against booking_secrets
-  SELECT b.id, b.user_id, b.project_id, b.status, b.checked_in, b.checked_in_at
+  SELECT b.id, b.user_id, b.project_id, b.status, b.checked_in, b.checked_in_at, b.spots
   INTO v_booking
   FROM bookings b
   JOIN booking_secrets bs ON bs.booking_id = b.id
@@ -74,7 +74,7 @@ BEGIN
     AND bs.check_in_token = p_check_in_token;
 
   IF v_booking IS NULL THEN
-    RAISE EXCEPTION 'This QR code is invalid.' USING ERRCODE = 'P0001';
+    RAISE EXCEPTION 'This QR code is invalid.';
   END IF;
 
   -- 2. Verify caller is the project teacher
@@ -84,12 +84,12 @@ BEGIN
   WHERE id = v_booking.project_id;
 
   IF v_project.user_id != auth.uid() THEN
-    RAISE EXCEPTION 'You can only check in students for your own classes.' USING ERRCODE = 'P0003';
+    RAISE EXCEPTION 'You can only check in students for your own classes.';
   END IF;
 
   -- 3. Verify booking state
   IF v_booking.status != 'Succeeded' THEN
-    RAISE EXCEPTION 'This booking has not been paid yet.' USING ERRCODE = 'P0004';
+    RAISE EXCEPTION 'This booking has not been paid yet.' ;
   END IF;
 
   -- 4. Already checked in — silently succeed
@@ -97,7 +97,8 @@ BEGIN
     RETURN jsonb_build_object(
       'success', true,
       'bookingId', v_booking.id,
-      'checkedInAt', v_booking.checked_in_at
+      'checkedInAt', v_booking.checked_in_at,
+      'spots', v_booking.spots
     );
   END IF;
 
@@ -110,7 +111,8 @@ BEGIN
   RETURN jsonb_build_object(
     'success', true,
     'bookingId', v_booking.id,
-    'checkedInAt', v_now
+    'checkedInAt', v_now,
+    'spots', v_booking.spots
   );
 END;
 $$;

@@ -12,7 +12,6 @@ import {
   LocationInput,
   SelectBoxInput,
   TextBoxInput,
-  Tile,
 } from "@/components";
 import {
   LEVEL,
@@ -47,7 +46,7 @@ function ProjectContent() {
         const { data } = await supabase
           .from("projects")
           .select(
-            `*, song:songs(*), location:locations(*), bookings:bookings(*)`
+            `*, song:songs(*), location:locations(*), bookings:bookings(*)`,
           )
           .eq("id", projectId)
           .eq("user_id", profile?.id)
@@ -56,7 +55,7 @@ function ProjectContent() {
           .throwOnError();
         return data;
       },
-    }
+    },
   );
 
   // Form State
@@ -66,14 +65,14 @@ function ProjectContent() {
   const [style, setStyle] = useState(data.style);
   const [level, setLevel] = useState(data.level);
   const [price, setPrice] = useState(
-    data.price ? (data.price * 0.01).toString() : ""
+    data.price ? (data.price * 0.01).toString() : "",
   );
   const [spots, setSpots] = useState(data.spots?.toString() ?? "");
   const [startAt, setStartAt] = useState(
-    data.startAt ? new Date(data.startAt) : undefined
+    data.startAt ? new Date(data.startAt) : undefined,
   );
   const [endAt, setEndAt] = useState(
-    data.endAt ? new Date(data.endAt) : undefined
+    data.endAt ? new Date(data.endAt) : undefined,
   );
   const [location, setLocation] = useState(data.location);
 
@@ -118,28 +117,28 @@ function ProjectContent() {
     if (wasCanceled) {
       showAlert(
         "Project Canceled",
-        "This project has been canceled and can no longer be edited. You can delete it if you no longer need it."
+        "This project has been canceled and can no longer be edited. You can delete it if you no longer need it.",
       );
       return;
     }
     if (status === PROJECT_STATUS.DRAFT && wasReleased) {
       showAlert(
         "Already Released",
-        "This project has already been released to students and can't be moved back to draft."
+        "This project has already been released to students and can't be moved back to draft.",
       );
       return;
     }
     if (status === PROJECT_STATUS.RELEASED && !isOnboarded) {
       showAlert(
         "Wallet Setup Required",
-        "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started."
+        "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started.",
       );
       return;
     }
     if (status === PROJECT_STATUS.RELEASED && !isFieldsComplete) {
       showAlert(
         "Not Ready to Release",
-        "Before releasing, make sure you've filled in the style, level, price, spots, date, and location."
+        "Before releasing, make sure you've filled in the style, level, price, spots, date, and location.",
       );
       return;
     }
@@ -170,7 +169,7 @@ function ProjectContent() {
       } catch {
         showAlert(
           "Save Failed",
-          "Couldn't save your project changes. Please try again."
+          "Couldn't save your project changes. Please try again.",
         );
       }
     };
@@ -179,7 +178,7 @@ function ProjectContent() {
       showAlert(
         "Cancel This Class?",
         `Booked students will receive full refunds. A ${transactionFee}% processing fee on the class price will be deducted per booking. This cannot be undone.`,
-        { confirmLabel: "Cancel Class", onConfirm: doSave }
+        { confirmLabel: "Cancel Class", onConfirm: doSave },
       );
       return;
     }
@@ -195,7 +194,7 @@ function ProjectContent() {
         PROJECT_STATUS_TRANSITIONS[data.status].map((s) => [
           s,
           PROJECT_STATUS_TO_ACTION[s],
-        ])
+        ]),
       ),
       modal: false,
       onValueChange: canEditStatus
@@ -307,6 +306,13 @@ function ProjectContent() {
           onPress={() => router.navigate(`./${projectId}/studio`)}
           style={styles.primary}
         />
+        {wasReleased && (
+          <Button
+            label="Scan"
+            onPress={() => router.navigate(`./${projectId}/scan`)}
+            outlined
+          />
+        )}
       </ButtonGroup>
     </>
   );

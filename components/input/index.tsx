@@ -10,6 +10,7 @@ export {
 } from "./box-input";
 export { Button, type ButtonProps } from "./button";
 export { ButtonGroup, type ButtonGroupProps } from "./button-group";
+export { CameraPermission } from "./camera-permission";
 export { Checkout } from "./checkout";
 export { DateTimeInput } from "./datetime-input";
 export { IconButton, type IconButtonProps } from "./icon-button";
