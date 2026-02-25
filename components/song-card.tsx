@@ -56,6 +56,7 @@ export const SongCard = ({ data }: SongCardProps) => {
 
 const styles = StyleSheet.create((theme) => ({
   background: {
+    alignSelf: "center",
     width: screenWidth * 0.75,
     height: screenWidth * 0.75,
   },

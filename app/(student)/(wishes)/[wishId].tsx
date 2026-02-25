@@ -5,6 +5,7 @@ import {
   Carousel,
   Header,
   SelectBoxInput,
+  SongCard,
   TextBoxInput,
   ThemedText,
   Tile,
@@ -43,7 +44,7 @@ function WishContent() {
                 bookings:bookings(*),
                 watchings:watchings(*)
               )
-            )`
+            )`,
           )
           .eq("id", wishId)
           .single()
@@ -78,7 +79,7 @@ function WishContent() {
     } catch {
       showAlert(
         "Save Failed",
-        "Couldn't save your wish changes. Please try again."
+        "Couldn't save your wish changes. Please try again.",
       );
     }
   };
@@ -94,7 +95,7 @@ function WishContent() {
     } catch {
       showAlert(
         "Delete Failed",
-        "Couldn't delete your wish. Please try again."
+        "Couldn't delete your wish. Please try again.",
       );
     }
   };
@@ -115,19 +116,23 @@ function WishContent() {
             <ThemedText type="h4">Classes</ThemedText>
             <Carousel
               data={data.recommendations.map(
-                (recommendation) => recommendation.project
+                (recommendation) => recommendation.project,
               )}
             />
           </View>
         )}
 
-        {/* Song Tile (read-only) */}
-        <Tile
-          imageSource={data.song.artworkUrl}
-          title={data.song.name}
-          subtitle={data.song.artistName}
-          previewUrl={data.song.previewUrl}
-        />
+        {/* Song */}
+        {hasRecommendations ? (
+          <Tile
+            imageSource={data.song.artworkUrl}
+            title={data.song.name}
+            subtitle={data.song.artistName}
+            previewUrl={data.song.previewUrl}
+          />
+        ) : (
+          <SongCard data={data.song} />
+        )}
 
         {/* Editable Fields */}
         <View style={styles.row}>

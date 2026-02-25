@@ -12,9 +12,7 @@ export function WishInfo({ data }: WishInfoProps) {
   return (
     <View style={styles.container}>
       {/* Song Card */}
-      <View style={styles.cardContainer}>
-        <SongCard data={data.song} />
-      </View>
+      <SongCard data={data.song} />
 
       {/* Style and Level Selects */}
       <View style={styles.row}>
@@ -36,9 +34,6 @@ export function WishInfo({ data }: WishInfoProps) {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     gap: theme.gap(2),
-  },
-  cardContainer: {
-    alignSelf: "center",
   },
   row: {
     flexDirection: "row",

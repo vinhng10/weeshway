@@ -22,7 +22,7 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
         data.bookings
           ?.filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
           .reduce((acc, b) => acc + (b.spots || 0), 0) ?? 0;
-      label = `${succeededCount} | ${data.spots}`;
+      label = `${succeededCount}/${data.spots}`;
       break;
   }
 

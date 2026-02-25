@@ -32,7 +32,7 @@ export default function MakeAWish() {
     if (!isLoggedIn || !profile) {
       showAlert(
         "Login Required",
-        "Please sign in to your account to continue."
+        "Please sign in to your account to continue.",
       );
       return;
     }
@@ -40,7 +40,7 @@ export default function MakeAWish() {
     if (!song) {
       showAlert(
         "Song Required",
-        "Please search and select a song before making a wish."
+        "Please search and select a song before making a wish.",
       );
       return;
     }
@@ -76,7 +76,7 @@ export default function MakeAWish() {
     } catch {
       showAlert(
         "Creation Failed",
-        "Couldn't create your wish. Please try again."
+        "Couldn't create your wish. Please try again.",
       );
     }
   };
@@ -93,11 +93,7 @@ export default function MakeAWish() {
         <SongSearch onSongPress={(song) => setSong(song)} />
 
         {/* Song Card */}
-        {song && (
-          <View style={styles.cardContainer}>
-            <SongCard data={song} />
-          </View>
-        )}
+        {song && <SongCard data={song} />}
 
         {/* Style and Level Selects */}
         <View style={styles.row}>
@@ -139,9 +135,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     gap: theme.gap(2),
     padding: theme.gap(2),
     paddingBottom: theme.gap(16),
-  },
-  cardContainer: {
-    alignSelf: "center",
   },
   row: {
     flexDirection: "row",

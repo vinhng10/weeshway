@@ -274,7 +274,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: theme.gap(0.5),
+    gap: theme.gap(0.2),
   },
   icon: {
     color: theme.colors.dimmed,

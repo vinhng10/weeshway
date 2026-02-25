@@ -35,7 +35,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: theme.gap(0.5),
+    gap: theme.gap(0.2),
     borderRadius: theme.gap(2),
     variants: {
       size: {
