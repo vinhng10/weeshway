@@ -174,11 +174,11 @@ function ProjectContent() {
       }
     };
 
-    if (status === PROJECT_STATUS.CANCELED) {
+    if (wasReleased && status === PROJECT_STATUS.CANCELED) {
       showAlert(
-        "Cancel This Class?",
-        `Booked students will receive full refunds. A ${transactionFee}% processing fee on the class price will be deducted per booking. This cannot be undone.`,
-        { confirmLabel: "Cancel Class", onConfirm: doSave },
+        "Cancel This Project?",
+        `Cancellations are subject to a ${transactionFee}% penalty fee per booking. This cannot be undone.`,
+        { confirmLabel: "Confirm", onConfirm: doSave },
       );
       return;
     }

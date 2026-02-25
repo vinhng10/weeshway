@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { authenticateInternalRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
-import { type Fees, exchange, getFees } from "../_shared/fees.ts";
+import { type Fees, getFees } from "../_shared/fees.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- 1. Configuration & Clients ---
@@ -32,18 +32,18 @@ type FailedJob = z.infer<typeof failedJobSchema>;
  *   If a transfer exists, it is reversed proportionally.
  *
  * - teacher-initiated: student gets a full refund.
- *   If a transfer exists, it is reversed and the teacher is compensated
- *   with the booking fee. Teacher effectively bears the Stripe processing
- *   fee on the class price.
+ *   If a transfer exists, it is fully reversed.
+ *   A cancellation penalty (transactionFee% of class price) is debited
+ *   from the teacher's connected account via Stripe Account Debits.
  */
 async function processJob(job: Job, fees: Fees) {
-  const { bookingFee, transactionFee, usdRates } = fees;
+  const { transactionFee } = fees;
 
   return await sql.begin(async () => {
     // 1. Fetch booking data — refund_initiator is set by the validate_refund_eligibility trigger
     const [booking] = await sql`
       SELECT b.id, b.stripe_payment_intent_id, b.spots, b.refund_initiator,
-             b.stripe_transfer_id, p.price, p.currency,
+             b.stripe_transfer_id, b.checked_in, p.price, p.currency,
              pr.stripe_account_id AS teacher_stripe_account_id
       FROM public.bookings b
       JOIN public.projects p ON p.id = b.project_id
@@ -67,6 +67,13 @@ async function processJob(job: Job, fees: Fees) {
       throw new HttpError(`Booking ${job.id} has no refund initiator`, 400);
     }
 
+    if (booking.refund_initiator === "Student" && booking.checked_in) {
+      throw new HttpError(
+        `Booking ${job.id}: cannot refund after check-in`,
+        400,
+      );
+    }
+
     const hasTransfer = !!booking.stripe_transfer_id;
     const metadata = {
       jobId: job.jobId.toString(),
@@ -81,7 +88,6 @@ async function processJob(job: Job, fees: Fees) {
       const refund = await stripe.refunds.create({
         payment_intent: booking.stripe_payment_intent_id,
         amount: refundAmount,
-        ...(hasTransfer && { reverse_transfer: true }),
         metadata,
       });
 
@@ -94,40 +100,34 @@ async function processJob(job: Job, fees: Fees) {
         );
       }
 
+      // Fully reverse the transfer if it exists
+      if (hasTransfer) {
+        await stripe.transfers.createReversal(booking.stripe_transfer_id);
+      }
+
+      // Charge cancellation penalty (transactionFee% of class price) to the teacher
+      const classPrice = booking.price * booking.spots;
+      const penaltyAmount = Math.round(classPrice * (transactionFee / 100));
+
+      if (penaltyAmount > 0) {
+        await stripe.charges.create({
+          amount: penaltyAmount,
+          currency: booking.currency.toLowerCase(),
+          source: booking.teacher_stripe_account_id,
+          description: `Cancellation penalty for booking ${booking.id}`,
+          metadata,
+        });
+      }
+
+      // Full refund to student
       const refund = await stripe.refunds.create({
         payment_intent: booking.stripe_payment_intent_id,
-        ...(hasTransfer && { reverse_transfer: true }),
         metadata,
       });
-
-      // Compensate teacher with booking fee only if a transfer was reversed
-      let stripeTransferId: string | undefined;
-      if (hasTransfer) {
-        const feePerSpot = exchange(
-          bookingFee,
-          "USD",
-          booking.currency,
-          usdRates,
-        );
-        const bookingFeeAmount = feePerSpot * booking.spots;
-
-        const transfer = await stripe.transfers.create({
-          amount: bookingFeeAmount,
-          currency: booking.currency.toLowerCase(),
-          destination: booking.teacher_stripe_account_id,
-          metadata: {
-            jobId: job.jobId.toString(),
-            bookingId: booking.id.toString(),
-            reason: "spot_fee_compensation",
-          },
-        });
-        stripeTransferId = transfer.id;
-      }
 
       return {
         ...job,
         refundId: refund.id,
-        stripeTransferId,
         status: refund.status,
       };
     }
@@ -158,11 +158,7 @@ Deno.serve(async (req) => {
 
     const fees = await getFees();
     const completedJobs: Array<
-      Job & {
-        refundId: string;
-        stripeTransferId?: string;
-        status: string | null;
-      }
+      Job & { refundId: string; status: string | null }
     > = [];
     const failedJobs: FailedJob[] = [];
 

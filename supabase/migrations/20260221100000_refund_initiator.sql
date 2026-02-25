@@ -38,12 +38,17 @@ BEGIN
             RETURN NEW;
         END IF;
 
-        -- 4. Enforce 24h rule for student-initiated cancellations
+        -- 4. Block refund if student already checked in
+        IF OLD.checked_in = true THEN
+            RAISE EXCEPTION 'Refunds are not allowed after checking in.';
+        END IF;
+
+        -- 5. Enforce 24h rule for student-initiated cancellations
         IF now() > (project_start_at - INTERVAL '1 day') THEN
             RAISE EXCEPTION 'Refunds are only allowed up to 24 hours before the class starts.';
         END IF;
 
-        -- 5. Student-initiated
+        -- 6. Student-initiated
         NEW.refund_initiator := 'Student'::public.role;
     END IF;
 

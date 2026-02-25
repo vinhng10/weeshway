@@ -44,7 +44,7 @@ export default function Profile() {
       "Delete Account",
       "This will permanently delete your account and all associated data. This action cannot be undone.",
       {
-        confirmLabel: "Delete",
+        confirmLabel: "Confirm",
         onConfirm: async () => {
           try {
             await deleteAccount();

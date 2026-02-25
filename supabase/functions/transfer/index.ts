@@ -65,12 +65,12 @@ async function processJob(job: Job, transactionFee: number) {
     const chargeId = paymentIntent.latest_charge as string;
 
     // 3. Calculate teacher amount: classPrice * spots * (1 - transactionFee/100)
-    const classTotal = booking.price * booking.spots;
-    const teacherAmount = Math.round(classTotal * (1 - transactionFee / 100));
+    const classPrice = booking.price * booking.spots;
+    const transferAmount = Math.round(classPrice * (1 - transactionFee / 100));
 
     // 4. Create Stripe Transfer
     const transfer = await stripe.transfers.create({
-      amount: teacherAmount,
+      amount: transferAmount,
       currency: booking.currency.toLowerCase(),
       destination: booking.teacher_stripe_account_id,
       source_transaction: chargeId,
@@ -125,6 +125,12 @@ Deno.serve(async (req) => {
           error instanceof Error ? error.message : "Unknown error";
         failedJobs.push({ ...job, error: message });
       }
+    }
+
+    // Dequeue successful jobs
+    if (completedJobs.length) {
+      const jobIds = completedJobs.map((j) => j.jobId);
+      await sql`SELECT util.batch_dequeue('transfer_jobs', ${jobIds})`;
     }
 
     return jsonResponse({

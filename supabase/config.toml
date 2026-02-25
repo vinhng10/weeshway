@@ -412,3 +412,7 @@ verify_jwt = false
 [functions.remind]
 enabled = true
 verify_jwt = false
+
+[functions.transfer]
+enabled = true
+verify_jwt = false

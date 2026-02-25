@@ -689,7 +689,7 @@ end;
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION util.process_jobs(queue_name text, edge_function_name text, batch_size integer DEFAULT 10, max_requests integer DEFAULT 10, timeout_milliseconds integer DEFAULT ((5 * 60) * 1000))
+CREATE OR REPLACE FUNCTION util.process_jobs(queue_name text, edge_function_name text, batch_size integer DEFAULT 10, max_requests integer DEFAULT 10, timeout_milliseconds integer DEFAULT ((60) * 1000))
  RETURNS void
  LANGUAGE plpgsql
  SECURITY DEFINER
