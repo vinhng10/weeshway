@@ -67,7 +67,6 @@ export type ProjectType = {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
-  name?: string;
   status: ProjectStatusType;
   style?: StyleType;
   level?: LevelType;

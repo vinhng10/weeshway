@@ -172,11 +172,6 @@ function ClassContent() {
           <ThemedText type="h3">{data.profile.fullName}</ThemedText>
         </Pressable>
 
-        {/* Project Name */}
-        {data.name && (
-          <TextBoxInput label="Name" value={data.name} editable={false} />
-        )}
-
         <View style={styles.row}>
           <Chip label={data.status} color="light" size="large" />
           {isBooked && (

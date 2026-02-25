@@ -85,7 +85,7 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
     <Tile
       imageSource={data.song.artworkUrl}
-      title={data.song.name ?? data.name}
+      title={data.song.name}
       subtitle={data.song.artistName ?? ""}
       metadata={[data.style, data.level].filter(Boolean).join(" • ")}
       previewUrl={data.song.previewUrl}

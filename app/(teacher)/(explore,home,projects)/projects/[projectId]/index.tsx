@@ -59,7 +59,6 @@ function ProjectContent() {
   );
 
   // Form State
-  const [name, setName] = useState(data.name);
   const [description, setDescription] = useState(data.description);
   const [status, setStatus] = useState<ProjectStatusType>(data.status);
   const [style, setStyle] = useState(data.style);
@@ -76,11 +75,14 @@ function ProjectContent() {
   );
   const [location, setLocation] = useState(data.location);
 
+  const succeededBookingsCount = data.bookings
+    .filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
+    .reduce((acc, b) => acc + (b.spots || 0), 0);
+
   // Logic Flags
   const wasReleased = data.status === PROJECT_STATUS.RELEASED;
   const wasCanceled = data.status === PROJECT_STATUS.CANCELED;
   const canEditDetails = !wasReleased && !wasCanceled;
-  const canEditStatus = !wasCanceled;
   const isOnboarded = !!profile?.onboardingComplete;
   const isFieldsComplete = !!(
     style &&
@@ -197,7 +199,7 @@ function ProjectContent() {
         ]),
       ),
       modal: false,
-      onValueChange: canEditStatus
+      onValueChange: !wasCanceled
         ? (verb: string) =>
             setStatus(PROJECT_ACTION_TO_STATUS[verb] as ProjectStatusType)
         : undefined,
@@ -217,14 +219,6 @@ function ProjectContent() {
       >
         {/* Song Hero */}
         <Hero data={data.song} />
-
-        {/* Project Name Input */}
-        <TextBoxInput
-          label="Name"
-          value={name}
-          onValueChange={setName}
-          editable={canEditDetails}
-        />
 
         {/* Toggle Button Group for Status */}
         <ChipBar items={options} />
@@ -257,7 +251,11 @@ function ProjectContent() {
           />
           <IntBoxInput
             label="Spots"
-            value={spots}
+            value={
+              wasReleased
+                ? `${succeededBookingsCount} / ${data.spots ?? 0}`
+                : spots
+            }
             onValueChange={setSpots}
             editable={canEditDetails}
           />

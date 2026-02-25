@@ -11,7 +11,7 @@ const jobSchema = z.array(
   z.object({
     jobId: z.number(),
     id: z.number(),
-  })
+  }),
 );
 
 Deno.serve(async (req) => {
@@ -32,11 +32,12 @@ Deno.serve(async (req) => {
       SELECT
         b.project_id,
         p.expo_push_token,
-        pr.name AS project_name,
+        s.name AS song_name,
         pr.start_at
       FROM public.bookings b
       JOIN public.profiles p ON b.user_id = p.id
       JOIN public.projects pr ON b.project_id = pr.id
+      LEFT JOIN public.songs s ON pr.song_id = s.id
       WHERE b.project_id = ANY(${projectIds})
         AND b.status = 'Succeeded'
         AND p.expo_push_token IS NOT NULL
@@ -53,7 +54,7 @@ Deno.serve(async (req) => {
       to: t.expo_push_token,
       sound: "default",
       title: "Class starting soon!",
-      body: `${t.project_name} starts in less than 1 hour`,
+      body: `${t.song_name ?? "Your class"} starts in less than 1 hour`,
       data: { projectId: t.project_id },
     }));
 

@@ -150,7 +150,7 @@ export function Checkout({
       if (error) {
         setStatus("error");
         setStatusMessage(
-          `Payment ${error.code.toLowerCase()}. Please try again.`
+          `Payment ${error.code.toLowerCase()}. Please try again.`,
         );
         return;
       }
@@ -188,17 +188,11 @@ export function Checkout({
         <View style={styles.content}>
           {/* Class Info */}
           <View style={styles.classInfo}>
-            {project.name ? (
-              <ThemedText type="h2">{project.name}</ThemedText>
-            ) : (
-              <>
-                <ThemedText type="h2">{project.song.name}</ThemedText>
-                {project.song.artistName && (
-                  <ThemedText color="dimmed" type="h4">
-                    {project.song.artistName}
-                  </ThemedText>
-                )}
-              </>
+            <ThemedText type="h2">{project.song.name}</ThemedText>
+            {project.song.artistName && (
+              <ThemedText color="dimmed" type="h4">
+                {project.song.artistName}
+              </ThemedText>
             )}
             {project.profile.fullName && (
               <ThemedText color="dimmed" type="h4">

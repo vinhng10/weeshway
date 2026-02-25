@@ -46,7 +46,6 @@ export default function CreateProject() {
   const showAlert = useAlert((state) => state.showAlert);
 
   // Initialize state with project data or defaults
-  const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
   const [status, setStatus] = useState<ProjectStatusType>(PROJECT_STATUS.DRAFT);
   const [style, setStyle] = useState<StyleType>();
@@ -129,7 +128,6 @@ export default function CreateProject() {
             genre: song.genre,
           },
           p_project_data: {
-            name: name?.trim(),
             status: status,
             style: style,
             level: level,
@@ -185,13 +183,6 @@ export default function CreateProject() {
             previewUrl={song.previewUrl}
           />
         )}
-
-        {/* Project Name Input */}
-        <TextInput
-          placeholder="Project name..."
-          value={name}
-          onChangeText={setName}
-        />
 
         {/* Toggle Button Group for Status */}
         <ChipBar items={options} />
