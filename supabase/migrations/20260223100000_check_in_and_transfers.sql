@@ -25,7 +25,7 @@ GRANT ALL ON public.booking_secrets TO postgres;
 ALTER TABLE public.bookings
   ADD COLUMN checked_in boolean DEFAULT false NOT NULL,
   ADD COLUMN checked_in_at timestamptz,
-  ADD COLUMN transfer_id text;
+  ADD COLUMN stripe_transfer_id text;
 
 -- 3. Profile credits & currency
 ALTER TABLE public.profiles

@@ -127,6 +127,7 @@ export type BookingType = {
   spots: number;
   checkedIn: boolean;
   checkedInAt?: Date;
+  stripeTransferId?: string;
   secret?: BookingSecretType | null;
 };
 

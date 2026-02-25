@@ -7,6 +7,7 @@ SELECT pgmq.create('notification_jobs');
 SELECT pgmq.create('project_recommendation_jobs');
 SELECT pgmq.create('refund_jobs');
 SELECT pgmq.create('reminder_jobs');
+SELECT pgmq.create('transfer_jobs');
 SELECT pgmq.create('wish_recommendation_jobs');
 
 -- =============================================================================
@@ -43,10 +44,10 @@ SELECT cron.schedule(
   $$SELECT util.process_jobs('notification_jobs', 'notify', 100)$$
 );
 
--- Process refunds: every hour
+-- Process refunds: every 15 minutes
 SELECT cron.schedule(
   'process-refunds',
-  '0 * * * *',
+  '*/15 * * * *',
   $$SELECT util.process_jobs('refund_jobs', 'refund', 100)$$
 );
 
@@ -83,4 +84,18 @@ SELECT cron.schedule(
   'process-reminders',
   '*/2 * * * *',
   $$SELECT util.process_jobs('reminder_jobs', 'remind', 100, 10, 30000)$$
+);
+
+-- Enqueue transfers: every 15 minutes
+SELECT cron.schedule(
+  'enqueue-transfers',
+  '*/15 * * * *',
+  $$SELECT util.enqueue_transfers()$$
+);
+
+-- Process transfers: every 15 minutes
+SELECT cron.schedule(
+  'process-transfers',
+  '*/15 * * * *',
+  $$SELECT util.process_jobs('transfer_jobs', 'transfer', 100)$$
 );

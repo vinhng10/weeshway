@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
         supabase
           .from("projects")
           .select(
-            "id, price, currency, spots, teacher:profiles!inner(stripe_account_id)"
+            "id, price, currency, spots, teacher:profiles!inner(stripe_account_id)",
           )
           .eq("id", projectId)
           .single()
@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
         remainingSpots > 0
           ? `Only ${remainingSpots} spots left`
           : "Class is already full",
-        406
+        406,
       );
     }
 
@@ -93,12 +93,11 @@ Deno.serve(async (req) => {
       fees.bookingFee,
       "USD",
       project.currency,
-      fees.usdRates
+      fees.usdRates,
     );
     const price = project.price * spots;
     const bookingFee = feePerSpot * spots;
     const total = price + bookingFee;
-    const fee = Math.round(price * (fees.transactionFee / 100)) + bookingFee;
 
     // 7. Execute Stripe Operations
     const session = await stripe.customerSessions.create({
@@ -132,9 +131,9 @@ Deno.serve(async (req) => {
           existingBooking.stripe_payment_intent_id,
           {
             amount: total,
-            application_fee_amount: fee,
+            transfer_group: `booking_${project.id}_${user.id}`,
             metadata: { user_id: customer.id, project_id: project.id, spots },
-          }
+          },
         );
         // We manually update spots here for immediate UI consistency,
         // though the webhook would eventually do it too.
@@ -144,7 +143,7 @@ Deno.serve(async (req) => {
           .eq("id", existingBooking.id);
       } else {
         intent = await stripe.paymentIntents.retrieve(
-          existingBooking.stripe_payment_intent_id
+          existingBooking.stripe_payment_intent_id,
         );
       }
     } else {
@@ -162,8 +161,7 @@ Deno.serve(async (req) => {
         amount: total,
         currency: project.currency.toLowerCase(),
         customer_account: customer.stripe_account_id,
-        application_fee_amount: fee,
-        transfer_data: { destination: teacherStripeId },
+        transfer_group: `booking_${project.id}_${user.id}`,
         automatic_payment_methods: { enabled: true },
         metadata: {
           user_id: customer.id,
