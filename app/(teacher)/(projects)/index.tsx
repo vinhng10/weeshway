@@ -46,6 +46,7 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
           .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
           .order("updated_at", { ascending: false });
         if (status) query = query.eq("status", status);
+        else query = query.neq("status", PROJECT_STATUS.DELETED);
         if (style) query = query.eq("style", style);
         if (level) query = query.eq("level", level);
         return query;

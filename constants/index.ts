@@ -48,6 +48,7 @@ export const PROJECT_STATUS = {
   DRAFT: "Draft",
   RELEASED: "Released",
   CANCELED: "Canceled",
+  DELETED: "Deleted",
 } as const;
 
 // Maps each passive DB status to the active verb shown to teachers in action chips.
@@ -57,6 +58,7 @@ export const PROJECT_STATUS_TO_ACTION: Record<string, string> = {
   [PROJECT_STATUS.DRAFT]: "Draft",
   [PROJECT_STATUS.RELEASED]: "Release",
   [PROJECT_STATUS.CANCELED]: "Cancel",
+  [PROJECT_STATUS.DELETED]: "Delete",
 };
 
 // Reverse of PROJECT_STATUS_TO_ACTION — maps action verb back to DB value.
@@ -65,6 +67,7 @@ export const PROJECT_ACTION_TO_STATUS: Record<string, string> = {
   Draft: PROJECT_STATUS.DRAFT,
   Release: PROJECT_STATUS.RELEASED,
   Cancel: PROJECT_STATUS.CANCELED,
+  Delete: PROJECT_STATUS.DELETED,
 };
 
 // Allowed forward transitions per status (can never move backwards).
@@ -72,10 +75,11 @@ export const PROJECT_STATUS_TRANSITIONS: Record<string, string[]> = {
   [PROJECT_STATUS.DRAFT]: [
     PROJECT_STATUS.DRAFT,
     PROJECT_STATUS.RELEASED,
-    PROJECT_STATUS.CANCELED,
+    PROJECT_STATUS.DELETED,
   ],
   [PROJECT_STATUS.RELEASED]: [PROJECT_STATUS.RELEASED, PROJECT_STATUS.CANCELED],
-  [PROJECT_STATUS.CANCELED]: [PROJECT_STATUS.CANCELED],
+  [PROJECT_STATUS.CANCELED]: [PROJECT_STATUS.CANCELED, PROJECT_STATUS.DELETED],
+  [PROJECT_STATUS.DELETED]: [PROJECT_STATUS.DELETED],
 };
 
 export const STRIPE_PAYMENT_STATUS = {

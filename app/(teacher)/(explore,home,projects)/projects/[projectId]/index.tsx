@@ -1,7 +1,5 @@
 import {
   Boundary,
-  Button,
-  ButtonGroup,
   ChipBar,
   ChipBarItemProps,
   DateTimeInput,
@@ -12,6 +10,8 @@ import {
   LocationInput,
   SelectBoxInput,
   TextBoxInput,
+  Toolbar,
+  ToolbarItem,
 } from "@/components";
 import {
   LEVEL,
@@ -28,7 +28,7 @@ import { ProjectEnrichedType, ProjectStatusType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { RefreshControl, View } from "react-native";
+import { RefreshControl, Share, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -82,7 +82,8 @@ function ProjectContent() {
   // Logic Flags
   const wasReleased = data.status === PROJECT_STATUS.RELEASED;
   const wasCanceled = data.status === PROJECT_STATUS.CANCELED;
-  const canEditDetails = !wasReleased && !wasCanceled;
+  const wasDeleted = data.status === PROJECT_STATUS.DELETED;
+  const canEditDetails = !wasReleased && !wasCanceled && !wasDeleted;
   const isOnboarded = !!profile?.onboardingComplete;
   const isFieldsComplete = !!(
     style &&
@@ -94,28 +95,14 @@ function ProjectContent() {
     location
   );
 
-  const handleDelete = async () => {
-    try {
-      await supabase
-        .from("projects")
-        .delete()
-        .eq("id", projectId)
-        .throwOnError();
-
-      await queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey.includes("projects"),
-      });
-      router.back();
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error && error.message
-          ? error.message
-          : "Couldn't delete the project. Please try again.";
-      showAlert("Delete Failed", message);
-    }
-  };
-
   const handleSave = async () => {
+    if (wasDeleted) {
+      showAlert(
+        "Project Deleted",
+        "This project has been deleted and can no longer be edited.",
+      );
+      return;
+    }
     if (wasCanceled) {
       showAlert(
         "Project Canceled",
@@ -198,10 +185,54 @@ function ProjectContent() {
         ]),
       ),
       modal: false,
-      onValueChange: !wasCanceled
+      onValueChange: !wasDeleted
         ? (verb: string) =>
             setStatus(PROJECT_ACTION_TO_STATUS[verb] as ProjectStatusType)
         : undefined,
+    },
+  ];
+
+  const handleStudio = () => {
+    router.navigate(`./${projectId}/studio`);
+  };
+
+  const handleScan = () => {
+    if (wasReleased) {
+      router.navigate(`./${projectId}/scan`);
+    } else {
+      showAlert(
+        "Not Available",
+        "Check-in is only available for released projects.",
+      );
+    }
+  };
+
+  const handleShare = async () => {
+    await Share.share({
+      message: `Check out this class: ${data.song?.name ?? "Untitled"}`,
+    });
+  };
+
+  const toolbarItems: ToolbarItem[] = [
+    {
+      icon: "checkmark-circle",
+      label: "Save",
+      onPress: handleSave,
+    },
+    {
+      icon: "flask",
+      label: "Studio",
+      onPress: handleStudio,
+    },
+    {
+      icon: "qr-code",
+      label: "Check-in",
+      onPress: handleScan,
+    },
+    {
+      icon: "share-social-sharp",
+      label: "Share",
+      onPress: handleShare,
     },
   ];
 
