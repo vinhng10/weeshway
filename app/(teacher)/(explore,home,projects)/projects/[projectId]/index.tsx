@@ -150,7 +150,6 @@ function ProjectContent() {
         await supabase
           .from("projects")
           .update({
-            name: name ?? null,
             status: status ?? null,
             style: style ?? null,
             level: level ?? null,
@@ -292,26 +291,8 @@ function ProjectContent() {
         />
       </KeyboardAwareScrollView>
 
-      {/* Save Changes Buttons */}
-      <ButtonGroup stickyBottom>
-        {wasCanceled ? (
-          <Button label="Delete" onPress={handleDelete} outlined />
-        ) : (
-          <Button label="Save" onPress={handleSave} />
-        )}
-        <Button
-          label="Studio"
-          onPress={() => router.navigate(`./${projectId}/studio`)}
-          style={styles.primary}
-        />
-        {wasReleased && (
-          <Button
-            label="Scan"
-            onPress={() => router.navigate(`./${projectId}/scan`)}
-            outlined
-          />
-        )}
-      </ButtonGroup>
+      {/* Sticky Toolbar */}
+      <Toolbar items={toolbarItems} />
     </>
   );
 }
@@ -341,8 +322,5 @@ const styles = StyleSheet.create((theme, rt) => ({
   row: {
     flexDirection: "row",
     gap: theme.gap(2),
-  },
-  primary: {
-    backgroundColor: theme.colors.primary,
   },
 }));
