@@ -14,12 +14,12 @@ import {
   ToolbarItem,
 } from "@/components";
 import {
+  BOOKING_ACTIVE_STATUSES,
   LEVEL,
   PROJECT_ACTION_TO_STATUS,
   PROJECT_STATUS,
   PROJECT_STATUS_TO_ACTION,
   PROJECT_STATUS_TRANSITIONS,
-  STRIPE_PAYMENT_STATUS,
   STYLE,
 } from "@/constants";
 import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
@@ -50,7 +50,7 @@ function ProjectContent() {
           )
           .eq("id", projectId)
           .eq("user_id", profile?.id)
-          .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
+          .in("bookings.status", BOOKING_ACTIVE_STATUSES)
           .single()
           .throwOnError();
         return data;
@@ -76,7 +76,7 @@ function ProjectContent() {
   const [location, setLocation] = useState(data.location);
 
   const succeededBookingsCount = data.bookings
-    .filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
+    .filter((b) => BOOKING_ACTIVE_STATUSES.includes(b.status))
     .reduce((acc, b) => acc + (b.spots || 0), 0);
 
   // Logic Flags

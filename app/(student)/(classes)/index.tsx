@@ -10,9 +10,9 @@ import {
   Tile,
 } from "@/components";
 import {
+  BOOKING_ACTIVE_STATUSES,
   LEVEL,
   PROJECT_STATUS,
-  STRIPE_PAYMENT_STATUS,
   STYLE,
 } from "@/constants";
 import { useAuth, useSuspenseInfiniteRpc, useSuspenseQuery } from "@/hooks";
@@ -56,10 +56,10 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
             location:locations(*),
             bookings:bookings(*),
             watchings:watchings(*)
-          )`
+          )`,
         )
         .eq("wish.user_id", profile?.id)
-        .eq("project.bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
+        .in("project.bookings.status", BOOKING_ACTIVE_STATUSES)
         .limit(20);
 
       if (style) {
@@ -72,7 +72,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
       const { data } = await query.throwOnError();
       if (!data || data.length === 0) return [];
       const uniqueProjects = Array.from(
-        new Map(data.map((r) => [r.project.id, r.project])).values()
+        new Map(data.map((r) => [r.project.id, r.project])).values(),
       );
       return [uniqueProjects];
     },
@@ -100,7 +100,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
         .or(`start_at.is.null,start_at.gte.${new Date().toISOString()}`)
         .neq("status", PROJECT_STATUS.CANCELED)
         .neq("status", PROJECT_STATUS.DELETED)
-        .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED);
+        .in("bookings.status", BOOKING_ACTIVE_STATUSES);
       if (status) query = query.eq("status", status);
       if (style) query = query.eq("style", style);
       if (level) query = query.eq("level", level);

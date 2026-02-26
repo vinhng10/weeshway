@@ -1532,7 +1532,7 @@ CREATE INDEX "wishes_user_id_idx" ON "public"."wishes" USING "btree" ("user_id")
 CREATE OR REPLACE TRIGGER "embed_songs_on_insert" AFTER INSERT ON "public"."songs" FOR EACH ROW EXECUTE FUNCTION "util"."enqueue"('embedding_jobs');
 
 
-CREATE OR REPLACE TRIGGER "handle_project_cancelled" AFTER UPDATE ON "public"."projects" FOR EACH ROW EXECUTE FUNCTION "public"."handle_project_cancellation"();
+CREATE OR REPLACE TRIGGER "handle_project_cancellation" AFTER UPDATE ON "public"."projects" FOR EACH ROW EXECUTE FUNCTION "public"."handle_project_cancellation"();
 
 
 CREATE OR REPLACE TRIGGER "manage_project_lifecycle" BEFORE INSERT OR UPDATE ON "public"."projects" FOR EACH ROW EXECUTE FUNCTION "public"."manage_project_lifecycle"();

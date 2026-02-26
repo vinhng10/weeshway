@@ -2,7 +2,7 @@ import {
   LEVEL,
   PROJECT_STATUS,
   ROLE,
-  STRIPE_PAYMENT_STATUS,
+  BOOKING_STATUS,
   STYLE,
   TEMPO,
   TIME,
@@ -15,7 +15,7 @@ type ValueOf<T> = T[keyof T];
 
 export type LevelType = ValueOf<typeof LEVEL>;
 export type ProjectStatusType = ValueOf<typeof PROJECT_STATUS>;
-export type StripePaymentStatusType = ValueOf<typeof STRIPE_PAYMENT_STATUS>;
+export type BookingStatusType = ValueOf<typeof BOOKING_STATUS>;
 export type StyleType = ValueOf<typeof STYLE>;
 export type WishStatusType = ValueOf<typeof WISH_STATUS>;
 export type TimeType = ValueOf<typeof TIME>;
@@ -122,9 +122,8 @@ export type BookingType = {
   userId: string;
   projectId: number;
   stripePaymentIntentId: string;
-  status: StripePaymentStatusType;
+  status: BookingStatusType;
   spots: number;
-  checkedIn: boolean;
   checkedInAt?: Date;
   stripeTransferId?: string;
   secret?: BookingSecretType | null;

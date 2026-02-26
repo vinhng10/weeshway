@@ -82,14 +82,22 @@ export const PROJECT_STATUS_TRANSITIONS: Record<string, string[]> = {
   [PROJECT_STATUS.DELETED]: [PROJECT_STATUS.DELETED],
 };
 
-export const STRIPE_PAYMENT_STATUS = {
+export const BOOKING_STATUS = {
   SUCCEEDED: "Succeeded",
   PROCESSING: "Processing",
   FAILED: "Failed",
   CANCELED: "Canceled",
   REFUNDED: "Refunded",
   REFUNDING: "Refunding",
+  CHECKED_IN: "CheckedIn",
+  TRANSFERRED: "Transferred",
 } as const;
+
+export const BOOKING_ACTIVE_STATUSES: string[] = [
+  BOOKING_STATUS.SUCCEEDED,
+  BOOKING_STATUS.CHECKED_IN,
+  BOOKING_STATUS.TRANSFERRED,
+];
 
 export const WISH_STATUS = {
   CLASS_AVAILABLE: "Class available",

@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       JOIN public.projects pr ON b.project_id = pr.id
       LEFT JOIN public.songs s ON pr.song_id = s.id
       WHERE b.project_id = ANY(${projectIds})
-        AND b.status = 'Succeeded'
+        AND b.status IN ('Succeeded', 'CheckedIn')
         AND p.expo_push_token IS NOT NULL
     `;
 

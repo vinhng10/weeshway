@@ -11,9 +11,9 @@ import {
   Tile,
 } from "@/components";
 import {
+  BOOKING_ACTIVE_STATUSES,
   LEVEL,
   PROJECT_STATUS,
-  STRIPE_PAYMENT_STATUS,
   STYLE,
   WISH_STATUS,
   WISH_WATCH,
@@ -70,7 +70,7 @@ function WishesContent({ style, level }: WishesContentProps) {
     });
 
   const renderTile = (
-    data: WishRecommendationEnrichedType
+    data: WishRecommendationEnrichedType,
   ): React.ReactElement => (
     <Tile
       imageSource={data.song.artworkUrl}
@@ -89,7 +89,7 @@ function WishesContent({ style, level }: WishesContentProps) {
                 ...new Set(
                   data.recommendations
                     .map((r) => r.project.profile.avatarUrl)
-                    .filter((url): url is string => url !== undefined)
+                    .filter((url): url is string => url !== undefined),
                 ),
               ]}
             />
@@ -181,7 +181,7 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
     trailingQuery: (query) => {
       query = query
         .eq("user_id", profile?.id)
-        .eq("project.bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED);
+        .in("project.bookings.status", BOOKING_ACTIVE_STATUSES);
       if (status) query = query.eq("project.status", status);
       if (style) query = query.eq("project.style", style);
       if (level) query = query.eq("project.level", level);

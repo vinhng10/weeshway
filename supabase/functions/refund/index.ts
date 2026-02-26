@@ -43,7 +43,7 @@ async function processJob(job: Job, fees: Fees) {
     // 1. Fetch booking data — refund_initiator is set by the validate_refund_eligibility trigger
     const [booking] = await sql`
       SELECT b.id, b.stripe_payment_intent_id, b.spots, b.refund_initiator,
-             b.stripe_transfer_id, b.checked_in, p.price, p.currency,
+             b.stripe_transfer_id, p.price, p.currency,
              pr.stripe_account_id AS teacher_stripe_account_id
       FROM public.bookings b
       JOIN public.projects p ON p.id = b.project_id
@@ -65,13 +65,6 @@ async function processJob(job: Job, fees: Fees) {
 
     if (!booking.refund_initiator) {
       throw new HttpError(`Booking ${job.id} has no refund initiator`, 400);
-    }
-
-    if (booking.refund_initiator === "Student" && booking.checked_in) {
-      throw new HttpError(
-        `Booking ${job.id}: cannot refund after check-in`,
-        400,
-      );
     }
 
     const hasTransfer = !!booking.stripe_transfer_id;

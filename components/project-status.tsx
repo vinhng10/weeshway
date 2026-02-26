@@ -1,4 +1,4 @@
-import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
+import { BOOKING_ACTIVE_STATUSES, PROJECT_STATUS } from "@/constants";
 import { ProjectEnrichedType } from "@/types";
 import { Chip } from "./chip";
 import { IconSymbolName } from "./icon-symbol";
@@ -20,7 +20,7 @@ export function ProjectStatus({ data }: ProjectStatusProps) {
       icon = "person-sharp";
       const succeededCount =
         data.bookings
-          ?.filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
+          ?.filter((b) => BOOKING_ACTIVE_STATUSES.includes(b.status))
           .reduce((acc, b) => acc + (b.spots || 0), 0) ?? 0;
       label = `${succeededCount}/${data.spots}`;
       break;

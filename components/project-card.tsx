@@ -1,4 +1,4 @@
-import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
+import { BOOKING_ACTIVE_STATUSES, PROJECT_STATUS } from "@/constants";
 import { useAlert, useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
@@ -29,7 +29,7 @@ export const ProjectCard = ({ data }: CardProps) => {
     useShallow((state) => ({
       isPlaying: state.isPlaying(data.song.previewUrl),
       toggle: state.toggle,
-    }))
+    })),
   );
   const formatMoney = useLocales((state) => state.formatMoney);
   const showAlert = useAlert((state) => state.showAlert);
@@ -69,7 +69,7 @@ export const ProjectCard = ({ data }: CardProps) => {
     } catch {
       showAlert(
         "Watch List",
-        "Couldn't update your watch list. Please try again."
+        "Couldn't update your watch list. Please try again.",
       );
     }
   };
@@ -90,7 +90,7 @@ export const ProjectCard = ({ data }: CardProps) => {
     (b) =>
       b.userId === profile?.id &&
       b.projectId === data.id &&
-      b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED
+      BOOKING_ACTIVE_STATUSES.includes(b.status),
   );
   const booked = !!userBooking;
   const watching = data.watchings.some((w) => w.userId === profile?.id);
@@ -168,9 +168,9 @@ export const ProjectCard = ({ data }: CardProps) => {
                     {data.startAt && data.endAt
                       ? `${formatDate(
                           new Date(data.startAt),
-                          true
+                          true,
                         )}, ${formatTime(
-                          new Date(data.startAt)
+                          new Date(data.startAt),
                         )} - ${formatTime(new Date(data.endAt))}`
                       : ""}
                   </ThemedText>

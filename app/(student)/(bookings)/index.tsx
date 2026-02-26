@@ -7,7 +7,7 @@ import {
   SectionListView,
   Tile,
 } from "@/components";
-import { STRIPE_PAYMENT_STATUS, TIME } from "@/constants";
+import { BOOKING_STATUS, TIME } from "@/constants";
 import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
 import { BookingEnrichedType, ProjectEnrichedType, TimeType } from "@/types";
 import { router } from "expo-router";
@@ -45,9 +45,11 @@ function BookingsContent({ time }: BookingsContentProps) {
       query = query
         .eq("user_id", profile?.id)
         .in("status", [
-          STRIPE_PAYMENT_STATUS.SUCCEEDED,
-          STRIPE_PAYMENT_STATUS.REFUNDING,
-          STRIPE_PAYMENT_STATUS.REFUNDED,
+          BOOKING_STATUS.SUCCEEDED,
+          BOOKING_STATUS.CHECKED_IN,
+          BOOKING_STATUS.TRANSFERRED,
+          BOOKING_STATUS.REFUNDING,
+          BOOKING_STATUS.REFUNDED,
         ]);
 
       const now = new Date();

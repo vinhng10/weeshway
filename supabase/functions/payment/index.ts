@@ -43,7 +43,12 @@ Deno.serve(async (req) => {
           .select("id, user_id, spots, stripe_payment_intent_id, status")
           .eq("project_id", projectId)
           // We fetch Succeeded (for capacity) and Processing (for the current user's retry logic)
-          .in("status", ["Succeeded", "Processing"]),
+          .in("status", [
+            "Succeeded",
+            "Processing",
+            "CheckedIn",
+            "Transferred",
+          ]),
       ]);
 
     // 3. Guards
@@ -65,7 +70,9 @@ Deno.serve(async (req) => {
 
     const occupiedSpots =
       bookings
-        ?.filter((b) => b.status === "Succeeded")
+        ?.filter((b) =>
+          ["Succeeded", "CheckedIn", "Transferred"].includes(b.status),
+        )
         .reduce((acc, b) => acc + (b.spots || 0), 0) || 0;
     const remainingSpots = (project.spots || 0) - occupiedSpots;
 
@@ -80,7 +87,10 @@ Deno.serve(async (req) => {
 
     // 5. Check Existing Booking Status
     // If the user already has a Succeeded booking, we return it immediately.
-    if (existingBooking?.status === "Succeeded") {
+    if (
+      existingBooking &&
+      ["Succeeded", "CheckedIn", "Transferred"].includes(existingBooking.status)
+    ) {
       return jsonResponse({
         status: "succeeded",
         customerId: customer.stripe_account_id,

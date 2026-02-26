@@ -8,9 +8,9 @@ import {
   Tile,
 } from "@/components";
 import {
+  BOOKING_ACTIVE_STATUSES,
   LEVEL,
   PROJECT_STATUS,
-  STRIPE_PAYMENT_STATUS,
   STYLE,
 } from "@/constants";
 import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
@@ -43,7 +43,7 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
       trailingQuery: (query) => {
         query = query
           .eq("user_id", profile?.id)
-          .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
+          .in("bookings.status", BOOKING_ACTIVE_STATUSES)
           .order("updated_at", { ascending: false });
         if (status) query = query.eq("status", status);
         else query = query.neq("status", PROJECT_STATUS.DELETED);

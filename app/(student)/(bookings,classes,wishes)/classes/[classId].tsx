@@ -14,7 +14,11 @@ import {
   TextBoxInput,
   ThemedText,
 } from "@/components";
-import { PROJECT_STATUS, STRIPE_PAYMENT_STATUS } from "@/constants";
+import {
+  BOOKING_ACTIVE_STATUSES,
+  BOOKING_STATUS,
+  PROJECT_STATUS,
+} from "@/constants";
 import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
@@ -51,8 +55,8 @@ function ClassContent() {
           )
           .eq("id", classId)
           .in("bookings.status", [
-            STRIPE_PAYMENT_STATUS.SUCCEEDED,
-            STRIPE_PAYMENT_STATUS.REFUNDING,
+            ...BOOKING_ACTIVE_STATUSES,
+            BOOKING_STATUS.REFUNDING,
           ])
           .eq("watchings.user_id", profile?.id)
           .single()
@@ -64,13 +68,13 @@ function ClassContent() {
 
   const userBooking = data.bookings.find((b) => b.userId === profile?.id);
   const isBooked = !!userBooking;
-  const isRefunding = userBooking?.status === STRIPE_PAYMENT_STATUS.REFUNDING;
+  const isRefunding = userBooking?.status === BOOKING_STATUS.REFUNDING;
   const isReleased = data.status === PROJECT_STATUS.RELEASED;
   const isWatching = data.watchings.some((w) => w.userId === profile?.id);
   const isCanceled = data.status === PROJECT_STATUS.CANCELED;
 
   const succeededBookingsCount = data.bookings
-    .filter((b) => b.status === STRIPE_PAYMENT_STATUS.SUCCEEDED)
+    .filter((b) => BOOKING_ACTIVE_STATUSES.includes(b.status))
     .reduce((acc, b) => acc + (b.spots || 0), 0);
 
   const handleBook = () => setVisible(true);
@@ -115,7 +119,7 @@ function ClassContent() {
     try {
       await supabase
         .from("bookings")
-        .update({ status: STRIPE_PAYMENT_STATUS.REFUNDING })
+        .update({ status: BOOKING_STATUS.REFUNDING })
         .eq("id", userBooking.id)
         .throwOnError();
 

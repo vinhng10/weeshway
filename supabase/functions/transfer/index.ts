@@ -30,8 +30,7 @@ async function processJob(job: Job, transactionFee: number) {
       JOIN public.projects p ON p.id = b.project_id
       JOIN public.profiles pr ON pr.id = p.user_id
       WHERE b.id = ${job.id}
-        AND b.checked_in = true
-        AND b.status = 'Succeeded'
+        AND b.status = 'Transferred'
         AND b.stripe_transfer_id IS NULL
       FOR UPDATE
     `;

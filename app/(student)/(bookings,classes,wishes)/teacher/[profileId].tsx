@@ -8,7 +8,7 @@ import {
   Tile,
   Video,
 } from "@/components";
-import { STRIPE_PAYMENT_STATUS } from "@/constants";
+import { BOOKING_ACTIVE_STATUSES } from "@/constants";
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
@@ -55,7 +55,7 @@ function TeacherProfileContent() {
     trailingQuery: (query) =>
       query
         .eq("user_id", profileId)
-        .eq("bookings.status", STRIPE_PAYMENT_STATUS.SUCCEEDED)
+        .in("bookings.status", BOOKING_ACTIVE_STATUSES)
         .gte("start_at", new Date().toISOString()),
   });
 

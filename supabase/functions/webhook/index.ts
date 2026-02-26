@@ -22,7 +22,7 @@ async function upsertBooking(
   INSERT INTO bookings (stripe_payment_intent_id, status, user_id, project_id, spots)
   VALUES (
     ${paymentIntentId}, 
-    ${status}::public.stripe_payment_status, 
+    ${status}::public.booking_status, 
     ${metadata.user_id}, 
     ${metadata.project_id}, 
     ${metadata?.spots}
