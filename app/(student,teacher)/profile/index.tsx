@@ -6,7 +6,7 @@ import {
   ThemedText,
 } from "@/components";
 import { ROLE } from "@/constants";
-import { useAlert, useAuth, useRole } from "@/hooks";
+import { useAuth, useRole } from "@/hooks";
 import { router } from "expo-router";
 import { Linking, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -14,11 +14,9 @@ import { StyleSheet } from "react-native-unistyles";
 export default function Profile() {
   const profile = useAuth((state) => state.profile);
   const signOut = useAuth((state) => state.signOut);
-  const deleteAccount = useAuth((state) => state.deleteAccount);
 
   const role = useRole((state) => state.role);
   const setRole = useRole((state) => state.setRole);
-  const showAlert = useAlert((state) => state.showAlert);
   const rolePath = role === ROLE.STUDENT ? "student" : "teacher";
 
   const handleAccount = () => {
@@ -37,27 +35,6 @@ export default function Profile() {
   const handleSignOut = async () => {
     await signOut();
     router.replace("../sign-in");
-  };
-
-  const handleDeleteAccountPress = () => {
-    showAlert(
-      "Delete Account",
-      "This will permanently delete your account and all associated data. This action cannot be undone.",
-      {
-        confirmLabel: "Confirm",
-        onConfirm: async () => {
-          try {
-            await deleteAccount();
-            router.replace("../sign-in");
-          } catch {
-            showAlert(
-              "Delete Failed",
-              "Couldn't delete your account. Please try again."
-            );
-          }
-        },
-      }
-    );
   };
 
   const options: ChipBarItemProps[] = [
@@ -103,13 +80,6 @@ export default function Profile() {
           title="Sign Out"
           onPress={handleSignOut}
           showChevron={false}
-        />
-        <MenuItem
-          icon="trash"
-          title="Delete Account"
-          onPress={handleDeleteAccountPress}
-          showChevron={false}
-          color="danger"
         />
       </ScrollView>
     </View>

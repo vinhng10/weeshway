@@ -21,15 +21,16 @@ export default function Account() {
   const profile = useAuth((state) => state.profile);
   const email = useAuth((state) => state.session?.user.email ?? "");
   const fetchProfile = useAuth((state) => state.fetchProfile);
+  const deleteAccount = useAuth((state) => state.deleteAccount);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   const showAlert = useAlert((state) => state.showAlert);
   const [fullName, setFullName] = useState(profile?.fullName || "");
   const [bio, setBio] = useState(profile?.bio || "");
   const [avatarUri, setAvatarUri] = useState<string | null>(
-    profile?.avatarUrl || null
+    profile?.avatarUrl || null,
   );
   const [videoUrls, setVideoUrls] = useState<string[]>(
-    profile?.videoUrls || []
+    profile?.videoUrls || [],
   );
 
   const isLocalUri = (uri: string): boolean => {
@@ -53,7 +54,7 @@ export default function Account() {
       if (status !== "granted") {
         showAlert(
           "Permission Needed",
-          "Please allow access to your photo library to upload a video."
+          "Please allow access to your photo library to upload a video.",
         );
         return;
       }
@@ -79,11 +80,32 @@ export default function Account() {
     setVideoUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleDeleteAccount = () => {
+    showAlert(
+      "Delete Account",
+      "This will permanently delete your account and all associated data. This action cannot be undone.",
+      {
+        confirmLabel: "Confirm",
+        onConfirm: async () => {
+          try {
+            await deleteAccount();
+            router.replace("../sign-in");
+          } catch {
+            showAlert(
+              "Delete Failed",
+              "Couldn't delete your account. Please try again.",
+            );
+          }
+        },
+      },
+    );
+  };
+
   const handleSave = async () => {
     if (!profile || !isLoggedIn) {
       showAlert(
         "Login Required",
-        "Please sign in to your account to continue."
+        "Please sign in to your account to continue.",
       );
       return;
     }
@@ -95,7 +117,7 @@ export default function Account() {
         avatarUrl = await uploadMedia(
           "profiles",
           avatarUri,
-          `${profile.id}/avatars`
+          `${profile.id}/avatars`,
         );
       }
 
@@ -106,11 +128,11 @@ export default function Account() {
             return await uploadMedia(
               "profiles",
               videoUrl,
-              `${profile.id}/videos`
+              `${profile.id}/videos`,
             );
           }
           return videoUrl;
-        })
+        }),
       );
 
       // Update profile
@@ -133,7 +155,7 @@ export default function Account() {
     } catch {
       showAlert(
         "Save Failed",
-        "Couldn't save your profile changes. Please try again."
+        "Couldn't save your profile changes. Please try again.",
       );
     }
   };
@@ -202,6 +224,9 @@ export default function Account() {
             multiline
           />
         </View>
+
+        {/* Delete Account */}
+        <Button label="Delete Account" onPress={handleDeleteAccount} outlined />
       </ScrollView>
 
       <Button label={"Save"} onPress={handleSave} stickyBottom />
