@@ -52,7 +52,7 @@ export const useLocales = create<LocaleState>((set, get) => ({
     if (!profile?.id) return;
 
     try {
-      const { country, currency, exchange } = get();
+      const { country, currency } = get();
       const updates: Record<string, unknown> = {};
 
       if (profile.country !== country) {
@@ -61,13 +61,6 @@ export const useLocales = create<LocaleState>((set, get) => ({
 
       if (profile.currency !== currency) {
         updates.currency = currency;
-        if (profile.credits) {
-          updates.credits = exchange(
-            profile.credits,
-            profile.currency ?? "USD",
-            currency
-          );
-        }
       }
 
       if (Object.keys(updates).length === 0) return;

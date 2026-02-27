@@ -76,7 +76,7 @@ SELECT cron.schedule(
 SELECT cron.schedule(
   'enqueue-reminders',
   '*/5 * * * *',
-  $$SELECT util.enqueue_reminders()$$
+  $$SELECT public.enqueue_reminders()$$
 );
 
 -- Process reminders: every 2 minutes
@@ -90,7 +90,7 @@ SELECT cron.schedule(
 SELECT cron.schedule(
   'enqueue-transfers',
   '*/15 * * * *',
-  $$SELECT util.enqueue_transfers()$$
+  $$SELECT public.enqueue_transfers()$$
 );
 
 -- Process transfers: every 15 minutes
@@ -99,3 +99,12 @@ SELECT cron.schedule(
   '*/15 * * * *',
   $$SELECT util.process_jobs('transfer_jobs', 'transfer', 100)$$
 );
+
+-- =============================================================================
+-- Fees
+-- =============================================================================
+
+INSERT INTO "public"."fees" ("key", "value") 
+VALUES 
+  ('booking_fee', '50'), 
+  ('transaction_fee', '5');

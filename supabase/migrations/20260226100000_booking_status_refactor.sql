@@ -208,7 +208,7 @@ END;
 $$;
 
 -- enqueue_transfers: use status = 'CheckedIn' instead of checked_in boolean
-CREATE OR REPLACE FUNCTION "util"."enqueue_transfers"() RETURNS "void"
+CREATE OR REPLACE FUNCTION "public"."enqueue_transfers"() RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO ''
     AS $$

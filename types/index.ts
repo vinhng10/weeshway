@@ -52,7 +52,6 @@ export type ProfileType = {
   country?: string;
   expoPushToken?: string;
   policiesAgreedAt?: Date;
-  credits: number;
   currency: string;
 };
 

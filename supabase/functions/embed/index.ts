@@ -404,7 +404,7 @@ async function processJob(job: Job) {
 
     await sql`
       WITH nearest AS (
-        SELECT util.find_nearest_centroid(${JSON.stringify(embedding)}) as cid
+        SELECT public.find_nearest_centroid(${JSON.stringify(embedding)}) as cid
       )
       UPDATE public.songs
       SET embedding = ${JSON.stringify(embedding)},

@@ -60,7 +60,7 @@ function RootNavigator() {
     initFees();
   }, [initFees]);
 
-  // Sync country, currency, and credits conversion
+  // Sync country and currency
   useEffect(() => {
     syncLocales(profile);
   }, [isLoggedIn, country, currency]);
