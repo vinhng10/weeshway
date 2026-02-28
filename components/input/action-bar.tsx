@@ -9,17 +9,17 @@ import { StyleSheet } from "react-native-unistyles";
 import { IconSymbol, type IconSymbolName } from "../icon-symbol";
 import { ThemedText } from "../themed-text";
 
-export type ToolbarItem = {
+export type ActionBarItem = {
   icon: IconSymbolName;
   label?: string;
   onPress?: (event: GestureResponderEvent) => void | Promise<void>;
 };
 
-export type ToolbarProps = {
-  items: ToolbarItem[];
+export type ActionBarProps = {
+  items: ActionBarItem[];
 };
 
-function ToolbarButton({ icon, label, onPress }: ToolbarItem) {
+function ActionBarButton({ icon, label, onPress }: ActionBarItem) {
   const [loading, setLoading] = useState(false);
 
   const handlePress = (event: GestureResponderEvent) => {
@@ -45,7 +45,7 @@ function ToolbarButton({ icon, label, onPress }: ToolbarItem) {
         <>
           <IconSymbol name={icon} size={18} color={styles.icon.color} />
           {label && (
-            <ThemedText color="dark" style={styles.label}>
+            <ThemedText type="tiny" color="dark">
               {label}
             </ThemedText>
           )}
@@ -55,13 +55,15 @@ function ToolbarButton({ icon, label, onPress }: ToolbarItem) {
   );
 }
 
-export const Toolbar: React.FunctionComponent<ToolbarProps> = ({ items }) => {
+export const ActionBar: React.FunctionComponent<ActionBarProps> = ({
+  items,
+}) => {
   return (
     <View style={styles.container}>
       {items.map((item, index) => (
         <View key={index} style={styles.itemWrapper}>
           {index > 0 && <View style={styles.divider} />}
-          <ToolbarButton {...item} />
+          <ActionBarButton {...item} />
         </View>
       ))}
     </View>
@@ -102,9 +104,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   disabled: {
     opacity: 0.3,
-  },
-  label: {
-    fontSize: 9,
-    lineHeight: 11,
   },
 }));

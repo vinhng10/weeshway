@@ -43,6 +43,10 @@ export const styles = StyleSheet.create((theme) => ({
           fontSize: 16,
           lineHeight: 18,
         },
+        tiny: {
+          fontSize: 9,
+          lineHeight: 11,
+        },
       },
       bold: {
         true: {

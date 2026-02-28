@@ -1,4 +1,6 @@
 import {
+  ActionBar,
+  ActionBarItem,
   Boundary,
   ChipBar,
   ChipBarItemProps,
@@ -10,8 +12,6 @@ import {
   LocationInput,
   SelectBoxInput,
   TextBoxInput,
-  Toolbar,
-  ToolbarItem,
 } from "@/components";
 import {
   BOOKING_ACTIVE_STATUSES,
@@ -213,7 +213,7 @@ function ProjectContent() {
     });
   };
 
-  const toolbarItems: ToolbarItem[] = [
+  const actionBarItems: ActionBarItem[] = [
     {
       icon: "checkmark-circle",
       label: "Save",
@@ -322,8 +322,8 @@ function ProjectContent() {
         />
       </KeyboardAwareScrollView>
 
-      {/* Sticky Toolbar */}
-      <Toolbar items={toolbarItems} />
+      {/* Sticky ActionBar */}
+      <ActionBar items={actionBarItems} />
     </>
   );
 }

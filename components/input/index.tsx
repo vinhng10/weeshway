@@ -1,3 +1,8 @@
+export {
+  ActionBar,
+  type ActionBarItem,
+  type ActionBarProps,
+} from "./action-bar";
 export { Alert } from "./alert";
 export {
   DateTimeBoxInput,
@@ -24,4 +29,3 @@ export { Options } from "./options";
 export { SongSearch } from "./song-search";
 export { SpotsSelector } from "./spots-selector";
 export { TextInput, type TextInputProps } from "./text-input";
-export { Toolbar, type ToolbarItem, type ToolbarProps } from "./toolbar";
