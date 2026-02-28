@@ -1,10 +1,10 @@
 import {
-  ActionBar,
-  ActionBarItem,
   Boundary,
   ChipBar,
   ChipBarItemProps,
   DateTimeInput,
+  FAB,
+  FABItem,
   FloatBoxInput,
   Header,
   Hero,
@@ -213,7 +213,7 @@ function ProjectContent() {
     });
   };
 
-  const actionBarItems: ActionBarItem[] = [
+  const fabItems: FABItem[] = [
     {
       icon: "checkmark-circle",
       label: "Save",
@@ -322,8 +322,7 @@ function ProjectContent() {
         />
       </KeyboardAwareScrollView>
 
-      {/* Sticky ActionBar */}
-      <ActionBar items={actionBarItems} />
+      <FAB label="Actions" items={fabItems} />
     </>
   );
 }

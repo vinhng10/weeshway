@@ -1,8 +1,3 @@
-export {
-  ActionBar,
-  type ActionBarItem,
-  type ActionBarProps,
-} from "./action-bar";
 export { Alert } from "./alert";
 export {
   DateTimeBoxInput,
@@ -18,6 +13,7 @@ export { ButtonGroup, type ButtonGroupProps } from "./button-group";
 export { CameraPermission } from "./camera-permission";
 export { Checkout } from "./checkout";
 export { DateTimeInput } from "./datetime-input";
+export { FAB, type FABItem, type FABProps } from "./fab";
 export { IconButton, type IconButtonProps } from "./icon-button";
 export { LocationInput } from "./location-input";
 export { LocationPermission, syncLocation } from "./location-permission";

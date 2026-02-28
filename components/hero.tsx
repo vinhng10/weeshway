@@ -9,12 +9,11 @@ import { ThemedText } from "./themed-text";
 
 interface HeroProps {
   data: SongType;
-  onShare?: () => void;
 }
 
-export const Hero = ({ data, onShare }: HeroProps) => {
+export const Hero = ({ data }: HeroProps) => {
   const isPlaying = useAudioPlayerStore((state) =>
-    state.isPlaying(data.previewUrl)
+    state.isPlaying(data.previewUrl),
   );
   const toggle = useAudioPlayerStore((state) => state.toggle);
 
@@ -39,13 +38,6 @@ export const Hero = ({ data, onShare }: HeroProps) => {
             </ThemedText>
           </View>
           <View style={styles.buttonContainer}>
-            {onShare && (
-              <IconButton
-                icon="share-social-sharp"
-                iconSize={24}
-                onPress={onShare}
-              />
-            )}
             <IconButton
               icon={isPlaying ? "pause" : "play"}
               iconSize={36}

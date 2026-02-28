@@ -5,6 +5,8 @@ import {
   Checkout,
   Chip,
   DateTimeInput,
+  FAB,
+  FABItem,
   FloatBoxInput,
   Header,
   Hero,
@@ -25,7 +27,13 @@ import { ProjectEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Share,
+  View,
+} from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassContent() {
@@ -143,8 +151,74 @@ function ClassContent() {
     );
   };
 
-  const buttonLabel = isReleased ? "Book" : isWatching ? "Unwatch" : "Watch";
+  const handleCheckin = () => {
+    if (isBooked && userBooking.secret) {
+      setQrVisible(true);
+    } else {
+      showAlert(
+        "Not Available",
+        "Check-in is only available after you've booked this class.",
+      );
+    }
+  };
 
+  const handleReport = () => {
+    showAlert(
+      "Report Class",
+      "Are you sure you want to report this class? Our team will review it.",
+      {
+        confirmLabel: "Report",
+        onConfirm: async () => {
+          try {
+            await supabase
+              .from("reports")
+              .insert({ user_id: profile?.id, project_id: data.id })
+              .throwOnError();
+            showAlert(
+              "Reported",
+              "Thanks for letting us know. We'll review this class.",
+            );
+          } catch {
+            showAlert(
+              "Report Failed",
+              "Couldn't submit your report. Please try again.",
+            );
+          }
+        },
+      },
+    );
+  };
+
+  const handleShare = async () => {
+    await Share.share({
+      message: `Check out this class: ${data.song?.name ?? "Untitled"}`,
+    });
+  };
+
+  const fabItems: FABItem[] = [
+    {
+      icon: "close-circle",
+      label: "Cancel Booking",
+      onPress: !isRefunding && !isCanceled ? handleCancel : undefined,
+    },
+    {
+      icon: "qr-code",
+      label: "Check-in",
+      onPress: !isCanceled ? handleCheckin : undefined,
+    },
+    {
+      icon: "flag",
+      label: "Report",
+      onPress: handleReport,
+    },
+    {
+      icon: "share-social-sharp",
+      label: "Share",
+      onPress: handleShare,
+    },
+  ];
+
+  const buttonLabel = isReleased ? "Book" : isWatching ? "Unwatch" : "Watch";
   const handlePress = isReleased ? handleBook : handleWatch;
 
   return (
@@ -230,19 +304,10 @@ function ClassContent() {
           multiline
           numberOfLines={4}
         />
-
-        {/* Cancel button - shown below description when booked */}
-        {isBooked && !isRefunding && !isCanceled && (
-          <Button outlined label="Cancel Booking" onPress={handleCancel} />
-        )}
       </ScrollView>
 
-      {isCanceled ? null : isRefunding ? null : isBooked ? (
-        <Button
-          stickyBottom
-          label="Show QR"
-          onPress={() => setQrVisible(true)}
-        />
+      {isBooked ? (
+        <FAB label="Actions" items={fabItems} />
       ) : (
         <Button stickyBottom label={buttonLabel} onPress={handlePress} />
       )}
