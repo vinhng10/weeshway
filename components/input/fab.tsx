@@ -62,16 +62,14 @@ function FABAction({
         onPress={handlePress}
         disabled={disabled}
       >
-        <View style={styles.iconCircle}>
+        <View style={styles.icon}>
           {loading ? (
-            <ActivityIndicator size="small" color={styles.iconColor.color} />
+            <ActivityIndicator size="small" />
           ) : (
-            <IconSymbol name={icon} size={20} color={styles.iconColor.color} />
+            <IconSymbol name={icon} size={20} />
           )}
         </View>
-        <ThemedText type="h4" style={styles.actionLabel}>
-          {label}
-        </ThemedText>
+        <ThemedText type="h4">{label}</ThemedText>
       </Pressable>
     </Animated.View>
   );
@@ -144,19 +142,13 @@ const styles = StyleSheet.create((theme) => ({
       },
     },
   },
-  iconCircle: {
+  icon: {
     width: theme.gap(5),
     height: theme.gap(5),
     borderRadius: theme.gap(2),
     backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
-  },
-  iconColor: {
-    color: theme.colors.background,
-  },
-  actionLabel: {
-    color: theme.colors.activeTint,
   },
   button: {
     width: "70%",
