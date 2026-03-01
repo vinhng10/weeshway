@@ -11,7 +11,7 @@ const jobSchema = z.array(
   z.object({
     jobId: z.number(),
     id: z.number(),
-  })
+  }),
 );
 
 Deno.serve(async (req) => {
@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
 
     // 1. Create a lookup to link internal IDs to Job IDs
     const jobIdLookup = new Map(
-      jobs.map((j) => [String(j.id), String(j.jobId)])
+      jobs.map((j) => [String(j.id), String(j.jobId)]),
     );
 
     // 2. Fetch targets
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     // 3. Group by user_id and pick one random target per user
     const groups = Map.groupBy(targets, (t) => t.user_id);
     const pickedTargets = Array.from(groups.values()).map(
-      (group) => group[Math.floor(Math.random() * group.length)]
+      (group) => group[Math.floor(Math.random() * group.length)],
     );
 
     // 4. Map picked targets to Expo messages and collect Job IDs for dequeuing

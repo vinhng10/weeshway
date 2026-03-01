@@ -207,6 +207,10 @@ function ProjectContent() {
     }
   };
 
+  const handleReport = () => {
+    router.navigate(`./${projectId}/report`);
+  };
+
   const handleShare = async () => {
     await Share.share({
       message: `Check out this class: ${data.song?.name ?? "Untitled"}`,
@@ -228,6 +232,11 @@ function ProjectContent() {
       icon: "qr-code",
       label: "Check-in",
       onPress: handleScan,
+    },
+    {
+      icon: "flag",
+      label: "Report",
+      onPress: handleReport,
     },
     {
       icon: "share-social-sharp",

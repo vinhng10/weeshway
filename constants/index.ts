@@ -156,3 +156,25 @@ export const TEMPO = {
   "0.75": "0.75x",
   "1.0": "1x",
 } as const;
+
+export const STUDENT_REPORT_REASON = {
+  TEACHER_NO_SHOW: "Teacher didn't show up",
+  WRONG_LOCATION: "Wrong location",
+  CLASS_ENDED_EARLY: "Class ended early",
+  INAPPROPRIATE_BEHAVIOR: "Inappropriate behavior",
+  OTHER: "Other",
+} as const;
+
+export const TEACHER_REPORT_REASON = {
+  STUDENT_NO_SHOW: "Student didn't show up",
+  INAPPROPRIATE_BEHAVIOR: "Inappropriate behavior",
+  PROPERTY_DAMAGE: "Property damage",
+  OTHER: "Other",
+} as const;
+
+export const REPORT_STATUS = {
+  PENDING: "Pending",
+  REVIEWING: "Reviewing",
+  RESOLVED: "Resolved",
+  DISMISSED: "Dismissed",
+} as const;

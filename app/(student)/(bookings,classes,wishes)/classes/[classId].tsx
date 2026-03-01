@@ -163,30 +163,7 @@ function ClassContent() {
   };
 
   const handleReport = () => {
-    showAlert(
-      "Report Class",
-      "Are you sure you want to report this class? Our team will review it.",
-      {
-        confirmLabel: "Report",
-        onConfirm: async () => {
-          try {
-            await supabase
-              .from("reports")
-              .insert({ user_id: profile?.id, project_id: data.id })
-              .throwOnError();
-            showAlert(
-              "Reported",
-              "Thanks for letting us know. We'll review this class.",
-            );
-          } catch {
-            showAlert(
-              "Report Failed",
-              "Couldn't submit your report. Please try again.",
-            );
-          }
-        },
-      },
-    );
+    router.navigate(`./report?classId=${classId}`);
   };
 
   const handleShare = async () => {

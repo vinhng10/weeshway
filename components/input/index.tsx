@@ -22,6 +22,7 @@ export {
   syncPushToken,
 } from "./notifications-permission";
 export { Options } from "./options";
+export { PhotoPicker } from "./photo-picker";
 export { SongSearch } from "./song-search";
 export { SpotsSelector } from "./spots-selector";
 export { TextInput, type TextInputProps } from "./text-input";

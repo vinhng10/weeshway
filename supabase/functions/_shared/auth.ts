@@ -6,7 +6,7 @@ const SUPABASE_JWT_ISSUER =
   Deno.env.get("SB_JWT_ISSUER") ?? Deno.env.get("SUPABASE_URL") + "/auth/v1";
 
 const SUPABASE_JWT_KEYS = jose.createRemoteJWKSet(
-  new URL(Deno.env.get("SUPABASE_URL")! + "/auth/v1/.well-known/jwks.json")
+  new URL(Deno.env.get("SUPABASE_URL")! + "/auth/v1/.well-known/jwks.json"),
 );
 
 export type AuthContext = {
@@ -67,7 +67,7 @@ export async function authenticateRequest(req: Request): Promise<AuthContext> {
       global: {
         headers: { Authorization: authHeader },
       },
-    }
+    },
   );
 
   // Retrieve user from authenticated session
@@ -106,7 +106,7 @@ export function authenticateInternalRequest(req: Request): void {
  */
 export async function getUserProfile(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
 ): Promise<ProfileWithStripe> {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -125,7 +125,7 @@ export async function getUserProfile(
  */
 export async function getStripeAccountId(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
 ): Promise<string> {
   const profile = await getUserProfile(supabase, userId);
 
@@ -140,7 +140,7 @@ export async function getStripeAccountId(
  * All-in-one: Authenticate and get Stripe account ID
  */
 export async function authenticateAndGetStripeAccount(
-  req: Request
+  req: Request,
 ): Promise<{ supabase: SupabaseClient; user: User; stripeAccountId: string }> {
   const { supabase, user } = await authenticateRequest(req);
   const stripeAccountId = await getStripeAccountId(supabase, user.id);
@@ -155,6 +155,6 @@ export async function authenticateAndGetStripeAccount(
 export function createServiceRoleClient(): SupabaseClient {
   return createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SB_SECRET_KEY")!
+    Deno.env.get("SB_SECRET_KEY")!,
   );
 }

@@ -1,9 +1,12 @@
 import {
   LEVEL,
   PROJECT_STATUS,
+  REPORT_STATUS,
   ROLE,
   BOOKING_STATUS,
+  STUDENT_REPORT_REASON,
   STYLE,
+  TEACHER_REPORT_REASON,
   TEMPO,
   TIME,
   TRACK,
@@ -23,6 +26,9 @@ export type TrackType = ValueOf<typeof TRACK>;
 export type RoleType = ValueOf<typeof ROLE>;
 export type WishWatchType = ValueOf<typeof WISH_WATCH>;
 export type TempoType = ValueOf<typeof TEMPO>;
+export type StudentReportReasonType = ValueOf<typeof STUDENT_REPORT_REASON>;
+export type TeacherReportReasonType = ValueOf<typeof TEACHER_REPORT_REASON>;
+export type ReportStatusType = ValueOf<typeof REPORT_STATUS>;
 
 export type OptionItem = {
   key: string;
@@ -185,4 +191,15 @@ export type BookingEnrichedType = BookingType & {
 
 export type WatchingEnrichedType = WatchingType & {
   project: ProjectEnrichedType;
+};
+
+export type ReportType = {
+  id: number;
+  createdAt: Date;
+  userId: string;
+  projectId: number;
+  description: string;
+  photoUrls: string[];
+  status: string;
+  resolution?: string;
 };

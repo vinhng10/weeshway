@@ -11,6 +11,7 @@ export { ChipBar, ChipBarItem, type ChipBarItemProps } from "./chip-bar";
 export { Header } from "./header";
 export { Hero } from "./hero";
 export { MenuItem } from "./menu-item";
+export { Photo } from "./photo";
 export { ProjectCard } from "./project-card";
 export { ProjectStatus } from "./project-status";
 export { QRCode } from "./qr-code";
