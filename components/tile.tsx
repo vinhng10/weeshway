@@ -1,8 +1,5 @@
-import { WISH_STATUS } from "@/constants";
 import { useAudioPlayerStore } from "@/hooks";
-import { WishStatusType } from "@/types";
 import { ImageProps } from "expo-image";
-import { LinearGradientProps } from "expo-linear-gradient";
 import React, { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -15,7 +12,6 @@ interface TileProps {
   title: string;
   subtitle?: string;
   metadata?: string;
-  backgroundColor?: WishStatusType;
   avatar?: ReactNode;
   status?: ReactNode;
   previewUrl?: string;
@@ -27,7 +23,6 @@ export const Tile: React.FunctionComponent<TileProps> = ({
   title,
   subtitle,
   metadata,
-  backgroundColor,
   avatar,
   status,
   previewUrl,
@@ -42,25 +37,9 @@ export const Tile: React.FunctionComponent<TileProps> = ({
     toggle(previewUrl);
   };
 
-  const getBackgroundColor = (): LinearGradientProps["colors"] => {
-    switch (backgroundColor) {
-      case WISH_STATUS.CLASS_AVAILABLE:
-        return ["#558200", "#135700"];
-      case WISH_STATUS.GRANTED:
-        return ["#558200", "#135700"];
-      default:
-        return ["#1B1B1B", "#1B1B1B"];
-    }
-  };
-
   return (
     <Pressable onPress={onPress}>
-      <View
-        style={styles.container}
-        // colors={getBackgroundColor()}
-        // start={{ x: 0, y: 0 }}
-        // end={{ x: 1, y: 0 }}
-      >
+      <View style={styles.container}>
         <View style={styles.leftContainer}>
           <View style={styles.avatarContainer}>
             <Avatar source={imageSource} size="large" shape="square" />

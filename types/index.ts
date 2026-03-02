@@ -189,6 +189,10 @@ export type BookingEnrichedType = BookingType & {
   project: ProjectEnrichedType;
 };
 
+export type BookingCheckinEnrichedType = BookingType & {
+  profile: ProfileType;
+};
+
 export type WatchingEnrichedType = WatchingType & {
   project: ProjectEnrichedType;
 };

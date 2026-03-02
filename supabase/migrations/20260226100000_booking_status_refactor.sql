@@ -51,14 +51,8 @@ BEGIN
 
   -- 3. Verify booking state
   IF v_booking.status != 'Succeeded' THEN
-    -- Already checked in — silently succeed
     IF v_booking.status = 'CheckedIn' THEN
-      RETURN jsonb_build_object(
-        'success', true,
-        'bookingId', v_booking.id,
-        'checkedInAt', v_booking.checked_in_at,
-        'spots', v_booking.spots
-      );
+      RAISE EXCEPTION 'Already checked in.';
     END IF;
     RAISE EXCEPTION 'This booking has not been paid yet.';
   END IF;
