@@ -117,22 +117,29 @@ function ReportContent() {
       ),
     );
 
-    await supabase
-      .from("reports")
-      .insert({
-        user_id: profile?.id,
-        project_id: Number(projectId),
-        description: finalDescription,
-        photo_urls: finalPhotoUrls,
-      })
-      .throwOnError();
+    try {
+      await supabase
+        .from("reports")
+        .insert({
+          user_id: profile?.id,
+          project_id: Number(projectId),
+          description: finalDescription,
+          photo_urls: finalPhotoUrls,
+        })
+        .throwOnError();
 
-    await queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey.includes("reports"),
-    });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes("reports"),
+      });
 
-    showAlert("Reported", "Thanks for letting us know. We'll review this.");
-    router.back();
+      showAlert("Reported", "Thanks for letting us know. We'll review this.");
+      router.back();
+    } catch (error: any) {
+      showAlert(
+        "Report Failed",
+        error?.message ?? "Couldn't send your report. Please try again.",
+      );
+    }
   };
 
   return (
@@ -147,7 +154,7 @@ function ReportContent() {
         <View style={styles.section}>
           <ThemedText type="h4">Reason</ThemedText>
           <SelectBoxInput
-            label="Reason"
+            label="Options"
             value={description}
             options={TEACHER_REPORT_REASON}
             onValueChange={setDescription}

@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { authenticateInternalRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
-import { getFees } from "../_shared/fees.ts";
+import { type Fees, getFees } from "../_shared/fees.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
@@ -12,6 +12,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 const jobSchema = z.object({
   jobId: z.number(),
   id: z.number(),
+  noShow: z.boolean(),
 });
 const failedJobSchema = jobSchema.extend({
   error: z.string(),
@@ -19,9 +20,9 @@ const failedJobSchema = jobSchema.extend({
 type Job = z.infer<typeof jobSchema>;
 type FailedJob = z.infer<typeof failedJobSchema>;
 
-async function processJob(job: Job, transactionFee: number) {
+async function processJob(job: Job, fees: Fees) {
   return await sql.begin(async () => {
-    // 1. Fetch booking with check-in and no transfer yet
+    // 1. Fetch booking with no transfer yet
     const [booking] = await sql`
       SELECT b.id, b.stripe_payment_intent_id, b.spots, b.user_id,
              p.price, p.currency, p.id AS project_id,
@@ -62,21 +63,48 @@ async function processJob(job: Job, transactionFee: number) {
     }
 
     const chargeId = paymentIntent.latest_charge as string;
-
-    // 3. Calculate teacher amount: classPrice * spots * (1 - transactionFee/100)
     const classPrice = booking.price * booking.spots;
-    const transferAmount = Math.round(classPrice * (1 - transactionFee / 100));
+    const currency = booking.currency.toLowerCase();
 
-    // 4. Create Stripe Transfer
+    let transferAmount: number;
+    let refundId: string | undefined;
+
+    if (job.noShow) {
+      // No-show: teacher gets noShowSplit%, student gets refunded the rest minus transaction fee
+      transferAmount = Math.round(classPrice * (fees.noShowSplit / 100));
+      const refundAmount = Math.round(
+        classPrice *
+          (1 - fees.noShowSplit / 100) *
+          (1 - fees.transactionFee / 100),
+      );
+
+      // 3a. Refund student
+      const refund = await stripe.refunds.create({
+        payment_intent: booking.stripe_payment_intent_id,
+        amount: refundAmount,
+        metadata: {
+          jobId: job.jobId.toString(),
+          bookingId: booking.id.toString(),
+          reason: "no_show",
+        },
+      });
+      refundId = refund.id;
+    } else {
+      // Normal: teacher gets full amount minus transaction fee
+      transferAmount = Math.round(classPrice * (1 - fees.transactionFee / 100));
+    }
+
+    // 4. Create Stripe Transfer to teacher
     const transfer = await stripe.transfers.create({
       amount: transferAmount,
-      currency: booking.currency.toLowerCase(),
+      currency,
       destination: booking.teacher_stripe_account_id,
       source_transaction: chargeId,
       transfer_group: `booking_${booking.project_id}_${booking.user_id}`,
       metadata: {
         jobId: job.jobId.toString(),
         bookingId: booking.id.toString(),
+        ...(job.noShow && { noShow: "true" }),
       },
     });
 
@@ -87,7 +115,7 @@ async function processJob(job: Job, transactionFee: number) {
       WHERE id = ${booking.id}
     `;
 
-    return { ...job, stripeTransferId: transfer.id };
+    return { ...job, stripeTransferId: transfer.id, refundId };
   });
 }
 
@@ -111,13 +139,15 @@ Deno.serve(async (req) => {
       return jsonResponse({ completed: 0, failed: 0 });
     }
 
-    const { transactionFee } = await getFees();
-    const completedJobs: Array<Job & { stripeTransferId: string }> = [];
+    const fees = await getFees();
+    const completedJobs: Array<
+      Job & { stripeTransferId: string; refundId?: string }
+    > = [];
     const failedJobs: FailedJob[] = [];
 
     for (const job of pendingJobs) {
       try {
-        const result = await processJob(job, transactionFee);
+        const result = await processJob(job, fees);
         completedJobs.push(result);
       } catch (error: unknown) {
         const message =

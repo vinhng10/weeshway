@@ -51,6 +51,48 @@ ON "public"."reports" FOR INSERT TO "authenticated"
 WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 -- =============================================================================
+-- Validate report timing: only allow from class start to 48h after class end
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION "public"."validate_report_eligibility"()
+  RETURNS TRIGGER
+  LANGUAGE "plpgsql"
+  SET "search_path" TO ''
+  AS $$
+DECLARE
+  v_start_at timestamptz;
+  v_end_at   timestamptz;
+BEGIN
+  SELECT p.start_at, p.end_at
+  INTO v_start_at, v_end_at
+  FROM public.projects p
+  WHERE p.id = NEW.project_id;
+
+  IF v_start_at IS NULL OR v_end_at IS NULL THEN
+    RAISE EXCEPTION 'Project has no scheduled time'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF now() < v_start_at THEN
+    RAISE EXCEPTION 'Reports can only be submitted after the class has started'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF now() > v_end_at + interval '48 hours' THEN
+    RAISE EXCEPTION 'Reports can only be submitted within 48 hours after the class ends'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER "validate_report_eligibility"
+  BEFORE INSERT ON "public"."reports"
+  FOR EACH ROW
+  EXECUTE FUNCTION "public"."validate_report_eligibility"();
+
+-- =============================================================================
 -- Update enqueue_transfers to hold bookings with pending reports
 -- =============================================================================
 
@@ -61,14 +103,14 @@ CREATE OR REPLACE FUNCTION "public"."enqueue_transfers"() RETURNS "void"
 DECLARE
   msgs jsonb[];
 BEGIN
-  -- Atomically mark eligible bookings and collect their IDs
+  -- Mark eligible bookings (CheckedIn or Succeeded) as Transferred
   -- Skip bookings where the student has a pending report on the project
-  WITH flagged AS (
-    UPDATE public.bookings b
-    SET status = 'Transferred'
-    FROM public.projects p
-    WHERE p.id = b.project_id
-      AND b.status = 'CheckedIn'
+  -- Succeeded without check-in = no-show → partial refund + reduced teacher share
+  WITH eligible AS (
+    SELECT b.id, (b.status = 'Succeeded') AS no_show
+    FROM public.bookings b
+    JOIN public.projects p ON p.id = b.project_id
+    WHERE b.status IN ('CheckedIn', 'Succeeded')
       AND p.end_at < now() - interval '48 hours'
       AND NOT EXISTS (
         SELECT 1 FROM public.reports r
@@ -76,9 +118,16 @@ BEGIN
           AND r.user_id = b.user_id
           AND r.status = 'Pending'::"public"."report_status"
       )
-    RETURNING b.id
+    FOR UPDATE OF b
+  ),
+  flagged AS (
+    UPDATE public.bookings b
+    SET status = 'Transferred'
+    FROM eligible e
+    WHERE b.id = e.id
+    RETURNING e.id, e.no_show
   )
-  SELECT array_agg(jsonb_build_object('id', f.id))
+  SELECT array_agg(jsonb_build_object('id', f.id, 'noShow', f.no_show))
   INTO msgs
   FROM flagged f;
 
