@@ -196,9 +196,9 @@ function ProjectContent() {
     router.navigate(`./${projectId}/studio`);
   };
 
-  const handleScan = () => {
+  const handleCheckin = () => {
     if (wasReleased) {
-      router.navigate(`./${projectId}/scan`);
+      router.navigate(`./${projectId}/checkin`);
     } else {
       showAlert(
         "Not Available",
@@ -231,7 +231,7 @@ function ProjectContent() {
     {
       icon: "qr-code",
       label: "Check-in",
-      onPress: handleScan,
+      onPress: handleCheckin,
     },
     {
       icon: "flag",

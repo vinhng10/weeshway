@@ -13,7 +13,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
 
-function ScanContent() {
+function CheckinContent() {
   const [permission, requestPermission] = useCameraPermissions();
   const lastScannedId = useRef<number | null>(null);
   const isProcessing = useRef(false);
@@ -109,12 +109,12 @@ function ScanContent() {
   );
 }
 
-export default function Scan() {
+export default function Checkin() {
   return (
     <View style={styles.container}>
-      <Header title="Check-in Scanner" />
+      <Header title="Check-in" />
       <Boundary>
-        <ScanContent />
+        <CheckinContent />
       </Boundary>
     </View>
   );
@@ -151,7 +151,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.danger,
   },
   bannerText: {
-    color: "#FFFFFF",
+    color: theme.colors.typography,
     flexShrink: 1,
   },
 }));
