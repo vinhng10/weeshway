@@ -6,16 +6,10 @@ const config = getDefaultConfig(__dirname);
 config.resolver.assetExts.push("pte");
 config.resolver.assetExts.push("bin");
 
-config.resolver.blockList = [
-  /node_modules\/.*\/android\/.*/, // Ignores android build artifacts
-  /node_modules\/.*\/ios\/.*/, // Ignores ios build artifacts
-];
-
 // Enable tree shaking and inline requires for smaller bundles and faster startup
 // Also set EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH=1 and EXPO_UNSTABLE_TREE_SHAKING=1 for production builds
 config.transformer.getTransformOptions = async () => ({
   transform: {
-    experimentalImportSupport: true,
     inlineRequires: true,
   },
 });

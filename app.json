@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "weeshway",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "icon": "./assets/images/icon.png",
       "supportsTablet": true,
@@ -22,7 +21,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0C0C0C"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.weeshway.weeshway",
       "permissions": [
         "android.permission.RECORD_AUDIO",
@@ -53,7 +51,9 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
+          "fonts": [
+            "./assets/fonts/MomoTrustDisplay-Regular.ttf"
+          ]
         }
       ],
       [
@@ -63,12 +63,7 @@
           "enableGooglePay": true
         }
       ],
-      [
-        "expo-web-browser",
-        {
-          "experimentalLauncherActivity": true
-        }
-      ],
+      "expo-web-browser",
       "expo-localization",
       [
         "expo-location",
@@ -81,7 +76,9 @@
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
         }
-      ]
+      ],
+      "expo-image",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
