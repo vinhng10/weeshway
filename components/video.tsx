@@ -1,7 +1,5 @@
-import { useEvent } from "expo";
 import { Image } from "expo-image";
-import { useVideoPlayer, VideoView } from "expo-video";
-import * as VideoThumbnails from "expo-video-thumbnails";
+import { useVideoPlayer, VideoThumbnail, VideoView } from "expo-video";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -10,100 +8,84 @@ interface VideoProps {
   source: string | null;
 }
 
-export function Video({ source }: VideoProps) {
-  const [thumbnailUri, setThumbnailUri] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [shouldLoadPlayer, setShouldLoadPlayer] = useState(false);
+export const Video = React.memo(function Video({ source }: VideoProps) {
+  const [thumbnail, setThumbnail] = useState<VideoThumbnail | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPlayer, setShowPlayer] = useState(false);
   const videoRef = useRef<any>(null);
+
+  const player = useVideoPlayer(source, (p) => {
+    p.loop = true;
+    p.muted = false;
+  });
 
   useEffect(() => {
     if (!source) {
       setIsLoading(false);
-      setThumbnailUri(null);
+      setThumbnail(null);
       return;
     }
 
+    let cancelled = false;
     const generateThumbnail = async () => {
       setIsLoading(true);
       try {
-        const { uri } = await VideoThumbnails.getThumbnailAsync(source, {
-          time: 15000,
-        });
-        setThumbnailUri(uri);
+        const [result] = await player.generateThumbnailsAsync(15);
+        if (!cancelled) setThumbnail(result);
       } catch (e) {
         console.warn("Thumbnail generation failed:", e);
-        setThumbnailUri(null);
+        if (!cancelled) setThumbnail(null);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     generateThumbnail();
-  }, [source]);
+    return () => {
+      cancelled = true;
+    };
+  }, [source, player]);
 
   const handlePress = useCallback(() => {
     if (!source) return;
-    setShouldLoadPlayer(true);
-  }, [source]);
+    player.currentTime = 0;
+    player.play();
+    setShowPlayer(true);
+  }, [source, player]);
+
+  useEffect(() => {
+    if (showPlayer) {
+      videoRef.current?.enterFullscreen().catch(() => {});
+    }
+  }, [showPlayer]);
+
+  const handleFullscreenExit = useCallback(() => {
+    player.pause();
+    player.currentTime = 0;
+    setShowPlayer(false);
+  }, [player]);
 
   return (
     <Pressable onPress={handlePress} disabled={isLoading}>
       <View style={[styles.container, styles.indicator]}>
         {source && isLoading ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
+          <ActivityIndicator size="large" color="#FFFFFF" />
         ) : (
-          thumbnailUri && (
-            <Image source={{ uri: thumbnailUri }} style={styles.container} />
-          )
+          thumbnail && <Image source={thumbnail} style={styles.container} />
         )}
       </View>
-      {source && shouldLoadPlayer && (
-        <VideoPlayerComponent
-          uri={source}
-          videoRef={videoRef}
-          onClose={() => setShouldLoadPlayer(false)}
+      {showPlayer && (
+        <VideoView
+          ref={videoRef}
+          player={player}
+          nativeControls
+          fullscreenOptions={{ enable: true }}
+          onFullscreenExit={handleFullscreenExit}
         />
       )}
     </Pressable>
   );
-}
-
-function VideoPlayerComponent({
-  uri,
-  videoRef,
-  onClose,
-}: {
-  uri: string;
-  videoRef: React.RefObject<any>;
-  onClose: any;
-}) {
-  const player = useVideoPlayer(uri, (p) => {
-    p.loop = false;
-    p.muted = false;
-    p.play();
-  });
-
-  const { status, error } = useEvent(player, "statusChange", {
-    status: player.status,
-    error: undefined,
-  });
-
-  useEffect(() => {
-    if (status === "readyToPlay" && !error) {
-      videoRef.current?.enterFullscreen().catch(() => {});
-    }
-  }, [status, error, videoRef]);
-
-  return (
-    <VideoView
-      ref={videoRef}
-      player={player}
-      nativeControls
-      fullscreenOptions={{ enable: true }}
-      onFullscreenExit={onClose}
-    />
-  );
-}
+});
 
 const styles = StyleSheet.create((theme) => ({
   container: {

@@ -62,17 +62,12 @@ function TeacherProfileContent() {
   const renderProfile = (data: ProfileEnrichedType): React.ReactElement => (
     <View style={styles.header}>
       <Avatar source={data.avatarUrl} size="large" shape="circle" bordered />
-      <ThemedText type="h3" style={styles.text}>
-        {data.fullName}
-      </ThemedText>
-      <ThemedText
-        color="dimmed"
-        numberOfLines={2}
-        ellipsizeMode="tail"
-        style={styles.text}
-      >
-        {data.bio}
-      </ThemedText>
+      <ThemedText type="h3">{data.fullName}</ThemedText>
+      {data.bio && (
+        <ThemedText color="dimmed" numberOfLines={2} ellipsizeMode="tail">
+          {data.bio}
+        </ThemedText>
+      )}
     </View>
   );
 
@@ -152,8 +147,5 @@ const styles = StyleSheet.create((theme, rt) => ({
     justifyContent: "center",
     alignItems: "center",
     gap: theme.gap(1),
-  },
-  text: {
-    textAlign: "center",
   },
 }));
