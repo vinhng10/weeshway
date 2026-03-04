@@ -3,14 +3,8 @@ import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 
 export type ThemedTextProps = TextProps & UnistylesVariants<typeof styles>;
 
-export function ThemedText({
-  style,
-  type,
-  bold,
-  color,
-  ...rest
-}: ThemedTextProps) {
-  styles.useVariants({ type, bold, color });
+export function ThemedText({ style, type, color, ...rest }: ThemedTextProps) {
+  styles.useVariants({ type, color });
   return (
     <Text allowFontScaling={false} style={[styles.style, style]} {...rest} />
   );
@@ -50,11 +44,6 @@ export const styles = StyleSheet.create((theme) => ({
           lineHeight: 11,
         },
       },
-      bold: {
-        true: {
-          fontWeight: 900,
-        },
-      },
       color: {
         default: {
           color: theme.colors.typography,
@@ -68,8 +57,11 @@ export const styles = StyleSheet.create((theme) => ({
         danger: {
           color: theme.colors.danger,
         },
+        light: {
+          color: theme.colors.light,
+        },
         dark: {
-          color: theme.colors.background,
+          color: theme.colors.dark,
         },
       },
     },

@@ -3,9 +3,9 @@ import { StyleSheet } from "react-native-unistyles";
 const lightTheme = {
   colors: {
     background: "#F4F4F4",
-    foreground: "#E6E6E6",
+    foreground: "#EFEFEF",
     typography: "#2C2C2C",
-    dimmed: "#B2B2B2",
+    dimmed: "#9C9C9C",
     contrast: "#2C2C2C",
     typographyContrast: "#F4F4F4",
     link: "#1E3799",
@@ -22,7 +22,7 @@ const lightTheme = {
 const darkTheme = {
   colors: {
     background: "#0C0C0C",
-    foreground: "#1B1B1B",
+    foreground: "#171717",
     typography: "#F4F4F4",
     dimmed: "#B2B2B2",
     contrast: "#F4F4F4",

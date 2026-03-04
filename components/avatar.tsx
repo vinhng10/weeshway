@@ -77,7 +77,7 @@ const styles = StyleSheet.create((theme) => ({
       bordered: {
         true: {
           borderRadius: theme.gap(2),
-          borderColor: "#FFFFFF",
+          borderColor: theme.colors.contrast,
           borderWidth: 2,
         },
       },
@@ -108,7 +108,7 @@ const styles = StyleSheet.create((theme) => ({
     width: theme.gap(3),
     height: theme.gap(3),
     borderRadius: 999,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.contrast,
     justifyContent: "center",
     alignItems: "center",
   },

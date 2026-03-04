@@ -8,7 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
 import { Avatar } from "./avatar";
 import { Chip } from "./chip";
@@ -22,6 +22,7 @@ interface CardProps {
 }
 
 export const ProjectCard = ({ data }: CardProps) => {
+  const { theme } = useUnistyles();
   const profile = useAuth((state) => state.profile);
   const queryClient = useQueryClient();
   const [visible, setVisible] = useState(false);
@@ -114,7 +115,7 @@ export const ProjectCard = ({ data }: CardProps) => {
       >
         <LinearGradient
           style={styles.overlay}
-          colors={["rgba(255, 255, 255, 0.1)", "#0C0C0C"]}
+          colors={["rgba(255, 255, 255, 0.1)", theme.colors.background]}
           start={{ x: 0.0, y: 0.3 }}
           end={{ x: 0, y: 1 }}
         >
@@ -128,8 +129,8 @@ export const ProjectCard = ({ data }: CardProps) => {
             />
             <ThemedText type="h3">{data.profile.fullName}</ThemedText>
             <View style={styles.chipContainer}>
-              {data.style && <Chip label={data.style} color="light" />}
-              {data.level && <Chip label={data.level} color="light" />}
+              {data.style && <Chip label={data.style} color="contrast" />}
+              {data.level && <Chip label={data.level} color="contrast" />}
             </View>
           </View>
 
@@ -183,7 +184,7 @@ export const ProjectCard = ({ data }: CardProps) => {
           {/* Bottom Container */}
           <View style={styles.bottomContainer}>
             <View style={styles.bookButton}>
-              <Button label={label} onPress={onPress} disabled={booked} color="light" />
+              <Button label={label} onPress={onPress} disabled={booked} />
             </View>
             <IconButton
               icon={isPlaying ? "pause" : "play"}
