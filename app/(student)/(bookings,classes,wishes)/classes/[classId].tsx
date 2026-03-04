@@ -228,11 +228,11 @@ function ClassContent() {
         </Pressable>
 
         <View style={styles.row}>
-          <Chip label={data.status} color="light" size="large" />
+          <Chip label={data.status} color="contrast" size="large" />
           {isBooked && (
             <Chip
               label={isRefunding ? "Refunding" : `Booked x${userBooking.spots}`}
-              color={isRefunding ? "danger" : "light"}
+              color={isRefunding ? "danger" : "contrast"}
               size="large"
             />
           )}

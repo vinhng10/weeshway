@@ -3,7 +3,11 @@ import {
   TextInput as RNTextInput,
   type TextInputProps as RNTextInputProps,
 } from "react-native";
-import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
+import {
+  StyleSheet,
+  UnistylesVariants,
+  useUnistyles,
+} from "react-native-unistyles";
 import { styles as textStyles } from "../themed-text";
 
 export type TextInputProps = RNTextInputProps &
@@ -12,6 +16,7 @@ export type TextInputProps = RNTextInputProps &
 
 export const TextInput = forwardRef<RNTextInput, TextInputProps>(
   ({ type, bold, color, multiline, style, ...rest }, ref) => {
+    const { theme } = useUnistyles();
     styles.useVariants({ multiline });
     textStyles.useVariants({ type, bold, color });
 
@@ -20,6 +25,7 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
         ref={ref}
         multiline={multiline}
         allowFontScaling={false}
+        placeholderTextColor={theme.colors.dimmed}
         style={[styles.container, textStyles.style, style]}
         {...rest}
       />

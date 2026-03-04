@@ -119,10 +119,10 @@ export function Checkout({
               componentBorder: theme.colors.dimmed,
               componentDivider: theme.colors.dimmed,
               primaryText: theme.colors.typography,
-              secondaryText: theme.colors.tint,
+              secondaryText: theme.colors.dimmed,
               componentText: theme.colors.typography,
-              placeholderText: theme.colors.tint,
-              icon: theme.colors.tint,
+              placeholderText: theme.colors.dimmed,
+              icon: theme.colors.dimmed,
               error: theme.colors.danger,
             },
             shapes: {

@@ -57,7 +57,7 @@ function ReportContent() {
         >
           <View style={styles.section}>
             <ThemedText type="h4">Status</ThemedText>
-            <Chip label={data.status} color="light" size="large" />
+            <Chip label={data.status} color="contrast" size="large" />
           </View>
 
           <View style={styles.section}>

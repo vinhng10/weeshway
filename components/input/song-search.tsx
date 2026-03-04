@@ -1,15 +1,10 @@
 import { useSongSearch } from "@/hooks";
 import { SongType } from "@/types";
 import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Keyboard,
-  Modal,
-  View,
-} from "react-native";
+import { FlatList, Keyboard, Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 import { Tile } from "../tile";
 import { TextInput } from "./text-input";
@@ -38,7 +33,7 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
     if (loading) {
       return (
         <View style={styles.messageContainer}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
+          <ThemedActivityIndicator size="large" />
         </View>
       );
     }

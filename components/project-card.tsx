@@ -114,7 +114,7 @@ export const ProjectCard = ({ data }: CardProps) => {
       >
         <LinearGradient
           style={styles.overlay}
-          colors={["rgba(255, 255, 255, 0.1)", "rgba(0, 0, 0, 0.9)"]}
+          colors={["rgba(255, 255, 255, 0.1)", "#0C0C0C"]}
           start={{ x: 0.0, y: 0.3 }}
           end={{ x: 0, y: 1 }}
         >
@@ -183,7 +183,7 @@ export const ProjectCard = ({ data }: CardProps) => {
           {/* Bottom Container */}
           <View style={styles.bottomContainer}>
             <View style={styles.bookButton}>
-              <Button label={label} onPress={onPress} disabled={booked} />
+              <Button label={label} onPress={onPress} disabled={booked} color="light" />
             </View>
             <IconButton
               icon={isPlaying ? "pause" : "play"}

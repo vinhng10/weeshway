@@ -17,6 +17,7 @@ export { ProjectStatus } from "./project-status";
 export { QRCode } from "./qr-code";
 export { SectionListView } from "./section-list";
 export { SongCard } from "./song-card";
+export { ThemedActivityIndicator } from "./themed-activity-indicator";
 export {
   styles as textStyles,
   ThemedText,

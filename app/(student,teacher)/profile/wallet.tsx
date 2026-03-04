@@ -60,7 +60,7 @@ function StudentWalletContent() {
     queryFn: async () => {
       const { data, error } =
         await supabase.functions.invoke<PaymentMethodsResponse>(
-          "payment-methods"
+          "payment-methods",
         );
       if (error) throw error;
       return data ? data.paymentMethods : [];
@@ -73,7 +73,7 @@ function StudentWalletContent() {
       async provideCustomerSessionClientSecret(): Promise<CustomerSessionClientSecret> {
         const { data, error } =
           await supabase.functions.invoke<SetupSessionResponse>(
-            "setup-session"
+            "setup-session",
           );
 
         if (error) throw error;
@@ -95,7 +95,7 @@ function StudentWalletContent() {
         return data.setupIntentClientSecret;
       },
     }),
-    [profile?.stripeAccountId]
+    [profile?.stripeAccountId],
   );
 
   const handleSetup = async () => {
@@ -119,10 +119,10 @@ function StudentWalletContent() {
               componentBorder: theme.colors.dimmed,
               componentDivider: theme.colors.dimmed,
               primaryText: theme.colors.typography,
-              secondaryText: theme.colors.tint,
+              secondaryText: theme.colors.dimmed,
               componentText: theme.colors.typography,
-              placeholderText: theme.colors.tint,
-              icon: theme.colors.tint,
+              placeholderText: theme.colors.dimmed,
+              icon: theme.colors.dimmed,
               error: theme.colors.danger,
             },
             shapes: {
@@ -143,7 +143,7 @@ function StudentWalletContent() {
         if (error) {
           showAlert(
             "Payment Setup",
-            "Couldn't initialize the payment setup. Please try again."
+            "Couldn't initialize the payment setup. Please try again.",
           );
           return;
         }
@@ -157,7 +157,7 @@ function StudentWalletContent() {
     } catch {
       showAlert(
         "Payment Setup",
-        "Couldn't open the payment setup. Please try again."
+        "Couldn't open the payment setup. Please try again.",
       );
     }
   };
@@ -188,7 +188,7 @@ function StudentWalletContent() {
         refetch={refetch}
         isRefetching={isRefetching}
       />
-      <Button label="Manage" onPress={handleSetup} stickyBottom />
+      <Button label="Setup" onPress={handleSetup} stickyBottom />
     </>
   );
 }
@@ -245,7 +245,7 @@ function TeacherWalletContent() {
         "onboard",
         {
           body: { country, returnUrl: RETURN_URL },
-        }
+        },
       );
 
       if (error) throw error;
@@ -263,7 +263,7 @@ function TeacherWalletContent() {
     } catch {
       showAlert(
         "Setup Failed",
-        "Couldn't start the wallet setup. Please try again."
+        "Couldn't start the wallet setup. Please try again.",
       );
     }
   };
@@ -287,7 +287,7 @@ function TeacherWalletContent() {
     } catch {
       showAlert(
         "Dashboard Unavailable",
-        "Couldn't open your payment dashboard. Please try again."
+        "Couldn't open your payment dashboard. Please try again.",
       );
     }
   };
@@ -301,7 +301,7 @@ function TeacherWalletContent() {
   };
 
   const renderExternalAccount = (
-    item: AccountResponse["externalAccounts"][0]
+    item: AccountResponse["externalAccounts"][0],
   ): React.ReactElement => {
     const title = item.bankName;
     const subtitle = `•••• ${item.last4} (${item.currency.toUpperCase()})`;

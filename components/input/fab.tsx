@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  GestureResponderEvent,
-  Pressable,
-  View,
-} from "react-native";
+import { GestureResponderEvent, Pressable, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -13,6 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
 import { IconSymbol, type IconSymbolName } from "../icon-symbol";
+import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 
 export type FABItem = {
@@ -64,7 +60,7 @@ function FABAction({
       >
         <View style={styles.icon}>
           {loading ? (
-            <ActivityIndicator size="small" />
+            <ThemedActivityIndicator size="small" />
           ) : (
             <IconSymbol name={icon} size={20} />
           )}
@@ -146,7 +142,7 @@ const styles = StyleSheet.create((theme) => ({
     width: theme.gap(5),
     height: theme.gap(5),
     borderRadius: theme.gap(2),
-    backgroundColor: "white",
+    backgroundColor: theme.colors.contrast,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -159,9 +155,9 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: theme.gap(2),
-    backgroundColor: theme.colors.activeTint,
+    backgroundColor: theme.colors.contrast,
   },
   buttonLabel: {
-    color: theme.colors.background,
+    color: theme.colors.typographyContrast,
   },
 }));

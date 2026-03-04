@@ -19,6 +19,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
   label,
   onPress,
   disabled,
+  color,
   outlined,
   stickyBottom,
   style,
@@ -26,7 +27,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const isDisabled = disabled || loading;
-  styles.useVariants({ outlined, stickyBottom });
+  styles.useVariants({ color, outlined, stickyBottom });
 
   const handlePress = (event: GestureResponderEvent) => {
     if (!onPress || loading) return;
@@ -50,7 +51,9 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator
           size="large"
-          color={outlined ? "#FFFFFF" : "#0C0C0C"}
+          color={
+            (StyleSheet.flatten(styles.label) as { color?: string })?.color
+          }
         />
       ) : (
         <ThemedText type="h4" style={styles.label}>
@@ -69,14 +72,22 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     borderRadius: theme.gap(2),
     variants: {
-      outlined: {
-        true: {
-          backgroundColor: theme.colors.background,
-          borderWidth: theme.gap(0.4),
-          borderColor: theme.colors.activeTint,
+      color: {
+        light: {
+          backgroundColor: theme.colors.light,
+        },
+        dark: {
+          backgroundColor: theme.colors.dark,
         },
         default: {
-          backgroundColor: theme.colors.activeTint,
+          backgroundColor: theme.colors.contrast,
+        },
+      },
+      outlined: {
+        true: {
+          backgroundColor: "transparent",
+          borderWidth: theme.gap(0.4),
+          borderColor: theme.colors.typography,
         },
       },
       stickyBottom: {
@@ -91,12 +102,20 @@ const styles = StyleSheet.create((theme) => ({
   },
   label: {
     variants: {
-      outlined: {
-        true: {
-          color: theme.colors.activeTint,
+      color: {
+        light: {
+          color: theme.colors.dark,
+        },
+        dark: {
+          color: theme.colors.light,
         },
         default: {
-          color: theme.colors.background,
+          color: theme.colors.typographyContrast,
+        },
+      },
+      outlined: {
+        true: {
+          color: theme.colors.typography,
         },
       },
       stickyBottom: { true: {} },

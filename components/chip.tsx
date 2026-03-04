@@ -52,6 +52,8 @@ const styles = StyleSheet.create((theme) => ({
         light: {},
         dark: {},
         danger: {},
+        contrast: {},
+        default: {},
       },
     },
   },
@@ -69,6 +71,8 @@ const styles = StyleSheet.create((theme) => ({
         light: {},
         dark: {},
         danger: {},
+        contrast: {},
+        default: {},
       },
     },
   },
@@ -80,16 +84,24 @@ const styles = StyleSheet.create((theme) => ({
       },
       color: {
         light: {
-          color: "#000000",
-          backgroundColor: "#FFFFFF",
+          color: theme.colors.dark,
+          backgroundColor: theme.colors.light,
         },
         dark: {
-          color: "#FFFFFF",
+          color: theme.colors.light,
           backgroundColor: theme.colors.foreground,
         },
         danger: {
           color: theme.colors.danger,
           paddingHorizontal: 0,
+        },
+        contrast: {
+          color: theme.colors.typographyContrast,
+          backgroundColor: theme.colors.contrast,
+        },
+        default: {
+          color: theme.colors.typography,
+          backgroundColor: theme.colors.foreground,
         },
       },
     },

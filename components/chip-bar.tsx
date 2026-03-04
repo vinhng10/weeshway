@@ -37,7 +37,7 @@ export const ChipBarItem = ({
   if (modal) {
     // When an option is selected, text is the value prop
     const chipLabel = value ? value : label;
-    const chipColor = value ? "light" : "dark";
+    const chipColor = value ? "contrast" : undefined;
 
     return (
       <>
@@ -69,7 +69,7 @@ export const ChipBarItem = ({
             <Chip
               key={optionValue}
               size={"large"}
-              color={isActive ? "light" : "dark"}
+              color={isActive ? "contrast" : undefined}
               label={optionValue}
               onPress={() => onValueChange?.(optionValue)}
             />

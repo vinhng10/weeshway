@@ -26,7 +26,7 @@ export const Hero = ({ data }: HeroProps) => {
     <ImageBackground source={data.artworkUrl} style={styles.background}>
       <LinearGradient
         style={styles.overlay}
-        colors={["rgba(0, 0, 0, 0.3)", "#0C0C0C"]}
+        colors={["rgba(255, 255, 255, 0.1)", "#0C0C0C"]}
         start={{ x: 0, y: 0.3 }}
         end={{ x: 0, y: 1 }}
       >

@@ -1,9 +1,10 @@
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Button } from "./input/button";
+import { ThemedActivityIndicator } from "./themed-activity-indicator";
 
 export function Boundary({ children }: { children: React.ReactNode }) {
   return (
@@ -20,7 +21,7 @@ export function Boundary({ children }: { children: React.ReactNode }) {
           <Suspense
             fallback={
               <View style={styles.container}>
-                <ActivityIndicator size="large" color="#FFFFFF" />
+                <ThemedActivityIndicator size="large" />
               </View>
             }
           >

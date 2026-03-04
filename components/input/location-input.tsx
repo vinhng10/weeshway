@@ -3,7 +3,6 @@ import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Keyboard,
   Linking,
@@ -15,6 +14,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
 import { MenuItem } from "../menu-item";
+import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 import { TextBoxInput } from "./box-input";
 import { Button } from "./button";
@@ -135,7 +135,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     if (loading) {
       return (
         <View style={styles.messageContainer}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
+          <ThemedActivityIndicator size="large" />
         </View>
       );
     }

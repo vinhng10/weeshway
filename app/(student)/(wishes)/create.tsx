@@ -23,8 +23,8 @@ export default function MakeAWish() {
   const queryClient = useQueryClient();
   const showAlert = useAlert((state) => state.showAlert);
 
-  const [style, setStyle] = useState<StyleType>(STYLE.HIPHOP);
-  const [level, setLevel] = useState<LevelType>(LEVEL.BEGINNER);
+  const [style, setStyle] = useState<StyleType>();
+  const [level, setLevel] = useState<LevelType>();
   const [description, setDescription] = useState("");
   const [song, setSong] = useState<SongType | null>(null);
 

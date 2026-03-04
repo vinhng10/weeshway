@@ -1,8 +1,9 @@
 import { Image } from "expo-image";
 import { useVideoPlayer, VideoThumbnail, VideoView } from "expo-video";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { ThemedActivityIndicator } from "./themed-activity-indicator";
 
 interface VideoProps {
   source: string | null;
@@ -69,7 +70,7 @@ export const Video = React.memo(function Video({ source }: VideoProps) {
     <Pressable onPress={handlePress} disabled={isLoading}>
       <View style={[styles.container, styles.indicator]}>
         {source && isLoading ? (
-          <ActivityIndicator size="large" color="#FFFFFF" />
+          <ThemedActivityIndicator size="large" />
         ) : (
           thumbnail && <Image source={thumbnail} style={styles.container} />
         )}
