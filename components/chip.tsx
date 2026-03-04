@@ -21,10 +21,10 @@ export const Chip: React.FunctionComponent<ChipProps> = ({
   return (
     <Pressable onPress={onPress} disabled={!onPress}>
       <View style={[styles.container, styles.color]}>
-        <ThemedText style={[styles.color, styles.contentSize]}>
+        <ThemedText style={[styles.textColor, styles.contentSize]}>
           {label}
         </ThemedText>
-        {icon && <IconSymbol style={styles.color} name={icon} size={16} />}
+        {icon && <IconSymbol style={styles.textColor} name={icon} size={16} />}
       </View>
     </Pressable>
   );
@@ -83,26 +83,26 @@ const styles = StyleSheet.create((theme) => ({
         large: {},
       },
       color: {
-        light: {
-          color: theme.colors.dark,
-          backgroundColor: theme.colors.light,
-        },
-        dark: {
-          color: theme.colors.light,
-          backgroundColor: theme.colors.foreground,
-        },
-        danger: {
-          color: theme.colors.danger,
-          paddingHorizontal: 0,
-        },
-        contrast: {
-          color: theme.colors.typographyContrast,
-          backgroundColor: theme.colors.contrast,
-        },
-        default: {
-          color: theme.colors.typography,
-          backgroundColor: theme.colors.foreground,
-        },
+        light: { backgroundColor: theme.colors.light },
+        dark: { backgroundColor: theme.colors.foreground },
+        danger: { paddingHorizontal: 0 },
+        contrast: { backgroundColor: theme.colors.contrast },
+        default: { backgroundColor: theme.colors.foreground },
+      },
+    },
+  },
+  textColor: {
+    variants: {
+      size: {
+        default: {},
+        large: {},
+      },
+      color: {
+        light: { color: theme.colors.dark },
+        dark: { color: theme.colors.light },
+        danger: { color: theme.colors.danger },
+        contrast: { color: theme.colors.typographyContrast },
+        default: { color: theme.colors.typography },
       },
     },
   },

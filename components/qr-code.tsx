@@ -1,6 +1,6 @@
 import { Modal, Pressable, View } from "react-native";
 import QRCodeSVG from "react-native-qrcode-svg";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { Button } from "./input/button";
 import { ThemedText } from "./themed-text";
 
@@ -11,6 +11,12 @@ type QRModalProps = {
   title?: string;
   description?: string;
 };
+
+const UniQRCodeSVG = withUnistyles(QRCodeSVG, (theme) => ({
+  size: theme.gap(25),
+  color: theme.colors.typographyContrast,
+  backgroundColor: theme.colors.contrast,
+}));
 
 export const QRCode: React.FunctionComponent<QRModalProps> = ({
   visible,
@@ -36,7 +42,7 @@ export const QRCode: React.FunctionComponent<QRModalProps> = ({
           </ThemedText>
         )}
         <View style={styles.qrContainer}>
-          <QRCodeSVG value={value} size={200} />
+          <UniQRCodeSVG value={value} />
         </View>
         <Button label="Close" onPress={onClose} />
       </View>
@@ -60,8 +66,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   qrContainer: {
     alignSelf: "center",
-    padding: theme.gap(3),
-    backgroundColor: "#FFFFFF",
-    borderRadius: theme.gap(2),
+    padding: theme.gap(0.5),
+    backgroundColor: theme.colors.contrast,
   },
 }));

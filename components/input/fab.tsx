@@ -58,11 +58,11 @@ function FABAction({
         onPress={handlePress}
         disabled={disabled}
       >
-        <View style={styles.icon}>
+        <View style={styles.iconContainer}>
           {loading ? (
             <ThemedActivityIndicator size="small" />
           ) : (
-            <IconSymbol name={icon} size={20} />
+            <IconSymbol name={icon} size={20} style={styles.icon} />
           )}
         </View>
         <ThemedText type="h4">{label}</ThemedText>
@@ -80,10 +80,10 @@ export const FAB: React.FunctionComponent<FABProps> = ({ label, items }) => {
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, styles.overlay]}
         >
           <Pressable
-            style={styles.overlay}
+            style={styles.overlayPress}
             onPress={() => setExpanded(false)}
           />
         </Animated.View>
@@ -114,9 +114,11 @@ export const FAB: React.FunctionComponent<FABProps> = ({ label, items }) => {
 
 const styles = StyleSheet.create((theme) => ({
   overlay: {
-    flex: 1,
     backgroundColor: theme.colors.background,
     opacity: 0.95,
+  },
+  overlayPress: {
+    flex: 1,
   },
   menu: {
     position: "absolute",
@@ -138,13 +140,16 @@ const styles = StyleSheet.create((theme) => ({
       },
     },
   },
-  icon: {
+  iconContainer: {
     width: theme.gap(5),
     height: theme.gap(5),
     borderRadius: theme.gap(2),
     backgroundColor: theme.colors.contrast,
     justifyContent: "center",
     alignItems: "center",
+  },
+  icon: {
+    color: theme.colors.typographyContrast,
   },
   button: {
     width: "70%",

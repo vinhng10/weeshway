@@ -10,7 +10,7 @@ export type BulletProps = {
 export function Bullet({ text }: BulletProps) {
   return (
     <View style={styles.container}>
-      <IconSymbol name="checkmark-circle" size={20} color="#6B9C00" />
+      <IconSymbol name="checkmark-circle" size={20} style={styles.icon} />
       <ThemedText type="h5" color="dimmed" style={styles.text}>
         {text}
       </ThemedText>
@@ -26,5 +26,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   text: {
     flex: 1,
+  },
+  icon: {
+    color: theme.colors.primary,
   },
 }));

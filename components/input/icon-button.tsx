@@ -44,7 +44,7 @@ const styles = StyleSheet.create((theme) => ({
     variants: {
       type: {
         default: {
-          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          backgroundColor: `${theme.colors.contrast}55`,
         },
         transparent: {
           backgroundColor: "transparent",
@@ -67,7 +67,7 @@ const styles = StyleSheet.create((theme) => ({
     variants: {
       type: {
         default: {
-          color: "rgba(255, 255, 255, 0.6)",
+          color: `${theme.colors.light}88`,
         },
         transparent: {
           color: theme.colors.typography,

@@ -5,8 +5,14 @@ import {
   requestMediaLibraryPermissionsAsync,
 } from "expo-image-picker";
 import { Pressable, View } from "react-native";
-import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
+import {
+  StyleSheet,
+  type UnistylesVariants,
+  withUnistyles,
+} from "react-native-unistyles";
 import { IconSymbol } from "./icon-symbol";
+
+const UniImage = withUnistyles(Image);
 
 export type AvatarProps = ImageProps &
   UnistylesVariants<typeof styles> & {
@@ -36,7 +42,7 @@ export function Avatar({
       if (status !== "granted") {
         showAlert(
           "Permission Needed",
-          "Please allow access to your photo library to upload an image."
+          "Please allow access to your photo library to upload an image.",
         );
         return;
       }
@@ -61,7 +67,7 @@ export function Avatar({
 
   return (
     <Pressable onPress={handleImagePicker}>
-      <Image source={source} style={[styles.avatar, style]} {...rest} />
+      <UniImage source={source} style={[styles.avatar, style]} {...rest} />
       {editable && onSourceChange && (
         <View style={styles.cameraButton}>
           <IconSymbol name="camera" size={16} />

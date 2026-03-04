@@ -8,7 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
 import { Avatar } from "./avatar";
 import { Chip } from "./chip";
@@ -17,12 +17,15 @@ import { Button, Checkout, formatDate, formatTime, IconButton } from "./input";
 import { ProjectStatus } from "./project-status";
 import { ThemedText } from "./themed-text";
 
+const UniLinearGradient = withUnistyles(LinearGradient, (theme) => ({
+  colors: ["rgba(255, 255, 255, 0)", theme.colors.foreground] as const,
+}));
+
 interface CardProps {
   data: ProjectEnrichedType;
 }
 
 export const ProjectCard = ({ data }: CardProps) => {
-  const { theme } = useUnistyles();
   const profile = useAuth((state) => state.profile);
   const queryClient = useQueryClient();
   const [visible, setVisible] = useState(false);
@@ -113,10 +116,9 @@ export const ProjectCard = ({ data }: CardProps) => {
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >
-        <LinearGradient
+        <UniLinearGradient
           style={styles.overlay}
-          colors={["rgba(255, 255, 255, 0.1)", theme.colors.background]}
-          start={{ x: 0.0, y: 0.3 }}
+          start={{ x: 0, y: 0.3 }}
           end={{ x: 0, y: 1 }}
         >
           {/* Top Container */}
@@ -155,17 +157,19 @@ export const ProjectCard = ({ data }: CardProps) => {
             <View style={styles.rowGroup}>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
-                  <IconSymbol name="location-sharp" size={16} color="#FFFFFF" />
-                  <ThemedText>{data.location?.displayName}</ThemedText>
+                  <IconSymbol name="location-sharp" size={16} />
+                  <ThemedText type="h5">
+                    {data.location?.displayName}
+                  </ThemedText>
                 </View>
-                <ThemedText>
+                <ThemedText type="h5">
                   {formatMoney(data.price, data.currency)}
                 </ThemedText>
               </View>
               <View style={styles.row}>
                 <View style={styles.infoRow}>
-                  <IconSymbol name="time" size={16} color="#FFFFFF" />
-                  <ThemedText>
+                  <IconSymbol name="time" size={16} />
+                  <ThemedText type="h5">
                     {data.startAt && data.endAt
                       ? `${formatDate(
                           new Date(data.startAt),
@@ -192,7 +196,7 @@ export const ProjectCard = ({ data }: CardProps) => {
               onPress={handleAudioPlayer}
             />
           </View>
-        </LinearGradient>
+        </UniLinearGradient>
       </ImageBackground>
 
       <Checkout

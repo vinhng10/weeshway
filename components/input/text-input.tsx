@@ -15,10 +15,10 @@ export type TextInputProps = RNTextInputProps &
   UnistylesVariants<typeof textStyles>;
 
 export const TextInput = forwardRef<RNTextInput, TextInputProps>(
-  ({ type, bold, color, multiline, style, ...rest }, ref) => {
+  ({ type, color, multiline, style, ...rest }, ref) => {
     const { theme } = useUnistyles();
     styles.useVariants({ multiline });
-    textStyles.useVariants({ type, bold, color });
+    textStyles.useVariants({ type, color });
 
     return (
       <RNTextInput

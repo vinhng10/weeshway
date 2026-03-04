@@ -10,6 +10,7 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Header } from "../header";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
+import { ButtonGroup } from "./button-group";
 import { SpotsSelector } from "./spots-selector";
 
 type PaymentIntentResponse = {
@@ -245,14 +246,14 @@ export function Checkout({
         </View>
 
         {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
+        <ButtonGroup direction="column" stickyBottom>
           <Button
             label={status === "success" ? "See you in class!" : "Pay"}
             onPress={handlePay}
             disabled={status === "success"}
           />
           <Button outlined label="Cancel" onPress={onExit} />
-        </View>
+        </ButtonGroup>
       </View>
     </Modal>
   );
@@ -295,10 +296,5 @@ const styles = StyleSheet.create((theme, rt) => ({
   statusContainer: {
     alignItems: "center",
     marginTop: theme.gap(1),
-  },
-  buttonContainer: {
-    padding: theme.gap(2),
-    gap: theme.gap(2),
-    paddingBottom: rt.insets.bottom + theme.gap(2),
   },
 }));

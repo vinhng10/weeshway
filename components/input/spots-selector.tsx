@@ -26,7 +26,7 @@ export function SpotsSelector({
   return (
     <View style={[styles.row, styles.container]}>
       <View style={[styles.row, styles.spotsLabel]}>
-        <IconSymbol name="person-sharp" size={20} color="#FFFFFF" />
+        <IconSymbol name="person-sharp" size={20} />
         <ThemedText type="h3">Spots</ThemedText>
       </View>
       <View style={[styles.row, styles.quantitySelector]}>

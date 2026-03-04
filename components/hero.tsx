@@ -3,16 +3,19 @@ import { SongType } from "@/types";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { IconButton } from "./input/icon-button";
 import { ThemedText } from "./themed-text";
+
+const UniLinearGradient = withUnistyles(LinearGradient, (theme) => ({
+  colors: ["rgba(255, 255, 255, 0)", theme.colors.background] as const,
+}));
 
 interface HeroProps {
   data: SongType;
 }
 
 export const Hero = ({ data }: HeroProps) => {
-  const { theme } = useUnistyles();
   const isPlaying = useAudioPlayerStore((state) =>
     state.isPlaying(data.previewUrl),
   );
@@ -25,10 +28,9 @@ export const Hero = ({ data }: HeroProps) => {
 
   return (
     <ImageBackground source={data.artworkUrl} style={styles.background}>
-      <LinearGradient
+      <UniLinearGradient
         style={styles.overlay}
-        colors={["rgba(255, 255, 255, 0.1)", theme.colors.background]}
-        start={{ x: 0, y: 0.3 }}
+        start={{ x: 0, y: 0.5 }}
         end={{ x: 0, y: 1 }}
       >
         <View style={styles.contentContainer}>
@@ -46,7 +48,7 @@ export const Hero = ({ data }: HeroProps) => {
             />
           </View>
         </View>
-      </LinearGradient>
+      </UniLinearGradient>
     </ImageBackground>
   );
 };

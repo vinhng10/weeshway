@@ -327,7 +327,7 @@ const styles = StyleSheet.create((theme) => ({
     left: "50%",
     height: "100%",
     width: theme.gap(0.25),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.typography,
     zIndex: 10,
   },
 }));

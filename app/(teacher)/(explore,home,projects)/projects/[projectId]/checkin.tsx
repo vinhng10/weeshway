@@ -163,7 +163,6 @@ function CheckinContent() {
             <IconSymbol
               name={banner.success ? "checkmark-circle" : "close-circle"}
               size={20}
-              color="#FFFFFF"
             />
             <ThemedText type="h4" style={styles.bannerText}>
               {banner.message}
