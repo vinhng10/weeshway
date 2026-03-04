@@ -29,7 +29,7 @@ export default function SignIn() {
       }
       setError(
         error.message ||
-          "Couldn't sign in. Please check your credentials and try again."
+          "Couldn't sign in. Please check your credentials and try again.",
       );
     }
   };
@@ -79,7 +79,7 @@ export default function SignIn() {
           <ThemedText type="h5" color="dimmed">
             Don't have an account?
           </ThemedText>
-          <Link href="/sign-up">
+          <Link allowFontScaling={false} href="/sign-up">
             <ThemedText type="h5" color="danger">
               Sign Up
             </ThemedText>

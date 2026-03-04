@@ -19,11 +19,12 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
       <RNTextInput
         ref={ref}
         multiline={multiline}
+        allowFontScaling={false}
         style={[styles.container, textStyles.style, style]}
         {...rest}
       />
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create((theme) => ({

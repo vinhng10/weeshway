@@ -11,7 +11,9 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   styles.useVariants({ type, bold, color });
-  return <Text style={[styles.style, style]} {...rest} />;
+  return (
+    <Text allowFontScaling={false} style={[styles.style, style]} {...rest} />
+  );
 }
 
 export const styles = StyleSheet.create((theme) => ({

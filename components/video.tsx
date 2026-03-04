@@ -77,6 +77,7 @@ export const Video = React.memo(function Video({ source }: VideoProps) {
       {showPlayer && (
         <VideoView
           ref={videoRef}
+          style={StyleSheet.absoluteFill}
           player={player}
           nativeControls
           fullscreenOptions={{ enable: true }}

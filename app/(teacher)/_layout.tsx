@@ -14,6 +14,7 @@ export default function TabLayout() {
         sceneStyle: {
           backgroundColor: theme.colors.background,
         },
+        tabBarAllowFontScaling: false,
         tabBarStyle: {
           backgroundColor: theme.colors.background,
           borderTopWidth: 0,

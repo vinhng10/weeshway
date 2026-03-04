@@ -1,7 +1,7 @@
+import { Avatar, ThemedText } from "@/components";
 import { ImageSource } from "expo-image";
-import { Text, View, type ViewProps } from "react-native";
+import { View, type ViewProps } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
-import { Avatar } from "./avatar";
 
 export type AvatarGroupProps = ViewProps &
   UnistylesVariants<typeof styles> & {
@@ -32,7 +32,9 @@ export function AvatarGroup({ avatars, max, size, ...rest }: AvatarGroupProps) {
           <View style={styles.overflowBadge}>
             <Avatar size={size} />
             <View style={styles.overflowText}>
-              <Text style={styles.overflowTextInner}>+{overflowCount}</Text>
+              <ThemedText style={styles.overflowTextInner}>
+                +{overflowCount}
+              </ThemedText>
             </View>
           </View>
         </View>

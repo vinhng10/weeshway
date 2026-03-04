@@ -51,7 +51,7 @@ export default function CreateAccountScreen() {
       });
     } catch (error: any) {
       setError(
-        error.message || "Couldn't create your account. Please try again."
+        error.message || "Couldn't create your account. Please try again.",
       );
     }
   };
@@ -145,7 +145,7 @@ export default function CreateAccountScreen() {
           <ThemedText type="h5" color="dimmed">
             Already have an account?
           </ThemedText>
-          <Link href="/sign-in">
+          <Link allowFontScaling={false} href="/sign-in">
             <ThemedText type="h5" color="danger">
               Sign In
             </ThemedText>
