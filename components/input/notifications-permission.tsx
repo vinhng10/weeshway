@@ -11,7 +11,7 @@ import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
 export async function syncPushToken(
-  profile: ProfileType | null
+  profile: ProfileType | null,
 ): Promise<void> {
   if (!profile?.id) return;
 
@@ -67,7 +67,7 @@ export const NotificationsPermission = () => {
     } catch {
       showAlert(
         "Notifications",
-        "Something went wrong enabling notifications. Please try again later."
+        "Something went wrong enabling notifications. Please try again later.",
       );
     } finally {
       // This is the source of truth that prevents it from ever showing again
@@ -123,7 +123,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-    opacity: 0.8,
+    opacity: 0.95,
   },
   sheet: {
     padding: theme.gap(2),

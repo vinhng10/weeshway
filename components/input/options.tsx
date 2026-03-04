@@ -76,7 +76,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-    opacity: 0.95,
   },
   scrollContainer: {
     gap: theme.gap(4),

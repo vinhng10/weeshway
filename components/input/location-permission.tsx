@@ -10,9 +10,7 @@ import { Bullet } from "../bullet";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
-export async function syncLocation(
-  profile: ProfileType | null
-): Promise<void> {
+export async function syncLocation(profile: ProfileType | null): Promise<void> {
   if (!profile?.id) return;
 
   try {
@@ -109,7 +107,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-    opacity: 0.8,
+    opacity: 0.95,
   },
   sheet: {
     padding: theme.gap(2),

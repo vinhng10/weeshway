@@ -124,7 +124,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-    opacity: 0.95,
   },
   searchContainer: {
     padding: theme.gap(2),

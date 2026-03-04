@@ -114,7 +114,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
             administrative_area_level_1: location.administrativeAreaLevel1,
             location: locationPoint,
           },
-          { ignoreDuplicates: true }
+          { ignoreDuplicates: true },
         )
         .select()
         .maybeSingle()
@@ -126,7 +126,7 @@ export const LocationInput: React.FunctionComponent<LocationProps> = ({
     } catch {
       showAlert(
         "Location Error",
-        "Couldn't save the selected location. Please try again."
+        "Couldn't save the selected location. Please try again.",
       );
     }
   };
@@ -258,7 +258,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top + theme.gap(1),
     backgroundColor: theme.colors.background,
-    opacity: 0.95,
   },
   searchContainer: {
     padding: theme.gap(2),
