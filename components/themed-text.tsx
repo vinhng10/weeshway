@@ -40,8 +40,8 @@ export const styles = StyleSheet.create((theme) => ({
           lineHeight: 18,
         },
         tiny: {
-          fontSize: 9,
-          lineHeight: 11,
+          fontSize: 10,
+          lineHeight: 12,
         },
       },
       color: {

@@ -1,21 +1,25 @@
 import { Avatar, ThemedText } from "@/components";
-import { ImageSource } from "expo-image";
 import { View, type ViewProps } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 
 export type AvatarGroupProps = ViewProps &
   UnistylesVariants<typeof styles> & {
-    avatars: ImageSource[] | string[];
+    avatars: string[];
     max?: number;
   };
 
 export function AvatarGroup({ avatars, max, size, ...rest }: AvatarGroupProps) {
   styles.useVariants({ size });
 
+  const totalCount = avatars.length;
+  const uniqueAvatars = [...new Set(avatars)];
+
   // Limit the number of avatars to display if max is specified
   const avatarsToShow =
-    max && avatars.length > max ? avatars.slice(0, max) : avatars;
-  const overflowCount = max && avatars.length > max ? avatars.length - max : 0;
+    max && uniqueAvatars.length > max
+      ? uniqueAvatars.slice(0, max)
+      : uniqueAvatars;
+  const overflowCount = max && totalCount > max ? totalCount - max : 0;
 
   return (
     <View style={styles.container} {...rest}>
@@ -55,10 +59,10 @@ const styles = StyleSheet.create((theme) => ({
     variants: {
       size: {
         default: {
-          marginLeft: -theme.gap(1),
+          marginLeft: -theme.gap(2),
         },
         large: {
-          marginLeft: -theme.gap(2),
+          marginLeft: -theme.gap(4),
         },
       },
     },
@@ -67,19 +71,16 @@ const styles = StyleSheet.create((theme) => ({
     variants: {
       size: {
         default: {
-          marginLeft: -theme.gap(1),
+          marginLeft: -theme.gap(2),
         },
         large: {
-          marginLeft: -theme.gap(2),
+          marginLeft: -theme.gap(4),
         },
       },
     },
   },
   overflowBadge: {
     position: "relative",
-  },
-  overflowAvatarImage: {
-    opacity: 0.6,
   },
   overflowText: {
     position: "absolute",
@@ -91,14 +92,11 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   overflowTextInner: {
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    color: theme.colors.typographyContrast,
+    backgroundColor: theme.colors.contrast,
     borderRadius: 999,
-    paddingHorizontal: theme.gap(1),
-    paddingVertical: theme.gap(0.25),
+    padding: theme.gap(0.5),
     minWidth: theme.gap(3),
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "bold",
     textAlign: "center",
     overflow: "hidden",
   },

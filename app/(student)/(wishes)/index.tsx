@@ -78,20 +78,15 @@ function WishesContent({ style, level }: WishesContentProps) {
       subtitle={data.song.artistName}
       metadata={[data.style, data.level].filter(Boolean).join(" • ")}
       previewUrl={data.song.previewUrl}
-      backgroundColor={data.status}
       avatar={
         data.recommendations &&
         data.recommendations.length > 0 && (
           <View style={styles.avatarGroup}>
             <AvatarGroup
               max={2}
-              avatars={[
-                ...new Set(
-                  data.recommendations
-                    .map((r) => r.project.profile.avatarUrl)
-                    .filter((url): url is string => url !== undefined),
-                ),
-              ]}
+              avatars={data.recommendations
+                .map((r) => r.project.profile.avatarUrl)
+                .filter((url): url is string => url !== undefined)}
             />
           </View>
         )
