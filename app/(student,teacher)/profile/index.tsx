@@ -58,7 +58,17 @@ export default function Profile() {
           bordered
         />
         <ThemedText type="h3">{profile?.fullName}</ThemedText>
-        <ThemedText color="dimmed">{profile?.bio}</ThemedText>
+        {profile?.bio && (
+          <ThemedText
+            type="h5"
+            color="dimmed"
+            numberOfLines={2}
+            ellipsizeMode="tail"
+            style={styles.bio}
+          >
+            {profile.bio}
+          </ThemedText>
+        )}
         <ChipBar padding items={options} />
       </View>
 
@@ -93,10 +103,14 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.background,
   },
   header: {
+    alignSelf: "center",
     alignItems: "center",
-    paddingHorizontal: theme.gap(2),
-    gap: theme.gap(1),
+    width: "70%",
+    gap: theme.gap(0.2),
     marginBottom: theme.gap(2),
+  },
+  bio: {
+    textAlign: "center",
   },
   scrollContainer: {
     paddingHorizontal: theme.gap(2),

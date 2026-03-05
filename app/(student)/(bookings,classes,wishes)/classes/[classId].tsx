@@ -224,7 +224,16 @@ function ClassContent() {
             shape="circle"
             bordered
           />
-          <ThemedText type="h3">{data.profile.fullName}</ThemedText>
+          <View style={styles.teacherInfo}>
+            <ThemedText type="h3" numberOfLines={1}>
+              {data.profile.fullName}
+            </ThemedText>
+            {data.profile.bio && (
+              <ThemedText type="h5" color="dimmed" numberOfLines={1}>
+                {data.profile.bio}
+              </ThemedText>
+            )}
+          </View>
         </Pressable>
 
         <View style={styles.row}>
@@ -339,5 +348,10 @@ const styles = StyleSheet.create((theme, rt) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.gap(2),
+  },
+  teacherInfo: {
+    width: "70%",
+    justifyContent: "center",
+    gap: theme.gap(0.2),
   },
 }));

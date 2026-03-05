@@ -64,7 +64,13 @@ function TeacherProfileContent() {
       <Avatar source={data.avatarUrl} size="large" shape="circle" bordered />
       <ThemedText type="h3">{data.fullName}</ThemedText>
       {data.bio && (
-        <ThemedText color="dimmed" numberOfLines={2} ellipsizeMode="tail">
+        <ThemedText
+          type="h5"
+          color="dimmed"
+          numberOfLines={2}
+          ellipsizeMode="tail"
+          style={styles.bio}
+        >
           {data.bio}
         </ThemedText>
       )}
@@ -139,8 +145,14 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.background,
   },
   header: {
+    alignSelf: "center",
     alignItems: "center",
-    gap: theme.gap(1),
+    textAlign: "center",
+    width: "70%",
+    gap: theme.gap(0.2),
+  },
+  bio: {
+    textAlign: "center",
   },
   videoContainer: {
     flexDirection: "row",
