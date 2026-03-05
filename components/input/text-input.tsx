@@ -6,9 +6,13 @@ import {
 import {
   StyleSheet,
   UnistylesVariants,
-  useUnistyles,
+  withUnistyles,
 } from "react-native-unistyles";
 import { styles as textStyles } from "../themed-text";
+
+const UniTextInput = withUnistyles(RNTextInput, (theme) => ({
+  placeholderTextColor: theme.colors.dimmed,
+}));
 
 export type TextInputProps = RNTextInputProps &
   UnistylesVariants<typeof styles> &
@@ -16,16 +20,14 @@ export type TextInputProps = RNTextInputProps &
 
 export const TextInput = forwardRef<RNTextInput, TextInputProps>(
   ({ type, color, multiline, style, ...rest }, ref) => {
-    const { theme } = useUnistyles();
     styles.useVariants({ multiline });
     textStyles.useVariants({ type, color });
 
     return (
-      <RNTextInput
+      <UniTextInput
         ref={ref}
         multiline={multiline}
         allowFontScaling={false}
-        placeholderTextColor={theme.colors.dimmed}
         style={[styles.container, textStyles.style, style]}
         {...rest}
       />

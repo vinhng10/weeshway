@@ -130,8 +130,8 @@ function StudentWalletContent() {
             },
             primaryButton: {
               colors: {
-                background: theme.colors.typography,
-                text: theme.colors.background,
+                background: theme.colors.contrast,
+                text: theme.colors.typographyContrast,
               },
               shapes: {
                 borderRadius: theme.gap(2),

@@ -921,12 +921,12 @@ BEGIN
 
         -- 4. Block refund if student already checked in
         IF OLD.checked_in = true THEN
-            RAISE EXCEPTION 'Refunds are not allowed after checking in.';
+            RAISE EXCEPTION 'Cancellation is not allowed after checking in.';
         END IF;
 
         -- 5. Enforce 24h rule for student-initiated cancellations
         IF now() > (project_start_at - INTERVAL '1 day') THEN
-            RAISE EXCEPTION 'Refunds are only allowed up to 24 hours before the class starts.';
+            RAISE EXCEPTION 'Cancellation is only allowed up to 24 hours before the class starts.';
         END IF;
 
         -- 6. Student-initiated

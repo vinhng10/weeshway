@@ -1,7 +1,10 @@
 import { ActivityIndicator, type ActivityIndicatorProps } from "react-native";
-import { useUnistyles } from "react-native-unistyles";
+import { withUnistyles } from "react-native-unistyles";
+
+const UniActivityIndicator = withUnistyles(ActivityIndicator, (theme) => ({
+  color: theme.colors.typography,
+}));
 
 export function ThemedActivityIndicator(props: ActivityIndicatorProps) {
-  const { theme } = useUnistyles();
-  return <ActivityIndicator color={theme.colors.typography} {...props} />;
+  return <UniActivityIndicator {...props} />;
 }

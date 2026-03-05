@@ -1,12 +1,12 @@
 import { useState } from "react";
 import {
-  ActivityIndicator,
   GestureResponderEvent,
   Pressable,
   type PressableProps,
   type ViewProps,
 } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
+import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 
 export type ButtonProps = {
@@ -49,7 +49,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator
+        <ThemedActivityIndicator
           size="large"
           color={
             (StyleSheet.flatten(styles.label) as { color?: string })?.color

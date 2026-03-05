@@ -69,8 +69,8 @@ export function Avatar({
     <Pressable onPress={handleImagePicker}>
       <UniImage source={source} style={[styles.avatar, style]} {...rest} />
       {editable && onSourceChange && (
-        <View style={styles.cameraButton}>
-          <IconSymbol name="camera" size={16} />
+        <View style={styles.iconContainer}>
+          <IconSymbol name="camera" size={16} style={styles.icon} />
         </View>
       )}
     </Pressable>
@@ -107,7 +107,7 @@ const styles = StyleSheet.create((theme) => ({
       },
     },
   },
-  cameraButton: {
+  iconContainer: {
     position: "absolute",
     bottom: 0,
     right: 0,
@@ -117,5 +117,8 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.contrast,
     justifyContent: "center",
     alignItems: "center",
+  },
+  icon: {
+    color: theme.colors.typographyContrast,
   },
 }));

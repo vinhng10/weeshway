@@ -4,6 +4,7 @@ import {
   CameraPermission,
   Header,
   IconSymbol,
+  ThemedActivityIndicator,
   ThemedText,
 } from "@/components";
 import {
@@ -30,7 +31,7 @@ import { StyleSheet } from "react-native-unistyles";
 function CheckinContent() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const queryClient = useQueryClient();
-  const [permission] = useCameraPermissions();
+  const [permission, requestPermission] = useCameraPermissions();
   const lastScannedId = useRef<number | null>(null);
   const isProcessing = useRef(false);
   const bannerOpacity = useSharedValue(0);
@@ -110,10 +111,17 @@ function CheckinContent() {
     }
   };
 
-  if (!permission) return null;
+  if (!permission) {
+    return <ThemedActivityIndicator size="large" style={styles.fill} />;
+  }
 
   if (!permission.granted) {
-    return <CameraPermission />;
+    return (
+      <CameraPermission
+        permission={permission}
+        requestPermission={requestPermission}
+      />
+    );
   }
 
   const checkedInCount = bookings.filter(

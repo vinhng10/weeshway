@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { Pressable, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import { IconSymbol } from "./icon-symbol";
 import { ThemedText } from "./themed-text";
 
@@ -13,15 +13,10 @@ export const Header: React.FunctionComponent<HeaderProps> = ({
   title,
   onPress,
 }) => {
-  const { theme } = useUnistyles();
   return (
     <View style={styles.container}>
       <Pressable onPress={onPress ?? router.back} style={styles.backButton}>
-        <IconSymbol
-          name="chevron-back"
-          size={32}
-          color={theme.colors.typography}
-        />
+        <IconSymbol name="chevron-back" size={32} />
       </Pressable>
       <ThemedText type="h4">{title}</ThemedText>
     </View>

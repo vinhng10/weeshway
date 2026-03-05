@@ -1,21 +1,38 @@
-import { useCameraPermissions } from "expo-camera";
+import { PermissionResponse } from "expo-camera";
 import { useRouter } from "expo-router";
-import { Linking, Modal, Pressable, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { AppState, Linking, Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Bullet } from "../bullet";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 
-export const CameraPermission = () => {
-  const [permission, requestPermission] = useCameraPermissions();
+interface CameraPermissionProps {
+  permission: PermissionResponse;
+  requestPermission: () => Promise<PermissionResponse>;
+}
+
+export const CameraPermission = ({
+  permission,
+  requestPermission,
+}: CameraPermissionProps) => {
   const router = useRouter();
-
-  if (!permission || permission.granted) return null;
-
   const denied = !permission.canAskAgain;
+  const openedSettings = useRef(false);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "active" && openedSettings.current) {
+        openedSettings.current = false;
+        requestPermission();
+      }
+    });
+    return () => sub.remove();
+  }, [requestPermission]);
 
   const handleAllow = async () => {
     if (denied) {
+      openedSettings.current = true;
       await Linking.openSettings();
     } else {
       await requestPermission();
@@ -24,7 +41,7 @@ export const CameraPermission = () => {
 
   return (
     <Modal
-      visible={!permission.granted}
+      visible
       animationType="slide"
       presentationStyle="overFullScreen"
       transparent={true}
