@@ -169,7 +169,7 @@ export default function Projects() {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top + theme.gap(1),
+    marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
   },
 }));

@@ -18,7 +18,7 @@ export default function Studio() {
 
   const useStudioStore = useMemo(
     () => createStudioStore(Number(projectId)),
-    [projectId]
+    [projectId],
   );
 
   const {
@@ -38,7 +38,7 @@ export default function Studio() {
       initialize: state.initialize,
       syncToServer: state.syncToServer,
       syncFromServer: state.syncFromServer,
-    }))
+    })),
   );
 
   const activeSource = studio[studio.activeTrack].source;
@@ -76,7 +76,7 @@ export default function Studio() {
       playbackRate: state.playbackRate,
       setPlaybackRate: state.setPlaybackRate,
       didJustFinish: state.didJustFinish(activeSource),
-    }))
+    })),
   );
 
   const showAlert = useAlert((state) => state.showAlert);
@@ -98,7 +98,7 @@ export default function Studio() {
         player?.seekTo(0);
         reset();
       };
-    }, [])
+    }, []),
   );
 
   const handleSplit = () => {
@@ -128,7 +128,7 @@ export default function Studio() {
     } catch {
       showAlert(
         "Playback Error",
-        "Couldn't load the audio file. Please try again."
+        "Couldn't load the audio file. Please try again.",
       );
     }
   };
@@ -178,7 +178,7 @@ export default function Studio() {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top + theme.gap(1),
+    marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
   },
   studioContainer: {

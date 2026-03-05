@@ -95,7 +95,7 @@ export default function CreateProject() {
     if (!isLoggedIn || !profile) {
       showAlert(
         "Login Required",
-        "Please sign in to your account to continue."
+        "Please sign in to your account to continue.",
       );
       return;
     }
@@ -103,7 +103,7 @@ export default function CreateProject() {
     if (!song) {
       showAlert(
         "Song Required",
-        "Please search and select a song before creating a project."
+        "Please search and select a song before creating a project.",
       );
       return;
     }
@@ -111,7 +111,7 @@ export default function CreateProject() {
     if (status === PROJECT_STATUS.RELEASED && !profile.onboardingComplete) {
       showAlert(
         "Wallet Setup Required",
-        "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started."
+        "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started.",
       );
       return;
     }
@@ -155,7 +155,7 @@ export default function CreateProject() {
     } catch {
       showAlert(
         "Creation Failed",
-        "Couldn't create your project. Please try again."
+        "Couldn't create your project. Please try again.",
       );
     }
   };
@@ -246,7 +246,7 @@ export default function CreateProject() {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top + theme.gap(1),
+    marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
   },
   scrollContainer: {

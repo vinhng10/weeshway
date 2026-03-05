@@ -53,7 +53,7 @@ export const QRCode: React.FunctionComponent<QRModalProps> = ({
 const styles = StyleSheet.create((theme, rt) => ({
   overlay: {
     flex: 1,
-    marginTop: rt.insets.top + theme.gap(1),
+    marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
     opacity: 0.95,
   },

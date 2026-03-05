@@ -81,9 +81,9 @@ function HomeContent() {
         sum +
         Math.round(
           exchange(s.totalEarnings, s.currency, currency) *
-            (1 - transactionFee / 100)
+            (1 - transactionFee / 100),
         ),
-      0
+      0,
     );
     const bookingCount = data.reduce((sum, s) => sum + s.bookingCount, 0);
 
@@ -106,7 +106,7 @@ function HomeContent() {
       title={data.song.name}
       subtitle={data.location?.displayName}
       metadata={`${formatTime(new Date(data.startAt!))} - ${formatTime(
-        new Date(data.endAt!)
+        new Date(data.endAt!),
       )}`}
       previewUrl={data.song.previewUrl}
       status={<ProjectStatus data={data} />}
@@ -159,7 +159,7 @@ export default function Home() {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top + theme.gap(1),
+    marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
   },
   greeting: {

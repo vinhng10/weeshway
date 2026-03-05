@@ -44,7 +44,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
       date.getMonth(),
       date.getDate(),
       startTime.getHours(),
-      startTime.getMinutes()
+      startTime.getMinutes(),
     );
 
     // Combine date from date with time from endTime
@@ -53,7 +53,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
       date.getMonth(),
       date.getDate(),
       endTime.getHours(),
-      endTime.getMinutes()
+      endTime.getMinutes(),
     );
 
     // Validate that start time is not greater than end time
@@ -78,7 +78,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
           <ThemedText type="h5">
             {startAt && endAt
               ? `${formatDate(startAt, true)}, ${formatTime(
-                  startAt
+                  startAt,
                 )} - ${formatTime(endAt)}`
               : ""}
           </ThemedText>
@@ -174,7 +174,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   modalContainer: {
     flex: 1,
-    marginTop: rt.insets.top + theme.gap(1),
+    marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
   },
   modalContent: {

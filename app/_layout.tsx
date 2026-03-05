@@ -12,6 +12,7 @@ import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Stack, useSegments } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -119,6 +120,7 @@ export default function Root() {
           urlScheme="weeshway"
         >
           <QueryClientProvider client={queryClient}>
+            <StatusBar style="auto" />
             <RootNavigator />
             <Alert />
           </QueryClientProvider>

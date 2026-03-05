@@ -181,7 +181,7 @@ export default function Wish() {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top + theme.gap(1),
+    marginTop: rt.insets.top,
   },
   scrollContainer: {
     gap: theme.gap(2),

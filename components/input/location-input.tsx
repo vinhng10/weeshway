@@ -256,7 +256,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   modalContainer: {
     flex: 1,
-    marginTop: rt.insets.top + theme.gap(1),
+    marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
   },
   searchContainer: {
