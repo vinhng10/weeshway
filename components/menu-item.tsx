@@ -61,7 +61,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start",
-    gap: theme.gap(0.5),
   },
   title: {
     flex: 1,

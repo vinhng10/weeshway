@@ -45,7 +45,7 @@ const styles = StyleSheet.create((theme) => ({
         },
         large: {
           paddingHorizontal: theme.gap(2),
-          paddingVertical: theme.gap(1.2),
+          paddingVertical: theme.gap(0.8),
         },
       },
       color: {

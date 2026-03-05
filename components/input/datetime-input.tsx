@@ -170,7 +170,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   content: {
     flex: 1,
-    gap: theme.gap(1),
+    gap: theme.gap(0.5),
   },
   modalContainer: {
     flex: 1,

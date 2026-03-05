@@ -76,7 +76,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   song: {
     flex: 1,
-    gap: theme.gap(0.5),
   },
   container: {
     flexDirection: "row",

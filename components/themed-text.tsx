@@ -13,35 +13,29 @@ export function ThemedText({ style, type, color, ...rest }: ThemedTextProps) {
 export const styles = StyleSheet.create((theme) => ({
   style: {
     fontFamily: theme.fontFamily,
+    includeFontPadding: false,
     variants: {
       type: {
         default: {
           fontSize: 14,
-          lineHeight: 16,
         },
         h1: {
           fontSize: 30,
-          lineHeight: 32,
         },
         h2: {
           fontSize: 24,
-          lineHeight: 26,
         },
         h3: {
           fontSize: 20,
-          lineHeight: 22,
         },
         h4: {
           fontSize: 18,
-          lineHeight: 20,
         },
         h5: {
           fontSize: 16,
-          lineHeight: 18,
         },
         tiny: {
           fontSize: 10,
-          lineHeight: 12,
         },
       },
       color: {

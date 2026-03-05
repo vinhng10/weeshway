@@ -265,7 +265,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start",
-    gap: theme.gap(1),
+    gap: theme.gap(0.5),
     borderRadius: theme.gap(2),
     padding: theme.gap(1.5),
     backgroundColor: theme.colors.foreground,

@@ -167,10 +167,9 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   statsContainer: {
     justifyContent: "center",
-    paddingVertical: theme.gap(2),
+    paddingVertical: theme.gap(1.5),
     paddingHorizontal: theme.gap(1),
     backgroundColor: theme.colors.foreground,
     borderRadius: theme.gap(2),
-    gap: theme.gap(1),
   },
 }));

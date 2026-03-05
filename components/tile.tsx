@@ -104,7 +104,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "column",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: theme.gap(0.5),
   },
   avatarContainer: {
     position: "relative",

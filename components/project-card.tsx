@@ -240,7 +240,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   rowGroup: {
     flexDirection: "column",
-    gap: theme.gap(0.5),
   },
   row: {
     flexDirection: "row",
