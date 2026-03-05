@@ -6,6 +6,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { Bullet } from "../bullet";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
+import { ButtonGroup } from "./button-group";
 
 interface CameraPermissionProps {
   permission: PermissionResponse;
@@ -54,19 +55,10 @@ export const CameraPermission = ({
           Allow camera access to:
         </ThemedText>
         <Bullet text="Scan booking QR code. You only get paid for checked-in bookings." />
-        <View style={styles.row}>
-          <Button
-            style={styles.button}
-            outlined
-            label="Later"
-            onPress={() => router.back()}
-          />
-          <Button
-            style={styles.button}
-            label={denied ? "Settings" : "Allow"}
-            onPress={handleAllow}
-          />
-        </View>
+        <ButtonGroup>
+          <Button outlined label="Later" onPress={() => router.back()} />
+          <Button label={denied ? "Settings" : "Allow"} onPress={handleAllow} />
+        </ButtonGroup>
       </View>
     </Modal>
   );
@@ -83,14 +75,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     padding: theme.gap(2),
     borderTopLeftRadius: theme.gap(2),
     borderTopRightRadius: theme.gap(2),
-    gap: theme.gap(2),
+    gap: theme.gap(1),
     backgroundColor: theme.colors.foreground,
-  },
-  row: {
-    flexDirection: "row",
-    gap: theme.gap(2),
-  },
-  button: {
-    flex: 1,
   },
 }));

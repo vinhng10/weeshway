@@ -9,6 +9,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { Bullet } from "../bullet";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
+import { ButtonGroup } from "./button-group";
 
 export async function syncLocation(profile: ProfileType | null): Promise<void> {
   if (!profile?.id) return;
@@ -84,19 +85,10 @@ export const LocationPermission = () => {
           </>
         )}
 
-        <View style={styles.row}>
-          <Button
-            style={styles.button}
-            outlined
-            label="Later"
-            onPress={() => handleAction(false)}
-          />
-          <Button
-            style={styles.button}
-            label="Allow"
-            onPress={() => handleAction(true)}
-          />
-        </View>
+        <ButtonGroup>
+          <Button outlined label="Later" onPress={() => handleAction(false)} />
+          <Button label="Allow" onPress={() => handleAction(true)} />
+        </ButtonGroup>
       </View>
     </Modal>
   );
@@ -113,14 +105,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     padding: theme.gap(2),
     borderTopLeftRadius: theme.gap(2),
     borderTopRightRadius: theme.gap(2),
-    gap: theme.gap(2),
+    gap: theme.gap(1),
     backgroundColor: theme.colors.foreground,
-  },
-  row: {
-    flexDirection: "row",
-    gap: theme.gap(2),
-  },
-  button: {
-    flex: 1,
   },
 }));
