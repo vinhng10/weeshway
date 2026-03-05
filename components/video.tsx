@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { useVideoPlayer, VideoThumbnail, VideoView } from "expo-video";
+import { useVideoPlayer, type VideoThumbnail, VideoView } from "expo-video";
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -16,55 +16,42 @@ export const Video = React.memo(function Video({ source }: VideoProps) {
 
   const player = useVideoPlayer(source, (p) => {
     p.loop = true;
-    p.muted = false;
   });
 
   useEffect(() => {
     if (!source) {
-      setIsLoading(false);
       setThumbnail(null);
       return;
     }
 
-    let cancelled = false;
     setIsLoading(true);
 
-    const generateThumbnail = async () => {
+    const generate = async () => {
       try {
         const [result] = await player.generateThumbnailsAsync(0);
-        if (!cancelled) setThumbnail(result);
+        setThumbnail(result);
       } catch {
-        if (!cancelled) setThumbnail(null);
+        setThumbnail(null);
       } finally {
-        if (!cancelled) setIsLoading(false);
+        setIsLoading(false);
       }
     };
 
     if (player.status === "readyToPlay") {
-      generateThumbnail();
+      generate();
     } else {
-      const subscription = player.addListener("statusChange", ({ status }) => {
+      const sub = player.addListener("statusChange", ({ status }) => {
         if (status === "readyToPlay") {
-          subscription.remove();
-          generateThumbnail();
+          sub.remove();
+          generate();
         } else if (status === "error") {
-          subscription.remove();
-          if (!cancelled) {
-            setThumbnail(null);
-            setIsLoading(false);
-          }
+          sub.remove();
+          setThumbnail(null);
+          setIsLoading(false);
         }
       });
-
-      return () => {
-        cancelled = true;
-        subscription.remove();
-      };
+      return () => sub.remove();
     }
-
-    return () => {
-      cancelled = true;
-    };
   }, [source, player]);
 
   const handlePress = async () => {
