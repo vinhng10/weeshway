@@ -27,20 +27,41 @@ export const Video = React.memo(function Video({ source }: VideoProps) {
     }
 
     let cancelled = false;
+    setIsLoading(true);
+
     const generateThumbnail = async () => {
-      setIsLoading(true);
       try {
         const [result] = await player.generateThumbnailsAsync(0);
         if (!cancelled) setThumbnail(result);
-      } catch (e) {
-        console.warn("Thumbnail generation failed:", e);
+      } catch {
         if (!cancelled) setThumbnail(null);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
     };
 
-    generateThumbnail();
+    if (player.status === "readyToPlay") {
+      generateThumbnail();
+    } else {
+      const subscription = player.addListener("statusChange", ({ status }) => {
+        if (status === "readyToPlay") {
+          subscription.remove();
+          generateThumbnail();
+        } else if (status === "error") {
+          subscription.remove();
+          if (!cancelled) {
+            setThumbnail(null);
+            setIsLoading(false);
+          }
+        }
+      });
+
+      return () => {
+        cancelled = true;
+        subscription.remove();
+      };
+    }
+
     return () => {
       cancelled = true;
     };
