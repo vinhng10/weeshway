@@ -36,7 +36,7 @@ export function PhotoPicker({
 
       const result = await launchCameraAsync({
         mediaTypes: ["images"],
-        allowsEditing: true,
+        allowsEditing: false,
         quality: 0.8,
       });
 

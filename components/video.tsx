@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useVideoPlayer, VideoThumbnail, VideoView } from "expo-video";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ThemedActivityIndicator } from "./themed-activity-indicator";
@@ -12,8 +12,7 @@ interface VideoProps {
 export const Video = React.memo(function Video({ source }: VideoProps) {
   const [thumbnail, setThumbnail] = useState<VideoThumbnail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPlayer, setShowPlayer] = useState(false);
-  const videoRef = useRef<any>(null);
+  const videoRef = useRef<VideoView>(null);
 
   const player = useVideoPlayer(source, (p) => {
     p.loop = true;
@@ -31,7 +30,7 @@ export const Video = React.memo(function Video({ source }: VideoProps) {
     const generateThumbnail = async () => {
       setIsLoading(true);
       try {
-        const [result] = await player.generateThumbnailsAsync(15);
+        const [result] = await player.generateThumbnailsAsync(0);
         if (!cancelled) setThumbnail(result);
       } catch (e) {
         console.warn("Thumbnail generation failed:", e);
@@ -47,24 +46,19 @@ export const Video = React.memo(function Video({ source }: VideoProps) {
     };
   }, [source, player]);
 
-  const handlePress = useCallback(() => {
+  const handlePress = async () => {
     if (!source) return;
     player.currentTime = 0;
     player.play();
-    setShowPlayer(true);
-  }, [source, player]);
+    try {
+      await videoRef.current?.enterFullscreen();
+    } catch {}
+  };
 
-  useEffect(() => {
-    if (showPlayer) {
-      videoRef.current?.enterFullscreen().catch(() => {});
-    }
-  }, [showPlayer]);
-
-  const handleFullscreenExit = useCallback(() => {
+  const handleFullscreenExit = () => {
     player.pause();
     player.currentTime = 0;
-    setShowPlayer(false);
-  }, [player]);
+  };
 
   return (
     <Pressable onPress={handlePress} disabled={isLoading}>
@@ -72,19 +66,17 @@ export const Video = React.memo(function Video({ source }: VideoProps) {
         {source && isLoading ? (
           <ThemedActivityIndicator size="large" />
         ) : (
-          thumbnail && <Image source={thumbnail} style={styles.container} />
+          thumbnail && <Image source={thumbnail} style={styles.thumbnail} />
         )}
       </View>
-      {showPlayer && (
-        <VideoView
-          ref={videoRef}
-          style={StyleSheet.absoluteFill}
-          player={player}
-          nativeControls
-          fullscreenOptions={{ enable: true }}
-          onFullscreenExit={handleFullscreenExit}
-        />
-      )}
+      <VideoView
+        ref={videoRef}
+        style={styles.hiddenPlayer}
+        player={player}
+        nativeControls
+        fullscreenOptions={{ enable: true }}
+        onFullscreenExit={handleFullscreenExit}
+      />
     </Pressable>
   );
 });
@@ -95,9 +87,20 @@ const styles = StyleSheet.create((theme) => ({
     aspectRatio: 9 / 16,
     borderRadius: theme.gap(2),
     backgroundColor: theme.colors.foreground,
+    overflow: "hidden",
+  },
+  thumbnail: {
+    width: "100%",
+    height: "100%",
   },
   indicator: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  hiddenPlayer: {
+    width: 1,
+    height: 1,
+    opacity: 0,
+    position: "absolute",
   },
 }));
