@@ -1,7 +1,7 @@
 import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
 import { getArtworkUrl, pickImage } from "@/utils";
-import { ImageBackground } from "expo-image";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
@@ -47,10 +47,11 @@ export const Hero = ({
   };
 
   return (
-    <ImageBackground
-      source={getArtworkUrl(artworkUrl ?? data.artworkUrl, 400)}
-      style={styles.background}
-    >
+    <View style={styles.background}>
+      <Image
+        source={getArtworkUrl(artworkUrl ?? data.artworkUrl, 400)}
+        style={styles.backgroundImage}
+      />
       <UniLinearGradient
         style={styles.overlay}
         start={{ x: 0, y: 0.5 }}
@@ -78,7 +79,7 @@ export const Hero = ({
           </View>
         </View>
       </UniLinearGradient>
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -87,6 +88,10 @@ const styles = StyleSheet.create((theme) => ({
     height: theme.gap(32),
     marginHorizontal: -theme.gap(2),
     marginTop: -theme.gap(2),
+    overflow: "hidden",
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFill,
   },
   overlay: {
     flex: 1,

@@ -1,7 +1,7 @@
 import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
 import { getArtworkUrl } from "@/utils";
-import { ImageBackground } from "expo-image";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dimensions, View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
@@ -30,11 +30,11 @@ export const SongCard = ({ data }: SongCardProps) => {
   };
 
   return (
-    <ImageBackground
-      source={{ uri: getArtworkUrl(data.artworkUrl, 400) }}
-      style={styles.background}
-      imageStyle={styles.backgroundImage}
-    >
+    <View style={styles.background}>
+      <Image
+        source={{ uri: getArtworkUrl(data.artworkUrl, 400) }}
+        style={styles.backgroundImage}
+      />
       <UniLinearGradient
         style={styles.overlay}
         start={{ x: 0, y: 0.5 }}
@@ -54,7 +54,7 @@ export const SongCard = ({ data }: SongCardProps) => {
           />
         </View>
       </UniLinearGradient>
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -63,8 +63,11 @@ const styles = StyleSheet.create((theme) => ({
     alignSelf: "center",
     width: screenWidth * 0.75,
     height: screenWidth * 0.75,
+    borderRadius: theme.gap(2),
+    overflow: "hidden",
   },
   backgroundImage: {
+    ...StyleSheet.absoluteFill,
     borderRadius: theme.gap(2),
   },
   overlay: {
@@ -73,7 +76,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "column",
     justifyContent: "flex-end",
     alignItems: "flex-start",
-    borderRadius: theme.gap(2),
   },
   song: {
     flex: 1,

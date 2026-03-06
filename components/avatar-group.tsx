@@ -26,21 +26,14 @@ export function AvatarGroup({ avatars, max, size, ...rest }: AvatarGroupProps) {
       {avatarsToShow.map((source, index) => (
         <View
           key={index}
-          style={[styles.avatarWrapper, index > 0 && styles.avatarOverlap]}
+          style={[styles.avatarWrapper, index > 0 && styles.overlap]}
         >
           <Avatar source={source} size={size} bordered shape="circle" />
         </View>
       ))}
       {overflowCount > 0 && (
-        <View style={[styles.avatarWrapper, styles.overflowAvatar]}>
-          <View style={styles.overflowBadge}>
-            <Avatar size={size} />
-            <View style={styles.overflowText}>
-              <ThemedText style={styles.overflowTextInner}>
-                +{overflowCount}
-              </ThemedText>
-            </View>
-          </View>
+        <View style={[styles.avatarWrapper, styles.overlap]}>
+          <ThemedText style={styles.overflowBadge}>+{overflowCount}</ThemedText>
         </View>
       )}
     </View>
@@ -55,19 +48,7 @@ const styles = StyleSheet.create((theme) => ({
   avatarWrapper: {
     position: "relative",
   },
-  avatarOverlap: {
-    variants: {
-      size: {
-        default: {
-          marginLeft: -theme.gap(2),
-        },
-        large: {
-          marginLeft: -theme.gap(4),
-        },
-      },
-    },
-  },
-  overflowAvatar: {
+  overlap: {
     variants: {
       size: {
         default: {
@@ -80,24 +61,23 @@ const styles = StyleSheet.create((theme) => ({
     },
   },
   overflowBadge: {
-    position: "relative",
-  },
-  overflowText: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  overflowTextInner: {
     color: theme.colors.typographyContrast,
     backgroundColor: theme.colors.contrast,
     borderRadius: 999,
-    padding: theme.gap(0.5),
-    minWidth: theme.gap(3),
     textAlign: "center",
+    textAlignVertical: "center",
     overflow: "hidden",
+    variants: {
+      size: {
+        default: {
+          width: theme.gap(3.5),
+          height: theme.gap(3.5),
+        },
+        large: {
+          width: theme.gap(5),
+          height: theme.gap(5),
+        },
+      },
+    },
   },
 }));

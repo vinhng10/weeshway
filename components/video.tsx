@@ -28,7 +28,9 @@ export const Video = React.memo(function Video({ source }: VideoProps) {
 
     const generate = async () => {
       try {
-        const [result] = await player.generateThumbnailsAsync(0);
+        const [result] = await player.generateThumbnailsAsync(0, {
+          maxWidth: 200,
+        });
         setThumbnail(result);
       } catch {
         setThumbnail(null);

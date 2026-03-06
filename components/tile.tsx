@@ -1,5 +1,4 @@
 import { useAudioPlayerStore } from "@/hooks";
-import { getArtworkUrl } from "@/utils";
 import React, { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -42,11 +41,7 @@ export const Tile: React.FunctionComponent<TileProps> = ({
       <View style={styles.container}>
         <View style={styles.leftContainer}>
           <View style={styles.avatarContainer}>
-            <Avatar
-              source={getArtworkUrl(imageSource, 100)}
-              size="large"
-              shape="square"
-            />
+            <Avatar source={imageSource} size="large" shape="square" />
             {previewUrl && (
               <View style={styles.playButtonOverlay}>
                 <IconButton

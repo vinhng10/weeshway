@@ -1,4 +1,4 @@
-import { pickImage } from "@/utils";
+import { getArtworkUrl, pickImage } from "@/utils";
 import { Image, type ImageProps } from "expo-image";
 import { Pressable, View } from "react-native";
 import {
@@ -36,7 +36,11 @@ export function Avatar({
 
   return (
     <Pressable onPress={handleImagePicker}>
-      <UniImage source={source} style={[styles.avatar, style]} {...rest} />
+      <UniImage
+        source={getArtworkUrl(source as string, size === "large" ? 100 : 60)}
+        style={[styles.avatar, style]}
+        {...rest}
+      />
       {editable && onSourceChange && (
         <View style={styles.iconContainer}>
           <IconSymbol name="camera" size={16} style={styles.icon} />

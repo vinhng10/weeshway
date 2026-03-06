@@ -4,7 +4,7 @@ import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
 import { formatDate, formatTime, getArtworkUrl } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { ImageBackground } from "expo-image";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -112,11 +112,11 @@ export const ProjectCard = ({ data }: CardProps) => {
 
   return (
     <Pressable onPress={handlePress}>
-      <ImageBackground
-        source={getArtworkUrl(data.artworkUrl ?? data.song.artworkUrl, 400)}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-      >
+      <View style={styles.background}>
+        <Image
+          source={getArtworkUrl(data.artworkUrl ?? data.song.artworkUrl, 400)}
+          style={styles.backgroundImage}
+        />
         <UniLinearGradient
           style={styles.overlay}
           start={{ x: 0, y: 0.3 }}
@@ -198,7 +198,7 @@ export const ProjectCard = ({ data }: CardProps) => {
             />
           </View>
         </UniLinearGradient>
-      </ImageBackground>
+      </View>
 
       <Checkout
         visible={visible && !booked}
@@ -213,8 +213,11 @@ export const ProjectCard = ({ data }: CardProps) => {
 const styles = StyleSheet.create((theme) => ({
   background: {
     flex: 1,
+    borderRadius: theme.gap(2),
+    overflow: "hidden",
   },
   backgroundImage: {
+    ...StyleSheet.absoluteFill,
     borderRadius: theme.gap(2),
   },
   overlay: {
@@ -223,7 +226,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "column",
     justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: theme.gap(2),
   },
   topContainer: {
     width: "100%",
