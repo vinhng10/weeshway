@@ -1,9 +1,5 @@
-import { useAlert } from "@/hooks";
+import { pickImage } from "@/utils";
 import { Image, type ImageProps } from "expo-image";
-import {
-  launchImageLibraryAsync,
-  requestMediaLibraryPermissionsAsync,
-} from "expo-image-picker";
 import { Pressable, View } from "react-native";
 import {
   StyleSheet,
@@ -31,38 +27,11 @@ export function Avatar({
   ...rest
 }: AvatarProps) {
   styles.useVariants({ size, bordered, shape });
-  const showAlert = useAlert((state) => state.showAlert);
 
   const handleImagePicker = async () => {
     if (!editable || !onSourceChange) return;
-
-    try {
-      // Request permissions
-      const { status } = await requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        showAlert(
-          "Permission Needed",
-          "Please allow access to your photo library to upload an image.",
-        );
-        return;
-      }
-
-      // Launch image picker
-      const result = await launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        const uri = asset.uri;
-        onSourceChange(uri);
-      }
-    } catch {
-      showAlert("Upload Failed", "Couldn't load your image. Please try again.");
-    }
+    const uri = await pickImage();
+    if (uri) onSourceChange(uri);
   };
 
   return (

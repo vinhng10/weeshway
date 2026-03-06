@@ -17,7 +17,7 @@ export default function Studio() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
 
   const useStudioStore = useMemo(
-    () => createStudioStore(Number(projectId)),
+    () => createStudioStore(projectId),
     [projectId],
   );
 

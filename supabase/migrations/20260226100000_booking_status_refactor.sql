@@ -18,7 +18,7 @@ ALTER TABLE public.bookings DROP COLUMN transfer_enqueued;
 -- =============================================================================
 
 -- check_in: use status = 'CheckedIn' instead of checked_in boolean
-CREATE OR REPLACE FUNCTION "public"."check_in"("p_booking_id" bigint, "p_check_in_token" "uuid") RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."check_in"("p_booking_id" "uuid", "p_check_in_token" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$

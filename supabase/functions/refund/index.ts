@@ -12,7 +12,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 
 const jobSchema = z.object({
   jobId: z.number(),
-  id: z.number(),
+  id: z.uuidv7(),
 });
 const failedJobSchema = jobSchema.extend({
   error: z.string(),

@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       if (error.code === "v2_account_missing_configuration") {
         return jsonResponse(
           { onboardingComplete: false, externalAccounts: [] },
-          200
+          200,
         );
       }
     }

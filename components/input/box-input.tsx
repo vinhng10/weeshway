@@ -1,4 +1,4 @@
-import { DAY, MONTH } from "@/constants";
+import { formatDate, formatTime } from "@/utils";
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 import DatePicker from "react-native-date-picker";
@@ -7,26 +7,6 @@ import { IconSymbol, IconSymbolName } from "../icon-symbol";
 import { ThemedText } from "../themed-text";
 import { Options } from "./options";
 import { TextInput, TextInputProps } from "./text-input";
-
-export const formatDate = (date?: Date, compact: boolean = false): string => {
-  if (!date) return "";
-  const dayOfWeek = Object.values(DAY)[date.getDay()];
-  const month = Object.values(MONTH)[date.getMonth()];
-  const day = date.getDate();
-  const year = date.getFullYear();
-  return compact
-    ? `${month.slice(0, 3)} ${day}`
-    : `${dayOfWeek.slice(0, 3)}, ${month.slice(0, 3)} ${day}, ${year}`;
-};
-
-export const formatTime = (date?: Date): string => {
-  if (!date) return "";
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const hoursStr = String(hours).padStart(2, "0");
-  const minutesStr = String(minutes).padStart(2, "0");
-  return `${hoursStr}:${minutesStr}`;
-};
 
 interface BoxInputBaseProps {
   label: string;

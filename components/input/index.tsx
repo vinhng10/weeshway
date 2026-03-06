@@ -2,8 +2,6 @@ export { Alert } from "./alert";
 export {
   DateTimeBoxInput,
   FloatBoxInput,
-  formatDate,
-  formatTime,
   IntBoxInput,
   SelectBoxInput,
   TextBoxInput,

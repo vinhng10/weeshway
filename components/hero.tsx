@@ -1,5 +1,6 @@
 import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
+import { pickImage } from "@/utils";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
@@ -13,21 +14,43 @@ const UniLinearGradient = withUnistyles(LinearGradient, (theme) => ({
 
 interface HeroProps {
   data: SongType;
+  artworkUrl?: string;
+  artworkEditable?: boolean;
+  onArtworkChange?: (uri: string | undefined) => void;
 }
 
-export const Hero = ({ data }: HeroProps) => {
+export const Hero = ({
+  data,
+  artworkUrl,
+  artworkEditable,
+  onArtworkChange,
+}: HeroProps) => {
   const isPlaying = useAudioPlayerStore((state) =>
     state.isPlaying(data.previewUrl),
   );
   const toggle = useAudioPlayerStore((state) => state.toggle);
+
+  const hasCustomArtwork = !!artworkUrl && artworkUrl !== data.artworkUrl;
 
   const handleAudioPlayer = () => {
     if (!data.previewUrl) return;
     toggle(data.previewUrl);
   };
 
+  const handleArtworkPress = async () => {
+    if (hasCustomArtwork) {
+      onArtworkChange?.(undefined);
+      return;
+    }
+    const uri = await pickImage();
+    if (uri) onArtworkChange?.(uri);
+  };
+
   return (
-    <ImageBackground source={data.artworkUrl} style={styles.background}>
+    <ImageBackground
+      source={artworkUrl ?? data.artworkUrl}
+      style={styles.background}
+    >
       <UniLinearGradient
         style={styles.overlay}
         start={{ x: 0, y: 0.5 }}
@@ -41,6 +64,12 @@ export const Hero = ({ data }: HeroProps) => {
             </ThemedText>
           </View>
           <View style={styles.buttonContainer}>
+            {artworkEditable && onArtworkChange && (
+              <IconButton
+                icon={hasCustomArtwork ? "close" : "camera"}
+                onPress={handleArtworkPress}
+              />
+            )}
             <IconButton
               icon={isPlaying ? "pause" : "play"}
               iconSize={36}

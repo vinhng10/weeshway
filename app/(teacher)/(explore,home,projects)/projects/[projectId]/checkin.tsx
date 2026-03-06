@@ -32,7 +32,7 @@ function CheckinContent() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const queryClient = useQueryClient();
   const [permission, requestPermission] = useCameraPermissions();
-  const lastScannedId = useRef<number | null>(null);
+  const lastScannedId = useRef<string | null>(null);
   const isProcessing = useRef(false);
   const bannerOpacity = useSharedValue(0);
   const bannerTranslateY = useSharedValue(20);
@@ -77,7 +77,7 @@ function CheckinContent() {
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     if (isProcessing.current) return;
 
-    let bookingId: number, checkInToken: string;
+    let bookingId: string, checkInToken: string;
     try {
       ({ bookingId, checkInToken } = JSON.parse(data));
       if (!bookingId || !checkInToken) return;

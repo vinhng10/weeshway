@@ -211,7 +211,7 @@ function ClassContent() {
         }
       >
         {/* Hero Section */}
-        <Hero data={data.song} />
+        <Hero data={data.song} artworkUrl={data.artworkUrl} />
 
         {/* Avatar and Name */}
         <Pressable

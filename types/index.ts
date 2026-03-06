@@ -36,7 +36,7 @@ export type OptionItem = {
 };
 
 export type WishType = {
-  id: number;
+  id: string;
   createdAt: Date;
   userId: string;
   style?: string;
@@ -68,7 +68,7 @@ export type ItemType = {
 };
 
 export type ProjectType = {
-  id: number;
+  id: string;
   createdAt: Date;
   updatedAt: Date;
   userId: string;
@@ -82,6 +82,7 @@ export type ProjectType = {
   description?: string;
   songId?: string;
   locationId?: number;
+  artworkUrl?: string;
   songItems: ItemType[];
   countItems: ItemType[];
   currency: string;
@@ -114,18 +115,18 @@ export type LocationType = {
 };
 
 export type RecommendationType = {
-  id: number;
+  id: string;
   createdAt: Date;
-  wishId: number;
-  projectId: number;
+  wishId: string;
+  projectId: string;
   score: number;
 };
 
 export type BookingType = {
-  id: number;
+  id: string;
   createdAt: Date;
   userId: string;
-  projectId: number;
+  projectId: string;
   stripePaymentIntentId: string;
   status: BookingStatusType;
   spots: number;
@@ -135,7 +136,7 @@ export type BookingType = {
 };
 
 export type BookingSecretType = {
-  bookingId: number;
+  bookingId: string;
   checkInToken: string;
 };
 
@@ -153,10 +154,10 @@ export type BubbleType = {
 };
 
 export type WatchingType = {
-  id: number;
+  id: string;
   createdAt: Date;
   userId: string;
-  projectId: number;
+  projectId: string;
 };
 
 // Utility type: WishType with song_id replaced by joined songs relation
@@ -198,10 +199,10 @@ export type WatchingEnrichedType = WatchingType & {
 };
 
 export type ReportType = {
-  id: number;
+  id: string;
   createdAt: Date;
   userId: string;
-  projectId: number;
+  projectId: string;
   description: string;
   photoUrls: string[];
   status: string;

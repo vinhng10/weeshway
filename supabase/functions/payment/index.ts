@@ -8,7 +8,7 @@ import { jsonResponse } from "../_shared/response.ts";
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 
 const requestSchema = z.object({
-  projectId: z.number().positive(),
+  projectId: z.uuidv7(),
   spots: z.number().positive().default(1),
 });
 

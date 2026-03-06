@@ -43,6 +43,35 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
 
 
+-- UUIDv7: timestamp-ordered UUID (RFC 9562)
+CREATE OR REPLACE FUNCTION "extensions"."uuid_generate_v7"(
+  p_timestamp timestamp with time zone default clock_timestamp()
+) RETURNS "uuid"
+    LANGUAGE "plpgsql" VOLATILE
+    AS $$
+DECLARE
+  v_time double precision;
+  v_unix_t bigint;
+  v_rand_a bigint;
+  v_rand_b bigint;
+  c_milli double precision := 10^3;
+  c_micro double precision := 10^6;
+  c_scale double precision := 4.096;
+BEGIN
+  v_time := extract(epoch from p_timestamp);
+  v_unix_t := trunc(v_time * c_milli);
+  v_rand_a := trunc((v_time * c_micro - v_unix_t * c_milli) * c_scale);
+  v_rand_b := trunc(random() * 2^30)::bigint << 32 | trunc(random() * 2^32)::bigint;
+
+  RETURN (
+    lpad(to_hex(v_unix_t), 12, '0')
+    || lpad(to_hex((v_rand_a | x'0000000000007000'::bigint)::bigint), 4, '0')
+    || lpad(to_hex((v_rand_b | x'8000000000000000'::bigint)::bigint), 16, '0')
+  )::uuid;
+END;
+$$;
+
+
 CREATE TYPE "public"."country_code" AS ENUM (
     'AF',
     'AL',
@@ -371,7 +400,7 @@ CREATE TYPE "public"."style" AS ENUM (
 ALTER TYPE "public"."style" OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."check_in"("p_booking_id" bigint, "p_check_in_token" "uuid") RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."check_in"("p_booking_id" "uuid", "p_check_in_token" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$
@@ -433,7 +462,7 @@ END;
 $$;
 
 
-ALTER FUNCTION "public"."check_in"("p_booking_id" bigint, "p_check_in_token" "uuid") OWNER TO "postgres";
+ALTER FUNCTION "public"."check_in"("p_booking_id" "uuid", "p_check_in_token" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."create_booking_secret"() RETURNS "trigger"
@@ -452,12 +481,12 @@ $$;
 ALTER FUNCTION "public"."create_booking_secret"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."create_project_with_song"("p_song_data" "jsonb", "p_project_data" "jsonb") RETURNS bigint
+CREATE OR REPLACE FUNCTION "public"."create_project_with_song"("p_song_data" "jsonb", "p_project_data" "jsonb") RETURNS "uuid"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public', 'pg_catalog', 'extensions'
     AS $$
 declare
-  v_project_id bigint;
+  v_project_id uuid;
 begin
   insert into public.songs (id, name, artist_name, artwork_url, preview_url, genre)
   values (
@@ -470,8 +499,9 @@ begin
   )
   on conflict (id) do nothing;
 
-  insert into public.projects (status, style, level, price, spots, description, start_at, end_at, location_id, song_id, currency)
+  insert into public.projects (id, status, style, level, price, spots, description, start_at, end_at, location_id, song_id, currency)
   values (
+    COALESCE((p_project_data->>'id')::uuid, extensions.uuid_generate_v7()),
     (p_project_data->>'status')::public.status,
     (p_project_data->>'style')::public.style,
     (p_project_data->>'level')::public.level,
@@ -493,12 +523,12 @@ end;$$;
 ALTER FUNCTION "public"."create_project_with_song"("p_song_data" "jsonb", "p_project_data" "jsonb") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."create_wish_with_song"("p_song_data" "jsonb", "p_wish_data" "jsonb") RETURNS bigint
+CREATE OR REPLACE FUNCTION "public"."create_wish_with_song"("p_song_data" "jsonb", "p_wish_data" "jsonb") RETURNS "uuid"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public', 'pg_catalog'
     AS $$
 declare
-  v_wish_id bigint;
+  v_wish_id uuid;
 begin
   insert into public.songs (id, name, artist_name, artwork_url, preview_url, genre)
   values (p_song_data->>'id', p_song_data->>'name', p_song_data->>'artist_name', p_song_data->>'artwork_url', p_song_data->>'preview_url', p_song_data->>'genre')
@@ -558,7 +588,7 @@ ALTER FUNCTION "public"."get_bubbles"("p_style" "public"."style", "p_level" "pub
 
 
 CREATE TABLE IF NOT EXISTS "public"."projects" (
-    "id" bigint NOT NULL,
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v7"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
     "updated_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text"),
     "status" "public"."status" DEFAULT 'Draft'::"public"."status",
@@ -632,7 +662,7 @@ ALTER FUNCTION "public"."get_nearby_classes_for_user"("p_user_id" "uuid") OWNER 
 
 
 CREATE TABLE IF NOT EXISTS "public"."wishes" (
-    "id" bigint NOT NULL,
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v7"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
     "user_id" "uuid" DEFAULT "auth"."uid"(),
     "style" "public"."style",
@@ -806,7 +836,7 @@ $$;
 ALTER FUNCTION "public"."manage_project_lifecycle"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."recommend_class_to_wishes"("p_project_id" bigint, "p_limit" integer DEFAULT 10, "p_threshold" double precision DEFAULT 0.5) RETURNS "void"
+CREATE OR REPLACE FUNCTION "public"."recommend_class_to_wishes"("p_project_id" "uuid", "p_limit" integer DEFAULT 10, "p_threshold" double precision DEFAULT 0.5) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'extensions'
     AS $$
@@ -839,10 +869,10 @@ END;
 $$;
 
 
-ALTER FUNCTION "public"."recommend_class_to_wishes"("p_project_id" bigint, "p_limit" integer, "p_threshold" double precision) OWNER TO "postgres";
+ALTER FUNCTION "public"."recommend_class_to_wishes"("p_project_id" "uuid", "p_limit" integer, "p_threshold" double precision) OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" bigint, "p_limit" integer DEFAULT 10, "p_threshold" double precision DEFAULT 0.5) RETURNS "void"
+CREATE OR REPLACE FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" "uuid", "p_limit" integer DEFAULT 10, "p_threshold" double precision DEFAULT 0.5) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'extensions'
     AS $$
@@ -876,7 +906,7 @@ END;
 $$;
 
 
-ALTER FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" bigint, "p_limit" integer, "p_threshold" double precision) OWNER TO "postgres";
+ALTER FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" "uuid", "p_limit" integer, "p_threshold" double precision) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."update_objects_updated_at"() RETURNS "trigger"
@@ -1160,7 +1190,7 @@ BEGIN
   LOOP
     BEGIN
       EXECUTE format('SELECT %s($1)', function_name)
-      USING (job.message->>'id')::bigint;
+      USING (job.message->>'id')::uuid;
 
       job_ids := job_ids || job.msg_id;
     EXCEPTION WHEN OTHERS THEN
@@ -1199,7 +1229,7 @@ ALTER FUNCTION "util"."project_url"() OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."booking_secrets" (
-    "booking_id" bigint NOT NULL,
+    "booking_id" "uuid" NOT NULL,
     "check_in_token" "uuid" DEFAULT "gen_random_uuid"() NOT NULL
 );
 
@@ -1208,10 +1238,10 @@ ALTER TABLE "public"."booking_secrets" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."bookings" (
-    "id" bigint NOT NULL,
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v7"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "user_id" "uuid" NOT NULL,
-    "project_id" bigint NOT NULL,
+    "project_id" "uuid" NOT NULL,
     "stripe_payment_intent_id" "text" NOT NULL,
     "status" "public"."stripe_payment_status",
     "updated_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text"),
@@ -1225,16 +1255,6 @@ CREATE TABLE IF NOT EXISTS "public"."bookings" (
 
 
 ALTER TABLE "public"."bookings" OWNER TO "postgres";
-
-
-ALTER TABLE "public"."bookings" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME "public"."bookings_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
 
 
 CREATE TABLE IF NOT EXISTS "public"."centroids" (
@@ -1305,36 +1325,16 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
 ALTER TABLE "public"."profiles" OWNER TO "postgres";
 
 
-ALTER TABLE "public"."projects" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME "public"."projects_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
 CREATE TABLE IF NOT EXISTS "public"."recommendation_items" (
-    "id" bigint NOT NULL,
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v7"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL,
-    "wish_id" bigint NOT NULL,
-    "project_id" bigint NOT NULL,
+    "wish_id" "uuid" NOT NULL,
+    "project_id" "uuid" NOT NULL,
     "score" double precision
 );
 
 
 ALTER TABLE "public"."recommendation_items" OWNER TO "postgres";
-
-
-ALTER TABLE "public"."recommendation_items" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME "public"."recommendation_items_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
 
 
 CREATE OR REPLACE VIEW "public"."recommendations" WITH ("security_invoker"='true') AS
@@ -1383,34 +1383,14 @@ ALTER VIEW "public"."stats" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."watchings" (
-    "id" bigint NOT NULL,
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v7"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "user_id" "uuid",
-    "project_id" bigint
+    "project_id" "uuid"
 );
 
 
 ALTER TABLE "public"."watchings" OWNER TO "postgres";
-
-
-ALTER TABLE "public"."watchings" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME "public"."watchings_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
-ALTER TABLE "public"."wishes" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME "public"."wishes_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
 
 
 CREATE OR REPLACE FUNCTION "public"."find_nearest_centroid"("query_embedding" "extensions"."vector") RETURNS bigint
@@ -1728,9 +1708,9 @@ ALTER TABLE "public"."watchings" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."wishes" ENABLE ROW LEVEL SECURITY;
 
 
-GRANT ALL ON FUNCTION "public"."check_in"("p_booking_id" bigint, "p_check_in_token" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."check_in"("p_booking_id" bigint, "p_check_in_token" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."check_in"("p_booking_id" bigint, "p_check_in_token" "uuid") TO "service_role";
+GRANT ALL ON FUNCTION "public"."check_in"("p_booking_id" "uuid", "p_check_in_token" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."check_in"("p_booking_id" "uuid", "p_check_in_token" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."check_in"("p_booking_id" "uuid", "p_check_in_token" "uuid") TO "service_role";
 
 
 GRANT ALL ON FUNCTION "public"."create_booking_secret"() TO "anon";
@@ -1798,14 +1778,14 @@ GRANT ALL ON FUNCTION "public"."manage_project_lifecycle"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."manage_project_lifecycle"() TO "service_role";
 
 
-GRANT ALL ON FUNCTION "public"."recommend_class_to_wishes"("p_project_id" bigint, "p_limit" integer, "p_threshold" double precision) TO "anon";
-GRANT ALL ON FUNCTION "public"."recommend_class_to_wishes"("p_project_id" bigint, "p_limit" integer, "p_threshold" double precision) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."recommend_class_to_wishes"("p_project_id" bigint, "p_limit" integer, "p_threshold" double precision) TO "service_role";
+GRANT ALL ON FUNCTION "public"."recommend_class_to_wishes"("p_project_id" "uuid", "p_limit" integer, "p_threshold" double precision) TO "anon";
+GRANT ALL ON FUNCTION "public"."recommend_class_to_wishes"("p_project_id" "uuid", "p_limit" integer, "p_threshold" double precision) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."recommend_class_to_wishes"("p_project_id" "uuid", "p_limit" integer, "p_threshold" double precision) TO "service_role";
 
 
-GRANT ALL ON FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" bigint, "p_limit" integer, "p_threshold" double precision) TO "anon";
-GRANT ALL ON FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" bigint, "p_limit" integer, "p_threshold" double precision) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" bigint, "p_limit" integer, "p_threshold" double precision) TO "service_role";
+GRANT ALL ON FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" "uuid", "p_limit" integer, "p_threshold" double precision) TO "anon";
+GRANT ALL ON FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" "uuid", "p_limit" integer, "p_threshold" double precision) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."recommend_classes_for_wish"("p_wish_id" "uuid", "p_limit" integer, "p_threshold" double precision) TO "service_role";
 
 
 GRANT ALL ON FUNCTION "public"."update_objects_updated_at"() TO "anon";
@@ -1826,11 +1806,6 @@ GRANT ALL ON TABLE "public"."booking_secrets" TO "service_role";
 GRANT ALL ON TABLE "public"."bookings" TO "anon";
 GRANT ALL ON TABLE "public"."bookings" TO "authenticated";
 GRANT ALL ON TABLE "public"."bookings" TO "service_role";
-
-
-GRANT ALL ON SEQUENCE "public"."bookings_id_seq" TO "anon";
-GRANT ALL ON SEQUENCE "public"."bookings_id_seq" TO "authenticated";
-GRANT ALL ON SEQUENCE "public"."bookings_id_seq" TO "service_role";
 
 
 GRANT ALL ON TABLE "public"."centroids" TO "anon";
@@ -1858,19 +1833,9 @@ GRANT ALL ON TABLE "public"."profiles" TO "authenticated";
 GRANT ALL ON TABLE "public"."profiles" TO "service_role";
 
 
-GRANT ALL ON SEQUENCE "public"."projects_id_seq" TO "anon";
-GRANT ALL ON SEQUENCE "public"."projects_id_seq" TO "authenticated";
-GRANT ALL ON SEQUENCE "public"."projects_id_seq" TO "service_role";
-
-
 GRANT ALL ON TABLE "public"."recommendation_items" TO "anon";
 GRANT ALL ON TABLE "public"."recommendation_items" TO "authenticated";
 GRANT ALL ON TABLE "public"."recommendation_items" TO "service_role";
-
-
-GRANT ALL ON SEQUENCE "public"."recommendation_items_id_seq" TO "anon";
-GRANT ALL ON SEQUENCE "public"."recommendation_items_id_seq" TO "authenticated";
-GRANT ALL ON SEQUENCE "public"."recommendation_items_id_seq" TO "service_role";
 
 
 GRANT ALL ON TABLE "public"."recommendations" TO "anon";
@@ -1891,16 +1856,6 @@ GRANT ALL ON TABLE "public"."stats" TO "service_role";
 GRANT ALL ON TABLE "public"."watchings" TO "anon";
 GRANT ALL ON TABLE "public"."watchings" TO "authenticated";
 GRANT ALL ON TABLE "public"."watchings" TO "service_role";
-
-
-GRANT ALL ON SEQUENCE "public"."watchings_id_seq" TO "anon";
-GRANT ALL ON SEQUENCE "public"."watchings_id_seq" TO "authenticated";
-GRANT ALL ON SEQUENCE "public"."watchings_id_seq" TO "service_role";
-
-
-GRANT ALL ON SEQUENCE "public"."wishes_id_seq" TO "anon";
-GRANT ALL ON SEQUENCE "public"."wishes_id_seq" TO "authenticated";
-GRANT ALL ON SEQUENCE "public"."wishes_id_seq" TO "service_role";
 
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "postgres";

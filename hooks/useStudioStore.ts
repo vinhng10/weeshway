@@ -30,7 +30,7 @@ interface StudioState {
   syncFromServer: () => Promise<void>;
 }
 
-export const createStudioStore = (projectId: number) =>
+export const createStudioStore = (projectId: string) =>
   create<StudioState>()(
     persist(
       immer((set, get) => ({

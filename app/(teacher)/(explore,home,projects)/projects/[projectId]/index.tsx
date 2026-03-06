@@ -23,7 +23,7 @@ import {
   STYLE,
 } from "@/constants";
 import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
-import { supabase } from "@/supabase";
+import { supabase, uploadMedia } from "@/supabase";
 import { ProjectEnrichedType, ProjectStatusType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
@@ -72,6 +72,9 @@ function ProjectContent() {
   );
   const [endAt, setEndAt] = useState(
     data.endAt ? new Date(data.endAt) : undefined,
+  );
+  const [artworkUri, setArtworkUri] = useState<string | undefined>(
+    data.artworkUrl,
   );
   const [location, setLocation] = useState(data.location);
 
@@ -134,6 +137,15 @@ function ProjectContent() {
 
     const doSave = async () => {
       try {
+        let artworkUrl = artworkUri;
+        if (artworkUri && artworkUri !== data.artworkUrl) {
+          artworkUrl = await uploadMedia(
+            "projects",
+            artworkUri,
+            `${projectId}`,
+          );
+        }
+
         await supabase
           .from("projects")
           .update({
@@ -146,6 +158,7 @@ function ProjectContent() {
             end_at: endAt ?? null,
             description: description ?? null,
             location_id: location?.id ?? null,
+            artwork_url: artworkUrl ?? null,
           })
           .eq("id", projectId)
           .throwOnError();
@@ -257,7 +270,12 @@ function ProjectContent() {
         }
       >
         {/* Song Hero */}
-        <Hero data={data.song} />
+        <Hero
+          data={data.song}
+          artworkUrl={artworkUri}
+          artworkEditable={canEditDetails}
+          onArtworkChange={setArtworkUri}
+        />
 
         {/* Toggle Button Group for Status */}
         <ChipBar items={options} />

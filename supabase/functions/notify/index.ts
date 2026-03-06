@@ -10,7 +10,7 @@ const EXPO_ACCESS_TOKEN = Deno.env.get("EXPO_ACCESS_TOKEN");
 const jobSchema = z.array(
   z.object({
     jobId: z.number(),
-    id: z.number(),
+    id: z.uuidv7(),
   }),
 );
 

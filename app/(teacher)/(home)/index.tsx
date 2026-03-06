@@ -1,6 +1,5 @@
 import {
   Boundary,
-  formatTime,
   NotificationsPermission,
   ProjectStatus,
   SectionListView,
@@ -16,6 +15,7 @@ import {
 } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType, StatsType } from "@/types";
+import { formatTime } from "@/utils";
 import { router } from "expo-router";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -102,7 +102,7 @@ function HomeContent() {
 
   const renderTile = (data: ProjectEnrichedType) => (
     <Tile
-      imageSource={data.song.artworkUrl}
+      imageSource={data.artworkUrl ?? data.song.artworkUrl}
       title={data.song.name}
       subtitle={data.location?.displayName}
       metadata={`${formatTime(new Date(data.startAt!))} - ${formatTime(

@@ -5,12 +5,12 @@ import {
   DateTimeInput,
   FloatBoxInput,
   Header,
+  Hero,
   IntBoxInput,
   LocationInput,
   SelectBoxInput,
   SongSearch,
   TextInput,
-  Tile,
 } from "@/components";
 import {
   LEVEL,
@@ -20,7 +20,7 @@ import {
   STYLE,
 } from "@/constants";
 import { useAlert, useAuth, useLocales, useTempDataStore } from "@/hooks";
-import { supabase } from "@/supabase";
+import { supabase, uploadMedia } from "@/supabase";
 import {
   LevelType,
   LocationType,
@@ -55,6 +55,7 @@ export default function CreateProject() {
   const [startAt, setStartAt] = useState<Date>();
   const [endAt, setEndAt] = useState<Date>();
   const [song, setSong] = useState<SongType>();
+  const [artworkUri, setArtworkUri] = useState<string>();
   const [location, setLocation] = useState<LocationType>();
   const hasInitialized = useRef(false);
 
@@ -117,7 +118,7 @@ export default function CreateProject() {
     }
 
     try {
-      await supabase
+      const { data: projectId } = await supabase
         .rpc("create_project_with_song", {
           p_song_data: {
             id: song.id,
@@ -141,6 +142,20 @@ export default function CreateProject() {
           },
         })
         .throwOnError();
+
+      // Upload artwork after project exists (storage policy checks ownership)
+      if (artworkUri) {
+        const artworkUrl = await uploadMedia(
+          "projects",
+          artworkUri,
+          `${projectId}`,
+        );
+        await supabase
+          .from("projects")
+          .update({ artwork_url: artworkUrl })
+          .eq("id", projectId)
+          .throwOnError();
+      }
 
       // Invalidate and refetch the project query
       await queryClient.invalidateQueries({
@@ -171,18 +186,18 @@ export default function CreateProject() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Song Search */}
-        <SongSearch onSongPress={setSong} />
-
-        {/* Song Tile */}
+        {/* Song Hero */}
         {song && (
-          <Tile
-            imageSource={song.artworkUrl}
-            title={song.name}
-            subtitle={song.artistName}
-            previewUrl={song.previewUrl}
+          <Hero
+            data={song}
+            artworkUrl={artworkUri ?? song.artworkUrl}
+            artworkEditable
+            onArtworkChange={setArtworkUri}
           />
         )}
+
+        {/* Song Search */}
+        <SongSearch onSongPress={setSong} />
 
         {/* Toggle Button Group for Status */}
         <ChipBar items={options} />

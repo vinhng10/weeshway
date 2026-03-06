@@ -2,6 +2,7 @@ import { BOOKING_ACTIVE_STATUSES, PROJECT_STATUS } from "@/constants";
 import { useAlert, useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
+import { formatDate, formatTime } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -13,7 +14,7 @@ import { useShallow } from "zustand/react/shallow";
 import { Avatar } from "./avatar";
 import { Chip } from "./chip";
 import { IconSymbol } from "./icon-symbol";
-import { Button, Checkout, formatDate, formatTime, IconButton } from "./input";
+import { Button, Checkout, IconButton } from "./input";
 import { ProjectStatus } from "./project-status";
 import { ThemedText } from "./themed-text";
 
@@ -112,7 +113,7 @@ export const ProjectCard = ({ data }: CardProps) => {
   return (
     <Pressable onPress={handlePress}>
       <ImageBackground
-        source={data.song.artworkUrl}
+        source={data.artworkUrl ?? data.song.artworkUrl}
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >

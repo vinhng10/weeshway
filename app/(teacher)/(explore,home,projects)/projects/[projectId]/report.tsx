@@ -122,7 +122,7 @@ function ReportContent() {
         .from("reports")
         .insert({
           user_id: profile?.id,
-          project_id: Number(projectId),
+          project_id: projectId,
           description: finalDescription,
           photo_urls: finalPhotoUrls,
         })

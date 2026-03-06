@@ -76,7 +76,7 @@ function BookingsContent({ time }: BookingsContentProps) {
 
   const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
     <Tile
-      imageSource={data.song.artworkUrl}
+      imageSource={data.artworkUrl ?? data.song.artworkUrl}
       title={data.song.name}
       subtitle={data.song.artistName}
       metadata={[data.style, data.level].filter(Boolean).join(" • ")}

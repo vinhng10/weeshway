@@ -28,7 +28,10 @@ Deno.serve(async (req: Request) => {
     const accountId = profile.stripe_account_id;
 
     if (!accountId) {
-      throw new HttpError("Stripe account not found. Please sign up first.", 404);
+      throw new HttpError(
+        "Stripe account not found. Please sign up first.",
+        404,
+      );
     }
 
     // D. Stripe Operations

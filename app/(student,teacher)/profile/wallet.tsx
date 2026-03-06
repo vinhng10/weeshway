@@ -256,7 +256,7 @@ function TeacherWalletContent() {
         throw new Error("The onboarding link was not returned.");
       }
 
-      await WebBrowser.openAuthSessionAsync(onboardingUrl, RETURN_URL);
+      await WebBrowser.openBrowserAsync(onboardingUrl);
 
       await refetch();
       await fetchProfile();
@@ -283,7 +283,7 @@ function TeacherWalletContent() {
         throw new Error("The dashboard login link was not returned.");
       }
 
-      await WebBrowser.openAuthSessionAsync(dashboardUrl, RETURN_URL);
+      await WebBrowser.openBrowserAsync(dashboardUrl);
     } catch {
       showAlert(
         "Dashboard Unavailable",
