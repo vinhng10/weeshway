@@ -19,7 +19,7 @@ import { ProjectStatus } from "./project-status";
 import { ThemedText } from "./themed-text";
 
 const UniLinearGradient = withUnistyles(LinearGradient, (theme) => ({
-  colors: ["rgba(255, 255, 255, 0)", theme.colors.foreground] as const,
+  colors: ["transparent", theme.colors.background] as const,
 }));
 
 interface CardProps {

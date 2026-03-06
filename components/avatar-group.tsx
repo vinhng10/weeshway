@@ -65,17 +65,18 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.contrast,
     borderRadius: 999,
     textAlign: "center",
-    textAlignVertical: "center",
     overflow: "hidden",
     variants: {
       size: {
         default: {
           width: theme.gap(3.5),
           height: theme.gap(3.5),
+          lineHeight: theme.gap(3.5),
         },
         large: {
           width: theme.gap(5),
           height: theme.gap(5),
+          lineHeight: theme.gap(5),
         },
       },
     },

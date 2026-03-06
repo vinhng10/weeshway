@@ -11,7 +11,7 @@ import { ThemedText } from "./themed-text";
 const { width: screenWidth } = Dimensions.get("window");
 
 const UniLinearGradient = withUnistyles(LinearGradient, (theme) => ({
-  colors: ["rgba(255, 255, 255, 0)", theme.colors.background] as const,
+  colors: ["transparent", theme.colors.background] as const,
 }));
 
 interface SongCardProps {

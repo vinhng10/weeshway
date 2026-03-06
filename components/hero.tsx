@@ -9,7 +9,7 @@ import { IconButton } from "./input/icon-button";
 import { ThemedText } from "./themed-text";
 
 const UniLinearGradient = withUnistyles(LinearGradient, (theme) => ({
-  colors: ["rgba(255, 255, 255, 0)", theme.colors.background] as const,
+  colors: ["transparent", theme.colors.background] as const,
 }));
 
 interface HeroProps {
@@ -29,7 +29,6 @@ export const Hero = ({
     state.isPlaying(data.previewUrl),
   );
   const toggle = useAudioPlayerStore((state) => state.toggle);
-
   const hasCustomArtwork = !!artworkUrl && artworkUrl !== data.artworkUrl;
 
   const handleAudioPlayer = () => {
