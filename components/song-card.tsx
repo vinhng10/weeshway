@@ -1,5 +1,6 @@
 import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
+import { getArtworkUrl } from "@/utils";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dimensions, View } from "react-native";
@@ -30,7 +31,7 @@ export const SongCard = ({ data }: SongCardProps) => {
 
   return (
     <ImageBackground
-      source={{ uri: data.artworkUrl }}
+      source={{ uri: getArtworkUrl(data.artworkUrl, 400) }}
       style={styles.background}
       imageStyle={styles.backgroundImage}
     >

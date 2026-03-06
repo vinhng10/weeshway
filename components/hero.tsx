@@ -1,6 +1,6 @@
 import { useAudioPlayerStore } from "@/hooks";
 import { SongType } from "@/types";
-import { pickImage } from "@/utils";
+import { getArtworkUrl, pickImage } from "@/utils";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
@@ -48,7 +48,7 @@ export const Hero = ({
 
   return (
     <ImageBackground
-      source={artworkUrl ?? data.artworkUrl}
+      source={getArtworkUrl(artworkUrl ?? data.artworkUrl, 400)}
       style={styles.background}
     >
       <UniLinearGradient

@@ -190,7 +190,7 @@ export default function CreateProject() {
         {song && (
           <Hero
             data={song}
-            artworkUrl={artworkUri ?? song.artworkUrl}
+            artworkUrl={artworkUri}
             artworkEditable
             onArtworkChange={setArtworkUri}
           />

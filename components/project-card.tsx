@@ -2,7 +2,7 @@ import { BOOKING_ACTIVE_STATUSES, PROJECT_STATUS } from "@/constants";
 import { useAlert, useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
-import { formatDate, formatTime } from "@/utils";
+import { formatDate, formatTime, getArtworkUrl } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -113,7 +113,7 @@ export const ProjectCard = ({ data }: CardProps) => {
   return (
     <Pressable onPress={handlePress}>
       <ImageBackground
-        source={data.artworkUrl ?? data.song.artworkUrl}
+        source={getArtworkUrl(data.artworkUrl ?? data.song.artworkUrl, 400)}
         style={styles.background}
         imageStyle={styles.backgroundImage}
       >

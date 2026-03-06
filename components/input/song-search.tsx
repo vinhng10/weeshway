@@ -91,7 +91,7 @@ export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
             keyExtractor={(item) => item.id}
             renderItem={({ item: song }) => (
               <Tile
-                imageSource={{ uri: song.artworkUrl }}
+                imageSource={song.artworkUrl}
                 title={song.name}
                 subtitle={song.artistName}
                 metadata={song.genre}

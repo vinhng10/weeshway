@@ -16,10 +16,7 @@ const mapITunesToSong = (result: iTunesSearchResult): SongType => ({
   id: result.trackId.toString(),
   name: result.trackName,
   artistName: result.artistName,
-  artworkUrl: (result.artworkUrl100 || result.artworkUrl60 || "").replace(
-    /\d+x\d+/g,
-    "200x200"
-  ),
+  artworkUrl: result.artworkUrl100 || result.artworkUrl60 || "",
   genre: result.primaryGenreName,
   previewUrl: result.previewUrl,
   createdAt: new Date(),
@@ -45,7 +42,7 @@ export const useSongSearch = (query: string) => {
     const timeoutId = setTimeout(async () => {
       try {
         const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
-          trimmed
+          trimmed,
         )}&media=music&entity=song&limit=25`;
         const response = await fetch(url, { signal: abortController.signal });
 

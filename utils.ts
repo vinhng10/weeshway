@@ -5,6 +5,11 @@ import {
   requestMediaLibraryPermissionsAsync,
 } from "expo-image-picker";
 
+export const getArtworkUrl = (url?: string, size: number = 200): string => {
+  if (!url || !url.includes("mzstatic.com")) return url ?? "";
+  return url.replace(/\d+x\d+/, `${size}x${size}`);
+};
+
 export const formatDate = (date?: Date, compact: boolean = false): string => {
   if (!date) return "";
   const dayOfWeek = Object.values(DAY)[date.getDay()];
