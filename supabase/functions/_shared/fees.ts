@@ -3,7 +3,6 @@ import { createServiceRoleClient } from "./auth.ts";
 export type Fees = {
   bookingFee: number;
   transactionFee: number;
-  noShowSplit: number;
   usdRates: Record<string, number>;
 };
 
@@ -11,7 +10,6 @@ export async function getFees(): Promise<Fees> {
   const defaults: Fees = {
     bookingFee: 50,
     transactionFee: 5,
-    noShowSplit: 30,
     usdRates: {},
   };
   try {
@@ -29,7 +27,6 @@ export async function getFees(): Promise<Fees> {
     return {
       bookingFee: map.booking_fee ?? defaults.bookingFee,
       transactionFee: map.transaction_fee ?? defaults.transactionFee,
-      noShowSplit: map.no_show_split ?? defaults.noShowSplit,
       usdRates: rates.usd ?? {},
     };
   } catch {

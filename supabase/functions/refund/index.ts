@@ -25,7 +25,7 @@ type FailedJob = z.infer<typeof failedJobSchema>;
  * Processes a single refund job atomically.
  *
  * Uses Separate Charges and Transfers — the teacher transfer may or may not
- * exist at refund time (it only happens 48h after class ends + check-in).
+ * exist at refund time (it only happens 48h after class ends).
  *
  * - student-initiated: student bears the Stripe fee.
  *   Amount = classPrice × spots × (1 - transactionFee%).

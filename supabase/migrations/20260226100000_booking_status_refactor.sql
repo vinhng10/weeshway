@@ -144,11 +144,11 @@ BEGIN
         IF NEW.style IS NULL OR NEW.level IS NULL OR
            NEW.price IS NULL OR NEW.spots IS NULL OR NEW.start_at IS NULL OR
            NEW.end_at IS NULL OR NEW.location_id IS NULL THEN
-            RAISE EXCEPTION 'Cannot release: Missing required project details.';
+            RAISE EXCEPTION 'Some project details are missing. Please complete them before releasing.';
         END IF;
 
         IF NOT (SELECT onboarding_complete FROM public.profiles WHERE id = NEW.user_id) THEN
-            RAISE EXCEPTION 'Cannot release: Stripe onboarding incomplete.';
+            RAISE EXCEPTION 'Payment setup is incomplete. Please finish it before releasing.';
         END IF;
     END IF;
 
@@ -183,17 +183,12 @@ BEGIN
             RETURN NEW;
         END IF;
 
-        -- 4. Block student refund if already checked in
-        IF OLD.status = 'CheckedIn'::public.booking_status THEN
-            RAISE EXCEPTION 'Cancellation is not allowed after checking in.';
-        END IF;
-
-        -- 5. Enforce 24h rule for student-initiated cancellations
+        -- 4. Enforce 24h rule for student-initiated cancellations
         IF now() > (project_start_at - INTERVAL '1 day') THEN
             RAISE EXCEPTION 'Cancellation is only allowed up to 24 hours before the class starts.';
         END IF;
 
-        -- 6. Student-initiated
+        -- 5. Student-initiated
         NEW.refund_initiator := 'Student'::public.role;
     END IF;
 

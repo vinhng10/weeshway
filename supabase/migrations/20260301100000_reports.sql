@@ -96,9 +96,8 @@ DECLARE
 BEGIN
   -- Mark eligible bookings (CheckedIn or Succeeded) as Transferred
   -- Skip bookings where the student has a pending report on the project
-  -- Succeeded without check-in = no-show → partial refund + reduced teacher share
   WITH eligible AS (
-    SELECT b.id, (b.status = 'Succeeded') AS no_show
+    SELECT b.id
     FROM public.bookings b
     JOIN public.projects p ON p.id = b.project_id
     WHERE b.status IN ('CheckedIn', 'Succeeded')
@@ -116,9 +115,9 @@ BEGIN
     SET status = 'Transferred'
     FROM eligible e
     WHERE b.id = e.id
-    RETURNING e.id, e.no_show
+    RETURNING e.id
   )
-  SELECT array_agg(jsonb_build_object('id', f.id, 'noShow', f.no_show))
+  SELECT array_agg(jsonb_build_object('id', f.id))
   INTO msgs
   FROM flagged f;
 

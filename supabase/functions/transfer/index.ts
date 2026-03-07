@@ -12,7 +12,6 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 const jobSchema = z.object({
   jobId: z.number(),
   id: z.uuidv7(),
-  noShow: z.boolean(),
 });
 const failedJobSchema = jobSchema.extend({
   error: z.string(),
@@ -66,35 +65,12 @@ async function processJob(job: Job, fees: Fees) {
     const classPrice = booking.price * booking.spots;
     const currency = booking.currency.toLowerCase();
 
-    let transferAmount: number;
-    let refundId: string | undefined;
+    // Teacher gets class price minus transaction fee
+    const transferAmount = Math.round(
+      classPrice * (1 - fees.transactionFee / 100),
+    );
 
-    if (job.noShow) {
-      // No-show: teacher gets noShowSplit%, student gets refunded the rest minus transaction fee
-      transferAmount = Math.round(classPrice * (fees.noShowSplit / 100));
-      const refundAmount = Math.round(
-        classPrice *
-          (1 - fees.noShowSplit / 100) *
-          (1 - fees.transactionFee / 100),
-      );
-
-      // 3a. Refund student
-      const refund = await stripe.refunds.create({
-        payment_intent: booking.stripe_payment_intent_id,
-        amount: refundAmount,
-        metadata: {
-          jobId: job.jobId.toString(),
-          bookingId: booking.id.toString(),
-          reason: "no_show",
-        },
-      });
-      refundId = refund.id;
-    } else {
-      // Normal: teacher gets full amount minus transaction fee
-      transferAmount = Math.round(classPrice * (1 - fees.transactionFee / 100));
-    }
-
-    // 4. Create Stripe Transfer to teacher
+    // 3. Create Stripe Transfer to teacher
     const transfer = await stripe.transfers.create({
       amount: transferAmount,
       currency,
@@ -104,18 +80,17 @@ async function processJob(job: Job, fees: Fees) {
       metadata: {
         jobId: job.jobId.toString(),
         bookingId: booking.id.toString(),
-        ...(job.noShow && { noShow: "true" }),
       },
     });
 
-    // 5. Update booking with stripe_transfer_id
+    // 4. Update booking with stripe_transfer_id
     await sql`
       UPDATE public.bookings
       SET stripe_transfer_id = ${transfer.id}
       WHERE id = ${booking.id}
     `;
 
-    return { ...job, stripeTransferId: transfer.id, refundId };
+    return { ...job, stripeTransferId: transfer.id };
   });
 }
 
@@ -140,9 +115,7 @@ Deno.serve(async (req) => {
     }
 
     const fees = await getFees();
-    const completedJobs: Array<
-      Job & { stripeTransferId: string; refundId?: string }
-    > = [];
+    const completedJobs: Array<Job & { stripeTransferId: string }> = [];
     const failedJobs: FailedJob[] = [];
 
     for (const job of pendingJobs) {
