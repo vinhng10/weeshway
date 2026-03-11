@@ -33,7 +33,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   content: {
     paddingHorizontal: theme.gap(2),
-    paddingTop: theme.gap(2),
     gap: theme.gap(1),
   },
 }));

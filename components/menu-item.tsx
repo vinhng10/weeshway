@@ -27,7 +27,7 @@ export function MenuItem({
       <View style={styles.textContainer}>
         {title && (
           <ThemedText
-            style={[textStyles.style, styles.title]}
+            style={[textStyles.style]}
             numberOfLines={1}
             ellipsizeMode="tail"
           >
@@ -61,8 +61,5 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start",
-  },
-  title: {
-    flex: 1,
   },
 }));
