@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
       to: t.expo_push_token,
       sound: "default",
       title: "Class starting soon!",
-      body: `${t.song_name ?? "Your class"} starts in less than 1 hour`,
+      body: `${t.song_name ?? "Your"} class starts in less than 1 hour`,
       data: { projectId: t.project_id },
     }));
 

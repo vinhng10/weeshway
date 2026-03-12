@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "441711217271",
-    "project_id": "dance-721cb",
-    "storage_bucket": "dance-721cb.firebasestorage.app"
+    "project_number": "940618544716",
+    "project_id": "weeshway-ai",
+    "storage_bucket": "weeshway-ai.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:441711217271:android:84bc56a52065881910d472",
+        "mobilesdk_app_id": "1:940618544716:android:be19468b512747d2f1e6e9",
         "android_client_info": {
           "package_name": "com.weeshway.weeshway"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "441711217271-hpr4n615p3vdri701qfm0b81pd9o0vb6.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBDpZnMrxYTSZSegA5liSmangZ8qzMcChA"
+          "current_key": "AIzaSyDPpK3FBRFYrcj7sO16IADmzj2_V2T493Y"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "441711217271-hpr4n615p3vdri701qfm0b81pd9o0vb6.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

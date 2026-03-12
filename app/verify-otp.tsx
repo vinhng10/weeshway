@@ -76,6 +76,7 @@ export default function VerifyOtpScreen() {
           autoComplete="one-time-code"
           autoCorrect={false}
           maxLength={6}
+          textAlign="center"
         />
 
         <Button

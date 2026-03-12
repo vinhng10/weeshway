@@ -29,7 +29,21 @@
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.POST_NOTIFICATIONS"
       ],
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "*.weeshway.com",
+              "pathPrefix": "/projects"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
       "expo-router",
@@ -51,9 +65,7 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/MomoTrustDisplay-Regular.ttf"
-          ]
+          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
         }
       ],
       [
