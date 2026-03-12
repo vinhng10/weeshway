@@ -1667,9 +1667,15 @@ CREATE POLICY "Enable users to view their own data only" ON "public"."recommenda
   WHERE (("wishes"."id" = "recommendation_items"."wish_id") AND ("wishes"."user_id" = ( SELECT "auth"."uid"() AS "uid"))))));
 
 
-CREATE POLICY "Owner can read own secret" ON "public"."booking_secrets" FOR SELECT TO "authenticated" USING (("booking_id" IN ( SELECT "bookings"."id"
-   FROM "public"."bookings"
-  WHERE ("bookings"."user_id" = "auth"."uid"()))));
+CREATE POLICY "Owner can read own secret" ON "public"."booking_secrets"
+  FOR SELECT TO "authenticated"
+  USING (
+    "booking_id" IN (
+      SELECT "bookings"."id"
+      FROM "public"."bookings"
+      WHERE "bookings"."user_id" = (SELECT auth.uid())
+    )
+  );
 
 
 CREATE POLICY "Users can insert their own profile" ON "public"."profiles" FOR INSERT TO "authenticated" WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "id"));

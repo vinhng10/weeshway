@@ -52,7 +52,7 @@ export default function VerifyOtpScreen() {
         <Branding />
 
         <ThemedText type="h5" color="dimmed" style={styles.subtitle}>
-          Enter the 8-digit code sent to {email}
+          Enter the 6-digit code sent to {email}
         </ThemedText>
 
         {error ? (
@@ -75,7 +75,7 @@ export default function VerifyOtpScreen() {
           keyboardType="number-pad"
           autoComplete="one-time-code"
           autoCorrect={false}
-          maxLength={8}
+          maxLength={6}
         />
 
         <Button

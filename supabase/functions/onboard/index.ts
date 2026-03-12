@@ -42,7 +42,7 @@ Deno.serve(async (req: Request) => {
       dashboard: "express",
       defaults: {
         responsibilities: {
-          fees_collector: "application_express",
+          fees_collector: "application",
           losses_collector: "application",
         },
       },
