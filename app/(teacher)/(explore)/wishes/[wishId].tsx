@@ -6,23 +6,26 @@ import { router, useLocalSearchParams } from "expo-router";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
+type WishWithSimilarCount = WishEnrichedType & { similarWishCount: number };
+
 function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
   const setData = useTempDataStore((state) => state.setData);
 
-  const { data, refetch, isRefetching } = useSuspenseQuery<WishEnrichedType>({
-    queryKey: ["wishes", "explore", wishId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("wishes")
-        .select(`*, song:songs(*)`)
-        .eq("id", wishId)
-        .single()
-        .throwOnError();
-      return data;
-    },
-    enabled: !!wishId,
-  });
+  const { data, refetch, isRefetching } =
+    useSuspenseQuery<WishWithSimilarCount>({
+      queryKey: ["wishes", "explore", wishId],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from("wishes")
+          .select(`*, song:songs(*), similar_wish_count`)
+          .eq("id", wishId)
+          .single()
+          .throwOnError();
+        return data;
+      },
+      enabled: !!wishId,
+    });
 
   const handleCreateProject = () => {
     // Store the wish data in the temporary data store
@@ -40,7 +43,7 @@ function WishContent() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
       >
-        <WishInfo data={data} />
+        <WishInfo data={data} similarWishCount={data.similarWishCount} />
       </ScrollView>
       <Button
         label="Create Project"

@@ -1,6 +1,7 @@
 import {
   Boundary,
   BubbleChart,
+  Chip,
   ChipBar,
   ChipBarItemProps,
   LocationPermission,
@@ -10,7 +11,14 @@ import {
 import { LEVEL, STYLE } from "@/constants";
 import { useSuspenseInfiniteRpc, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import { BubbleType, LevelType, StyleType, WishEnrichedType } from "@/types";
+import {
+  BubbleType,
+  LevelType,
+  StyleType,
+  WishEnrichedType,
+} from "@/types";
+
+type WishWithSimilarCount = WishEnrichedType & { similarWishCount: number };
 import { router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -47,10 +55,10 @@ function ExploreContent({ style, level }: ExploreContentProps) {
     fetchNextPage,
     refetch: refetchWishes,
     isRefetching: isRefetchingWishes,
-  } = useSuspenseInfiniteRpc<WishEnrichedType>({
+  } = useSuspenseInfiniteRpc<WishWithSimilarCount>({
     queryKey: ["wishes", style, level, centroidId],
     rpcFunction: "get_nearby_wishes",
-    columns: `*, song:songs!inner(*)`,
+    columns: `*, song:songs!inner(*), similar_wish_count`,
     pageSize: 10,
     trailingQuery: (query) => {
       if (style) {
@@ -78,7 +86,7 @@ function ExploreContent({ style, level }: ExploreContentProps) {
     <BubbleChart data={data} onBubbleTap={handleBubbleTap} />
   );
 
-  const renderTile = (data: WishEnrichedType): React.ReactElement => (
+  const renderTile = (data: WishWithSimilarCount): React.ReactElement => (
     <Tile
       imageSource={data.song.artworkUrl}
       title={data.song.name}
@@ -86,6 +94,15 @@ function ExploreContent({ style, level }: ExploreContentProps) {
       metadata={[data.style, data.level].filter(Boolean).join(" • ")}
       previewUrl={data.song.previewUrl}
       onPress={() => router.navigate(`./wishes/${data.id}`)}
+      status={
+        data.similarWishCount > 0 ? (
+          <Chip
+            label={`${data.similarWishCount}`}
+            color="primary"
+            icon="sparkles"
+          />
+        ) : undefined
+      }
     />
   );
 

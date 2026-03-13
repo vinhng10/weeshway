@@ -3,12 +3,14 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { TextBoxInput, TextInput } from "./input";
 import { SongCard } from "./song-card";
+import { ThemedText } from "./themed-text";
 
 interface WishInfoProps {
   data: WishEnrichedType;
+  similarWishCount?: number;
 }
 
-export function WishInfo({ data }: WishInfoProps) {
+export function WishInfo({ data, similarWishCount }: WishInfoProps) {
   return (
     <View style={styles.container}>
       {/* Song Card */}
@@ -27,6 +29,13 @@ export function WishInfo({ data }: WishInfoProps) {
         value={data.description}
         editable={false}
       />
+
+      {similarWishCount != null && similarWishCount > 0 && (
+        <ThemedText type="h5" color="primary">
+          {similarWishCount} similar{" "}
+          {similarWishCount === 1 ? "wish" : "wishes"} nearby
+        </ThemedText>
+      )}
     </View>
   );
 }
