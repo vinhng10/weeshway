@@ -35,7 +35,7 @@ function BookingsContent({ time }: BookingsContentProps) {
       *, project:projects!inner(
         *, 
         profile:profiles(*), 
-        song:songs(*), 
+        song:songs(id, name, artist_name, preview_url, artwork_url),
         location:locations(*), 
         bookings:bookings(*)
       )

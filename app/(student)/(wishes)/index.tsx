@@ -53,7 +53,7 @@ function WishesContent({ style, level }: WishesContentProps) {
       tableName: "wishes",
       columns: `
         *, 
-        song:songs(*), 
+        song:songs(id, name, artist_name, preview_url, artwork_url),
         recommendations:recommendations(
           project:projects(
             profile:profiles(avatar_url)
@@ -167,8 +167,8 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
       project:projects(
         *, 
         profile:profiles(*), 
-        song:songs(*),
-        bookings:bookings(*), 
+        song:songs(id, name, artist_name, preview_url, artwork_url),
+        bookings:bookings(*),
         watchings:watchings(*)
       )
     `,

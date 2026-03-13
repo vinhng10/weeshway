@@ -34,12 +34,12 @@ function WishContent() {
           .from("wishes")
           .select(
             `*,
-            song:songs(*),
+            song:songs(id, name, artist_name, preview_url, artwork_url),
             recommendations:recommendations(
               project:projects(
                 *,
                 profile:profiles(*),
-                song:songs(*),
+                song:songs(id, name, artist_name, preview_url, artwork_url),
                 location:locations(*),
                 bookings:bookings(*),
                 watchings:watchings(*)

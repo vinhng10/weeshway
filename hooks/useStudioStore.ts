@@ -147,7 +147,7 @@ export const createStudioStore = (projectId: string) =>
           try {
             const { data } = await supabase
               .from("projects")
-              .select(`*, song:songs(*)`)
+              .select(`*, song:songs(id, name, artist_name, preview_url, artwork_url)`)
               .eq("id", projectId)
               .single()
               .throwOnError();
@@ -155,9 +155,6 @@ export const createStudioStore = (projectId: string) =>
             if (data) {
               const result = camelcaseKeys(data, { deep: true });
               set((state) => {
-                // state.studio.song.source = result.song.previewUrl;
-                // state.studio.count.source =
-                //   "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/2f/cb/7f/2fcb7f4a-1f8e-5f4c-2b61-b0b62261e4eb/mzaf_6330452069109107949.plus.aac.ep.m4a";
                 state.studio.song.items = result.songItems;
                 state.studio.count.items = result.countItems;
               });

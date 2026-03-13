@@ -47,7 +47,7 @@ function TeacherProfileContent() {
     tableName: "projects",
     columns: `
       *, 
-      song:songs(*), 
+      song:songs(id, name, artist_name, preview_url, artwork_url),
       bookings:bookings(*), 
       watchings:watchings(*)
     `,

@@ -52,7 +52,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
           project:projects!inner(
             *, 
             profile:profiles(*), 
-            song:songs(*), 
+            song:songs(id, name, artist_name, preview_url, artwork_url),
             location:locations(*),
             bookings:bookings(*),
             watchings:watchings(*)
@@ -90,8 +90,8 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
     columns: `
       *, 
       profile:profiles(*), 
-      song:songs(*), 
-      bookings:bookings(*), 
+      song:songs(id, name, artist_name, preview_url, artwork_url),
+      bookings:bookings(*),
       watchings:watchings(*)
     `,
     pageSize: 10,

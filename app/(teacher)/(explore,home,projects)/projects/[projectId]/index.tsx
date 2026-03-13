@@ -46,7 +46,11 @@ function ProjectContent() {
         const { data } = await supabase
           .from("projects")
           .select(
-            `*, song:songs(*), location:locations(*), bookings:bookings(*)`,
+            `*, 
+             song:songs(id, name, artist_name, preview_url, artwork_url),
+             location:locations(*), 
+             bookings:bookings(*)
+            `,
           )
           .eq("id", projectId)
           .eq("user_id", profile?.id)

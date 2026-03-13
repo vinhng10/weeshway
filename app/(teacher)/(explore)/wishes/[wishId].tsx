@@ -18,7 +18,7 @@ function WishContent() {
       queryFn: async () => {
         const { data } = await supabase
           .from("wishes")
-          .select(`*, song:songs(*), similar_wish_count`)
+          .select(`*, song:songs(id, name, artist_name, preview_url, artwork_url), similar_wish_count`)
           .eq("id", wishId)
           .single()
           .throwOnError();

@@ -39,7 +39,7 @@ function HomeContent() {
     columns: `
       *, 
       profile:profiles(*), 
-      song:songs(*),
+      song:songs(id, name, artist_name, preview_url, artwork_url),
       location:locations(*),
       bookings:bookings(*)
     `,
