@@ -10,6 +10,7 @@ config.resolver.assetExts.push("bin");
 // Also set EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH=1 and EXPO_UNSTABLE_TREE_SHAKING=1 for production builds
 config.transformer.getTransformOptions = async () => ({
   transform: {
+    experimentalImportSupport: true,
     inlineRequires: true,
   },
 });

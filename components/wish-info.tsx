@@ -30,12 +30,12 @@ export function WishInfo({ data, similarWishCount }: WishInfoProps) {
         editable={false}
       />
 
-      {similarWishCount != null && similarWishCount > 0 && (
+      {/* {similarWishCount != null && similarWishCount > 0 && (
         <ThemedText type="h5" color="primary">
           {similarWishCount} similar{" "}
           {similarWishCount === 1 ? "wish" : "wishes"} nearby
         </ThemedText>
-      )}
+      )} */}
     </View>
   );
 }

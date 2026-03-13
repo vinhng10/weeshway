@@ -6,7 +6,10 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EAS_LOCAL_BUILD_SKIP_CLEANUP": "1"
+      }
     },
     "preview": {
       "distribution": "internal"

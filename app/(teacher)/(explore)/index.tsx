@@ -94,15 +94,15 @@ function ExploreContent({ style, level }: ExploreContentProps) {
       metadata={[data.style, data.level].filter(Boolean).join(" • ")}
       previewUrl={data.song.previewUrl}
       onPress={() => router.navigate(`./wishes/${data.id}`)}
-      status={
-        data.similarWishCount > 0 ? (
-          <Chip
-            label={`${data.similarWishCount}`}
-            color="primary"
-            icon="sparkles"
-          />
-        ) : undefined
-      }
+      // status={
+      //   data.similarWishCount > 0 ? (
+      //     <Chip
+      //       label={`${data.similarWishCount}`}
+      //       color="primary"
+      //       icon="sparkles"
+      //     />
+      //   ) : undefined
+      // }
     />
   );
 

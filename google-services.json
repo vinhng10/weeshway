@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "940618544716",
-    "project_id": "weeshway-ai",
-    "storage_bucket": "weeshway-ai.firebasestorage.app"
+    "project_number": "417348737969",
+    "project_id": "weeshway-com",
+    "storage_bucket": "weeshway-com.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:940618544716:android:be19468b512747d2f1e6e9",
+        "mobilesdk_app_id": "1:417348737969:android:0bf4f3f7fbda20667d7b90",
         "android_client_info": {
           "package_name": "com.weeshway.weeshway"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDPpK3FBRFYrcj7sO16IADmzj2_V2T493Y"
+          "current_key": "AIzaSyDzJevj8DcVmMgt48YsWedN_GViyr2cP70"
         }
       ],
       "services": {
