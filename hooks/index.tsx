@@ -6,6 +6,7 @@ export { useLocationSearch } from "./useLocationSearch";
 export { useNotificationObserver } from "./useNotificationObserver";
 export { useOnboarding } from "./useOnboarding";
 export { useRole } from "./useRole";
+export { useSearch } from "./useSearch";
 export { useSongSearch } from "./useSongSearch";
 export {
   createStudioStore,
@@ -13,6 +14,5 @@ export {
   type TrackState,
 } from "./useStudioStore";
 export { useSuspenseInfiniteQuery } from "./useSuspenseInfiniteQuery";
-export { useSuspenseInfiniteRpc } from "./useSuspenseInfiniteRpc";
 export { useSuspenseQuery } from "./useSuspenseQuery";
 export { useTempDataStore } from "./useTempDataStore";

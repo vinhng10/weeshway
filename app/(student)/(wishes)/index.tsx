@@ -60,7 +60,6 @@ function WishesContent({ style, level }: WishesContentProps) {
           )
         )
       `,
-      pageSize: 10,
       trailingQuery: (query) => {
         query = query.eq("user_id", profile?.id);
         if (style) query = query.eq("style", style);
@@ -172,7 +171,6 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
         watchings:watchings(*)
       )
     `,
-    pageSize: 10,
     trailingQuery: (query) => {
       query = query
         .eq("user_id", profile?.id)

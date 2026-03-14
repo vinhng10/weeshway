@@ -1,3 +1,4 @@
+import { PAGE_SIZE } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
 import { useSuspenseInfiniteQuery as useTanStackSuspenseInfiniteQuery } from "@tanstack/react-query";
@@ -6,16 +7,13 @@ import camelcaseKeys from "camelcase-keys";
 interface UseSuspenseInfiniteQueryProps<TData = unknown> {
   tableName: string;
   columns?: string;
-  pageSize?: number;
   queryKey: readonly unknown[];
-  enabled?: boolean | (() => boolean);
   trailingQuery?: (query: any) => any;
 }
 
 export function useSuspenseInfiniteQuery<TData = unknown>({
   tableName,
   columns = "*",
-  pageSize = 10,
   queryKey,
   trailingQuery,
 }: UseSuspenseInfiniteQueryProps<TData>) {
@@ -46,14 +44,14 @@ export function useSuspenseInfiniteQuery<TData = unknown>({
       }
 
       // Fetch one extra item to check if there's more data
-      query = query.limit(pageSize + 1);
+      query = query.limit(PAGE_SIZE + 1);
 
       const { data } = await query.throwOnError();
 
       const rawData = data == null ? [] : data;
 
       // Check if there are more items
-      const hasMore = rawData.length > pageSize;
+      const hasMore = rawData.length > PAGE_SIZE;
       const items = hasMore ? rawData.slice(0, -1) : rawData;
 
       // Get the cursor for the next page (using original field name)
@@ -69,7 +67,7 @@ export function useSuspenseInfiniteQuery<TData = unknown>({
 
   const data = camelcaseKeys(
     query.data?.pages.flatMap((page) => page.data) || [],
-    { deep: true }
+    { deep: true },
   ) as TData[];
 
   return {

@@ -43,7 +43,6 @@ function HomeContent() {
       location:locations(*),
       bookings:bookings(*)
     `,
-    pageSize: 10,
     trailingQuery: (query) => {
       const now = new Date();
       const todayEnd = new Date();

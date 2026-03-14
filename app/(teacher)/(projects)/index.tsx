@@ -44,7 +44,6 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
         bookings:bookings(*),
         watchings:watchings(*)
       `,
-      pageSize: 10,
       trailingQuery: (query) => {
         query = query
           .eq("user_id", profile?.id)

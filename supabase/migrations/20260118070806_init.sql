@@ -499,7 +499,7 @@ begin
   )
   on conflict (id) do nothing;
 
-  insert into public.projects (id, status, style, level, price, spots, description, start_at, end_at, location_id, song_id, currency)
+  insert into public.projects (id, status, style, level, price, spots, description, start_at, end_at, location_id, song_id, currency, artwork_url)
   values (
     COALESCE((p_project_data->>'id')::uuid, extensions.uuid_generate_v7()),
     (p_project_data->>'status')::public.status,
@@ -512,7 +512,8 @@ begin
     (p_project_data->>'end_at')::timestamp with time zone,
     (p_project_data->>'location_id')::text,
     p_song_data->>'id',
-    p_project_data->>'currency'
+    p_project_data->>'currency',
+    p_project_data->>'artwork_url'
   )
   returning id into v_project_id;
 
@@ -606,24 +607,12 @@ CREATE TABLE IF NOT EXISTS "public"."projects" (
     "currency" "text" NOT NULL,
     "location_id" "text",
     "reminder_sent_at" timestamp with time zone,
+    "artwork_url" "text",
     CONSTRAINT "projects_currency_check" CHECK ((("char_length"("currency") = 3) AND ("currency" = "upper"("currency"))))
 );
 
 
 ALTER TABLE "public"."projects" OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_nearby_classes"() RETURNS SETOF "public"."projects"
-    LANGUAGE "plpgsql"
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
-BEGIN
-  RETURN QUERY SELECT * FROM public.get_nearby_classes_for_user(auth.uid());
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_nearby_classes"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_nearby_classes_for_user"("p_user_id" "uuid") RETURNS SETOF "public"."projects"
@@ -712,17 +701,6 @@ $$;
 
 
 ALTER FUNCTION "public"."get_nearby_wishes_for_user"("p_user_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_nearby_wishes"() RETURNS SETOF "public"."wishes"
-    LANGUAGE "sql"
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
-  SELECT * FROM public.get_nearby_wishes_for_user(auth.uid());
-$$;
-
-
-ALTER FUNCTION "public"."get_nearby_wishes"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
@@ -1382,6 +1360,49 @@ CREATE OR REPLACE VIEW "public"."stats" WITH ("security_invoker"='true') AS
 ALTER VIEW "public"."stats" OWNER TO "postgres";
 
 
+CREATE OR REPLACE VIEW "public"."nearby_projects" WITH ("security_invoker"='true') AS
+SELECT p.*
+FROM "public"."projects" p
+LEFT JOIN "public"."locations" l ON p.location_id = l.id
+JOIN "public"."profiles" teacher ON p.user_id = teacher.id
+CROSS JOIN (
+  SELECT location, country FROM "public"."profiles" WHERE id = "auth"."uid"()
+) me
+WHERE
+  CASE
+    WHEN me.location IS NOT NULL AND COALESCE(l.location, teacher.location) IS NOT NULL THEN
+      ST_DWithin(COALESCE(l.location, teacher.location), me.location, 1.0)
+    WHEN me.country IS NOT NULL THEN
+      COALESCE(l.country, teacher.country) = me.country
+    ELSE TRUE
+  END;
+
+
+ALTER VIEW "public"."nearby_projects" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."nearby_wishes" WITH ("security_invoker"='true') AS
+SELECT w.*
+FROM "public"."wishes" w
+JOIN "public"."profiles" p ON w.user_id = p.id
+CROSS JOIN (
+  SELECT location, country FROM "public"."profiles" WHERE id = "auth"."uid"()
+) me
+WHERE
+  CASE
+    WHEN me.location IS NOT NULL AND p.location IS NOT NULL THEN
+      ST_DWithin(p.location, me.location, 1.0)
+    WHEN me.country IS NOT NULL THEN
+      p.country = me.country
+    ELSE TRUE
+  END
+  AND w.created_at >= DATE_TRUNC('month', NOW() - INTERVAL '3 months')
+  AND w.user_id != "auth"."uid"();
+
+
+ALTER VIEW "public"."nearby_wishes" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."watchings" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v7"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1744,9 +1765,9 @@ GRANT ALL ON TABLE "public"."projects" TO "authenticated";
 GRANT ALL ON TABLE "public"."projects" TO "service_role";
 
 
-GRANT ALL ON FUNCTION "public"."get_nearby_classes"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_nearby_classes"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_nearby_classes"() TO "service_role";
+GRANT ALL ON TABLE "public"."nearby_projects" TO "anon";
+GRANT ALL ON TABLE "public"."nearby_projects" TO "authenticated";
+GRANT ALL ON TABLE "public"."nearby_projects" TO "service_role";
 
 
 GRANT ALL ON FUNCTION "public"."get_nearby_classes_for_user"("p_user_id" "uuid") TO "anon";
@@ -1759,9 +1780,9 @@ GRANT ALL ON TABLE "public"."wishes" TO "authenticated";
 GRANT ALL ON TABLE "public"."wishes" TO "service_role";
 
 
-GRANT ALL ON FUNCTION "public"."get_nearby_wishes"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_nearby_wishes"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_nearby_wishes"() TO "service_role";
+GRANT ALL ON TABLE "public"."nearby_wishes" TO "anon";
+GRANT ALL ON TABLE "public"."nearby_wishes" TO "authenticated";
+GRANT ALL ON TABLE "public"."nearby_wishes" TO "service_role";
 
 
 GRANT ALL ON FUNCTION "public"."get_nearby_wishes_for_user"("p_user_id" "uuid") TO "anon";
@@ -1895,3 +1916,21 @@ WITH CHECK (((bucket_id = 'profiles'::text) AND (( SELECT (auth.uid())::text AS 
 CREATE POLICY "profiles_update"
 ON "storage"."objects" AS permissive FOR UPDATE TO authenticated
 USING (((bucket_id = 'profiles'::text) AND (( SELECT (auth.uid())::text AS uid) = (storage.foldername(name))[1])));
+
+-- Storage bucket for project artwork
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('projects', 'projects', true, 10485760, ARRAY['image/*']);
+
+-- Storage policies (projects bucket)
+CREATE POLICY "projects_public_read" ON storage.objects FOR SELECT
+USING ((bucket_id = 'projects'::text));
+
+CREATE POLICY "projects_owner_insert" ON storage.objects FOR INSERT
+WITH CHECK (((bucket_id = 'projects'::text) AND EXISTS (
+  SELECT 1 FROM public.projects WHERE id = (storage.foldername(name))[1]::uuid AND user_id = auth.uid()
+)));
+
+CREATE POLICY "projects_owner_update" ON storage.objects FOR UPDATE
+USING (((bucket_id = 'projects'::text) AND EXISTS (
+  SELECT 1 FROM public.projects WHERE id = (storage.foldername(name))[1]::uuid AND user_id = auth.uid()
+)));

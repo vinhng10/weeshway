@@ -40,7 +40,6 @@ function BookingsContent({ time }: BookingsContentProps) {
         bookings:bookings(*)
       )
     `,
-    pageSize: 10,
     trailingQuery: (query) => {
       query = query
         .eq("user_id", profile?.id)

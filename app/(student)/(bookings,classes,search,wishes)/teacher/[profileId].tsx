@@ -51,12 +51,11 @@ function TeacherProfileContent() {
       bookings:bookings(*), 
       watchings:watchings(*)
     `,
-    pageSize: 10,
     trailingQuery: (query) =>
       query
         .eq("user_id", profileId)
         .in("bookings.status", BOOKING_ACTIVE_STATUSES)
-        .gte("start_at", new Date().toISOString()),
+        .or(`start_at.gte.${new Date().toISOString()},start_at.is.null`),
   });
 
   const renderProfile = (data: ProfileEnrichedType): React.ReactElement => (

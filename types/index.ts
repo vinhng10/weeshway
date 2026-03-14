@@ -198,6 +198,18 @@ export type WatchingEnrichedType = WatchingType & {
   project: ProjectEnrichedType;
 };
 
+export type SearchResultType = {
+  type: "project" | "profile";
+  id: string;
+  title: string;
+  subtitle?: string;
+  imageUrl?: string;
+  metadata?: string;
+  previewUrl?: string;
+  avatarUrl?: string;
+  rank: number;
+};
+
 export type ReportType = {
   id: string;
   createdAt: Date;

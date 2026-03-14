@@ -15,7 +15,7 @@ import {
   PROJECT_STATUS,
   STYLE,
 } from "@/constants";
-import { useAuth, useSuspenseInfiniteRpc, useSuspenseQuery } from "@/hooks";
+import { useAuth, useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   LevelType,
@@ -84,9 +84,9 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
     fetchNextPage,
     refetch: refetchProjects,
     isRefetching: isRefetchingProjects,
-  } = useSuspenseInfiniteRpc<ProjectEnrichedType>({
+  } = useSuspenseInfiniteQuery<ProjectEnrichedType>({
     queryKey: ["classes", "projects", status, style, level],
-    rpcFunction: "get_nearby_classes",
+    tableName: "nearby_projects",
     columns: `
       *, 
       profile:profiles(*), 
@@ -94,7 +94,6 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
       bookings:bookings(*),
       watchings:watchings(*)
     `,
-    pageSize: 10,
     trailingQuery: (query) => {
       query = query
         .or(`start_at.is.null,start_at.gte.${new Date().toISOString()}`)

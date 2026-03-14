@@ -46,7 +46,16 @@ export default function TabLayout() {
           title: "Bookings",
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="grid" color={color} />
+            <IconSymbol size={28} name="ticket" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(search)"
+        options={{
+          title: "Search",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="search" color={color} />
           ),
         }}
       />

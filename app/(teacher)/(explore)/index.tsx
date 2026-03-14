@@ -9,7 +9,7 @@ import {
   Tile,
 } from "@/components";
 import { LEVEL, STYLE } from "@/constants";
-import { useSuspenseInfiniteRpc, useSuspenseQuery } from "@/hooks";
+import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   BubbleType,
@@ -55,11 +55,10 @@ function ExploreContent({ style, level }: ExploreContentProps) {
     fetchNextPage,
     refetch: refetchWishes,
     isRefetching: isRefetchingWishes,
-  } = useSuspenseInfiniteRpc<WishWithSimilarCount>({
+  } = useSuspenseInfiniteQuery<WishWithSimilarCount>({
     queryKey: ["wishes", style, level, centroidId],
-    rpcFunction: "get_nearby_wishes",
+    tableName: "nearby_wishes",
     columns: `*, song:songs!inner(*), similar_wish_count`,
-    pageSize: 10,
     trailingQuery: (query) => {
       if (style) {
         query = query.eq("style", style);
