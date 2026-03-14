@@ -58,7 +58,7 @@ function ExploreContent({ style, level }: ExploreContentProps) {
   } = useSuspenseInfiniteQuery<WishWithSimilarCount>({
     queryKey: ["wishes", style, level, centroidId],
     tableName: "nearby_wishes",
-    columns: `*, song:songs!inner(*), similar_wish_count`,
+    columns: `*, song:songs!inner(*)`,
     trailingQuery: (query) => {
       if (style) {
         query = query.eq("style", style);
@@ -157,7 +157,7 @@ export default function Explore() {
     <View style={styles.container}>
       <ChipBar padding items={options} />
       <Boundary>
-        <ExploreContent />
+        <ExploreContent style={style} level={level} />
       </Boundary>
       <LocationPermission />
     </View>
