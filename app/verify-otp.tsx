@@ -85,11 +85,7 @@ export default function VerifyOtpScreen() {
           style={styles.button}
         />
 
-        <Button
-          label="Resend Code"
-          onPress={handleResend}
-          outlined
-        />
+        <Button label="Resend Code" onPress={handleResend} outlined />
       </KeyboardAwareScrollView>
     </View>
   );

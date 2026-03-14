@@ -52,7 +52,7 @@ export function SectionListView({
 const styles = StyleSheet.create((theme) => ({
   scrollContainer: {
     gap: theme.gap(1),
-    padding: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
   footer: {

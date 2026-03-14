@@ -267,7 +267,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   content: {
     flex: 1,
-    padding: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
     gap: theme.gap(3),
   },
   classInfo: {

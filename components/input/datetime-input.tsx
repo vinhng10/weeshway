@@ -180,7 +180,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   modalContent: {
     gap: theme.gap(2),
-    padding: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
   },
   row: {
     flexDirection: "row",

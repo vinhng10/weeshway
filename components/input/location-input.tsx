@@ -260,11 +260,11 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.background,
   },
   searchContainer: {
-    padding: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
   },
   scrollContainer: {
     gap: theme.gap(1),
-    paddingHorizontal: theme.gap(2),
+    padding: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
   messageContainer: {
@@ -273,7 +273,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     alignItems: "center",
   },
   modalContent: {
-    padding: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
     gap: theme.gap(2),
   },
   row: {

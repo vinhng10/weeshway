@@ -78,8 +78,8 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.background,
   },
   scrollContainer: {
-    gap: theme.gap(4),
-    padding: theme.gap(2),
+    gap: theme.gap(3),
+    paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
 }));

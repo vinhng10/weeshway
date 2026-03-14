@@ -107,13 +107,13 @@ const styles = StyleSheet.create((theme, rt) => ({
     alignItems: "center",
     width: "70%",
     gap: theme.gap(0.2),
-    marginBottom: theme.gap(2),
+    padding: theme.gap(2),
   },
   bio: {
     textAlign: "center",
   },
   scrollContainer: {
-    paddingHorizontal: theme.gap(2),
+    padding: theme.gap(2),
     paddingBottom: theme.gap(16),
     gap: theme.gap(1),
   },

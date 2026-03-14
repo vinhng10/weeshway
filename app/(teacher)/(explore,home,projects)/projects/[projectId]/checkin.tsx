@@ -217,7 +217,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.background,
   },
   content: {
-    padding: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
     gap: theme.gap(2),
   },
   cameraContainer: {

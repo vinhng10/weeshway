@@ -86,7 +86,6 @@ const styles = StyleSheet.create((theme) => ({
   background: {
     height: theme.gap(32),
     marginHorizontal: -theme.gap(2),
-    marginTop: -theme.gap(2),
     overflow: "hidden",
   },
   backgroundImage: {

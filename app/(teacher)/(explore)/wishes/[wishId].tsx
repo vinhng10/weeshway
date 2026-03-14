@@ -18,7 +18,9 @@ function WishContent() {
       queryFn: async () => {
         const { data } = await supabase
           .from("wishes")
-          .select(`*, song:songs(id, name, artist_name, preview_url, artwork_url), similar_wish_count`)
+          .select(
+            `*, song:songs(id, name, artist_name, preview_url, artwork_url), similar_wish_count`,
+          )
           .eq("id", wishId)
           .single()
           .throwOnError();
@@ -72,7 +74,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   scrollContainer: {
     gap: theme.gap(2),
-    padding: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
   cardContainer: {
