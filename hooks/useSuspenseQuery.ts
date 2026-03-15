@@ -13,9 +13,9 @@ type AuthenticatedQueryOptions<TData, TError> = Omit<
   queryFn: () => Promise<TData>;
 };
 
-export function useSuspenseQuery<TData = unknown, TError = Error>(
-  options: AuthenticatedQueryOptions<TData, TError>
-): UseSuspenseQueryResult<TData, TError> {
+export const useSuspenseQuery = <TData = unknown, TError = Error>(
+  options: AuthenticatedQueryOptions<TData, TError>,
+): UseSuspenseQueryResult<TData, TError> => {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
   options.queryKey = [...options.queryKey, profile?.id];
@@ -35,4 +35,4 @@ export function useSuspenseQuery<TData = unknown, TError = Error>(
     ...options,
     queryFn: wrappedQueryFn,
   });
-}
+};

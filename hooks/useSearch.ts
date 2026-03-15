@@ -7,9 +7,21 @@ import {
 } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 import { useEffect, useState } from "react";
-import { useAuth } from "./useAuth";
 
-function useDebouncedValue(value: string, delay = DEBOUNCE_TIME) {
+interface SearchPage {
+  data: SearchResultType[];
+  nextOffset?: number;
+}
+
+interface SearchState {
+  data: SearchResultType[];
+  fetchNextPage: () => void;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  isDebouncing: boolean;
+}
+
+const useDebouncedValue = (value: string, delay = DEBOUNCE_TIME) => {
   const [debounced, setDebounced] = useState(value);
 
   useEffect(() => {
@@ -18,12 +30,11 @@ function useDebouncedValue(value: string, delay = DEBOUNCE_TIME) {
   }, [value, delay]);
 
   return debounced;
-}
+};
 
-export function useSearch(query: string) {
+export const useSearch = (query: string, rpc: string): SearchState => {
   const debouncedQuery = useDebouncedValue(query);
   const trimmed = debouncedQuery.trim();
-  const profile = useAuth((state) => state.profile);
 
   const {
     data: pages,
@@ -31,22 +42,22 @@ export function useSearch(query: string) {
     hasNextPage,
     isFetchingNextPage,
   } = useSuspenseInfiniteQuery<
-    { data: SearchResultType[]; nextOffset?: number },
+    SearchPage,
     Error,
-    InfiniteData<{ data: SearchResultType[]; nextOffset?: number }>,
+    InfiniteData<SearchPage>,
     readonly unknown[],
     number
   >({
-    queryKey: ["search", trimmed, profile?.id],
+    queryKey: [rpc, trimmed],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       if (!trimmed) return { data: [], nextOffset: undefined };
 
       const { data } = await supabase
-        .rpc("search", {
-          search_term: trimmed,
-          page_limit: PAGE_SIZE + 1,
-          page_offset: pageParam,
+        .rpc(rpc, {
+          p_search_term: trimmed,
+          p_limit: PAGE_SIZE + 1,
+          p_offset: pageParam,
         })
         .throwOnError();
 
@@ -67,4 +78,4 @@ export function useSearch(query: string) {
     pages?.pages.flatMap((page) => page.data) ?? [];
 
   return { data, fetchNextPage, hasNextPage, isFetchingNextPage, isDebouncing };
-}
+};

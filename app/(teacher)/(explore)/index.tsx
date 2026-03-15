@@ -1,10 +1,10 @@
 import {
   Boundary,
   BubbleChart,
-  Chip,
   ChipBar,
   ChipBarItemProps,
   LocationPermission,
+  Search,
   SectionListView,
   Tile,
 } from "@/components";
@@ -14,15 +14,16 @@ import { supabase } from "@/supabase";
 import {
   BubbleType,
   LevelType,
+  SearchResultType,
   StyleType,
   WishEnrichedType,
 } from "@/types";
-
-type WishWithSimilarCount = WishEnrichedType & { similarWishCount: number };
 import { router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+
+type WishWithSimilarCount = WishEnrichedType & { similarWishCount: number };
 
 interface ExploreContentProps {
   style?: StyleType;
@@ -136,6 +137,10 @@ export default function Explore() {
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
+  const handleSearchSelect = (item: SearchResultType) => {
+    router.navigate(`./wishes/${item.id}`);
+  };
+
   const options: ChipBarItemProps[] = [
     {
       label: "Style",
@@ -155,7 +160,10 @@ export default function Explore() {
 
   return (
     <View style={styles.container}>
-      <ChipBar padding items={options} />
+      <View style={styles.toolbar}>
+        <Search onSelect={handleSearchSelect} rpc="search_nearby_wishes" />
+        <ChipBar items={options} />
+      </View>
       <Boundary>
         <ExploreContent style={style} level={level} />
       </Boundary>
@@ -169,5 +177,12 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
+  },
+  toolbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: theme.gap(2),
+    paddingVertical: theme.gap(1),
+    gap: theme.gap(1),
   },
 }));

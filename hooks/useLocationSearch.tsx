@@ -38,11 +38,17 @@ const convertGooglePlaceToLocation = (place: GooglePlace): LocationType => {
   };
 };
 
-export const useLocationSearch = (query: string) => {
-  const [state, setState] = useState({
-    locations: [] as LocationType[],
+interface LocationSearchState {
+  locations: LocationType[];
+  loading: boolean;
+  error: string | null;
+}
+
+export const useLocationSearch = (query: string): LocationSearchState => {
+  const [state, setState] = useState<LocationSearchState>({
+    locations: [],
     loading: false,
-    error: null as string | null,
+    error: null,
   });
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import {
   ChipBar,
   ChipBarItemProps,
   ProjectStatus,
+  Search,
   SectionListView,
   Tile,
 } from "@/components";
@@ -18,6 +19,7 @@ import {
   LevelType,
   ProjectEnrichedType,
   ProjectStatusType,
+  SearchResultType,
   StyleType,
 } from "@/types";
 import { router } from "expo-router";
@@ -136,6 +138,10 @@ export default function Projects() {
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
+  const handleSearchSelect = (item: SearchResultType) => {
+    router.navigate(`./projects/${item.id}`);
+  };
+
   const options: ChipBarItemProps[] = [
     {
       label: "Status",
@@ -162,7 +168,10 @@ export default function Projects() {
 
   return (
     <View style={styles.container}>
-      <ChipBar padding items={options} />
+      <View style={styles.toolbar}>
+        <Search onSelect={handleSearchSelect} rpc="search_projects" />
+        <ChipBar items={options} />
+      </View>
       <Boundary>
         <ProjectsContent status={status} style={style} level={level} />
       </Boundary>
@@ -175,5 +184,12 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
+  },
+  toolbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: theme.gap(2),
+    paddingVertical: theme.gap(1),
+    gap: theme.gap(1),
   },
 }));

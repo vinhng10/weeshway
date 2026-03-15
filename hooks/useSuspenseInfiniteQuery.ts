@@ -11,12 +11,21 @@ interface UseSuspenseInfiniteQueryProps<TData = unknown> {
   trailingQuery?: (query: any) => any;
 }
 
-export function useSuspenseInfiniteQuery<TData = unknown>({
+interface UseSuspenseInfiniteQueryReturn<TData> {
+  data: TData[];
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
+  refetch: () => void;
+  isRefetching: boolean;
+  isFetchingNextPage: boolean;
+}
+
+export const useSuspenseInfiniteQuery = <TData = unknown>({
   tableName,
   columns = "*",
   queryKey,
   trailingQuery,
-}: UseSuspenseInfiniteQueryProps<TData>) {
+}: UseSuspenseInfiniteQueryProps<TData>): UseSuspenseInfiniteQueryReturn<TData> => {
   const profile = useAuth((state) => state.profile);
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
 
@@ -78,4 +87,4 @@ export function useSuspenseInfiniteQuery<TData = unknown>({
     isRefetching: query.isRefetching,
     isFetchingNextPage: query.isFetchingNextPage,
   };
-}
+};

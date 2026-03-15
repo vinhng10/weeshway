@@ -199,7 +199,7 @@ export type WatchingEnrichedType = WatchingType & {
 };
 
 export type SearchResultType = {
-  type: "project" | "profile";
+  type: "class" | "profile" | "wish";
   id: string;
   title: string;
   subtitle?: string;

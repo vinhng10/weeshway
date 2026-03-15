@@ -21,6 +21,7 @@ export {
 } from "./notifications-permission";
 export { Options } from "./options";
 export { PhotoPicker } from "./photo-picker";
+export { Search } from "./search";
 export { SongSearch } from "./song-search";
 export { SpotsSelector } from "./spots-selector";
 export { TextInput, type TextInputProps } from "./text-input";

@@ -7,6 +7,7 @@ import {
   ChipBarItemProps,
   NotificationsPermission,
   ProjectStatus,
+  Search,
   SectionListView,
   Tile,
 } from "@/components";
@@ -23,6 +24,7 @@ import {
   LevelType,
   ProjectEnrichedType,
   ProjectStatusType,
+  SearchResultType,
   StyleType,
   WatchingEnrichedType,
   WishRecommendationEnrichedType,
@@ -52,7 +54,7 @@ function WishesContent({ style, level }: WishesContentProps) {
       queryKey: ["wishes", "recommendations", style, level],
       tableName: "wishes",
       columns: `
-        *, 
+        *,
         song:songs(id, name, artist_name, preview_url, artwork_url),
         recommendations:recommendations(
           project:projects(
@@ -164,8 +166,8 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
     tableName: "watchings",
     columns: `
       project:projects(
-        *, 
-        profile:profiles(*), 
+        *,
+        profile:profiles(*),
         song:songs(id, name, artist_name, preview_url, artwork_url),
         bookings:bookings(*),
         watchings:watchings(*)
@@ -222,6 +224,10 @@ export default function Wishes() {
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
+  const handleSearchSelect = (item: SearchResultType) => {
+    router.navigate(`./${item.id}`);
+  };
+
   const options: ChipBarItemProps[] = [
     {
       label: "Type",
@@ -256,7 +262,10 @@ export default function Wishes() {
 
   return (
     <View style={styles.container}>
-      <ChipBar padding items={options} />
+      <View style={styles.toolbar}>
+        <Search onSelect={handleSearchSelect} rpc="search_wishes" />
+        <ChipBar items={options} />
+      </View>
       <Boundary>
         {type === WISH_WATCH.WISH ? (
           <WishesContent style={style} level={level} />
@@ -278,6 +287,13 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
+  },
+  toolbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: theme.gap(2),
+    paddingVertical: theme.gap(1),
+    gap: theme.gap(1),
   },
   avatarGroup: {
     flexDirection: "column",

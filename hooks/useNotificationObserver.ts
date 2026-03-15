@@ -2,12 +2,14 @@ import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useEffect } from "react";
 
-export const useNotificationObserver = () => {
+export const useNotificationObserver = (): void => {
   useEffect(() => {
-    function redirect(notification: Notifications.Notification) {
+    const redirect = (notification: Notifications.Notification) => {
       const data = notification.request.content.data;
-      router.navigate(`/(student)/(wishes)/${data.wishId}`);
-    }
+      if (data?.wishId) {
+        router.navigate(`/(student)/(wishes)/${data.wishId}`);
+      }
+    };
 
     const response = Notifications.getLastNotificationResponse();
     if (response?.notification) {

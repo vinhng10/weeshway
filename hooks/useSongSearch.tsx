@@ -22,11 +22,17 @@ const mapITunesToSong = (result: iTunesSearchResult): SongType => ({
   createdAt: new Date(),
 });
 
-export const useSongSearch = (query: string) => {
-  const [state, setState] = useState({
-    songs: [] as SongType[],
+interface SongSearchState {
+  songs: SongType[];
+  loading: boolean;
+  error: string | null;
+}
+
+export const useSongSearch = (query: string): SongSearchState => {
+  const [state, setState] = useState<SongSearchState>({
+    songs: [],
     loading: false,
-    error: null as string | null,
+    error: null,
   });
 
   useEffect(() => {

@@ -6,6 +6,7 @@ import {
   ChipBarItemProps,
   LocationPermission,
   ProjectStatus,
+  Search,
   SectionListView,
   Tile,
 } from "@/components";
@@ -21,6 +22,7 @@ import {
   LevelType,
   ProjectEnrichedType,
   ProjectStatusType,
+  SearchResultType,
   StyleType,
 } from "@/types";
 import { router } from "expo-router";
@@ -50,8 +52,8 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
           `*,
           wish:wishes(user_id),
           project:projects!inner(
-            *, 
-            profile:profiles(*), 
+            *,
+            profile:profiles(*),
             song:songs(id, name, artist_name, preview_url, artwork_url),
             location:locations(*),
             bookings:bookings(*),
@@ -88,8 +90,8 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
     queryKey: ["classes", "projects", status, style, level],
     tableName: "nearby_projects",
     columns: `
-      *, 
-      profile:profiles(*), 
+      *,
+      profile:profiles(*),
       song:songs(id, name, artist_name, preview_url, artwork_url),
       bookings:bookings(*),
       watchings:watchings(*)
@@ -158,6 +160,14 @@ export default function Classes() {
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
+  const handleSearchSelect = (item: SearchResultType) => {
+    if (item.type === "profile") {
+      router.navigate(`./teacher/${item.id}`);
+    } else {
+      router.navigate(`./classes/${item.id}`);
+    }
+  };
+
   const options: ChipBarItemProps[] = [
     {
       label: "Status",
@@ -184,7 +194,13 @@ export default function Classes() {
 
   return (
     <View style={styles.container}>
-      <ChipBar padding items={options} />
+      <View style={styles.toolbar}>
+        <Search
+          onSelect={handleSearchSelect}
+          rpc="search_nearby_projects_and_profiles"
+        />
+        <ChipBar items={options} />
+      </View>
       <Boundary>
         <ClassesContent status={status} style={style} level={level} />
       </Boundary>
@@ -198,5 +214,12 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
+  },
+  toolbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: theme.gap(2),
+    paddingVertical: theme.gap(1),
+    gap: theme.gap(1),
   },
 }));
