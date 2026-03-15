@@ -3,7 +3,17 @@ CREATE OR REPLACE FUNCTION "public"."find_similar_wishes"(
   "p_threshold" double precision DEFAULT 0.5,
   "p_limit" integer DEFAULT 10
 ) RETURNS TABLE (
-  "wish_id" "uuid",
+  "id" "uuid",
+  "created_at" timestamptz,
+  "user_id" "uuid",
+  "style" "public"."style",
+  "level" "public"."level",
+  "description" "text",
+  "song_id" "text",
+  "song_name" "text",
+  "song_artist_name" "text",
+  "song_artwork_url" "text",
+  "song_preview_url" "text",
   "score" double precision
 )
     LANGUAGE "plpgsql" SECURITY INVOKER
@@ -21,7 +31,17 @@ BEGIN
   IF wish_embedding IS NULL THEN RETURN; END IF;
 
   RETURN QUERY
-  SELECT nw.id AS wish_id,
+  SELECT nw.id,
+         nw.created_at,
+         nw.user_id,
+         nw.style,
+         nw.level,
+         nw.description,
+         nw.song_id,
+         s.name AS song_name,
+         s.artist_name AS song_artist_name,
+         s.artwork_url AS song_artwork_url,
+         s.preview_url AS song_preview_url,
          1 - (s.embedding <=> wish_embedding) AS score
     FROM nearby_wishes nw
     JOIN songs s ON nw.song_id = s.id
@@ -56,3 +76,32 @@ RETURNS bigint
 $$;
 
 ALTER FUNCTION "public"."similar_wish_count"("wish_row" "public"."nearby_wishes") OWNER TO "postgres";
+
+-- Count nearby wishes whose song is similar to a given song
+CREATE OR REPLACE FUNCTION "public"."count_nearby_wishes_by_song"(
+  "p_song_id" "text",
+  "p_threshold" double precision DEFAULT 0.5
+) RETURNS bigint
+    LANGUAGE "plpgsql" SECURITY INVOKER STABLE
+    SET "search_path" TO 'public', 'extensions'
+    AS $$
+DECLARE
+  song_embedding vector;
+  result bigint;
+BEGIN
+  SELECT embedding INTO song_embedding
+    FROM songs WHERE id = p_song_id;
+
+  IF song_embedding IS NULL THEN RETURN 0; END IF;
+
+  SELECT count(*) INTO result
+    FROM nearby_wishes nw
+    JOIN songs s ON nw.song_id = s.id
+   WHERE s.embedding IS NOT NULL
+     AND 1 - (s.embedding <=> song_embedding) >= p_threshold;
+
+  RETURN result;
+END;
+$$;
+
+ALTER FUNCTION "public"."count_nearby_wishes_by_song"("p_song_id" "text", "p_threshold" double precision) OWNER TO "postgres";
