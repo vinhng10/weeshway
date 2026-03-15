@@ -26,6 +26,7 @@ export const styles = StyleSheet.create((theme) => ({
       },
       color: {
         default: { color: theme.colors.typography },
+        contrast: { color: theme.colors.typographyContrast },
         primary: { color: theme.colors.primary },
         dimmed: { color: theme.colors.dimmed },
         danger: { color: theme.colors.danger },

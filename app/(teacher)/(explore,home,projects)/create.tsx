@@ -10,7 +10,8 @@ import {
   LocationSearch,
   SelectBoxInput,
   SongSearch,
-  TextInput,
+  TextBoxInput,
+  VibeBadge,
 } from "@/components";
 import {
   LEVEL,
@@ -196,6 +197,8 @@ export default function CreateProject() {
           />
         )}
 
+        {song?.id && <VibeBadge songId={song.id} />}
+
         {/* Song Search */}
         <SongSearch onSongPress={setSong} />
 
@@ -243,8 +246,8 @@ export default function CreateProject() {
         />
 
         {/* Project Description Input */}
-        <TextInput
-          placeholder="Project description ..."
+        <TextBoxInput
+          label="Description"
           value={description}
           onChangeText={setDescription}
           multiline

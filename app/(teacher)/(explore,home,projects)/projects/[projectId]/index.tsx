@@ -12,6 +12,7 @@ import {
   LocationSearch,
   SelectBoxInput,
   TextBoxInput,
+  VibeBadge,
 } from "@/components";
 import {
   BOOKING_ACTIVE_STATUSES,
@@ -280,6 +281,8 @@ function ProjectContent() {
           artworkEditable={canEditDetails}
           onArtworkChange={setArtworkUri}
         />
+
+        <VibeBadge songId={data.song.id} />
 
         {/* Toggle Button Group for Status */}
         <ChipBar items={options} />

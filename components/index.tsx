@@ -1,6 +1,7 @@
 // Main Components
 export { Avatar, type AvatarProps } from "./avatar";
 export { AvatarGroup, type AvatarGroupProps } from "./avatar-group";
+export { VibeBadge } from "./badge";
 export { Boundary } from "./boundary";
 export { Branding } from "./branding";
 export { BubbleChart } from "./bubble-chart";
@@ -26,7 +27,6 @@ export {
 export { ThemedView, type ThemedViewProps } from "./themed-view";
 export { Tile } from "./tile";
 export { Video } from "./video";
-export { WishInfo } from "./wish-info";
 
 // Input Components (re-export from input/index.tsx)
 export * from "./input";

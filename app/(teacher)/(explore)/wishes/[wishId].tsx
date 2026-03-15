@@ -1,4 +1,12 @@
-import { Boundary, Button, Header, WishInfo } from "@/components";
+import {
+  Boundary,
+  Button,
+  Header,
+  SongCard,
+  TextBoxInput,
+  ThemedText,
+  Tile,
+} from "@/components";
 import { useSuspenseQuery, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
@@ -7,6 +15,16 @@ import { RefreshControl, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type WishWithSimilarCount = WishEnrichedType & { similarWishCount: number };
+
+type SimilarWish = {
+  id: string;
+  style?: string;
+  level?: string;
+  songName: string;
+  songArtistName: string;
+  songArtworkUrl: string;
+  songPreviewUrl?: string;
+};
 
 function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
@@ -29,10 +47,22 @@ function WishContent() {
       enabled: !!wishId,
     });
 
+  const { data: similarWishes } = useSuspenseQuery<SimilarWish[]>({
+    queryKey: ["wishes", "similar", wishId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .rpc("find_similar_wishes", {
+          p_wish_id: wishId,
+          p_limit: 5,
+        })
+        .throwOnError();
+      return data ?? [];
+    },
+    enabled: !!wishId,
+  });
+
   const handleCreateProject = () => {
-    // Store the wish data in the temporary data store
     setData<WishEnrichedType>(data);
-    // Navigate to create project screen
     router.navigate("../create");
   };
 
@@ -45,7 +75,37 @@ function WishContent() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
       >
-        <WishInfo data={data} similarWishCount={data.similarWishCount} />
+        <View style={styles.wishInfo}>
+          <SongCard data={data.song} />
+          <View style={styles.row}>
+            <TextBoxInput label="Style" value={data.style} editable={false} />
+            <TextBoxInput label="Level" value={data.level} editable={false} />
+          </View>
+          <TextBoxInput
+            label="Description"
+            multiline
+            numberOfLines={4}
+            value={data.description}
+            editable={false}
+          />
+        </View>
+
+        {similarWishes.length > 0 && (
+          <View style={styles.similarSection}>
+            <ThemedText type="h5">Similar Wishes</ThemedText>
+            {similarWishes.map((wish) => (
+              <Tile
+                key={wish.id}
+                imageSource={wish.songArtworkUrl}
+                title={wish.songName}
+                subtitle={wish.songArtistName}
+                metadata={[wish.style, wish.level].filter(Boolean).join(" • ")}
+                previewUrl={wish.songPreviewUrl}
+                onPress={() => router.push(`./${wish.id}`)}
+              />
+            ))}
+          </View>
+        )}
       </ScrollView>
       <Button
         label="Create Project"
@@ -77,8 +137,11 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
   },
-  cardContainer: {
-    alignSelf: "center",
+  wishInfo: {
+    gap: theme.gap(2),
+  },
+  similarSection: {
+    gap: theme.gap(1),
   },
   row: {
     flexDirection: "row",

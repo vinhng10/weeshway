@@ -27,10 +27,10 @@ export default function OnboardingScreen() {
           style={styles.roleButton}
           onPress={() => handleSelectRole(ROLE.STUDENT)}
         >
-          <ThemedText type="h2" style={styles.text}>
+          <ThemedText type="h2" color="contrast">
             Student
           </ThemedText>
-          <ThemedText type="h5" style={styles.text}>
+          <ThemedText type="h5" color="contrast">
             Browse and book dance classes
           </ThemedText>
         </Pressable>
@@ -39,10 +39,10 @@ export default function OnboardingScreen() {
           style={styles.roleButton}
           onPress={() => handleSelectRole(ROLE.TEACHER)}
         >
-          <ThemedText type="h2" style={styles.text}>
+          <ThemedText type="h2" color="contrast">
             Teacher
           </ThemedText>
-          <ThemedText type="h5" style={styles.text}>
+          <ThemedText type="h5" color="contrast">
             Create and teach dance classes
           </ThemedText>
         </Pressable>
@@ -71,8 +71,5 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.contrast,
     alignItems: "center",
     gap: theme.gap(0.5),
-  },
-  text: {
-    color: theme.colors.typographyContrast,
   },
 }));
