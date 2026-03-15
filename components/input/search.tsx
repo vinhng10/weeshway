@@ -22,7 +22,7 @@ export const Search: React.FunctionComponent<SearchProps> = ({ rpc }) => {
       style={styles.searchButton}
       onPress={() => router.navigate({ pathname: "./search", params: { rpc } })}
     >
-      <IconSymbol name="search" size={20} style={styles.searchIcon} />
+      <IconSymbol name="search" size={20} style={styles.icon} />
     </Pressable>
   );
 };
@@ -145,7 +145,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     justifyContent: "center",
     alignItems: "center",
   },
-  searchIcon: {
+  icon: {
     color: theme.colors.typographyContrast,
   },
 }));
