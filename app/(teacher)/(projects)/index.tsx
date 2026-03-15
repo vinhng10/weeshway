@@ -19,7 +19,6 @@ import {
   LevelType,
   ProjectEnrichedType,
   ProjectStatusType,
-  SearchResultType,
   StyleType,
 } from "@/types";
 import { router } from "expo-router";
@@ -138,10 +137,6 @@ export default function Projects() {
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
-  const handleSearchSelect = (item: SearchResultType) => {
-    router.navigate(`./projects/${item.id}`);
-  };
-
   const options: ChipBarItemProps[] = [
     {
       label: "Status",
@@ -169,7 +164,7 @@ export default function Projects() {
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
-        <Search onSelect={handleSearchSelect} rpc="search_projects" />
+        <Search rpc="search_projects" />
         <ChipBar items={options} />
       </View>
       <Boundary>

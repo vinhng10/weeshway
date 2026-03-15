@@ -13,7 +13,6 @@ import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
 import {
   BookingEnrichedType,
   ProjectEnrichedType,
-  SearchResultType,
   TimeType,
 } from "@/types";
 import { router } from "expo-router";
@@ -116,10 +115,6 @@ function BookingsContent({ time }: BookingsContentProps) {
 export default function Bookings() {
   const [time, setTime] = useState<TimeType>(TIME.TODAY);
 
-  const handleSearchSelect = (item: SearchResultType) => {
-    router.navigate(`./classes/${item.id}`);
-  };
-
   const options: ChipBarItemProps[] = [
     {
       label: "Time",
@@ -133,7 +128,7 @@ export default function Bookings() {
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
-        <Search onSelect={handleSearchSelect} rpc="search_bookings" />
+        <Search rpc="search_bookings" />
         <ChipBar items={options} />
       </View>
       <Boundary>

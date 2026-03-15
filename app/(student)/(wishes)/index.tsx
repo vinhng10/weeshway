@@ -24,7 +24,6 @@ import {
   LevelType,
   ProjectEnrichedType,
   ProjectStatusType,
-  SearchResultType,
   StyleType,
   WatchingEnrichedType,
   WishRecommendationEnrichedType,
@@ -224,10 +223,6 @@ export default function Wishes() {
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
-  const handleSearchSelect = (item: SearchResultType) => {
-    router.navigate(`./${item.id}`);
-  };
-
   const options: ChipBarItemProps[] = [
     {
       label: "Type",
@@ -263,7 +258,7 @@ export default function Wishes() {
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
-        <Search onSelect={handleSearchSelect} rpc="search_wishes" />
+        <Search rpc="search_wishes" />
         <ChipBar items={options} />
       </View>
       <Boundary>

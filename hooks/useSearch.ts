@@ -1,10 +1,7 @@
 import { DEBOUNCE_TIME, PAGE_SIZE } from "@/constants";
 import { supabase } from "@/supabase";
 import { SearchResultType } from "@/types";
-import {
-  type InfiniteData,
-  useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
+import { type InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
 import { useEffect, useState } from "react";
 
@@ -15,6 +12,8 @@ interface SearchPage {
 
 interface SearchState {
   data: SearchResultType[];
+  loading: boolean;
+  error: string | null;
   fetchNextPage: () => void;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
@@ -41,7 +40,9 @@ export const useSearch = (query: string, rpc: string): SearchState => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useSuspenseInfiniteQuery<
+    isLoading,
+    error,
+  } = useInfiniteQuery<
     SearchPage,
     Error,
     InfiniteData<SearchPage>,
@@ -50,9 +51,8 @@ export const useSearch = (query: string, rpc: string): SearchState => {
   >({
     queryKey: [rpc, trimmed],
     initialPageParam: 0,
+    enabled: !!trimmed,
     queryFn: async ({ pageParam = 0 }) => {
-      if (!trimmed) return { data: [], nextOffset: undefined };
-
       const { data } = await supabase
         .rpc(rpc, {
           p_search_term: trimmed,
@@ -77,5 +77,13 @@ export const useSearch = (query: string, rpc: string): SearchState => {
   const data: SearchResultType[] =
     pages?.pages.flatMap((page) => page.data) ?? [];
 
-  return { data, fetchNextPage, hasNextPage, isFetchingNextPage, isDebouncing };
+  return {
+    data,
+    loading: isLoading,
+    error: error?.message ?? null,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isDebouncing,
+  };
 };

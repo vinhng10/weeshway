@@ -11,13 +11,7 @@ import {
 import { LEVEL, STYLE } from "@/constants";
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import {
-  BubbleType,
-  LevelType,
-  SearchResultType,
-  StyleType,
-  WishEnrichedType,
-} from "@/types";
+import { BubbleType, LevelType, StyleType, WishEnrichedType } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -137,10 +131,6 @@ export default function Explore() {
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
-  const handleSearchSelect = (item: SearchResultType) => {
-    router.navigate(`./wishes/${item.id}`);
-  };
-
   const options: ChipBarItemProps[] = [
     {
       label: "Style",
@@ -161,7 +151,7 @@ export default function Explore() {
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
-        <Search onSelect={handleSearchSelect} rpc="search_nearby_wishes" />
+        <Search rpc="search_nearby_wishes" />
         <ChipBar items={options} />
       </View>
       <Boundary>

@@ -80,7 +80,7 @@ const LocationDetail: React.FunctionComponent<LocationDetailProps> = ({
   );
 };
 
-export const LocationInput: React.FunctionComponent<LocationProps> = ({
+export const LocationSearch: React.FunctionComponent<LocationProps> = ({
   label,
   value,
   onValueChange,

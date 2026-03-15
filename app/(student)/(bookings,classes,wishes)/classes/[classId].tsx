@@ -11,7 +11,7 @@ import {
   Header,
   Hero,
   IntBoxInput,
-  LocationInput,
+  LocationSearch,
   QRCode,
   TextBoxInput,
   ThemedText,
@@ -276,7 +276,7 @@ function ClassContent() {
         />
 
         {/* Location Row */}
-        <LocationInput
+        <LocationSearch
           label="Location"
           value={data.location}
           editable={false}

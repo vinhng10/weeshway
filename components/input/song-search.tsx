@@ -13,7 +13,9 @@ interface SongSearchProps {
   onSongPress?(song: SongType): void;
 }
 
-export const SongSearch: React.FC<SongSearchProps> = ({ onSongPress }) => {
+export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
+  onSongPress,
+}) => {
   const [visible, setVisible] = useState(false);
   const [query, setQuery] = useState("");
   const { songs, loading, error } = useSongSearch(query);

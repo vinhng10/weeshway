@@ -13,15 +13,15 @@ export { Checkout } from "./checkout";
 export { DateTimeInput } from "./datetime-input";
 export { FAB, type FABItem, type FABProps } from "./fab";
 export { IconButton, type IconButtonProps } from "./icon-button";
-export { LocationInput } from "./location-input";
 export { LocationPermission, syncLocation } from "./location-permission";
+export { LocationSearch } from "./location-search";
 export {
   NotificationsPermission,
   syncPushToken,
 } from "./notifications-permission";
 export { Options } from "./options";
 export { PhotoPicker } from "./photo-picker";
-export { Search } from "./search";
+export { Search, SearchScreen } from "./search";
 export { SongSearch } from "./song-search";
 export { SpotsSelector } from "./spots-selector";
 export { TextInput, type TextInputProps } from "./text-input";

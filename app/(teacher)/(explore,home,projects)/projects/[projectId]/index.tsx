@@ -9,7 +9,7 @@ import {
   Header,
   Hero,
   IntBoxInput,
-  LocationInput,
+  LocationSearch,
   SelectBoxInput,
   TextBoxInput,
 } from "@/components";
@@ -335,7 +335,7 @@ function ProjectContent() {
         />
 
         {/* Location Row */}
-        <LocationInput
+        <LocationSearch
           label="Location"
           value={location}
           onValueChange={setLocation}

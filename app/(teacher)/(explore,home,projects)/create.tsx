@@ -7,7 +7,7 @@ import {
   Header,
   Hero,
   IntBoxInput,
-  LocationInput,
+  LocationSearch,
   SelectBoxInput,
   SongSearch,
   TextInput,
@@ -236,7 +236,7 @@ export default function CreateProject() {
         />
 
         {/* Location Row */}
-        <LocationInput
+        <LocationSearch
           label="Location"
           value={location}
           onValueChange={setLocation}
