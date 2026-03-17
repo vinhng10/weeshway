@@ -359,17 +359,30 @@ CREATE TYPE "public"."status" AS ENUM (
 ALTER TYPE "public"."status" OWNER TO "postgres";
 
 
-CREATE TYPE "public"."stripe_payment_status" AS ENUM (
+CREATE TYPE "public"."booking_status" AS ENUM (
     'Succeeded',
-    'Processing',
+    'Created',
     'Failed',
     'Canceled',
     'Refunded',
-    'Refunding'
+    'Refunding',
+    'CheckedIn',
+    'Transferred'
 );
 
 
-ALTER TYPE "public"."stripe_payment_status" OWNER TO "postgres";
+ALTER TYPE "public"."booking_status" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."report_status" AS ENUM (
+    'Pending',
+    'Reviewing',
+    'Resolved',
+    'Dismissed'
+);
+
+
+ALTER TYPE "public"."report_status" OWNER TO "postgres";
 
 
 CREATE TYPE "public"."style" AS ENUM (
@@ -410,7 +423,7 @@ DECLARE
   v_now timestamptz := now();
 BEGIN
   -- 1. Validate token against booking_secrets
-  SELECT b.id, b.user_id, b.project_id, b.status, b.checked_in, b.checked_in_at, b.spots
+  SELECT b.id, b.user_id, b.project_id, b.status, b.checked_in_at, b.spots
   INTO v_booking
   FROM bookings b
   JOIN booking_secrets bs ON bs.booking_id = b.id
@@ -433,22 +446,15 @@ BEGIN
 
   -- 3. Verify booking state
   IF v_booking.status != 'Succeeded' THEN
-    RAISE EXCEPTION 'This booking has not been paid yet.' ;
+    IF v_booking.status = 'CheckedIn' THEN
+      RAISE EXCEPTION 'Already checked in.';
+    END IF;
+    RAISE EXCEPTION 'This booking has not been paid yet.';
   END IF;
 
-  -- 4. Already checked in — silently succeed
-  IF v_booking.checked_in THEN
-    RETURN jsonb_build_object(
-      'success', true,
-      'bookingId', v_booking.id,
-      'checkedInAt', v_booking.checked_in_at,
-      'spots', v_booking.spots
-    );
-  END IF;
-
-  -- 5. Check in
+  -- 4. Check in
   UPDATE bookings
-  SET checked_in = true,
+  SET status = 'CheckedIn',
       checked_in_at = v_now
   WHERE id = v_booking.id;
 
@@ -703,6 +709,21 @@ $$;
 ALTER FUNCTION "public"."get_nearby_wishes_for_user"("p_user_id" "uuid") OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."reports" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v7"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "user_id" "uuid" REFERENCES "auth"."users"("id") ON DELETE CASCADE,
+    "project_id" "uuid",
+    "description" "text" NOT NULL,
+    "photo_urls" "jsonb",
+    "status" "public"."report_status" DEFAULT 'Pending'::"public"."report_status" NOT NULL,
+    "resolution" "text"
+);
+
+
+ALTER TABLE "public"."reports" OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO ''
@@ -730,9 +751,9 @@ CREATE OR REPLACE FUNCTION "public"."handle_project_cancellation"() RETURNS "tri
 BEGIN
     IF NEW.status = 'Canceled'::public.status AND OLD.status IS DISTINCT FROM 'Canceled'::public.status THEN
         UPDATE public.bookings
-        SET status = 'Refunding'::public.stripe_payment_status
+        SET status = 'Refunding'
         WHERE project_id = NEW.id
-          AND status = 'Succeeded'::public.stripe_payment_status;
+          AND status IN ('Succeeded', 'CheckedIn');
     END IF;
 
     RETURN NEW;
@@ -761,7 +782,7 @@ BEGIN
                 IF EXISTS (
                     SELECT 1 FROM public.bookings
                     WHERE project_id = OLD.id
-                      AND status = 'Refunding'::public.stripe_payment_status
+                      AND status = 'Refunding'
                 ) THEN
                     RAISE EXCEPTION 'Project cannot be deleted until all refunds are completed.';
                 END IF;
@@ -909,10 +930,10 @@ DECLARE
     project_status   public.status;
     project_start_at TIMESTAMPTZ;
 BEGIN
-    IF NEW.status = 'Refunding'::public.stripe_payment_status THEN
+    IF NEW.status = 'Refunding' THEN
 
-        -- 1. Must come from 'Succeeded'
-        IF OLD.status IS DISTINCT FROM 'Succeeded'::public.stripe_payment_status THEN
+        -- 1. Must come from 'Succeeded' or 'CheckedIn'
+        IF OLD.status NOT IN ('Succeeded', 'CheckedIn') THEN
             RAISE EXCEPTION 'Only a confirmed booking can be refunded.';
         END IF;
 
@@ -927,17 +948,12 @@ BEGIN
             RETURN NEW;
         END IF;
 
-        -- 4. Block refund if student already checked in
-        IF OLD.checked_in = true THEN
-            RAISE EXCEPTION 'Cancellation is not allowed after checking in.';
-        END IF;
-
-        -- 5. Enforce 24h rule for student-initiated cancellations
+        -- 4. Enforce 24h rule for student-initiated cancellations
         IF now() > (project_start_at - INTERVAL '1 day') THEN
             RAISE EXCEPTION 'Cancellation is only allowed up to 24 hours before the class starts.';
         END IF;
 
-        -- 6. Student-initiated
+        -- 5. Student-initiated
         NEW.refund_initiator := 'Student'::public.role;
     END IF;
 
@@ -1042,18 +1058,27 @@ CREATE OR REPLACE FUNCTION "public"."enqueue_transfers"() RETURNS "void"
 DECLARE
   msgs jsonb[];
 BEGIN
-  -- Atomically mark eligible bookings and collect their IDs
-  WITH flagged AS (
+  -- Mark eligible bookings (CheckedIn or Succeeded) as Transferred
+  -- Skip bookings where the student has a pending report on the project
+  WITH eligible AS (
+    SELECT b.id
+    FROM public.bookings b
+    WHERE b.status IN ('CheckedIn', 'Succeeded')
+      AND b.project_end_at < now() - interval '48 hours'
+      AND NOT EXISTS (
+        SELECT 1 FROM public.reports r
+        WHERE r.project_id = b.project_id
+          AND r.user_id = b.user_id
+          AND r.status = 'Pending'::"public"."report_status"
+      )
+    FOR UPDATE OF b
+  ),
+  flagged AS (
     UPDATE public.bookings b
-    SET transfer_enqueued = true
-    FROM public.projects p
-    WHERE p.id = b.project_id
-      AND b.checked_in = true
-      AND b.status = 'Succeeded'
-      AND b.stripe_transfer_id IS NULL
-      AND b.transfer_enqueued = false
-      AND p.end_at < now() - interval '48 hours'
-    RETURNING b.id
+    SET status = 'Transferred'
+    FROM eligible e
+    WHERE b.id = e.id
+    RETURNING e.id
   )
   SELECT array_agg(jsonb_build_object('id', f.id))
   INTO msgs
@@ -1218,17 +1243,19 @@ ALTER TABLE "public"."booking_secrets" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."bookings" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v7"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "project_id" "uuid" NOT NULL,
+    "user_id" "uuid",
+    "project_id" "uuid",
     "stripe_payment_intent_id" "text" NOT NULL,
-    "status" "public"."stripe_payment_status",
+    "status" "public"."booking_status",
     "updated_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text"),
     "spots" smallint DEFAULT '1'::smallint,
     "refund_initiator" "public"."role",
-    "checked_in" boolean DEFAULT false NOT NULL,
     "checked_in_at" timestamp with time zone,
     "stripe_transfer_id" "text",
-    "transfer_enqueued" boolean DEFAULT false NOT NULL
+    "price" numeric NOT NULL,
+    "currency" "text" NOT NULL,
+    "to_stripe_account_id" "text",
+    "project_end_at" timestamp with time zone
 );
 
 
@@ -1347,14 +1374,14 @@ ALTER TABLE "public"."songs" OWNER TO "postgres";
 
 CREATE OR REPLACE VIEW "public"."stats" WITH ("security_invoker"='true') AS
  SELECT "p"."user_id",
-    "sum"("p"."price") AS "total_earnings",
+    "sum"("b"."price") AS "total_earnings",
     "count"("b"."id") AS "booking_count",
-    "p"."currency",
+    "b"."currency",
     "date_trunc"('month'::"text", "now"()) AS "current_month"
    FROM ("public"."bookings" "b"
      JOIN "public"."projects" "p" ON (("b"."project_id" = "p"."id")))
-  WHERE (("b"."status" = 'Succeeded'::"public"."stripe_payment_status") AND ("b"."checked_in" = true) AND ("b"."updated_at" >= "date_trunc"('month'::"text", "now"())))
-  GROUP BY "p"."user_id", "p"."currency";
+  WHERE (("b"."status" IN ('CheckedIn', 'Transferred')) AND ("b"."updated_at" >= "date_trunc"('month'::"text", "now"())))
+  GROUP BY "p"."user_id", "b"."currency";
 
 
 ALTER VIEW "public"."stats" OWNER TO "postgres";
@@ -1371,7 +1398,7 @@ CROSS JOIN (
 WHERE
   CASE
     WHEN me.location IS NOT NULL AND COALESCE(l.location, teacher.location) IS NOT NULL THEN
-      ST_DWithin(COALESCE(l.location, teacher.location), me.location, 1.0)
+      "extensions"."st_dwithin"(COALESCE(l.location, teacher.location), me.location, 1.0)
     WHEN me.country IS NOT NULL THEN
       COALESCE(l.country, teacher.country) = me.country
     ELSE TRUE
@@ -1391,7 +1418,7 @@ CROSS JOIN (
 WHERE
   CASE
     WHEN me.location IS NOT NULL AND p.location IS NOT NULL THEN
-      ST_DWithin(p.location, me.location, 1.0)
+      "extensions"."st_dwithin"(p.location, me.location, 1.0)
     WHEN me.country IS NOT NULL THEN
       p.country = me.country
     ELSE TRUE
@@ -1547,7 +1574,10 @@ CREATE OR REPLACE TRIGGER "recommend_on_project_upsert" AFTER INSERT OR UPDATE O
 CREATE OR REPLACE TRIGGER "recommend_on_wish_insert" AFTER INSERT ON "public"."wishes" FOR EACH ROW EXECUTE FUNCTION "util"."enqueue"('wish_recommendation_jobs');
 
 
-CREATE OR REPLACE TRIGGER "refund_bookings" AFTER UPDATE ON "public"."bookings" FOR EACH ROW WHEN ((("new"."status" = 'Refunding'::"public"."stripe_payment_status") AND ("old"."status" = 'Succeeded'::"public"."stripe_payment_status"))) EXECUTE FUNCTION "util"."enqueue"('refund_jobs');
+CREATE OR REPLACE TRIGGER "refund_bookings" AFTER UPDATE ON "public"."bookings"
+  FOR EACH ROW
+  WHEN (NEW.status = 'Refunding' AND OLD.status IN ('Succeeded', 'CheckedIn'))
+  EXECUTE FUNCTION "util"."enqueue"('refund_jobs');
 
 
 CREATE OR REPLACE TRIGGER "set_booking_updated_at" BEFORE UPDATE ON "public"."bookings" FOR EACH ROW EXECUTE FUNCTION "public"."update_objects_updated_at"();
@@ -1559,7 +1589,10 @@ CREATE OR REPLACE TRIGGER "set_profile_updated_at" BEFORE UPDATE ON "public"."pr
 CREATE OR REPLACE TRIGGER "set_project_updated_at" BEFORE UPDATE ON "public"."projects" FOR EACH ROW EXECUTE FUNCTION "public"."update_objects_updated_at"();
 
 
-CREATE OR REPLACE TRIGGER "create_booking_secret" AFTER INSERT OR UPDATE OF "status" ON "public"."bookings" FOR EACH ROW WHEN (("new"."status" = 'Succeeded'::"public"."stripe_payment_status")) EXECUTE FUNCTION "public"."create_booking_secret"();
+CREATE OR REPLACE TRIGGER "create_booking_secret" AFTER INSERT OR UPDATE OF "status" ON "public"."bookings"
+  FOR EACH ROW
+  WHEN (NEW.status = 'Succeeded')
+  EXECUTE FUNCTION "public"."create_booking_secret"();
 
 
 CREATE OR REPLACE TRIGGER "validate_refund_eligibility" BEFORE UPDATE ON "public"."bookings" FOR EACH ROW EXECUTE FUNCTION "public"."validate_refund_eligibility"();
@@ -1572,11 +1605,11 @@ ALTER TABLE ONLY "public"."booking_secrets"
 
 
 ALTER TABLE ONLY "public"."bookings"
-    ADD CONSTRAINT "bookings_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE CASCADE;
+    ADD CONSTRAINT "bookings_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE SET NULL;
 
 
 ALTER TABLE ONLY "public"."bookings"
-    ADD CONSTRAINT "bookings_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id");
+    ADD CONSTRAINT "bookings_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE SET NULL;
 
 
 ALTER TABLE ONLY "public"."profiles"
@@ -1592,7 +1625,7 @@ ALTER TABLE ONLY "public"."projects"
 
 
 ALTER TABLE ONLY "public"."projects"
-    ADD CONSTRAINT "projects_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id");
+    ADD CONSTRAINT "projects_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
 
 
 ALTER TABLE ONLY "public"."recommendation_items"
@@ -1621,6 +1654,55 @@ ALTER TABLE ONLY "public"."wishes"
 
 ALTER TABLE ONLY "public"."wishes"
     ADD CONSTRAINT "wishes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
+
+
+ALTER TABLE "public"."reports" ADD CONSTRAINT "reports_pkey" PRIMARY KEY ("id");
+ALTER TABLE "public"."reports" ADD CONSTRAINT "reports_user_project_key" UNIQUE ("user_id", "project_id");
+
+ALTER TABLE ONLY "public"."reports"
+    ADD CONSTRAINT "reports_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE CASCADE;
+
+CREATE INDEX "reports_project_id_idx" ON "public"."reports" ("project_id");
+
+
+CREATE OR REPLACE FUNCTION "public"."validate_report_eligibility"()
+  RETURNS TRIGGER
+  LANGUAGE "plpgsql"
+  SET "search_path" TO ''
+  AS $$
+DECLARE
+  v_start_at timestamptz;
+  v_end_at   timestamptz;
+BEGIN
+  SELECT p.start_at, p.end_at
+  INTO v_start_at, v_end_at
+  FROM public.projects p
+  WHERE p.id = NEW.project_id;
+
+  IF v_start_at IS NULL OR v_end_at IS NULL THEN
+    RAISE EXCEPTION 'Project has no scheduled time'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF now() < v_start_at THEN
+    RAISE EXCEPTION 'Reports can only be submitted after the class has started'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF now() > v_end_at + interval '48 hours' THEN
+    RAISE EXCEPTION 'Reports can only be submitted within 48 hours after the class ends'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER "validate_report_eligibility"
+  BEFORE INSERT ON "public"."reports"
+  FOR EACH ROW
+  EXECUTE FUNCTION "public"."validate_report_eligibility"();
+
 
 
 CREATE POLICY "Enable delete for users based on user_id" ON "public"."watchings" FOR DELETE TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
@@ -1730,6 +1812,18 @@ ALTER TABLE "public"."songs" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."watchings" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."reports" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "Enable read own reports"
+ON "public"."reports" FOR SELECT TO "authenticated"
+USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
+
+CREATE POLICY "Enable insert own reports"
+ON "public"."reports" FOR INSERT TO "authenticated"
+WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 ALTER TABLE "public"."wishes" ENABLE ROW LEVEL SECURITY;
@@ -1934,3 +2028,11 @@ CREATE POLICY "projects_owner_update" ON storage.objects FOR UPDATE
 USING (((bucket_id = 'projects'::text) AND EXISTS (
   SELECT 1 FROM public.projects WHERE id = (storage.foldername(name))[1]::uuid AND user_id = auth.uid()
 )));
+
+CREATE POLICY "reports_insert"
+ON "storage"."objects" AS permissive FOR INSERT TO authenticated
+WITH CHECK (((bucket_id = 'reports'::text) AND (( SELECT (auth.uid())::text AS uid) = (storage.foldername(name))[1])));
+
+CREATE POLICY "reports_select"
+ON "storage"."objects" AS permissive FOR SELECT TO authenticated
+USING (((bucket_id = 'reports'::text) AND (( SELECT (auth.uid())::text AS uid) = (storage.foldername(name))[1])));

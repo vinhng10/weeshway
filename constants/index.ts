@@ -85,7 +85,7 @@ export const PROJECT_STATUS_TRANSITIONS: Record<string, string[]> = {
 
 export const BOOKING_STATUS = {
   SUCCEEDED: "Succeeded",
-  PROCESSING: "Processing",
+  CREATED: "Created",
   FAILED: "Failed",
   CANCELED: "Canceled",
   REFUNDED: "Refunded",

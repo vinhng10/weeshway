@@ -2,7 +2,6 @@
   "imports": {
     "jose": "npm:jose",
     "supabase": "npm:@supabase/supabase-js",
-    "postgres": "npm:postgres",
-    "zod": "npm:zod"
+    "postgres": "npm:postgres"
   }
 }

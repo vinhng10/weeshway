@@ -12,30 +12,47 @@ const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 async function upsertBooking(
   paymentIntentId: string,
   status: string,
-  metadata: Stripe.PaymentIntent["metadata"] = {}
+  metadata: Stripe.PaymentIntent["metadata"] = {},
 ) {
   // We use ON CONFLICT (user_id, project_id) to ensure uniqueness.
   // We only overwrite the record if:
   // 1. It's the same payment intent we are updating (id match)
   // 2. OR the previous booking was unsuccessful (Canceled/Refunded/Failed), allowing a retry.
+  //
+  // All data comes from Stripe metadata — no table JOINs needed.
+  // The payment function snapshots project details (price, currency,
+  // to_stripe_account_id, end_at) into metadata at intent creation time.
+  // This makes bookings self-contained for async money operations
+  // (refund/transfer crons) after account deletion.
   await sql`
-  INSERT INTO bookings (stripe_payment_intent_id, status, user_id, project_id, spots)
+  INSERT INTO bookings (
+    stripe_payment_intent_id, status, user_id, project_id, spots, price, currency,
+    to_stripe_account_id, project_end_at
+  )
   VALUES (
-    ${paymentIntentId}, 
-    ${status}::public.booking_status, 
-    ${metadata.user_id}, 
-    ${metadata.project_id}, 
-    ${metadata?.spots}
+    ${paymentIntentId},
+    ${status},
+    ${metadata.user_id}::uuid,
+    ${metadata.project_id}::uuid,
+    ${metadata.spots}::int,
+    ${metadata.price}::int,
+    ${metadata.currency},
+    ${metadata.to_stripe_account_id},
+    ${metadata.end_at}::timestamptz
   )
   ON CONFLICT (user_id, project_id)
-  DO UPDATE SET 
+  DO UPDATE SET
     stripe_payment_intent_id = EXCLUDED.stripe_payment_intent_id,
     status = EXCLUDED.status,
-    spots = EXCLUDED.spots
-  WHERE 
-    -- 1. If it's the same payment intent, always allow the update (e.g. Processing -> Succeeded)
+    spots = EXCLUDED.spots,
+    price = EXCLUDED.price,
+    currency = EXCLUDED.currency,
+    to_stripe_account_id = EXCLUDED.to_stripe_account_id,
+    project_end_at = EXCLUDED.project_end_at
+  WHERE
+    -- 1. If it's the same payment intent, always allow the update (e.g. Created -> Succeeded)
     bookings.stripe_payment_intent_id = EXCLUDED.stripe_payment_intent_id
-    OR 
+    OR
     -- 2. If it's a new payment intent, only allow overwriting "dead" states
     bookings.status IN ('Canceled', 'Refunded', 'Failed')
   `;
@@ -45,7 +62,7 @@ async function handleEvent(event: Stripe.Event): Promise<void> {
   switch (event.type) {
     case "payment_intent.created": {
       const pi = event.data.object;
-      await upsertBooking(pi.id, "Processing", pi.metadata);
+      await upsertBooking(pi.id, "Created", pi.metadata);
       break;
     }
     case "payment_intent.succeeded": {
@@ -68,7 +85,7 @@ async function handleEvent(event: Stripe.Event): Promise<void> {
       await upsertBooking(
         charge.payment_intent as string,
         "Refunded",
-        charge.metadata
+        charge.metadata,
       );
       break;
     }
@@ -101,7 +118,7 @@ Deno.serve(async (req) => {
     const event = await stripe.webhooks.constructEventAsync(
       rawBody,
       signature,
-      WEBHOOK_SECRET
+      WEBHOOK_SECRET,
     );
 
     await handleEvent(event);

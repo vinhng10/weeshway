@@ -124,7 +124,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   deleteAccount: async () => {
-    const { error } = await supabase.functions.invoke("delete-account");
+    const { error } = await supabase.functions.invoke("deactivate-account");
     if (error) throw error;
     await supabase.auth.signOut();
   },

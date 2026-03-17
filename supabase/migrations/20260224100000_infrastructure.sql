@@ -8,6 +8,7 @@ SELECT pgmq.create('project_recommendation_jobs');
 SELECT pgmq.create('refund_jobs');
 SELECT pgmq.create('reminder_jobs');
 SELECT pgmq.create('transfer_jobs');
+SELECT pgmq.create('account_deletion_jobs');
 SELECT pgmq.create('wish_recommendation_jobs');
 
 -- =============================================================================
@@ -17,7 +18,8 @@ SELECT pgmq.create('wish_recommendation_jobs');
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES
   ('models', 'models', false, null, null),
-  ('profiles', 'profiles', true, 52428800, ARRAY['image/*', 'video/*']);
+  ('profiles', 'profiles', true, 52428800, ARRAY['image/*', 'video/*']),
+  ('reports', 'reports', false, 52428800, ARRAY['image/*']);
 
 -- =============================================================================
 -- Vault Secrets
@@ -100,12 +102,18 @@ SELECT cron.schedule(
   $$SELECT util.process_jobs('transfer_jobs', 'transfer', 100)$$
 );
 
+-- Process account deletions: every 15 minutes
+SELECT cron.schedule(
+  'process-account-deletions',
+  '*/15 * * * *',
+  $$SELECT util.process_jobs('account_deletion_jobs', 'delete-account', 10, 1, 300000)$$
+);
+
 -- =============================================================================
 -- Fees
 -- =============================================================================
 
-INSERT INTO "public"."fees" ("key", "value") 
-VALUES 
+INSERT INTO "public"."fees" ("key", "value")
+VALUES
   ('booking_fee', '50'),
-  ('transaction_fee', '5'),
-  ('no_show_split', '30');
+  ('transaction_fee', '5');

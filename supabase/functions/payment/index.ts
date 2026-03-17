@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
         supabase
           .from("projects")
           .select(
-            "id, price, currency, spots, teacher:profiles!inner(stripe_account_id)",
+            "id, price, currency, spots, end_at, teacher:profiles!inner(stripe_account_id)",
           )
           .eq("id", projectId)
           .single()
@@ -42,23 +42,18 @@ Deno.serve(async (req) => {
           .from("bookings")
           .select("id, user_id, spots, stripe_payment_intent_id, status")
           .eq("project_id", projectId)
-          // We fetch Succeeded (for capacity) and Processing (for the current user's retry logic)
-          .in("status", [
-            "Succeeded",
-            "Processing",
-            "CheckedIn",
-            "Transferred",
-          ]),
+          // We fetch Succeeded (for capacity) and Created (for the current user's retry logic)
+          .in("status", ["Succeeded", "Created", "CheckedIn", "Transferred"]),
       ]);
 
     // 3. Guards
-    const teacherStripeId = (
+    const toStripeAccountId = (
       Array.isArray(project.teacher) ? project.teacher[0] : project.teacher
     )?.stripe_account_id;
 
     if (!customer?.stripe_account_id)
       throw new HttpError("You cannot make payments yet", 406);
-    if (!teacherStripeId)
+    if (!toStripeAccountId)
       throw new HttpError("Teacher cannot receive payments yet", 406);
     if (!project.price || project.price <= 0)
       throw new HttpError("Class price is invalid", 406);
@@ -127,11 +122,11 @@ Deno.serve(async (req) => {
     let intent: Stripe.PaymentIntent;
 
     // DECISION LOGIC:
-    // We update the existing intent ONLY if the status is 'Processing'.
+    // We update the existing intent ONLY if the status is 'Created'.
     // If the status is 'Canceled', 'Refunded', or 'Failed', we ignore the old intent
     // and create a fresh one (which will overwrite the DB row via webhook).
     const isRetryable =
-      existingBooking?.status === "Processing" &&
+      existingBooking?.status === "Created" &&
       existingBooking.stripe_payment_intent_id;
 
     if (isRetryable) {
@@ -142,7 +137,15 @@ Deno.serve(async (req) => {
           {
             amount: total,
             transfer_group: `booking_${project.id}_${user.id}`,
-            metadata: { user_id: customer.id, project_id: project.id, spots },
+            metadata: {
+              user_id: customer.id,
+              project_id: project.id,
+              spots,
+              price: project.price,
+              currency: project.currency,
+              to_stripe_account_id: toStripeAccountId,
+              end_at: project.end_at,
+            },
           },
         );
         // We manually update spots here for immediate UI consistency,
@@ -177,6 +180,10 @@ Deno.serve(async (req) => {
           user_id: customer.id,
           project_id: project.id,
           spots,
+          price: project.price,
+          currency: project.currency,
+          to_stripe_account_id: toStripeAccountId,
+          end_at: project.end_at,
         },
       });
     }

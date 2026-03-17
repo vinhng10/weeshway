@@ -42,13 +42,8 @@ async function processJob(job: Job, fees: Fees) {
   return await sql.begin(async () => {
     // 1. Fetch booking data — refund_initiator is set by the validate_refund_eligibility trigger
     const [booking] = await sql`
-      SELECT b.id, b.stripe_payment_intent_id, b.spots, b.refund_initiator,
-             b.stripe_transfer_id, p.price, p.currency,
-             pr.stripe_account_id AS teacher_stripe_account_id
-      FROM public.bookings b
-      JOIN public.projects p ON p.id = b.project_id
-      JOIN public.profiles pr ON pr.id = p.user_id
-      WHERE b.id = ${job.id} AND b.status = 'Refunding'
+      SELECT * FROM public.bookings
+      WHERE id = ${job.id} AND status = 'Refunding'
       FOR UPDATE
     `;
 
@@ -86,7 +81,7 @@ async function processJob(job: Job, fees: Fees) {
 
       return { ...job, refundId: refund.id, status: refund.status };
     } else {
-      if (!booking.teacher_stripe_account_id) {
+      if (!booking.to_stripe_account_id) {
         throw new HttpError(
           `Booking ${job.id}: teacher has no Stripe account`,
           400,
@@ -106,7 +101,7 @@ async function processJob(job: Job, fees: Fees) {
         await stripe.charges.create({
           amount: penaltyAmount,
           currency: booking.currency.toLowerCase(),
-          source: booking.teacher_stripe_account_id,
+          source: booking.to_stripe_account_id,
           description: `Cancellation penalty for booking ${booking.id}`,
           metadata,
         });

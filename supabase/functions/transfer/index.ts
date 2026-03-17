@@ -23,15 +23,10 @@ async function processJob(job: Job, fees: Fees) {
   return await sql.begin(async () => {
     // 1. Fetch booking with no transfer yet
     const [booking] = await sql`
-      SELECT b.id, b.stripe_payment_intent_id, b.spots, b.user_id,
-             p.price, p.currency, p.id AS project_id,
-             pr.stripe_account_id AS teacher_stripe_account_id
-      FROM public.bookings b
-      JOIN public.projects p ON p.id = b.project_id
-      JOIN public.profiles pr ON pr.id = p.user_id
-      WHERE b.id = ${job.id}
-        AND b.status = 'Transferred'
-        AND b.stripe_transfer_id IS NULL
+      SELECT * FROM public.bookings
+      WHERE id = ${job.id}
+        AND status = 'Transferred'
+        AND stripe_transfer_id IS NULL
       FOR UPDATE
     `;
 
@@ -42,7 +37,7 @@ async function processJob(job: Job, fees: Fees) {
       );
     }
 
-    if (!booking.teacher_stripe_account_id) {
+    if (!booking.to_stripe_account_id) {
       throw new HttpError(
         `Booking ${job.id}: teacher has no Stripe account`,
         400,
@@ -74,7 +69,7 @@ async function processJob(job: Job, fees: Fees) {
     const transfer = await stripe.transfers.create({
       amount: transferAmount,
       currency,
-      destination: booking.teacher_stripe_account_id,
+      destination: booking.to_stripe_account_id,
       source_transaction: chargeId,
       transfer_group: `booking_${booking.project_id}_${booking.user_id}`,
       metadata: {

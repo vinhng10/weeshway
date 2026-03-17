@@ -130,6 +130,10 @@ export type BookingType = {
   stripePaymentIntentId: string;
   status: BookingStatusType;
   spots: number;
+  price: number;
+  currency: string;
+  toStripeAccountId?: string;
+  projectEndAt?: Date;
   checkedInAt?: Date;
   stripeTransferId?: string;
   secret?: BookingSecretType | null;
