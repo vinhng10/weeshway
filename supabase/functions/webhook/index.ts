@@ -24,12 +24,16 @@ async function upsertBooking(
   // to_stripe_account_id, end_at) into metadata at intent creation time.
   // This makes bookings self-contained for async money operations
   // (refund/transfer crons) after account deletion.
+  //
+  // The WHERE clause on profiles/projects guards against stale webhooks
+  // arriving after account deletion — if the user or project no longer
+  // exists, the INSERT silently inserts nothing.
   await sql`
   INSERT INTO bookings (
     stripe_payment_intent_id, status, user_id, project_id, spots, price, currency,
     to_stripe_account_id, project_end_at
   )
-  VALUES (
+  SELECT
     ${paymentIntentId},
     ${status},
     ${metadata.user_id}::uuid,
@@ -39,7 +43,8 @@ async function upsertBooking(
     ${metadata.currency},
     ${metadata.to_stripe_account_id},
     ${metadata.end_at}::timestamptz
-  )
+  WHERE EXISTS (SELECT 1 FROM profiles WHERE id = ${metadata.user_id}::uuid)
+    AND EXISTS (SELECT 1 FROM projects WHERE id = ${metadata.project_id}::uuid)
   ON CONFLICT (user_id, project_id)
   DO UPDATE SET
     stripe_payment_intent_id = EXCLUDED.stripe_payment_intent_id,

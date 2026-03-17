@@ -83,7 +83,7 @@ export default function Account() {
   const handleDeleteAccount = () => {
     showAlert(
       "Delete Account",
-      "This will permanently delete your account and all associated data. This action cannot be undone.",
+      "1. Your account will be deactivated immediately.\n2. Your classes will be canceled, eligible bookings refunded, and any open reports dismissed.\n3. All your data will be permanently deleted shortly after.\n\nThis cannot be undone.",
       {
         confirmLabel: "Confirm",
         onConfirm: async () => {

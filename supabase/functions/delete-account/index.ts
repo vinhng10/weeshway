@@ -12,7 +12,7 @@ const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
 
 const jobSchema = z.object({
   jobId: z.number(),
-  id: z.uuidv7(),
+  id: z.uuid(),
 });
 const failedJobSchema = jobSchema.extend({
   error: z.string(),

@@ -930,7 +930,7 @@ DECLARE
     project_status   public.status;
     project_start_at TIMESTAMPTZ;
 BEGIN
-    IF NEW.status = 'Refunding' THEN
+    IF NEW.status = 'Refunding' AND OLD.status IS DISTINCT FROM 'Refunding' THEN
 
         -- 1. Must come from 'Succeeded' or 'CheckedIn'
         IF OLD.status NOT IN ('Succeeded', 'CheckedIn') THEN

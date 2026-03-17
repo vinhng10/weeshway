@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     await sql`
       SELECT pgmq.send(
         queue_name => 'account_deletion_jobs',
-        msg => jsonb_build_object('id', ${userId})
+        msg => jsonb_build_object('id', ${userId}::text)
       )
     `;
 
