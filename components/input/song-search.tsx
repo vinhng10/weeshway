@@ -1,9 +1,11 @@
 import { useSongSearch } from "@/hooks";
 import { SongType } from "@/types";
+import { FlashList } from "@shopify/flash-list";
 import React, { useState } from "react";
-import { FlatList, Keyboard, Modal, View } from "react-native";
+import { Keyboard, Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { Separator } from "../separator";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 import { Tile } from "../tile";
@@ -30,6 +32,16 @@ export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
     onSongPress?.(song);
     handleClose();
   };
+
+  const renderSong = ({ item: song }: { item: SongType }) => (
+    <Tile
+      imageSource={song.artworkUrl}
+      title={song.name}
+      subtitle={song.artistName}
+      metadata={song.genre}
+      onPress={() => onSelect(song)}
+    />
+  );
 
   const renderEmptyState = () => {
     if (loading) {
@@ -88,28 +100,23 @@ export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
             />
           </View>
 
-          <FlatList
+          <FlashList
             data={songs}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item: song }) => (
-              <Tile
-                imageSource={song.artworkUrl}
-                title={song.name}
-                subtitle={song.artistName}
-                metadata={song.genre}
-                onPress={() => onSelect(song)}
-              />
-            )}
+            keyExtractor={keyExtractor}
+            renderItem={renderSong}
             ListEmptyComponent={renderEmptyState}
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            ItemSeparatorComponent={Separator}
           />
         </View>
       </Modal>
     </>
   );
 };
+
+const keyExtractor = (item: SongType) => item.id;
 
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
@@ -126,7 +133,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.gap(2),
   },
   scrollContainer: {
-    gap: theme.gap(1),
     padding: theme.gap(2),
     paddingBottom: theme.gap(16),
   },

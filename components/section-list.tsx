@@ -1,31 +1,32 @@
-import { useCallback, useMemo } from "react";
-import {
-  RefreshControl,
-  SectionList,
-  SectionListData,
-  SectionListRenderItemInfo,
-  View,
-} from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import React, { useMemo } from "react";
+import { RefreshControl, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ThemedText } from "./themed-text";
 
+export interface Section<T = any> {
+  title?: string;
+  data: T[];
+  render: (item: T) => React.ReactElement;
+}
+
 interface SectionListViewProps {
-  sections: ReadonlyArray<SectionListData<any>>;
+  sections: readonly Section[];
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   refetch?: () => void;
   isRefetching?: boolean;
 }
 
-const keyExtractor = (item: any, i: number) => item?.id ?? `item-${i}`;
-
-const renderSectionHeader = ({ section: { title } }: any) =>
-  title ? <ThemedText type="h4">{title}</ThemedText> : null;
-
-const renderSectionFooter = () => <View style={styles.footer} />;
-
-const renderItem = ({ item, section }: SectionListRenderItemInfo<any>) =>
-  section.render(item);
+type FlashItem =
+  | { type: "header"; title: string; sectionIndex: number }
+  | {
+      type: "row";
+      item: any;
+      render: (item: any) => React.ReactElement;
+      sectionIndex: number;
+    }
+  | { type: "footer"; sectionIndex: number };
 
 export function SectionListView({
   sections,
@@ -34,29 +35,52 @@ export function SectionListView({
   refetch,
   isRefetching,
 }: SectionListViewProps) {
-  const filteredSections = useMemo(
-    () => sections.filter((section) => section.data.length > 0),
-    [sections],
-  );
-
-  const handleEndReached = useCallback(() => {
-    if (hasNextPage && fetchNextPage) fetchNextPage();
-  }, [hasNextPage, fetchNextPage]);
+  const data = useMemo(() => {
+    const result: FlashItem[] = [];
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      if (section.data.length === 0) continue;
+      if (section.title) {
+        result.push({ type: "header", title: section.title, sectionIndex: i });
+      }
+      for (const item of section.data) {
+        result.push({
+          type: "row",
+          item,
+          render: section.render,
+          sectionIndex: i,
+        });
+      }
+      result.push({ type: "footer", sectionIndex: i });
+    }
+    return result;
+  }, [sections]);
 
   return (
-    <SectionList
-      sections={filteredSections}
-      keyExtractor={keyExtractor}
-      renderItem={renderItem}
-      renderSectionHeader={renderSectionHeader}
-      renderSectionFooter={renderSectionFooter}
+    <FlashList
+      data={data}
+      renderItem={({ item }) => {
+        if (item.type === "footer") return <View style={styles.footer} />;
+        if (item.type === "header") {
+          return <ThemedText type="h4">{item.title}</ThemedText>;
+        }
+        return <View style={styles.row}>{item.render(item.item)}</View>;
+      }}
+      getItemType={(item) => {
+        if (item.type === "footer") return "footer";
+        if (item.type === "header") return "header";
+        return `row-${item.sectionIndex}`;
+      }}
+      keyExtractor={(item, index) => {
+        if (item.type === "footer") return `footer-${item.sectionIndex}`;
+        if (item.type === "header")
+          return `header-${item.title}-${item.sectionIndex}`;
+        return item.item?.id ?? `row-${item.sectionIndex}-${index}`;
+      }}
       contentContainerStyle={styles.scrollContainer}
       showsVerticalScrollIndicator={false}
-      onEndReached={handleEndReached}
+      onEndReached={() => hasNextPage && fetchNextPage?.()}
       onEndReachedThreshold={0.5}
-      initialNumToRender={10}
-      maxToRenderPerBatch={10}
-      windowSize={5}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching ?? false}
@@ -69,9 +93,11 @@ export function SectionListView({
 
 const styles = StyleSheet.create((theme) => ({
   scrollContainer: {
-    gap: theme.gap(1),
     paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
+  },
+  row: {
+    paddingVertical: theme.gap(0.5),
   },
   footer: {
     height: theme.gap(1),

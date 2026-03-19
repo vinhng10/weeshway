@@ -1,12 +1,9 @@
 import {
-  Avatar,
-  AvatarGroup,
   Boundary,
   Button,
   ChipBar,
   ChipBarItemProps,
   NotificationsPermission,
-  ProjectStatus,
   Search,
   SectionListView,
   Tile,
@@ -30,7 +27,7 @@ import {
   WishWatchType,
 } from "@/types";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -69,30 +66,21 @@ function WishesContent({ style, level }: WishesContentProps) {
       },
     });
 
-  const renderTile = (
-    data: WishRecommendationEnrichedType,
-  ): React.ReactElement => (
-    <Tile
-      imageSource={data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.song.artistName}
-      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
-      previewUrl={data.song.previewUrl}
-      avatar={
-        data.recommendations &&
-        data.recommendations.length > 0 && (
-          <View style={styles.avatarGroup}>
-            <AvatarGroup
-              max={2}
-              avatars={data.recommendations
-                .map((r) => r.project.profile.avatarUrl)
-                .filter((url): url is string => url !== undefined)}
-            />
-          </View>
-        )
-      }
-      onPress={() => router.navigate(`./${data.id}`)}
-    />
+  const renderTile = useCallback(
+    (data: WishRecommendationEnrichedType): React.ReactElement => (
+      <Tile
+        imageSource={data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.song.artistName}
+        metadata={[data.style, data.level].filter(Boolean).join(" • ")}
+        previewUrl={data.song.previewUrl}
+        avatars={data.recommendations
+          ?.map((r) => r.project.profile.avatarUrl)
+          .filter((url): url is string => url !== undefined)}
+        onPress={() => router.navigate(`./${data.id}`)}
+      />
+    ),
+    [],
   );
 
   const { wishesWithClass, otherWishes } = useMemo(() => {
@@ -183,25 +171,31 @@ function WatchingsContent({ status, style, level }: WatchingsContentProps) {
     },
   });
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
-    <Tile
-      imageSource={data.artworkUrl ?? data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.song.artistName}
-      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
-      previewUrl={data.song.previewUrl}
-      avatar={
-        <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
-      }
-      status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`./classes/${data.id}`)}
-    />
+  const renderTile = useCallback(
+    (data: ProjectEnrichedType): React.ReactElement => (
+      <Tile
+        imageSource={data.artworkUrl ?? data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.song.artistName}
+        metadata={[data.style, data.level].filter(Boolean).join(" • ")}
+        previewUrl={data.song.previewUrl}
+        avatars={data.profile.avatarUrl ? [data.profile.avatarUrl] : undefined}
+        stats={data}
+        onPress={() => router.navigate(`./classes/${data.id}`)}
+      />
+    ),
+    [],
+  );
+
+  const projects = useMemo(
+    () => watchings.map((watching) => watching.project),
+    [watchings],
   );
 
   const sections = [
     {
       title: "Watchings",
-      data: watchings.map((watching) => watching.project),
+      data: projects,
       render: renderTile,
     },
   ];
@@ -289,10 +283,5 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingLeft: theme.gap(2),
     paddingVertical: theme.gap(1),
     gap: theme.gap(1),
-  },
-  avatarGroup: {
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    alignItems: "flex-end",
   },
 }));

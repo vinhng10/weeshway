@@ -14,9 +14,10 @@ export { Hero } from "./hero";
 export { MenuItem } from "./menu-item";
 export { Photo } from "./photo";
 export { ProjectCard } from "./project-card";
-export { ProjectStatus } from "./project-status";
+export { ProjectStats } from "./project-stats";
 export { QRCode } from "./qr-code";
 export { SectionListView } from "./section-list";
+export { Separator } from "./separator";
 export { SongCard } from "./song-card";
 export { ThemedActivityIndicator } from "./themed-activity-indicator";
 export {

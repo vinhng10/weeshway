@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/supabase";
 import { useSuspenseInfiniteQuery as useTanStackSuspenseInfiniteQuery } from "@tanstack/react-query";
 import camelcaseKeys from "camelcase-keys";
+import { useMemo } from "react";
 
 interface UseSuspenseInfiniteQueryProps<TData = unknown> {
   tableName: string;
@@ -69,15 +70,17 @@ export const useSuspenseInfiniteQuery = <TData = unknown>({
           ? (items[items.length - 1] as any).id
           : undefined;
 
-      return { data: items, nextCursor };
+      const camelCasedItems = camelcaseKeys(items, { deep: true });
+
+      return { data: camelCasedItems as TData[], nextCursor };
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-  const data = camelcaseKeys(
-    query.data?.pages.flatMap((page) => page.data) || [],
-    { deep: true },
-  ) as TData[];
+  const data = useMemo(
+    () => query.data?.pages.flatMap((page) => page.data) || [],
+    [query.data?.pages],
+  );
 
   return {
     data,

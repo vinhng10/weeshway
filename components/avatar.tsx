@@ -1,5 +1,6 @@
 import { getArtworkUrl, pickImage } from "@/utils";
 import { Image, type ImageProps } from "expo-image";
+import React from "react";
 import { Pressable, View } from "react-native";
 import {
   StyleSheet,
@@ -16,39 +17,47 @@ export type AvatarProps = ImageProps &
     editable?: boolean;
   };
 
-export function Avatar({
-  style,
-  source,
-  size,
-  bordered,
-  shape,
-  onSourceChange,
-  editable,
-  ...rest
-}: AvatarProps) {
-  styles.useVariants({ size, bordered, shape });
+export const Avatar = React.memo(
+  function Avatar({
+    style,
+    source,
+    size,
+    bordered,
+    shape,
+    onSourceChange,
+    editable,
+    ...rest
+  }: AvatarProps) {
+    styles.useVariants({ size, bordered, shape });
 
-  const handleImagePicker = async () => {
-    if (!editable || !onSourceChange) return;
-    const uri = await pickImage();
-    if (uri) onSourceChange(uri);
-  };
+    const handleImagePicker = async () => {
+      if (!editable || !onSourceChange) return;
+      const uri = await pickImage();
+      if (uri) onSourceChange(uri);
+    };
 
-  return (
-    <Pressable onPress={handleImagePicker}>
-      <UniImage
-        source={getArtworkUrl(source as string, size === "large" ? 100 : 60)}
-        style={[styles.avatar, style]}
-        {...rest}
-      />
-      {editable && onSourceChange && (
-        <View style={styles.iconContainer}>
-          <IconSymbol name="camera" size={16} style={styles.icon} />
-        </View>
-      )}
-    </Pressable>
-  );
-}
+    return (
+      <Pressable onPress={handleImagePicker}>
+        <UniImage
+          source={getArtworkUrl(source as string, size === "large" ? 100 : 60)}
+          style={[styles.avatar, style]}
+          {...rest}
+        />
+        {editable && onSourceChange && (
+          <View style={styles.iconContainer}>
+            <IconSymbol name="camera" size={16} style={styles.icon} />
+          </View>
+        )}
+      </Pressable>
+    );
+  },
+  (prev, next) =>
+    prev.source === next.source &&
+    prev.size === next.size &&
+    prev.bordered === next.bordered &&
+    prev.shape === next.shape &&
+    prev.editable === next.editable,
+);
 
 const styles = StyleSheet.create((theme) => ({
   avatar: {

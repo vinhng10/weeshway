@@ -1,22 +1,17 @@
 import {
-  Avatar,
   Boundary,
   ChipBar,
   ChipBarItemProps,
-  ProjectStatus,
   Search,
   SectionListView,
   Tile,
 } from "@/components";
 import { BOOKING_STATUS, TIME } from "@/constants";
 import { useAuth, useSuspenseInfiniteQuery } from "@/hooks";
-import {
-  BookingEnrichedType,
-  ProjectEnrichedType,
-  TimeType,
-} from "@/types";
+import { BookingEnrichedType, ProjectEnrichedType, TimeType } from "@/types";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -76,21 +71,25 @@ function BookingsContent({ time }: BookingsContentProps) {
     },
   });
 
-  const projects = bookings.map((booking) => booking.project);
+  const projects = useMemo(
+    () => bookings.map((booking) => booking.project),
+    [bookings],
+  );
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
-    <Tile
-      imageSource={data.artworkUrl ?? data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.song.artistName}
-      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
-      previewUrl={data.song.previewUrl}
-      avatar={
-        <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
-      }
-      status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`./classes/${data.id}`)}
-    />
+  const renderTile = useCallback(
+    (data: ProjectEnrichedType): React.ReactElement => (
+      <Tile
+        imageSource={data.artworkUrl ?? data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.song.artistName}
+        metadata={[data.style, data.level].filter(Boolean).join(" • ")}
+        previewUrl={data.song.previewUrl}
+        avatars={data.profile.avatarUrl ? [data.profile.avatarUrl] : undefined}
+        stats={data}
+        onPress={() => router.navigate(`./classes/${data.id}`)}
+      />
+    ),
+    [],
   );
 
   const sections = [

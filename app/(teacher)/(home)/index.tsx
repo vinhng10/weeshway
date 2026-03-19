@@ -1,7 +1,6 @@
 import {
   Boundary,
   NotificationsPermission,
-  ProjectStatus,
   SectionListView,
   ThemedText,
   Tile,
@@ -17,6 +16,7 @@ import { supabase } from "@/supabase";
 import { ProjectEnrichedType, StatsType } from "@/types";
 import { formatTime } from "@/utils";
 import { router } from "expo-router";
+import { useCallback } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -74,43 +74,49 @@ function HomeContent() {
     },
   });
 
-  const renderStats = (data: StatsType[]) => {
-    const totalEarnings = data.reduce(
-      (sum, s) =>
-        sum +
-        Math.round(
-          exchange(s.totalEarnings, s.currency, currency) *
-            (1 - transactionFee / 100),
-        ),
-      0,
-    );
-    const bookingCount = data.reduce((sum, s) => sum + s.bookingCount, 0);
+  const renderStats = useCallback(
+    (data: StatsType[]) => {
+      const totalEarnings = data.reduce(
+        (sum, s) =>
+          sum +
+          Math.round(
+            exchange(s.totalEarnings, s.currency, currency) *
+              (1 - transactionFee / 100),
+          ),
+        0,
+      );
+      const bookingCount = data.reduce((sum, s) => sum + s.bookingCount, 0);
 
-    return (
-      <View style={styles.statsContainer}>
-        <ThemedText color="dimmed">Earnings This Month</ThemedText>
-        <ThemedText type="h1" color="primary">
-          {formatMoney(totalEarnings)}
-        </ThemedText>
-        <ThemedText type="h3" color="dimmed">
-          {bookingCount} {bookingCount > 1 ? "bookings" : "booking"}
-        </ThemedText>
-      </View>
-    );
-  };
+      return (
+        <View style={styles.statsContainer}>
+          <ThemedText color="dimmed">Earnings This Month</ThemedText>
+          <ThemedText type="h1" color="primary">
+            {formatMoney(totalEarnings)}
+          </ThemedText>
+          <ThemedText type="h3" color="dimmed">
+            {bookingCount} {bookingCount > 1 ? "bookings" : "booking"}
+          </ThemedText>
+        </View>
+      );
+    },
+    [formatMoney, exchange, currency, transactionFee],
+  );
 
-  const renderTile = (data: ProjectEnrichedType) => (
-    <Tile
-      imageSource={data.artworkUrl ?? data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.location?.displayName}
-      metadata={`${formatTime(new Date(data.startAt!))} - ${formatTime(
-        new Date(data.endAt!),
-      )}`}
-      previewUrl={data.song.previewUrl}
-      status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`./projects/${data.id}`)}
-    />
+  const renderTile = useCallback(
+    (data: ProjectEnrichedType) => (
+      <Tile
+        imageSource={data.artworkUrl ?? data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.location?.displayName}
+        metadata={`${formatTime(new Date(data.startAt!))} - ${formatTime(
+          new Date(data.endAt!),
+        )}`}
+        previewUrl={data.song.previewUrl}
+        stats={data}
+        onPress={() => router.navigate(`./projects/${data.id}`)}
+      />
+    ),
+    [],
   );
 
   const sections = [
@@ -126,15 +132,17 @@ function HomeContent() {
     },
   ];
 
+  const refetch = useCallback(() => {
+    refetchProjects();
+    refetchStats();
+  }, [refetchProjects, refetchStats]);
+
   return (
     <SectionListView
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
-      refetch={() => {
-        refetchProjects();
-        refetchStats();
-      }}
+      refetch={refetch}
       isRefetching={isRefetchingProjects || isRefetchingStats}
     />
   );

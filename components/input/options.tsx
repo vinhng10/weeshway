@@ -1,7 +1,10 @@
 import { OptionItem } from "@/types";
-import { FlatList, ListRenderItem, Modal, Pressable, View } from "react-native";
+import { FlashList, ListRenderItem } from "@shopify/flash-list";
+import React, { useCallback, useMemo } from "react";
+import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { Separator } from "../separator";
 import { ThemedText } from "../themed-text";
 
 interface OptionsModalProps {
@@ -23,28 +26,38 @@ export const Options = ({
   currentValue,
   renderFunction,
 }: OptionsModalProps) => {
-  const handleSelect = (value: string) => {
-    onSelect(currentValue === value ? undefined : value);
-    onClose();
-  };
+  const handleSelect = useCallback(
+    (value: string) => {
+      onSelect(currentValue === value ? undefined : value);
+      onClose();
+    },
+    [currentValue, onSelect, onClose],
+  );
 
-  const optionsArray = Object.entries(options).map(([key, value]) => ({
-    key,
-    value,
-  }));
+  const optionsArray = useMemo(
+    () =>
+      Object.entries(options).map(([key, value]) => ({
+        key,
+        value,
+      })),
+    [options],
+  );
 
-  const renderItem: ListRenderItem<OptionItem> = ({ item }) => {
-    return (
-      <Pressable onPress={() => handleSelect(item.value)}>
-        <ThemedText
-          type="h3"
-          color={currentValue !== item.value ? "dimmed" : undefined}
-        >
-          {renderFunction ? renderFunction(item) : item.value}
-        </ThemedText>
-      </Pressable>
-    );
-  };
+  const renderItem: ListRenderItem<OptionItem> = useCallback(
+    ({ item }) => {
+      return (
+        <Pressable onPress={() => handleSelect(item.value)}>
+          <ThemedText
+            type="h3"
+            color={currentValue !== item.value ? "dimmed" : undefined}
+          >
+            {renderFunction ? renderFunction(item) : item.value}
+          </ThemedText>
+        </Pressable>
+      );
+    },
+    [handleSelect, currentValue, renderFunction],
+  );
 
   return (
     <Modal
@@ -59,12 +72,14 @@ export const Options = ({
         <Header title={title} onPress={onClose} />
 
         {/* Options List */}
-        <FlatList
+        <FlashList
           data={optionsArray}
           renderItem={renderItem}
           keyExtractor={(item) => item.key}
+          extraData={currentValue}
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <Separator gap={3} />}
         />
       </View>
     </Modal>
@@ -78,7 +93,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.background,
   },
   scrollContainer: {
-    gap: theme.gap(3),
     paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(16),
   },

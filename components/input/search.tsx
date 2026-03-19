@@ -1,12 +1,13 @@
 import { useSearch } from "@/hooks";
 import { SearchResultType } from "@/types";
+import { FlashList, ListRenderItem } from "@shopify/flash-list";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { FlatList, ListRenderItem, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Avatar } from "../avatar";
 import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
+import { Separator } from "../separator";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 import { Tile } from "../tile";
@@ -34,8 +35,7 @@ const ROUTE_BY_TYPE: Record<string, string> = {
   wish: "wishes",
 };
 
-const keyExtractor = (item: SearchResultType) =>
-  `${item.type}-${item.id}`;
+const keyExtractor = (item: SearchResultType) => `${item.type}-${item.id}`;
 
 export const SearchScreen: React.FunctionComponent = () => {
   const { rpc = "search" } = useLocalSearchParams<{ rpc?: string }>();
@@ -57,11 +57,7 @@ export const SearchScreen: React.FunctionComponent = () => {
         subtitle={item.subtitle}
         metadata={item.metadata}
         previewUrl={item.previewUrl}
-        avatar={
-          item.avatarUrl ? (
-            <Avatar source={item.avatarUrl} shape="circle" bordered />
-          ) : undefined
-        }
+        avatars={item.avatarUrl ? [item.avatarUrl] : undefined}
         onPress={() => handleSelect(item)}
       />
     ),
@@ -113,7 +109,7 @@ export const SearchScreen: React.FunctionComponent = () => {
           autoFocus
         />
       </View>
-      <FlatList
+      <FlashList
         data={data}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
@@ -123,9 +119,7 @@ export const SearchScreen: React.FunctionComponent = () => {
         keyboardShouldPersistTaps="handled"
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={5}
+        ItemSeparatorComponent={Separator}
       />
     </View>
   );
@@ -141,7 +135,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.gap(2),
   },
   scrollContainer: {
-    gap: theme.gap(1),
     padding: theme.gap(2),
     paddingBottom: theme.gap(16),
   },

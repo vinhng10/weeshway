@@ -2,7 +2,6 @@ import {
   Avatar,
   Boundary,
   Header,
-  ProjectStatus,
   SectionListView,
   ThemedText,
   Tile,
@@ -13,6 +12,7 @@ import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useMemo } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -58,42 +58,56 @@ function TeacherProfileContent() {
         .or(`start_at.gte.${new Date().toISOString()},start_at.is.null`),
   });
 
-  const renderProfile = (data: ProfileEnrichedType): React.ReactElement => (
-    <View style={styles.header}>
-      <Avatar source={data.avatarUrl} size="large" shape="circle" bordered />
-      <ThemedText type="h3">{data.fullName}</ThemedText>
-      {data.bio && (
-        <ThemedText
-          type="h5"
-          color="dimmed"
-          numberOfLines={2}
-          ellipsizeMode="tail"
-          style={styles.bio}
-        >
-          {data.bio}
-        </ThemedText>
-      )}
-    </View>
+  const renderProfile = useCallback(
+    (data: ProfileEnrichedType): React.ReactElement => (
+      <View style={styles.header}>
+        <Avatar source={data.avatarUrl} size="large" shape="circle" bordered />
+        <ThemedText type="h3">{data.fullName}</ThemedText>
+        {data.bio && (
+          <ThemedText
+            type="h5"
+            color="dimmed"
+            numberOfLines={2}
+            ellipsizeMode="tail"
+            style={styles.bio}
+          >
+            {data.bio}
+          </ThemedText>
+        )}
+      </View>
+    ),
+    [],
   );
 
-  const renderVideos = (data: string[]): React.ReactElement => (
-    <View style={styles.videoContainer}>
-      {data.map((video: string, index: number) => (
-        <Video key={`${video}-${index}`} source={video} />
-      ))}
-    </View>
+  const renderVideos = useCallback(
+    (data: string[]): React.ReactElement => (
+      <View style={styles.videoContainer}>
+        {data.map((video: string, index: number) => (
+          <Video key={index} source={video} />
+        ))}
+      </View>
+    ),
+    [],
   );
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
-    <Tile
-      imageSource={data.artworkUrl ?? data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.song.artistName}
-      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
-      previewUrl={data.song.previewUrl}
-      status={<ProjectStatus data={data} />}
-      onPress={() => router.dismissTo(`../classes/${data.id}`)}
-    />
+  const renderTile = useCallback(
+    (data: ProjectEnrichedType): React.ReactElement => (
+      <Tile
+        imageSource={data.artworkUrl ?? data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.song.artistName}
+        metadata={[data.style, data.level].filter(Boolean).join(" • ")}
+        previewUrl={data.song.previewUrl}
+        stats={data}
+        onPress={() => router.dismissTo(`../classes/${data.id}`)}
+      />
+    ),
+    [],
+  );
+
+  const videoData = useMemo(
+    () => (profile.videoUrls ? [profile.videoUrls] : []),
+    [profile.videoUrls],
   );
 
   const sections = [
@@ -102,7 +116,7 @@ function TeacherProfileContent() {
       render: renderProfile,
     },
     {
-      data: profile.videoUrls ? [profile.videoUrls] : [],
+      data: videoData,
       render: renderVideos,
     },
     {
@@ -112,15 +126,17 @@ function TeacherProfileContent() {
     },
   ];
 
+  const refetch = useCallback(() => {
+    refetchProfile();
+    refetchProjects();
+  }, [refetchProfile, refetchProjects]);
+
   return (
     <SectionListView
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
-      refetch={() => {
-        refetchProfile();
-        refetchProjects();
-      }}
+      refetch={refetch}
       isRefetching={isRefetchingProfile || isRefetchingProjects}
     />
   );

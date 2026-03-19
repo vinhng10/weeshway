@@ -1,19 +1,14 @@
 import { useAlert, useLocationSearch } from "@/hooks";
 import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
+import { FlashList } from "@shopify/flash-list";
 import React, { useState } from "react";
-import {
-  FlatList,
-  Keyboard,
-  Linking,
-  Modal,
-  Pressable,
-  View,
-} from "react-native";
+import { Keyboard, Linking, Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
 import { MenuItem } from "../menu-item";
+import { Separator } from "../separator";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 import { TextBoxInput } from "./box-input";
@@ -131,6 +126,18 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
     }
   };
 
+  const renderLocation = ({ item: location }: { item: LocationType }) => (
+    <MenuItem
+      icon="location-sharp"
+      title={location.displayName || "Unknown"}
+      subtitle={
+        location.shortFormattedAddress || location.formattedAddress || ""
+      }
+      onPress={() => handleLocationPress(location)}
+      showChevron={false}
+    />
+  );
+
   const renderEmptyState = () => {
     if (loading) {
       return (
@@ -200,26 +207,15 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
             />
           </View>
 
-          <FlatList
+          <FlashList
             data={locations}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item: location }) => (
-              <MenuItem
-                icon="location-sharp"
-                title={location.displayName || "Unknown"}
-                subtitle={
-                  location.shortFormattedAddress ||
-                  location.formattedAddress ||
-                  ""
-                }
-                onPress={() => handleLocationPress(location)}
-                showChevron={false}
-              />
-            )}
+            keyExtractor={keyExtractor}
+            renderItem={renderLocation}
             ListEmptyComponent={renderEmptyState}
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            ItemSeparatorComponent={Separator}
           />
         </View>
       </Modal>
@@ -232,6 +228,8 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
     </>
   );
 };
+
+const keyExtractor = (item: LocationType) => item.id;
 
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
@@ -263,7 +261,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.gap(2),
   },
   scrollContainer: {
-    gap: theme.gap(1),
     padding: theme.gap(2),
     paddingBottom: theme.gap(16),
   },

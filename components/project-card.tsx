@@ -15,7 +15,7 @@ import { Avatar } from "./avatar";
 import { Chip } from "./chip";
 import { IconSymbol } from "./icon-symbol";
 import { Button, Checkout, IconButton } from "./input";
-import { ProjectStatus } from "./project-status";
+import { ProjectStats } from "./project-stats";
 import { ThemedText } from "./themed-text";
 
 const UniLinearGradient = withUnistyles(LinearGradient, (theme) => ({
@@ -191,7 +191,7 @@ export const ProjectCard = ({ data }: CardProps) => {
                       : ""}
                   </ThemedText>
                 </View>
-                <ProjectStatus data={data} />
+                <ProjectStats data={data} />
               </View>
             </View>
           </View>

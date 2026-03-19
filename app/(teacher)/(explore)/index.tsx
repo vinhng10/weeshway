@@ -13,7 +13,7 @@ import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { BubbleType, LevelType, StyleType, WishEnrichedType } from "@/types";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -68,36 +68,31 @@ function ExploreContent({ style, level }: ExploreContentProps) {
     },
   });
 
-  const handleBubbleTap = (bubbleData: BubbleType) => {
-    if (centroidId !== bubbleData.label) {
-      setCentroidId(bubbleData.label);
-    } else {
-      setCentroidId(undefined);
-    }
-  };
+  const handleBubbleTap = useCallback((bubbleData: BubbleType) => {
+    setCentroidId((prev) =>
+      prev !== bubbleData.label ? bubbleData.label : undefined,
+    );
+  }, []);
 
-  const renderBubbleChart = (data: BubbleType[]): React.ReactElement => (
-    <BubbleChart data={data} onBubbleTap={handleBubbleTap} />
+  const renderBubbleChart = useCallback(
+    (data: BubbleType[]): React.ReactElement => (
+      <BubbleChart data={data} onBubbleTap={handleBubbleTap} />
+    ),
+    [handleBubbleTap],
   );
 
-  const renderTile = (data: WishWithSimilarCount): React.ReactElement => (
-    <Tile
-      imageSource={data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.song.artistName}
-      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
-      previewUrl={data.song.previewUrl}
-      onPress={() => router.navigate(`./wishes/${data.id}`)}
-      // status={
-      //   data.similarWishCount > 0 ? (
-      //     <Chip
-      //       label={`${data.similarWishCount}`}
-      //       color="primary"
-      //       icon="sparkles"
-      //     />
-      //   ) : undefined
-      // }
-    />
+  const renderTile = useCallback(
+    (data: WishWithSimilarCount): React.ReactElement => (
+      <Tile
+        imageSource={data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.song.artistName}
+        metadata={[data.style, data.level].filter(Boolean).join(" • ")}
+        previewUrl={data.song.previewUrl}
+        onPress={() => router.navigate(`./wishes/${data.id}`)}
+      />
+    ),
+    [],
   );
 
   const sections = [
@@ -113,15 +108,17 @@ function ExploreContent({ style, level }: ExploreContentProps) {
     },
   ];
 
+  const refetch = useCallback(() => {
+    refetchBubbles();
+    refetchWishes();
+  }, [refetchBubbles, refetchWishes]);
+
   return (
     <SectionListView
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
-      refetch={() => {
-        refetchBubbles();
-        refetchWishes();
-      }}
+      refetch={refetch}
       isRefetching={isRefetchingBubbles || isRefetchingWishes}
     />
   );

@@ -7,6 +7,7 @@ import {
   ThemedActivityIndicator,
   ThemedText,
 } from "@/components";
+import { Separator } from "@/components/separator";
 import {
   BOOKING_ACTIVE_STATUSES,
   BOOKING_STATUS,
@@ -15,11 +16,12 @@ import {
 import { useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { BookingCheckinEnrichedType } from "@/types";
+import { FlashList } from "@shopify/flash-list";
 import { useQueryClient } from "@tanstack/react-query";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import { RefreshControl, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -71,6 +73,26 @@ function CheckinContent() {
       withTiming(0, { duration: 150 }),
       withTiming(0, { duration: SCAN_DELAY_MS }),
       withTiming(20, { duration: 300 }),
+    );
+  };
+
+  const renderBooking = ({ item }: { item: BookingCheckinEnrichedType }) => {
+    const isCheckedIn = item.status === BOOKING_STATUS.CHECKED_IN;
+    return (
+      <View style={styles.row}>
+        <Avatar source={item.profile.avatarUrl} shape="circle" bordered />
+        <View style={styles.rowText}>
+          <ThemedText type="h5" numberOfLines={1} ellipsizeMode="tail">
+            {item.profile.fullName ?? item.profile.username ?? "Student"}
+          </ThemedText>
+          <ThemedText color="dimmed" numberOfLines={1}>
+            {item.spots} {item.spots === 1 ? "spot" : "spots"}
+          </ThemedText>
+        </View>
+        {isCheckedIn && (
+          <IconSymbol name="checkmark-circle" size={16} color="#6B9C00" />
+        )}
+      </View>
     );
   };
 
@@ -128,26 +150,6 @@ function CheckinContent() {
     (b) => b.status === BOOKING_STATUS.CHECKED_IN,
   ).length;
 
-  const renderBooking = ({ item }: { item: BookingCheckinEnrichedType }) => {
-    const isCheckedIn = item.status === BOOKING_STATUS.CHECKED_IN;
-    return (
-      <View style={styles.row}>
-        <Avatar source={item.profile.avatarUrl} shape="circle" bordered />
-        <View style={styles.rowText}>
-          <ThemedText type="h5" numberOfLines={1} ellipsizeMode="tail">
-            {item.profile.fullName ?? item.profile.username ?? "Student"}
-          </ThemedText>
-          <ThemedText color="dimmed" numberOfLines={1}>
-            {item.spots} {item.spots === 1 ? "spot" : "spots"}
-          </ThemedText>
-        </View>
-        {isCheckedIn && (
-          <IconSymbol name="checkmark-circle" size={16} color="#6B9C00" />
-        )}
-      </View>
-    );
-  };
-
   return (
     <View style={[styles.content, styles.fill]}>
       {/* Camera */}
@@ -184,12 +186,13 @@ function CheckinContent() {
         <ThemedText type="h4">
           Bookings ({checkedInCount} / {bookings.length})
         </ThemedText>
-        <FlatList
+        <FlashList
           data={bookings}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           renderItem={renderBooking}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={Separator}
           refreshControl={
             <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
           }
@@ -246,7 +249,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     gap: theme.gap(1),
   },
   list: {
-    gap: theme.gap(1),
     paddingBottom: theme.gap(16),
   },
   banner: {

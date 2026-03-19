@@ -1,11 +1,9 @@
 import {
-  Avatar,
   Boundary,
   Carousel,
   ChipBar,
   ChipBarItemProps,
   LocationPermission,
-  ProjectStatus,
   Search,
   SectionListView,
   Tile,
@@ -25,7 +23,7 @@ import {
   StyleType,
 } from "@/types";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -108,23 +106,27 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
     },
   });
 
-  const renderCarousel = (data: ProjectEnrichedType[]): React.ReactElement => (
-    <Carousel data={data} />
+  const renderCarousel = useCallback(
+    (data: ProjectEnrichedType[]): React.ReactElement => (
+      <Carousel data={data} />
+    ),
+    [],
   );
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
-    <Tile
-      imageSource={data.artworkUrl ?? data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.song.artistName}
-      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
-      previewUrl={data.song.previewUrl}
-      avatar={
-        <Avatar source={data.profile.avatarUrl} shape="circle" bordered />
-      }
-      status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`./classes/${data.id}`)}
-    />
+  const renderTile = useCallback(
+    (data: ProjectEnrichedType): React.ReactElement => (
+      <Tile
+        imageSource={data.artworkUrl ?? data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.song.artistName}
+        metadata={[data.style, data.level].filter(Boolean).join(" • ")}
+        previewUrl={data.song.previewUrl}
+        avatars={data.profile.avatarUrl ? [data.profile.avatarUrl] : undefined}
+        stats={data}
+        onPress={() => router.navigate(`./classes/${data.id}`)}
+      />
+    ),
+    [],
   );
 
   const sections = [
@@ -140,15 +142,17 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
     },
   ];
 
+  const refetch = useCallback(() => {
+    refetchRecommendations();
+    refetchProjects();
+  }, [refetchRecommendations, refetchProjects]);
+
   return (
     <SectionListView
       sections={sections}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
-      refetch={() => {
-        refetchRecommendations();
-        refetchProjects();
-      }}
+      refetch={refetch}
       isRefetching={isRefetchingRecommendations || isRefetchingProjects}
     />
   );

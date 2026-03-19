@@ -3,7 +3,6 @@ import {
   Button,
   ChipBar,
   ChipBarItemProps,
-  ProjectStatus,
   Search,
   SectionListView,
   Tile,
@@ -22,7 +21,7 @@ import {
   StyleType,
 } from "@/types";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -88,16 +87,19 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
     return { thisWeekProjects, otherProjects };
   }, [data]);
 
-  const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
-    <Tile
-      imageSource={data.artworkUrl ?? data.song.artworkUrl}
-      title={data.song.name}
-      subtitle={data.song.artistName ?? ""}
-      metadata={[data.style, data.level].filter(Boolean).join(" • ")}
-      previewUrl={data.song.previewUrl}
-      status={<ProjectStatus data={data} />}
-      onPress={() => router.navigate(`./projects/${data.id}`)}
-    />
+  const renderTile = useCallback(
+    (data: ProjectEnrichedType): React.ReactElement => (
+      <Tile
+        imageSource={data.artworkUrl ?? data.song.artworkUrl}
+        title={data.song.name}
+        subtitle={data.song.artistName ?? ""}
+        metadata={[data.style, data.level].filter(Boolean).join(" • ")}
+        previewUrl={data.song.previewUrl}
+        stats={data}
+        onPress={() => router.navigate(`./projects/${data.id}`)}
+      />
+    ),
+    [],
   );
 
   const sections = [

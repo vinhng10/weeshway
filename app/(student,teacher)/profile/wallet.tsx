@@ -23,8 +23,8 @@ import {
   CustomerSheetError,
 } from "@stripe/stripe-react-native";
 import * as WebBrowser from "expo-web-browser";
-import { useMemo, useState } from "react";
-import { SectionListData, View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 type StripeResponse = {
@@ -162,16 +162,19 @@ function StudentWalletContent() {
     }
   };
 
-  const renderPaymentMethod = (item: PaymentMethod): React.ReactElement => {
-    const brand = item.brand.charAt(0).toUpperCase() + item.brand.slice(1);
-    return (
-      <MenuItem
-        icon="card"
-        title={`${brand}     •••• ${item.last4}`}
-        showChevron={false}
-      />
-    );
-  };
+  const renderPaymentMethod = useCallback(
+    (item: PaymentMethod): React.ReactElement => {
+      const brand = item.brand.charAt(0).toUpperCase() + item.brand.slice(1);
+      return (
+        <MenuItem
+          icon="card"
+          title={`${brand}     •••• ${item.last4}`}
+          showChevron={false}
+        />
+      );
+    },
+    [],
+  );
 
   const sections = [
     {
@@ -211,20 +214,20 @@ function TeacherWalletContent() {
   const fetchProfile = useAuth((state) => state.fetchProfile);
   const country = useLocales((state) => state.country);
   const showAlert = useAlert((state) => state.showAlert);
-  const headerContent = [
-    "To receive payments from students, you need to complete your payment account setup with Stripe.",
-  ];
-  const requirements: RequirementItem[] = [
-    {
-      text: "Government-issued ID",
-    },
-    {
-      text: "Bank account details for receiving payouts",
-    },
-    {
-      text: "Business information (if applicable)",
-    },
-  ];
+  const headerContent = useMemo(
+    () => [
+      "To receive payments from students, you need to complete your payment account setup with Stripe.",
+    ],
+    [],
+  );
+  const requirements = useMemo<RequirementItem[]>(
+    () => [
+      { text: "Government-issued ID" },
+      { text: "Bank account details for receiving payouts" },
+      { text: "Business information (if applicable)" },
+    ],
+    [],
+  );
 
   const { data, refetch, isRefetching } = useSuspenseQuery<AccountResponse>({
     queryKey: ["profile", "stripe"],
@@ -292,30 +295,34 @@ function TeacherWalletContent() {
     }
   };
 
-  const renderRequirement = (item: RequirementItem): React.ReactElement => {
-    return <Bullet text={item.text} />;
-  };
+  const renderRequirement = useCallback(
+    (item: RequirementItem): React.ReactElement => {
+      return <Bullet text={item.text} />;
+    },
+    [],
+  );
 
-  const renderHeader = (content: string): React.ReactElement => {
+  const renderHeader = useCallback((content: string): React.ReactElement => {
     return <ThemedText color="dimmed">{content}</ThemedText>;
-  };
+  }, []);
 
-  const renderExternalAccount = (
-    item: AccountResponse["externalAccounts"][0],
-  ): React.ReactElement => {
-    const title = item.bankName;
-    const subtitle = `•••• ${item.last4} (${item.currency.toUpperCase()})`;
-    return (
-      <MenuItem
-        icon="card"
-        title={title}
-        subtitle={subtitle}
-        showChevron={false}
-      />
-    );
-  };
+  const renderExternalAccount = useCallback(
+    (item: AccountResponse["externalAccounts"][0]): React.ReactElement => {
+      const title = item.bankName;
+      const subtitle = `•••• ${item.last4} (${item.currency.toUpperCase()})`;
+      return (
+        <MenuItem
+          icon="card"
+          title={title}
+          subtitle={subtitle}
+          showChevron={false}
+        />
+      );
+    },
+    [],
+  );
 
-  const onboardingSections: SectionListData<string | RequirementItem>[] = [
+  const onboardingSections = [
     {
       title: "Setup required",
       data: headerContent,
@@ -328,13 +335,14 @@ function TeacherWalletContent() {
     },
   ];
 
-  const onboardedHeaderContent = [
-    "Use the Stripe Dashboard to track your earnings, manage payouts to your bank account, and access tax documents.",
-  ];
+  const onboardedHeaderContent = useMemo(
+    () => [
+      "Use the Stripe Dashboard to track your earnings, manage payouts to your bank account, and access tax documents.",
+    ],
+    [],
+  );
 
-  const externalAccountsSections: SectionListData<
-    string | AccountResponse["externalAccounts"][0]
-  >[] = [
+  const externalAccountsSections = [
     {
       title: "You're All Set!",
       data: onboardedHeaderContent,
