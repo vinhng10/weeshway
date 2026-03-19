@@ -159,7 +159,12 @@ export const ProjectCard = ({ data }: CardProps) => {
               <View style={styles.row}>
                 <View style={styles.infoRow}>
                   <IconSymbol name="location-sharp" size={16} />
-                  <ThemedText type="h5">
+                  <ThemedText
+                    type="h5"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={styles.flexShrink}
+                  >
                     {data.location?.displayName}
                   </ThemedText>
                 </View>
@@ -170,7 +175,12 @@ export const ProjectCard = ({ data }: CardProps) => {
               <View style={styles.row}>
                 <View style={styles.infoRow}>
                   <IconSymbol name="time" size={16} />
-                  <ThemedText type="h5">
+                  <ThemedText
+                    type="h5"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={styles.flexShrink}
+                  >
                     {data.startAt && data.endAt
                       ? `${formatDate(
                           new Date(data.startAt),
@@ -212,7 +222,7 @@ export const ProjectCard = ({ data }: CardProps) => {
 
 const styles = StyleSheet.create((theme) => ({
   background: {
-    flex: 1,
+    aspectRatio: 1,
     borderRadius: theme.gap(2),
     overflow: "hidden",
   },
@@ -250,6 +260,7 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   infoRow: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     gap: theme.gap(0.5),
@@ -260,6 +271,9 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
     gap: theme.gap(1),
+  },
+  flexShrink: {
+    flexShrink: 1,
   },
   bookButton: {
     flex: 1,

@@ -101,7 +101,7 @@ export const BOOKING_ACTIVE_STATUSES: string[] = [
 ];
 
 export const WISH_STATUS = {
-  CLASS_AVAILABLE: "Class available",
+  CLASS_RECOMMENDED: "Class recommended",
   GRANTED: "Granted",
   WAITING: "Waiting",
 } as const;

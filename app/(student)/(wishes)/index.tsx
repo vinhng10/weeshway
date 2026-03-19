@@ -100,15 +100,15 @@ function WishesContent({ style, level }: WishesContentProps) {
     const otherWishes: WishRecommendationEnrichedType[] = [];
 
     for (const wish of data) {
-      const hasClassAvailable = wish.recommendations.length > 0;
+      const hasClassRecommended = wish.recommendations.length > 0;
       const enrichedWish = {
         ...wish,
-        status: hasClassAvailable
-          ? WISH_STATUS.CLASS_AVAILABLE
+        status: hasClassRecommended
+          ? WISH_STATUS.CLASS_RECOMMENDED
           : WISH_STATUS.WAITING,
       };
 
-      if (hasClassAvailable) {
+      if (hasClassRecommended) {
         wishesWithClass.push(enrichedWish);
       } else {
         otherWishes.push(enrichedWish);
@@ -120,7 +120,7 @@ function WishesContent({ style, level }: WishesContentProps) {
 
   const sections = [
     {
-      title: "Class Available",
+      title: "Class recommended",
       data: wishesWithClass,
       render: renderTile,
     },

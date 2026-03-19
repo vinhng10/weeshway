@@ -1,13 +1,13 @@
+import { useCallback, useMemo } from "react";
 import {
   RefreshControl,
   SectionList,
   SectionListData,
+  SectionListRenderItemInfo,
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ThemedText } from "./themed-text";
-
-// Extend SectionListData to include a render function
 
 interface SectionListViewProps {
   sections: ReadonlyArray<SectionListData<any>>;
@@ -17,6 +17,16 @@ interface SectionListViewProps {
   isRefetching?: boolean;
 }
 
+const keyExtractor = (item: any, i: number) => item?.id ?? `item-${i}`;
+
+const renderSectionHeader = ({ section: { title } }: any) =>
+  title ? <ThemedText type="h4">{title}</ThemedText> : null;
+
+const renderSectionFooter = () => <View style={styles.footer} />;
+
+const renderItem = ({ item, section }: SectionListRenderItemInfo<any>) =>
+  section.render(item);
+
 export function SectionListView({
   sections,
   hasNextPage,
@@ -24,21 +34,29 @@ export function SectionListView({
   refetch,
   isRefetching,
 }: SectionListViewProps) {
+  const filteredSections = useMemo(
+    () => sections.filter((section) => section.data.length > 0),
+    [sections],
+  );
+
+  const handleEndReached = useCallback(() => {
+    if (hasNextPage && fetchNextPage) fetchNextPage();
+  }, [hasNextPage, fetchNextPage]);
+
   return (
     <SectionList
-      sections={sections.filter((section) => section.data.length > 0)}
-      keyExtractor={(item, i) => `${item}-${i}`}
-      renderItem={({ item, section }) => section.render(item)}
-      renderSectionHeader={({ section: { title } }) =>
-        title && <ThemedText type="h4">{title}</ThemedText>
-      }
-      renderSectionFooter={() => <View style={styles.footer} />}
+      sections={filteredSections}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
+      renderSectionHeader={renderSectionHeader}
+      renderSectionFooter={renderSectionFooter}
       contentContainerStyle={styles.scrollContainer}
       showsVerticalScrollIndicator={false}
-      onEndReached={() => {
-        if (hasNextPage && fetchNextPage) fetchNextPage();
-      }}
+      onEndReached={handleEndReached}
       onEndReachedThreshold={0.5}
+      initialNumToRender={10}
+      maxToRenderPerBatch={10}
+      windowSize={5}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching ?? false}

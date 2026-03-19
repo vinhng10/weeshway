@@ -1,8 +1,8 @@
 import { useSearch } from "@/hooks";
 import { SearchResultType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import { FlatList, Pressable, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { FlatList, ListRenderItem, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Avatar } from "../avatar";
 import { Header } from "../header";
@@ -34,17 +34,43 @@ const ROUTE_BY_TYPE: Record<string, string> = {
   wish: "wishes",
 };
 
+const keyExtractor = (item: SearchResultType) =>
+  `${item.type}-${item.id}`;
+
 export const SearchScreen: React.FunctionComponent = () => {
   const { rpc = "search" } = useLocalSearchParams<{ rpc?: string }>();
   const [query, setQuery] = useState("");
   const { data, loading, error, fetchNextPage, hasNextPage, isDebouncing } =
     useSearch(query, rpc);
 
-  const handleSelect = (item: SearchResultType) => {
+  const handleSelect = useCallback((item: SearchResultType) => {
     const prefix = ROUTE_BY_TYPE[item.type] ?? "";
     router.back();
     router.navigate(`./${prefix ? `${prefix}/` : ""}${item.id}`);
-  };
+  }, []);
+
+  const renderItem: ListRenderItem<SearchResultType> = useCallback(
+    ({ item }) => (
+      <Tile
+        imageSource={item.imageUrl}
+        title={item.title}
+        subtitle={item.subtitle}
+        metadata={item.metadata}
+        previewUrl={item.previewUrl}
+        avatar={
+          item.avatarUrl ? (
+            <Avatar source={item.avatarUrl} shape="circle" bordered />
+          ) : undefined
+        }
+        onPress={() => handleSelect(item)}
+      />
+    ),
+    [handleSelect],
+  );
+
+  const handleEndReached = useCallback(() => {
+    if (hasNextPage) fetchNextPage();
+  }, [hasNextPage, fetchNextPage]);
 
   const renderEmptyState = () => {
     if (!query.trim() || isDebouncing) return null;
@@ -89,30 +115,17 @@ export const SearchScreen: React.FunctionComponent = () => {
       </View>
       <FlatList
         data={data}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
-        renderItem={({ item }) => (
-          <Tile
-            imageSource={item.imageUrl}
-            title={item.title}
-            subtitle={item.subtitle}
-            metadata={item.metadata}
-            previewUrl={item.previewUrl}
-            avatar={
-              item.avatarUrl ? (
-                <Avatar source={item.avatarUrl} shape="circle" bordered />
-              ) : undefined
-            }
-            onPress={() => handleSelect(item)}
-          />
-        )}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
         ListEmptyComponent={renderEmptyState}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        onEndReached={() => {
-          if (hasNextPage) fetchNextPage();
-        }}
+        onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
       />
     </View>
   );
