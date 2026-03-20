@@ -11,8 +11,7 @@
       "icon": "./assets/images/icon.png",
       "supportsTablet": true,
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "App requires microphone access to detect wake words and transcribe speech.",
-        "NSSpeechRecognitionUsageDescription": "App transcribes your speech to text when you start listening."
+        "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.weeshway.weeshway"
     },
