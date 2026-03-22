@@ -81,7 +81,7 @@ export const useLocationSearch = (query: string): LocationSearchState => {
         );
 
         if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
+          throw new Error();
         }
 
         const jsonData = await response.json();

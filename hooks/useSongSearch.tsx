@@ -52,7 +52,7 @@ export const useSongSearch = (query: string): SongSearchState => {
         )}&media=music&entity=song&limit=25`;
         const response = await fetch(url, { signal: abortController.signal });
 
-        if (!response.ok) throw new Error("Search failed");
+        if (!response.ok) throw new Error();
 
         const data = await response.json();
         const mapped = data.results.map(mapITunesToSong);
