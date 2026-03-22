@@ -60,7 +60,11 @@ export const useSongSearch = (query: string): SongSearchState => {
         setState({ songs: mapped, loading: false, error: null });
       } catch (err: any) {
         if (err.name !== "AbortError") {
-          setState({ songs: [], loading: false, error: err.message });
+          setState({
+            songs: [],
+            loading: false,
+            error: "Couldn't search songs. Please try again.",
+          });
         }
       }
     }, DEBOUNCE_TIME);

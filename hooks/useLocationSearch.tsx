@@ -19,11 +19,11 @@ interface GooglePlace {
 
 const convertGooglePlaceToLocation = (place: GooglePlace): LocationType => {
   const country = place.addressComponents?.find((comp) =>
-    comp.types?.includes("country")
+    comp.types?.includes("country"),
   )?.shortText as LocationType["country"];
 
   const administrativeAreaLevel1 = place.addressComponents?.find((comp) =>
-    comp.types?.includes("administrative_area_level_1")
+    comp.types?.includes("administrative_area_level_1"),
   )?.longText;
 
   return {
@@ -77,7 +77,7 @@ export const useLocationSearch = (query: string): LocationSearchState => {
               textQuery: trimmedQuery,
             }),
             signal: abortController.signal,
-          }
+          },
         );
 
         if (!response.ok) {
@@ -99,8 +99,7 @@ export const useLocationSearch = (query: string): LocationSearchState => {
           setState({
             locations: [],
             loading: false,
-            error:
-              err instanceof Error ? err.message : "Failed to search locations",
+            error: "Couldn't search locations. Please try again.",
           });
         }
       }
