@@ -13,7 +13,13 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.weeshway.weeshway"
+      "bundleIdentifier": "com.weeshway.weeshway",
+      "entitlements": {
+        "aps-environment": "production",
+        "com.apple.developer.in-app-payments": [
+          "merchant.com.weeshway.weeshway"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -43,10 +49,7 @@
               "pathPrefix": "/classes"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
@@ -70,9 +73,7 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/MomoTrustDisplay-Regular.ttf"
-          ]
+          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
         }
       ],
       [
