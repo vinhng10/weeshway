@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export const DUCKING_VOLUME = 0.1;
 export const PIXELS_PER_SECOND = 30;
 export const TICK_INTERVAL = 5;
@@ -12,7 +14,9 @@ export const SUPABASE_PUBLISHABLE_KEY =
 export const STRIPE_PUBLISHABLE_KEY =
   process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
 export const GOOGLE_PLACES_API_KEY =
-  process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY!;
+  Platform.OS === "ios"
+    ? process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY_IOS!
+    : process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY_ANDROID!;
 
 export const STYLE = {
   BACHATA: "Bachata",

@@ -51,3 +51,8 @@ dataconnect
 mocks
 snippets
 backups
+page
+seed.sql
+
+# secrets
+secrets

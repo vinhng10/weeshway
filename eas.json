@@ -26,13 +26,13 @@
   "submit": {
     "production": {
       "android": {
-        "serviceAccountKeyPath": "./pc-api-key.json",
         "track": "production",
         "releaseStatus": "completed"
       },
       "ios": {
-        "ascAppId": "YOUR_ASC_APP_ID",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID",
+        "ascAppId": "6760827339",
+        "sku": "com.weeshway.weeshway",
+        "companyName": "WeeshWay",
         "language": "en-US"
       }
     }
