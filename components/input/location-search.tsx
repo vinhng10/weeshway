@@ -1,4 +1,5 @@
 import { useAlert, useLocationSearch } from "@/hooks";
+import { PlaceSuggestion } from "@/hooks/useLocationSearch";
 import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
 import { FlashList } from "@shopify/flash-list";
@@ -85,11 +86,21 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
   const [visible, setVisible] = useState(false);
   const [locationDetailVisible, setLocationDetailVisible] = useState(false);
   const [query, setQuery] = useState("");
-  const { locations, loading, error } = useLocationSearch(query);
+  const { suggestions, loading, error, getPlaceDetails } =
+    useLocationSearch(query);
 
-  const handleLocationPress = async (location: LocationType) => {
+  const handleLocationPress = async (suggestion: PlaceSuggestion) => {
     try {
       Keyboard.dismiss();
+
+      const location = await getPlaceDetails(suggestion.placeId);
+      if (!location) {
+        showAlert(
+          "Location Error",
+          "Couldn't get location details. Please try again.",
+        );
+        return;
+      }
 
       const locationPoint = location.location
         ? `POINT(${location.location.longitude} ${location.location.latitude})`
@@ -126,14 +137,12 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
     }
   };
 
-  const renderLocation = ({ item: location }: { item: LocationType }) => (
+  const renderLocation = ({ item }: { item: PlaceSuggestion }) => (
     <MenuItem
       icon="location-sharp"
-      title={location.displayName || "Unknown"}
-      subtitle={
-        location.shortFormattedAddress || location.formattedAddress || ""
-      }
-      onPress={() => handleLocationPress(location)}
+      title={item.displayName}
+      subtitle={item.secondaryText}
+      onPress={() => handleLocationPress(item)}
       showChevron={false}
     />
   );
@@ -208,7 +217,7 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
           </View>
 
           <FlashList
-            data={locations}
+            data={suggestions}
             keyExtractor={keyExtractor}
             renderItem={renderLocation}
             ListEmptyComponent={renderEmptyState}
@@ -229,7 +238,7 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
   );
 };
 
-const keyExtractor = (item: LocationType) => item.id;
+const keyExtractor = (item: PlaceSuggestion) => item.placeId;
 
 const styles = StyleSheet.create((theme, rt) => ({
   container: {

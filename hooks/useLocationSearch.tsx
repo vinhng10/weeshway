@@ -1,103 +1,90 @@
-import { DEBOUNCE_TIME, GOOGLE_PLACES_API_KEY } from "@/constants";
+import { DEBOUNCE_TIME } from "@/constants";
+import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
-import camelcaseKeys from "camelcase-keys";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-interface GooglePlace {
-  id: string;
-  displayName?: { text: string };
-  formattedAddress?: string;
-  shortFormattedAddress?: string;
-  addressComponents?: Array<{
-    types: string[];
-    shortText?: string;
-    longText?: string;
-  }>;
-  location?: { latitude: number; longitude: number };
-  googleMapsUri?: string;
+interface AutocompleteSuggestion {
+  placePrediction?: {
+    placeId: string;
+    text?: { text: string };
+    structuredFormat?: {
+      mainText?: { text: string };
+      secondaryText?: { text: string };
+    };
+  };
 }
 
-const convertGooglePlaceToLocation = (place: GooglePlace): LocationType => {
-  const country = place.addressComponents?.find((comp) =>
-    comp.types?.includes("country"),
-  )?.shortText as LocationType["country"];
+interface AutocompleteResponse {
+  suggestions?: AutocompleteSuggestion[];
+}
 
-  const administrativeAreaLevel1 = place.addressComponents?.find((comp) =>
-    comp.types?.includes("administrative_area_level_1"),
-  )?.longText;
-
-  return {
-    id: place.id,
-    displayName: place.displayName?.text,
-    formattedAddress: place.formattedAddress,
-    shortFormattedAddress: place.shortFormattedAddress,
-    googleMapsUri: place.googleMapsUri,
-    location: place.location,
-    country,
-    administrativeAreaLevel1,
-  };
-};
+export interface PlaceSuggestion {
+  placeId: string;
+  displayName: string;
+  secondaryText: string;
+}
 
 interface LocationSearchState {
-  locations: LocationType[];
+  suggestions: PlaceSuggestion[];
   loading: boolean;
   error: string | null;
 }
 
-export const useLocationSearch = (query: string): LocationSearchState => {
+export const useLocationSearch = (query: string) => {
   const [state, setState] = useState<LocationSearchState>({
-    locations: [],
+    suggestions: [],
     loading: false,
     error: null,
   });
+  const sessionTokenRef = useRef(crypto.randomUUID());
+
+  const resetSessionToken = () => {
+    sessionTokenRef.current = crypto.randomUUID();
+  };
 
   useEffect(() => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) {
-      setState({ locations: [], loading: false, error: null });
+      setState({ suggestions: [], loading: false, error: null });
       return;
     }
 
-    const abortController = new AbortController();
+    let cancelled = false;
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     const timeoutId = setTimeout(async () => {
       try {
-        const response = await fetch(
-          "https://places.googleapis.com/v1/places:searchText",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
-              "X-Goog-FieldMask":
-                "places.id,places.displayName,places.formattedAddress,places.shortFormattedAddress,places.addressComponents,places.location,places.googleMapsUri",
-            },
-            body: JSON.stringify({
+        const { data, error } =
+          await supabase.functions.invoke<AutocompleteResponse>("places", {
+            body: {
+              action: "autocomplete",
               textQuery: trimmedQuery,
-            }),
-            signal: abortController.signal,
-          },
-        );
+              sessionToken: sessionTokenRef.current,
+            },
+          });
 
-        if (!response.ok) {
-          throw new Error();
-        }
+        if (cancelled) return;
 
-        const jsonData = await response.json();
-        const data = camelcaseKeys(jsonData, { deep: true });
-        const places: GooglePlace[] = data && data.places ? data.places : [];
-        const convertedLocations = places.map(convertGooglePlaceToLocation);
+        if (error) throw error;
 
-        setState({
-          locations: convertedLocations,
-          loading: false,
-          error: null,
-        });
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+        const suggestions: PlaceSuggestion[] =
+          data?.suggestions
+            ?.filter((s) => s.placePrediction?.placeId)
+            .map((s) => ({
+              placeId: s.placePrediction!.placeId,
+              displayName:
+                s.placePrediction!.structuredFormat?.mainText?.text ||
+                s.placePrediction!.text?.text ||
+                "Unknown",
+              secondaryText:
+                s.placePrediction!.structuredFormat?.secondaryText?.text || "",
+            })) ?? [];
+
+        setState({ suggestions, loading: false, error: null });
+      } catch {
+        if (!cancelled) {
           setState({
-            locations: [],
+            suggestions: [],
             loading: false,
             error: "Couldn't search locations. Please try again.",
           });
@@ -106,10 +93,46 @@ export const useLocationSearch = (query: string): LocationSearchState => {
     }, DEBOUNCE_TIME);
 
     return () => {
+      cancelled = true;
       clearTimeout(timeoutId);
-      abortController.abort();
     };
   }, [query]);
 
-  return state;
+  const getPlaceDetails = async (
+    placeId: string,
+  ): Promise<LocationType | null> => {
+    const { data, error } = await supabase.functions.invoke("places", {
+      body: {
+        action: "details",
+        placeId,
+        sessionToken: sessionTokenRef.current,
+      },
+    });
+
+    // Reset session token after details fetch (end of session)
+    resetSessionToken();
+
+    if (error || !data) return null;
+
+    const country = data.addressComponents?.find((comp: any) =>
+      comp.types?.includes("country"),
+    )?.shortText as LocationType["country"];
+
+    const administrativeAreaLevel1 = data.addressComponents?.find((comp: any) =>
+      comp.types?.includes("administrative_area_level_1"),
+    )?.longText;
+
+    return {
+      id: data.id,
+      displayName: data.displayName?.text,
+      formattedAddress: data.formattedAddress,
+      shortFormattedAddress: data.shortFormattedAddress,
+      googleMapsUri: data.googleMapsUri,
+      location: data.location,
+      country,
+      administrativeAreaLevel1,
+    };
+  };
+
+  return { ...state, getPlaceDetails };
 };
