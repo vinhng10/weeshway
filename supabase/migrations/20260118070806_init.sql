@@ -431,7 +431,7 @@ BEGIN
     AND bs.check_in_token = p_check_in_token;
 
   IF v_booking IS NULL THEN
-    RAISE EXCEPTION 'This QR code is invalid.';
+    RAISE EXCEPTION 'This QR code doesn''t match any booking.';
   END IF;
 
   -- 2. Verify caller is the project teacher
@@ -772,7 +772,7 @@ BEGIN
     IF TG_OP = 'UPDATE' THEN
         -- Deleted is terminal — no modifications allowed
         IF OLD.status = 'Deleted' THEN
-            RAISE EXCEPTION 'A Deleted project cannot be modified.';
+            RAISE EXCEPTION 'This project has been deleted and can no longer be edited.';
         END IF;
 
         -- Canceled is terminal (except transition to Deleted)
@@ -784,11 +784,11 @@ BEGIN
                     WHERE project_id = OLD.id
                       AND status = 'Refunding'
                 ) THEN
-                    RAISE EXCEPTION 'Project cannot be deleted until all refunds are completed.';
+                    RAISE EXCEPTION 'This project can''t be deleted until all refunds are completed.';
                 END IF;
                 RETURN NEW;
             END IF;
-            RAISE EXCEPTION 'A Canceled project cannot be modified.';
+            RAISE EXCEPTION 'This project has been canceled and can no longer be edited. You can delete it if you no longer need it.';
         END IF;
 
         -- Released projects: only allow transition to Canceled
@@ -798,11 +798,11 @@ BEGIN
             END IF;
 
             IF NEW.status = 'Draft' THEN
-                RAISE EXCEPTION 'Cannot move a Released project back to Draft.';
+                RAISE EXCEPTION 'This project has already been released to students and can''t be moved back to draft.';
             END IF;
 
             IF NEW::text IS DISTINCT FROM OLD::text AND NEW.status = OLD.status THEN
-                RAISE EXCEPTION 'This project is Released. Only the Status can be changed to Canceled.';
+                RAISE EXCEPTION 'This project is released. Only the status can be changed to Canceled.';
             END IF;
         END IF;
 
@@ -819,11 +819,11 @@ BEGIN
         IF NEW.style IS NULL OR NEW.level IS NULL OR
            NEW.price IS NULL OR NEW.spots IS NULL OR NEW.start_at IS NULL OR
            NEW.end_at IS NULL OR NEW.location_id IS NULL THEN
-            RAISE EXCEPTION 'Cannot release: Missing required project details.';
+            RAISE EXCEPTION 'Before releasing, make sure you''ve filled in the style, level, price, spots, date, and location.';
         END IF;
 
-        IF NOT (SELECT onboarding_complete FROM public.profiles WHERE id = NEW.user_id) THEN
-            RAISE EXCEPTION 'Cannot release: Stripe onboarding incomplete.';
+        IF NOT (SELECT onboarding_completed FROM public.profiles WHERE id = NEW.user_id) THEN
+            RAISE EXCEPTION 'To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started.';
         END IF;
     END IF;
 
@@ -934,7 +934,7 @@ BEGIN
 
         -- 1. Must come from 'Succeeded' or 'CheckedIn'
         IF OLD.status NOT IN ('Succeeded', 'CheckedIn') THEN
-            RAISE EXCEPTION 'Only a confirmed booking can be refunded.';
+            RAISE EXCEPTION 'Only a confirmed booking can be canceled.';
         END IF;
 
         -- 2. Fetch project details
@@ -950,7 +950,7 @@ BEGIN
 
         -- 4. Enforce 24h rule for student-initiated cancellations
         IF now() > (project_start_at - INTERVAL '1 day') THEN
-            RAISE EXCEPTION 'Cancellation is only allowed up to 24 hours before the class starts.';
+            RAISE EXCEPTION 'Cancellations are only allowed up to 24 hours before the class starts.';
         END IF;
 
         -- 5. Student-initiated
@@ -1320,7 +1320,7 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "location" "extensions"."geometry",
     "country" "public"."country_code" DEFAULT 'US'::"public"."country_code",
     "expo_push_token" "text",
-    "onboarding_complete" boolean DEFAULT false NOT NULL,
+    "onboarding_completed" boolean DEFAULT false NOT NULL,
     "policies_agreed_at" timestamp with time zone,
     "currency" "text" DEFAULT 'USD'::"text" NOT NULL,
     CONSTRAINT "username_length" CHECK (("char_length"("username") >= 3))
@@ -1680,17 +1680,17 @@ BEGIN
   WHERE p.id = NEW.project_id;
 
   IF v_start_at IS NULL OR v_end_at IS NULL THEN
-    RAISE EXCEPTION 'Project has no scheduled time'
+    RAISE EXCEPTION 'This class has no scheduled time.'
       USING ERRCODE = 'check_violation';
   END IF;
 
   IF now() < v_start_at THEN
-    RAISE EXCEPTION 'Reports can only be submitted after the class has started'
+    RAISE EXCEPTION 'Reports can only be submitted after the class has started.'
       USING ERRCODE = 'check_violation';
   END IF;
 
   IF now() > v_end_at + interval '48 hours' THEN
-    RAISE EXCEPTION 'Reports can only be submitted within 48 hours after the class ends'
+    RAISE EXCEPTION 'Reports can only be submitted within 48 hours after the class ends.'
       USING ERRCODE = 'check_violation';
   END IF;
 

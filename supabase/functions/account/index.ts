@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     const account = await stripe.accounts.retrieve(stripeAccountId);
 
     // Determine if onboarding is complete
-    const onboardingComplete =
+    const onboardingCompleted =
       account.charges_enabled &&
       account.payouts_enabled &&
       account.details_submitted;
@@ -36,15 +36,15 @@ Deno.serve(async (req) => {
         }) || [];
 
     // Sync onboarding status to profile
-    if (onboardingComplete) {
+    if (onboardingCompleted) {
       await supabase
         .from("profiles")
-        .update({ onboarding_complete: true })
+        .update({ onboarding_completed: true })
         .eq("id", user.id);
     }
 
     return jsonResponse({
-      onboardingComplete,
+      onboardingCompleted,
       externalAccounts,
     });
   } catch (error: unknown) {
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     if (error instanceof Stripe.errors.StripeError) {
       if (error.code === "v2_account_missing_configuration") {
         return jsonResponse(
-          { onboardingComplete: false, externalAccounts: [] },
+          { onboardingCompleted: false, externalAccounts: [] },
           200,
         );
       }

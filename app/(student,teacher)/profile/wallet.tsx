@@ -201,7 +201,7 @@ type RequirementItem = {
 };
 
 type AccountResponse = {
-  onboardingComplete: boolean;
+  onboardingCompleted: boolean;
   externalAccounts: Array<{
     bankName: string | null;
     currency: string;
@@ -240,7 +240,7 @@ function TeacherWalletContent() {
     },
   });
 
-  const { onboardingComplete, externalAccounts } = data;
+  const { onboardingCompleted, externalAccounts } = data;
 
   const handleStartOnboarding = async () => {
     try {
@@ -272,7 +272,7 @@ function TeacherWalletContent() {
   };
 
   const handleOpenDashboard = async () => {
-    if (!profile?.stripeAccountId || !onboardingComplete) return;
+    if (!profile?.stripeAccountId || !onboardingCompleted) return;
 
     try {
       const { data, error } =
@@ -355,7 +355,7 @@ function TeacherWalletContent() {
     },
   ];
 
-  return onboardingComplete ? (
+  return onboardingCompleted ? (
     <>
       <SectionListView
         sections={externalAccountsSections}

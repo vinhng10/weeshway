@@ -110,14 +110,6 @@ export default function CreateProject() {
       return;
     }
 
-    if (status === PROJECT_STATUS.RELEASED && !profile.onboardingComplete) {
-      showAlert(
-        "Wallet Setup Required",
-        "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started.",
-      );
-      return;
-    }
-
     try {
       const { data: projectId } = await supabase
         .rpc("create_project_with_song", {
@@ -168,10 +160,12 @@ export default function CreateProject() {
 
       // Navigate back to projects list
       router.back();
-    } catch {
+    } catch (error) {
       showAlert(
-        "Creation Failed",
-        "Couldn't create your project. Please try again.",
+        "Create Project Failed",
+        error instanceof Error
+          ? error.message
+          : "Couldn't create your project. Please try again.",
       );
     }
   };

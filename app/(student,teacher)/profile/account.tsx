@@ -144,11 +144,8 @@ export default function Account() {
           avatar_url: avatarUrl,
           video_urls: finalVideoUrls,
         })
-        .eq("id", profile.id);
-
-      if (error) {
-        throw error;
-      }
+        .eq("id", profile.id)
+        .throwOnError();
 
       await fetchProfile();
       router.back();

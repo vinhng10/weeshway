@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "YX38UZ5WM6.com.weeshway.weeshway",
+        "paths": ["/classes/*", "/callback/*"]
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.weeshway.weeshway",
+      "sha256_cert_fingerprints": [
+        "A2:1E:A5:A9:BE:B7:91:8C:96:FC:AD:7E:D5:6F:E4:55:67:47:46:7D:79:3E:53:19:46:25:2B:AE:32:1F:1A:5A"
+      ]
+    }
+  }
+]

@@ -18,6 +18,9 @@
         "aps-environment": "production",
         "com.apple.developer.in-app-payments": [
           "merchant.com.weeshway.weeshway"
+        ],
+        "com.apple.developer.associated-domains": [
+          "applinks:weeshway.com"
         ]
       }
     },
@@ -47,9 +50,17 @@
               "scheme": "https",
               "host": "weeshway.com",
               "pathPrefix": "/classes"
+            },
+            {
+              "scheme": "https",
+              "host": "weeshway.com",
+              "pathPrefix": "/callback"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -73,7 +84,9 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
+          "fonts": [
+            "./assets/fonts/MomoTrustDisplay-Regular.ttf"
+          ]
         }
       ],
       [

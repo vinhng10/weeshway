@@ -92,54 +92,8 @@ function ProjectContent() {
   const wasCanceled = data.status === PROJECT_STATUS.CANCELED;
   const wasDeleted = data.status === PROJECT_STATUS.DELETED;
   const canEditDetails = !wasReleased && !wasCanceled && !wasDeleted;
-  const isOnboarded = !!profile?.onboardingComplete;
-  const isFieldsComplete = !!(
-    style &&
-    level &&
-    Number(price) > 0 &&
-    Number(spots) > 0 &&
-    startAt &&
-    endAt &&
-    location
-  );
 
   const handleSave = async () => {
-    if (wasDeleted) {
-      showAlert(
-        "Project Deleted",
-        "This project has been deleted and can no longer be edited.",
-      );
-      return;
-    }
-    if (wasCanceled) {
-      showAlert(
-        "Project Canceled",
-        "This project has been canceled and can no longer be edited. You can delete it if you no longer need it.",
-      );
-      return;
-    }
-    if (status === PROJECT_STATUS.DRAFT && wasReleased) {
-      showAlert(
-        "Already Released",
-        "This project has already been released to students and can't be moved back to draft.",
-      );
-      return;
-    }
-    if (status === PROJECT_STATUS.RELEASED && !isOnboarded) {
-      showAlert(
-        "Wallet Setup Required",
-        "To release a class, you need to set up your wallet so students can book and pay you. Head to Wallet to get started.",
-      );
-      return;
-    }
-    if (status === PROJECT_STATUS.RELEASED && !isFieldsComplete) {
-      showAlert(
-        "Not Ready to Release",
-        "Before releasing, make sure you've filled in the style, level, price, spots, date, and location.",
-      );
-      return;
-    }
-
     const doSave = async () => {
       try {
         let artworkUrl = artworkUri;
@@ -172,10 +126,12 @@ function ProjectContent() {
           predicate: (query) => query.queryKey.includes("projects"),
         });
         router.back();
-      } catch {
+      } catch (error) {
         showAlert(
           "Save Failed",
-          "Couldn't save your project changes. Please try again.",
+          error instanceof Error
+            ? error.message
+            : "Couldn't save your project changes. Please try again.",
         );
       }
     };
