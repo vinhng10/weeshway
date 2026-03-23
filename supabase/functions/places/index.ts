@@ -15,7 +15,7 @@ const autocompleteSchema = z.object({
 const detailsSchema = z.object({
   action: z.literal("details"),
   placeId: z.string().min(1),
-  sessionToken: z.string().uuid(),
+  sessionToken: z.uuid(),
 });
 
 const requestSchema = z.discriminatedUnion("action", [

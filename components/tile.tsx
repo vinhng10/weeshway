@@ -82,10 +82,12 @@ export const Tile: React.FunctionComponent<TileProps> = React.memo(
             </View>
           </View>
           <View style={styles.rightContainer}>
-            {avatars && avatars.length > 0 && (
-              <AvatarGroup avatars={avatars} max={2} />
-            )}
-            {stats && <ProjectStats data={stats} />}
+            <View>
+              {avatars && avatars.length > 0 && (
+                <AvatarGroup avatars={avatars} max={2} />
+              )}
+            </View>
+            <View>{stats && <ProjectStats data={stats} />}</View>
           </View>
         </View>
       </Pressable>

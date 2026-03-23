@@ -86,7 +86,7 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
   const [visible, setVisible] = useState(false);
   const [locationDetailVisible, setLocationDetailVisible] = useState(false);
   const [query, setQuery] = useState("");
-  const { suggestions, loading, error, getPlaceDetails } =
+  const { suggestions, loading, error, getPlaceDetails, resetSessionToken } =
     useLocationSearch(query);
 
   const handleLocationPress = async (suggestion: PlaceSuggestion) => {
@@ -175,6 +175,12 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
     return null;
   };
 
+  const handleDismiss = () => {
+    setVisible(false);
+    setQuery("");
+    resetSessionToken();
+  };
+
   const handlePress = () => {
     if (editable) {
       setVisible(true);
@@ -200,10 +206,10 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
         animationType="slide"
         presentationStyle="overFullScreen"
         transparent={true}
-        onRequestClose={() => setVisible(false)}
+        onRequestClose={handleDismiss}
       >
         <View style={styles.modalContainer}>
-          <Header title="Location" onPress={() => setVisible(false)} />
+          <Header title="Location" onPress={handleDismiss} />
 
           <View style={styles.searchContainer}>
             <TextInput

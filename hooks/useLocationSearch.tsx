@@ -1,6 +1,7 @@
 import { DEBOUNCE_TIME } from "@/constants";
 import { supabase } from "@/supabase";
 import { LocationType } from "@/types";
+import * as Crypto from "expo-crypto";
 import { useEffect, useRef, useState } from "react";
 
 interface AutocompleteSuggestion {
@@ -36,10 +37,10 @@ export const useLocationSearch = (query: string) => {
     loading: false,
     error: null,
   });
-  const sessionTokenRef = useRef(crypto.randomUUID());
+  const sessionTokenRef = useRef(Crypto.randomUUID());
 
   const resetSessionToken = () => {
-    sessionTokenRef.current = crypto.randomUUID();
+    sessionTokenRef.current = Crypto.randomUUID();
   };
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export const useLocationSearch = (query: string) => {
       return;
     }
 
-    let cancelled = false;
+    const abortController = new AbortController();
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     const timeoutId = setTimeout(async () => {
@@ -63,7 +64,7 @@ export const useLocationSearch = (query: string) => {
             },
           });
 
-        if (cancelled) return;
+        if (abortController.signal.aborted) return;
 
         if (error) throw error;
 
@@ -82,7 +83,7 @@ export const useLocationSearch = (query: string) => {
 
         setState({ suggestions, loading: false, error: null });
       } catch {
-        if (!cancelled) {
+        if (!abortController.signal.aborted) {
           setState({
             suggestions: [],
             loading: false,
@@ -93,7 +94,7 @@ export const useLocationSearch = (query: string) => {
     }, DEBOUNCE_TIME);
 
     return () => {
-      cancelled = true;
+      abortController.abort();
       clearTimeout(timeoutId);
     };
   }, [query]);
@@ -134,5 +135,5 @@ export const useLocationSearch = (query: string) => {
     };
   };
 
-  return { ...state, getPlaceDetails };
+  return { ...state, getPlaceDetails, resetSessionToken };
 };

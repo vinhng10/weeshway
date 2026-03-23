@@ -20,6 +20,7 @@
         "expo-audio": "~55.0.9",
         "expo-camera": "~55.0.10",
         "expo-constants": "~55.0.9",
+        "expo-crypto": "~55.0.10",
         "expo-dev-client": "~55.0.18",
         "expo-document-picker": "~55.0.9",
         "expo-file-system": "~55.0.11",
@@ -940,6 +941,8 @@
     "expo-camera": ["expo-camera@55.0.10", "", { "dependencies": { "barcode-detector": "^3.0.0" }, "peerDependencies": { "expo": "*", "react": "*", "react-native": "*", "react-native-web": "*" }, "optionalPeers": ["react-native-web"] }, "sha512-ftDNJbGsAPNJ/QrM3j6g8/rQAOqTwZpqtvmzF7V9VX0movaCznZFdYsLi/Fff9WeEk1KzcnLIlmSz4Tj+BCrJA=="],
 
     "expo-constants": ["expo-constants@55.0.9", "", { "dependencies": { "@expo/config": "~55.0.10", "@expo/env": "~2.1.1" }, "peerDependencies": { "expo": "*", "react-native": "*" } }, "sha512-iBiXjZeuU5S/8docQeNzsVvtDy4w0zlmXBpFEi1ypwugceEpdQQab65TVRbusXAcwpNVxCPMpNlDssYp0Pli2g=="],
+
+    "expo-crypto": ["expo-crypto@55.0.10", "", { "peerDependencies": { "expo": "*" } }, "sha512-3emt67pWch07F7DPQutn7CUpaiCJI8OOFxCGiwmzeSqSjuWP9upGOXkLQNVWf+29KZQRTVgf88LhDC2GFshMNA=="],
 
     "expo-dev-client": ["expo-dev-client@55.0.18", "", { "dependencies": { "expo-dev-launcher": "55.0.19", "expo-dev-menu": "55.0.16", "expo-dev-menu-interface": "55.0.1", "expo-manifests": "~55.0.11", "expo-updates-interface": "~55.1.3" }, "peerDependencies": { "expo": "*" } }, "sha512-zQeCGk+doTMIKwPe9lNlGcUiBlMpJQNyrrsYc5eRdxuMwBrDVAU7zshARmamSw8zlAIHCsThJH2zeJg/lgQrKA=="],
 
