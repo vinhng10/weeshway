@@ -167,8 +167,10 @@ function ClassContent() {
   };
 
   const handleShare = async () => {
+    const url = `https://weeshway.com/classes/${classId}`;
     await Share.share({
-      message: `Check out this class: ${data.song?.name ?? "Untitled"}`,
+      message: `Check out this class on WeeshWay! ${url}`,
+      url,
     });
   };
 
@@ -188,11 +190,11 @@ function ClassContent() {
       label: "Report",
       onPress: handleReport,
     },
-    {
-      icon: "share-social-sharp",
-      label: "Share",
-      onPress: handleShare,
-    },
+    // {
+    //   icon: "share-social-sharp",
+    //   label: "Share",
+    //   onPress: handleShare,
+    // },
   ];
 
   const buttonLabel = isReleased ? "Book" : isWatching ? "Unwatch" : "Watch";

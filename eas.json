@@ -24,6 +24,18 @@
     }
   },
   "submit": {
+    "internal": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "completed"
+      },
+      "ios": {
+        "ascAppId": "6760827339",
+        "sku": "com.weeshway.weeshway",
+        "companyName": "WeeshWay",
+        "language": "en-US"
+      }
+    },
     "production": {
       "android": {
         "track": "production",

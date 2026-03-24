@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content="0; url=weeshway://profile/wallet" />
+    <title>Returning to Weeshway...</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        padding: 50px;
+        color: #333;
+      }
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #6366f1;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      a {
+        color: #6366f1;
+        text-decoration: none;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="spinner"></div>
+    <h2>Redirecting you back to the app...</h2>
+    <p>
+      If the app doesn't open automatically,
+      <a href="weeshway://profile/wallet">click here to continue</a>.
+    </p>
+
+    <script>
+      // Secondary JS-based redirect for extra reliability
+      window.onload = function () {
+        setTimeout(function () {
+          window.location.href = "weeshway://profile/wallet";
+        }, 500);
+      };
+    </script>
+  </body>
+</html>

@@ -51,7 +51,7 @@ dataconnect
 mocks
 snippets
 backups
-page
+# page
 seed.sql
 
 # secrets

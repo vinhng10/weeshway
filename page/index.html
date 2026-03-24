@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WeeshWay</title>
+    <meta
+      name="description"
+      content="WeeshWay connects dance students with teachers. Browse classes, book spots, and wish for the classes you want to see."
+    />
+    <meta property="og:site_name" content="WeeshWay" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "WeeshWay",
+        "url": "https://weeshway.com"
+      }
+    </script>
+    <link rel="icon" href="./assets/icon.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Nav -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="#" class="nav-logo" id="nav-logo">
+          <img src="./assets/icon.webp" alt="WeeshWay" width="36" height="36" />
+          <span>WeeshWay</span>
+        </a>
+        <div class="nav-links">
+          <div class="nav-role-toggle hidden" id="nav-role-toggle">
+            <button
+              class="role-toggle-btn active"
+              id="toggle-student"
+              data-role="student"
+            >
+              Student
+            </button>
+            <button
+              class="role-toggle-btn"
+              id="toggle-teacher"
+              data-role="teacher"
+            >
+              Teacher
+            </button>
+          </div>
+          <a href="#pricing" id="nav-pricing">Pricing</a>
+          <a href="#download" id="nav-download">Download</a>
+        </div>
+        <button class="nav-burger" id="nav-burger" aria-label="Menu">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    <div class="drawer" id="drawer">
+      <div class="drawer-header">
+        <span class="drawer-title">Menu</span>
+        <button class="drawer-close" id="drawer-close" aria-label="Close">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-role-toggle hidden" id="drawer-role-toggle">
+        <button
+          class="role-toggle-btn active"
+          id="drawer-toggle-student"
+          data-role="student"
+        >
+          Student
+        </button>
+        <button
+          class="role-toggle-btn"
+          id="drawer-toggle-teacher"
+          data-role="teacher"
+        >
+          Teacher
+        </button>
+      </div>
+      <div class="drawer-links">
+        <a href="#pricing" class="drawer-link" id="drawer-pricing">Pricing</a>
+        <a href="#download" class="drawer-link" id="drawer-download"
+          >Download</a
+        >
+      </div>
+    </div>
+
+    <!-- Split Screen Hero -->
+    <section class="split-hero" id="split-hero">
+      <div class="split-container" id="split-container">
+        <div class="split-panel split-student" id="panel-student">
+          <img src="./assets/dance1.webp" alt="" class="split-bg-img" />
+          <div class="split-panel-content">
+            <div class="split-label">I want to<br />dance.</div>
+          </div>
+        </div>
+        <div class="split-panel split-teacher" id="panel-teacher">
+          <img src="./assets/dance2.webp" alt="" class="split-bg-img" />
+          <div class="split-panel-content">
+            <div class="split-label">I want to<br />teach.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store buttons on hero -->
+      <div class="hero-store-buttons" id="hero-store-buttons">
+        <a href="#" class="store-btn" aria-label="Download on the App Store">
+          <svg width="20" height="24" viewBox="0 0 384 512" fill="currentColor">
+            <path
+              d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"
+            />
+          </svg>
+          <div class="store-btn-text">
+            <span class="store-btn-small">Download on the</span
+            ><span class="store-btn-big">App Store</span>
+          </div>
+        </a>
+        <a href="#" class="store-btn" aria-label="Get it on Google Play">
+          <svg width="20" height="22" viewBox="0 0 512 512" fill="currentColor">
+            <path
+              d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"
+            />
+          </svg>
+          <div class="store-btn-text">
+            <span class="store-btn-small">Get it on</span
+            ><span class="store-btn-big">Google Play</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Student Expanded View -->
+      <div class="expanded-view student-view" id="student-view">
+        <img src="./assets/dance1.webp" alt="" class="expanded-bg-img" />
+        <!-- Step 1: Song search only -->
+        <div class="step-animate" id="student-step-1">
+          <h2 class="expanded-title">What song do you want to dance?</h2>
+          <div class="wish-form">
+            <div class="wish-search-wrap">
+              <input
+                type="text"
+                class="wish-search"
+                id="wish-search"
+                placeholder="Search song name"
+                autocomplete="off"
+              />
+              <div class="wish-search-spinner hidden" id="wish-spinner">
+                <div class="spinner"></div>
+              </div>
+              <div class="wish-search-results" id="wish-results"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Scroll-snap feature story -->
+        <div class="step-animate step-hidden" id="student-step-2">
+          <div class="feature-scroll" id="student-feature-scroll">
+            <section class="feature-snap reveal-section">
+              <div class="progressive-layout">
+                <div class="progressive-visual-side reveal-el reveal-left">
+                  <div class="featured-card-wrap" id="featured-card-wrap"></div>
+                </div>
+                <div class="progressive-text-side reveal-el reveal-right">
+                  <h2 class="progressive-headline">Make Your Wish.</h2>
+                  <p class="progressive-body">
+                    Drop the song you want to dance to. Sometimes, wishes come
+                    true.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section class="feature-snap reveal-section">
+              <div class="progressive-layout">
+                <div class="progressive-visual-side reveal-el reveal-left">
+                  <div class="bookings-demo" id="bookings-demo"></div>
+                </div>
+                <div class="progressive-text-side reveal-el reveal-right">
+                  <h2 class="progressive-headline">Manage Your Bookings.</h2>
+                  <p class="progressive-body">
+                    See your schedule, cancel if plans change, and get reminders
+                    so you never miss a class.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <!-- Teacher Expanded View -->
+      <div class="expanded-view teacher-view" id="teacher-view">
+        <img src="./assets/dance2.webp" alt="" class="expanded-bg-img" />
+        <!-- Step 1: Song search -->
+        <div class="step-animate" id="teacher-step-1">
+          <h2 class="expanded-title">What song do you want to teach?</h2>
+          <div class="wish-form">
+            <div class="wish-search-wrap">
+              <input
+                type="text"
+                class="wish-search"
+                id="teacher-search"
+                placeholder="Search song name"
+                autocomplete="off"
+              />
+              <div class="wish-search-spinner hidden" id="teacher-spinner">
+                <div class="spinner"></div>
+              </div>
+              <div class="wish-search-results" id="teacher-results"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Scroll-snap feature story -->
+        <div class="step-animate step-hidden" id="teacher-step-2">
+          <div class="feature-scroll" id="teacher-feature-scroll">
+            <section class="feature-snap reveal-section">
+              <div class="progressive-layout">
+                <div class="progressive-visual-side reveal-el reveal-left">
+                  <div class="featured-card-wrap" id="teacher-card-wrap"></div>
+                </div>
+                <div class="progressive-text-side reveal-el reveal-right">
+                  <h2 class="progressive-headline">
+                    Publish Your Class In Seconds.
+                  </h2>
+                  <p class="progressive-body">
+                    Pick a song, set your price, and go live.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section class="feature-snap reveal-section">
+              <div class="progressive-layout">
+                <div
+                  class="progressive-visual-side progressive-visual-square reveal-el reveal-left"
+                >
+                  <div class="bubble-container" id="bubble-container">
+                    <canvas id="bubble-canvas"></canvas>
+                  </div>
+                </div>
+                <div class="progressive-text-side reveal-el reveal-right">
+                  <h2 class="progressive-headline">Know Your Audience.</h2>
+                  <p class="progressive-body">
+                    See what students are wishing for, then plan classes that
+                    match the moment.
+                  </p>
+                  <div class="bubble-legend" id="bubble-legend"></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="feature-snap reveal-section">
+              <div class="progressive-layout">
+                <div
+                  class="progressive-visual-side progressive-visual-square reveal-el reveal-left"
+                >
+                  <div class="studio-demo" id="studio-demo">
+                    <div class="studio-song-header" id="studio-song-header">
+                      <img
+                        class="studio-song-art"
+                        id="studio-song-art"
+                        src=""
+                        alt=""
+                      />
+                      <div class="studio-song-info">
+                        <div
+                          class="studio-song-name"
+                          id="studio-song-name"
+                        ></div>
+                        <div
+                          class="studio-song-artist"
+                          id="studio-song-artist"
+                        ></div>
+                      </div>
+                    </div>
+                    <div class="studio-toolbar">
+                      <button class="studio-toolbar-btn" title="Files">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path
+                            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                          />
+                        </svg>
+                      </button>
+                      <button class="studio-toolbar-btn" title="Record">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path
+                            d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+                          />
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                          <line x1="12" y1="19" x2="12" y2="23" />
+                          <line x1="8" y1="23" x2="16" y2="23" />
+                        </svg>
+                      </button>
+                      <button
+                        class="studio-toolbar-btn studio-play-btn"
+                        id="studio-play"
+                        title="Play"
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                      </button>
+                      <button class="studio-toolbar-btn" title="Split Cells">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <line x1="12" y1="3" x2="12" y2="21" />
+                          <polyline points="9 8 12 5 15 8" />
+                          <polyline points="9 16 12 19 15 16" />
+                        </svg>
+                      </button>
+                      <button class="studio-toolbar-btn" title="Merge Cells">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <line x1="12" y1="3" x2="12" y2="21" />
+                          <polyline points="8 10 12 14 16 10" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="studio-tempo-row">
+                      <span class="studio-tempo-label">Tempo</span>
+                      <button class="tempo-chip" data-tempo="0.5">0.5x</button>
+                      <button class="tempo-chip" data-tempo="0.75">
+                        0.75x
+                      </button>
+                      <button class="tempo-chip active" data-tempo="1">
+                        1x
+                      </button>
+                    </div>
+                    <div
+                      class="studio-track-section track-selected"
+                      id="track-song"
+                      data-track="song"
+                    >
+                      <div class="studio-track-label">Song</div>
+                      <div class="studio-timeline" id="song-timeline">
+                        <div class="timeline-playhead" id="song-playhead"></div>
+                      </div>
+                    </div>
+                    <div
+                      class="studio-track-section track-dimmed"
+                      id="track-count"
+                      data-track="count"
+                    >
+                      <div class="studio-track-label bold">Count</div>
+                      <div class="studio-timeline" id="count-timeline">
+                        <div
+                          class="timeline-playhead"
+                          id="count-playhead"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="progressive-text-side reveal-el reveal-right">
+                  <h2 class="progressive-headline">Your Pocket Studio.</h2>
+                  <p class="progressive-body">
+                    Walk into class fully prepared. Split music and record
+                    counting in advance.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="pricing"
+      class="pricing-hero role-section role-student reveal-section hidden"
+    >
+      <div class="pricing-left">
+        <h2 class="hero-title reveal-el">Pay Only When You Book.</h2>
+        <div
+          class="pricing-price-block reveal-el"
+          style="transition-delay: 100ms"
+        >
+          <div class="hero-display">$0.50</div>
+          <div class="pricing-per">per booking spot</div>
+        </div>
+        <ul
+          class="pricing-features hero-caption reveal-el"
+          style="transition-delay: 200ms"
+        >
+          <li>No subscriptions.</li>
+          <li>No commitment.</li>
+        </ul>
+      </div>
+      <div class="hero-img-col">
+        <img src="./assets/dance4.webp" alt="" class="hero-img" />
+      </div>
+    </section>
+
+    <!-- PRICING — TEACHER -->
+    <section
+      id="pricing-teacher"
+      class="pricing-hero role-section role-teacher reveal-section hidden"
+    >
+      <div class="pricing-left">
+        <h2 class="hero-title reveal-el">When You Win, We Win.</h2>
+        <div
+          class="pricing-price-block reveal-el"
+          style="transition-delay: 100ms"
+        >
+          <div class="hero-display">5%</div>
+          <div class="pricing-per">per booking</div>
+        </div>
+        <ul
+          class="pricing-features hero-caption reveal-el"
+          style="transition-delay: 200ms"
+        >
+          <li>No subscriptions.</li>
+          <li>No commitment.</li>
+        </ul>
+      </div>
+      <div class="hero-img-col">
+        <img src="./assets/dance4.webp" alt="" class="hero-img" />
+      </div>
+    </section>
+
+    <!-- Download CTA -->
+    <section
+      class="pricing-hero download-hero reveal-section hidden"
+      id="download"
+    >
+      <div class="pricing-left">
+        <div class="download-title-group">
+          <h2 class="hero-title reveal-el">Get</h2>
+          <div
+            class="pricing-price-block reveal-el"
+            style="transition-delay: 80ms"
+          >
+            <div class="hero-display">WeeshWay</div>
+          </div>
+        </div>
+        <div
+          class="download-store-buttons reveal-el"
+          style="transition-delay: 160ms"
+        >
+          <a href="#" class="store-btn" aria-label="Download on the App Store">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 384 512"
+              fill="currentColor"
+            >
+              <path
+                d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"
+              />
+            </svg>
+            <div class="store-btn-text">
+              <span class="store-btn-small">Download on the</span
+              ><span class="store-btn-big">App Store</span>
+            </div>
+          </a>
+          <a href="#" class="store-btn" aria-label="Get it on Google Play">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 512 512"
+              fill="currentColor"
+            >
+              <path
+                d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"
+              />
+            </svg>
+            <div class="store-btn-text">
+              <span class="store-btn-small">Get it on</span
+              ><span class="store-btn-big">Google Play</span>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="hero-img-col reveal-el" style="transition-delay: 120ms">
+        <img src="./assets/dance6.webp" alt="" class="hero-img" />
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img
+            src="./assets/icon.webp"
+            alt="WeeshWay"
+            width="28"
+            height="28"
+          /><span>WeeshWay</span>
+        </div>
+        <div class="footer-legal">
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="cancellation.html">Cancellation &amp; Refunds</a>
+          <a href="delete.html">Delete Account</a>
+        </div>
+        <div class="footer-copy">
+          &copy; <span class="year"></span> WeeshWay. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+    <!-- Role-switch transition overlay -->
+    <div id="role-overlay"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

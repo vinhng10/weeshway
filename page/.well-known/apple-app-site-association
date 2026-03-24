@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["YX38UZ5WM6.com.weeshway.weeshway"],
+        "components": [
+          {
+            "/": "/classes/*",
+            "comment": "Matches class detail pages"
+          },
+          {
+            "/": "/callback/*",
+            "comment": "Matches Stripe callback redirects"
+          }
+        ]
+      }
+    ]
+  }
+}
