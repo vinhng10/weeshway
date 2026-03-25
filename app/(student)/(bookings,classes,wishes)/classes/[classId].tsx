@@ -24,16 +24,11 @@ import {
 import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
+import { share } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Share,
-  View,
-} from "react-native";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassContent() {
@@ -166,13 +161,7 @@ function ClassContent() {
     router.navigate(`./report?classId=${classId}`);
   };
 
-  const handleShare = async () => {
-    const url = `https://weeshway.com/classes/${classId}`;
-    await Share.share({
-      message: `Check out this class on WeeshWay! ${url}`,
-      url,
-    });
-  };
+  const handleShare = () => share(data);
 
   const fabItems: FABItem[] = [
     {
@@ -190,11 +179,11 @@ function ClassContent() {
       label: "Report",
       onPress: handleReport,
     },
-    // {
-    //   icon: "share-social-sharp",
-    //   label: "Share",
-    //   onPress: handleShare,
-    // },
+    {
+      icon: "share-social-sharp",
+      label: "Share",
+      onPress: handleShare,
+    },
   ];
 
   const buttonLabel = isReleased ? "Book" : isWatching ? "Unwatch" : "Watch";

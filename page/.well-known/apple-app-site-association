@@ -11,6 +11,10 @@
           {
             "/": "/profile/*",
             "comment": "Matches profile wallet"
+          },
+          {
+            "/": "/teacher/*",
+            "comment": "Matches teacher profile"
           }
         ]
       }

@@ -80,10 +80,10 @@ export const FAB: React.FunctionComponent<FABProps> = ({ label, items }) => {
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
-          style={[StyleSheet.absoluteFill, styles.overlay]}
+          style={StyleSheet.absoluteFill}
         >
           <Pressable
-            style={styles.overlayPress}
+            style={[styles.overlay, styles.overlayPress]}
             onPress={() => setExpanded(false)}
           />
         </Animated.View>

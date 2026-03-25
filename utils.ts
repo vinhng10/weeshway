@@ -1,9 +1,13 @@
-import { DAY, MONTH } from "@/constants";
+import { DAY, MONTH, WEBSITE_URL } from "@/constants";
 import { useAlert } from "@/hooks";
+import { ProjectEnrichedType } from "@/types";
+import * as Clipboard from "expo-clipboard";
+import { File, Paths } from "expo-file-system";
 import {
   launchImageLibraryAsync,
   requestMediaLibraryPermissionsAsync,
 } from "expo-image-picker";
+import Share from "react-native-share";
 
 export const getArtworkUrl = (url?: string, size: number = 200): string => {
   if (!url || !url.includes("mzstatic.com")) return url ?? "";
@@ -29,6 +33,39 @@ export const formatTime = (date?: Date): string => {
   const minutesStr = String(minutes).padStart(2, "0");
   return `${hoursStr}:${minutesStr}`;
 };
+
+export async function share(data: ProjectEnrichedType): Promise<void> {
+  const url = `${WEBSITE_URL}/classes/${data.id}`;
+  const title = data.song?.name ?? "this";
+  const message = `Check out "${title}" class on WeeshWay!\n${url}`;
+  const artworkUrl =
+    data.artworkUrl || getArtworkUrl(data.song?.artworkUrl, 1080);
+  let file: File | undefined;
+
+  Clipboard.setStringAsync(url);
+
+  try {
+    if (artworkUrl) {
+      file = await File.downloadFileAsync(
+        artworkUrl,
+        new File(Paths.cache, `share-artwork-${data.id}.jpg`),
+      );
+      await Share.open({
+        title,
+        message,
+        url: file.uri,
+        type: "image/jpeg",
+      });
+    } else {
+      await Share.open({ title, message, url });
+    }
+  } catch {
+  } finally {
+    if (file?.exists) {
+      file.delete();
+    }
+  }
+}
 
 export async function pickImage(): Promise<string | undefined> {
   const { status } = await requestMediaLibraryPermissionsAsync();

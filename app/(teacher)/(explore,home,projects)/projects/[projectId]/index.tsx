@@ -26,10 +26,11 @@ import {
 import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase, uploadMedia } from "@/supabase";
 import { ProjectEnrichedType, ProjectStatusType } from "@/types";
+import { share } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { RefreshControl, Share, View } from "react-native";
+import { RefreshControl, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -185,13 +186,7 @@ function ProjectContent() {
     router.navigate(`./${projectId}/report`);
   };
 
-  const handleShare = async () => {
-    const url = `https://weeshway.com/classes/${projectId}`;
-    await Share.share({
-      message: `Check out this class on WeeshWay! ${url}`,
-      url,
-    });
-  };
+  const handleShare = () => share(data);
 
   const fabItems: FABItem[] = [
     {
@@ -214,11 +209,11 @@ function ProjectContent() {
       label: "Report",
       onPress: handleReport,
     },
-    // {
-    //   icon: "share-social-sharp",
-    //   label: "Share",
-    //   onPress: handleShare,
-    // },
+    {
+      icon: "share-social-sharp",
+      label: "Share",
+      onPress: handleShare,
+    },
   ];
 
   return (

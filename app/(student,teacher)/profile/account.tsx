@@ -1,13 +1,16 @@
 import {
   Avatar,
-  Button,
+  FAB,
+  FABItem,
   Header,
   IconButton,
   TextBoxInput,
   Video,
 } from "@/components";
+import { WEBSITE_URL } from "@/constants";
 import { useAlert, useAuth } from "@/hooks";
 import { supabase, uploadMedia } from "@/supabase";
+import * as Clipboard from "expo-clipboard";
 import {
   launchImageLibraryAsync,
   requestMediaLibraryPermissionsAsync,
@@ -101,6 +104,13 @@ export default function Account() {
     );
   };
 
+  const handleShare = async () => {
+    if (!profile) return;
+    const url = `${WEBSITE_URL}/teacher/${profile.id}`;
+    await Clipboard.setStringAsync(url);
+    showAlert("Link Copied", "Your profile link has been copied to clipboard.");
+  };
+
   const handleSave = async () => {
     if (!profile || !isLoggedIn) {
       showAlert(
@@ -156,6 +166,24 @@ export default function Account() {
       );
     }
   };
+
+  const fabItems: FABItem[] = [
+    {
+      icon: "checkmark-circle",
+      label: "Save",
+      onPress: handleSave,
+    },
+    {
+      icon: "share-social-sharp",
+      label: "Share",
+      onPress: handleShare,
+    },
+    {
+      icon: "trash",
+      label: "Delete Account",
+      onPress: handleDeleteAccount,
+    },
+  ];
 
   return (
     <View style={styles.container}>
@@ -221,12 +249,9 @@ export default function Account() {
             multiline
           />
         </View>
-
-        {/* Delete Account */}
-        <Button label="Delete Account" onPress={handleDeleteAccount} outlined />
       </ScrollView>
 
-      <Button label={"Save"} onPress={handleSave} stickyBottom />
+      <FAB label="Actions" items={fabItems} />
     </View>
   );
 }

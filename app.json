@@ -56,6 +56,11 @@
               "scheme": "https",
               "host": "weeshway.com",
               "pathPrefix": "/profile"
+            },
+            {
+              "scheme": "https",
+              "host": "weeshway.com",
+              "pathPrefix": "/teacher"
             }
           ],
           "category": [
