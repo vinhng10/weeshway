@@ -83,6 +83,6 @@
     "@shopify/react-native-skia"
   ],
   "patchedDependencies": {
-    "@stripe/stripe-react-native@0.59.2": "patches/@stripe%2Fstripe-react-native@0.60.0.patch"
+    "@stripe/stripe-react-native@0.59.2": "patches/@stripe%2Fstripe-react-native@0.59.2.patch"
   }
 }
