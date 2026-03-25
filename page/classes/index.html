@@ -35,6 +35,16 @@
         margin: 0;
         max-width: 320px;
       }
+      .redirect-page .open-app-btn {
+        display: inline-block;
+        background: #0C0C0C;
+        color: #fff;
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 600;
+      }
       .redirect-page .store-buttons {
         display: flex;
         gap: 1rem;
@@ -44,20 +54,39 @@
     </style>
     <script>
       (function () {
-        // Extract classId from path: /classes/abc123
         var parts = window.location.pathname.split("/").filter(Boolean);
         var classId = parts.length > 1 ? parts[parts.length - 1] : null;
-        if (classId) {
-          // On iOS, universal links handle this automatically.
-          // On Android or when the app isn't installed, try the custom scheme.
-          var appUrl = "weeshway://classes/" + classId;
-          var timeout = setTimeout(function () {
-            // App didn't open — user stays on this page (fallback)
-          }, 1500);
-          window.addEventListener("blur", function () {
-            clearTimeout(timeout);
-          });
-          window.location.href = appUrl;
+        if (!classId) return;
+
+        var ua = navigator.userAgent || "";
+        var isAndroid = /android/i.test(ua);
+        // Detect in-app browsers that block JS redirects
+        var isInApp = /telegram|messenger|fbav|instagram|line|whatsapp/i.test(ua);
+
+        // Set the "Open in app" button href
+        document.addEventListener("DOMContentLoaded", function () {
+          var btn = document.getElementById("open-app-btn");
+          if (!btn) return;
+          if (isAndroid) {
+            btn.href =
+              "intent://classes/" +
+              classId +
+              "#Intent;scheme=weeshway;package=com.weeshway.weeshway;end";
+          } else {
+            btn.href = "weeshway://classes/" + classId;
+          }
+        });
+
+        // Only auto-redirect if NOT in an in-app browser
+        if (!isInApp) {
+          if (isAndroid) {
+            window.location.href =
+              "intent://classes/" +
+              classId +
+              "#Intent;scheme=weeshway;package=com.weeshway.weeshway;end";
+          } else {
+            window.location.href = "weeshway://classes/" + classId;
+          }
         }
       })();
     </script>
@@ -67,6 +96,7 @@
       <img src="/assets/icon.webp" alt="WeeshWay" />
       <h1>View this class on WeeshWay</h1>
       <p>Download the app to browse classes, book spots, and start dancing.</p>
+      <a id="open-app-btn" href="#" class="open-app-btn">Open in App</a>
       <div class="store-buttons">
         <a href="#" class="store-btn" aria-label="Download on the App Store">
           <svg
