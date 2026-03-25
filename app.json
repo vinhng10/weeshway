@@ -55,7 +55,7 @@
             {
               "scheme": "https",
               "host": "weeshway.com",
-              "pathPrefix": "/callback"
+              "pathPrefix": "/profile"
             }
           ],
           "category": [

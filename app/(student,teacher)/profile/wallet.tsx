@@ -259,7 +259,7 @@ function TeacherWalletContent() {
         throw new Error("The onboarding link was not returned.");
       }
 
-      await WebBrowser.openAuthSessionAsync(onboardingUrl, RETURN_URL);
+      await WebBrowser.openAuthSessionAsync(onboardingUrl);
 
       await refetch();
       await fetchProfile();

@@ -9,8 +9,8 @@
             "comment": "Matches class detail pages"
           },
           {
-            "/": "/callback/*",
-            "comment": "Matches Stripe callback redirects"
+            "/": "/profile/*",
+            "comment": "Matches profile wallet"
           }
         ]
       }
