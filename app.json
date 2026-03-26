@@ -5,11 +5,6 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "splash": {
-      "image": "./assets/images/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0C0C0C"
-    },
     "scheme": "weeshway",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -25,9 +20,7 @@
         "com.apple.developer.in-app-payments": [
           "merchant.com.weeshway.weeshway"
         ],
-        "com.apple.developer.associated-domains": [
-          "applinks:weeshway.com"
-        ]
+        "com.apple.developer.associated-domains": ["applinks:weeshway.com"]
       }
     },
     "android": {
@@ -68,14 +61,22 @@
               "pathPrefix": "/teacher"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
     "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F4F4F4",
+          "image": "./assets/images/icon.png",
+          "imageWidth": 250,
+          "dark": {
+            "backgroundColor": "#0C0C0C"
+          }
+        }
+      ],
       "expo-router",
       "expo-notifications",
       [
@@ -95,9 +96,7 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/MomoTrustDisplay-Regular.ttf"
-          ]
+          "fonts": ["./assets/fonts/MomoTrustDisplay-Regular.ttf"]
         }
       ],
       [
