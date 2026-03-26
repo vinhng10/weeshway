@@ -1,5 +1,6 @@
 import { Alert, syncLocation, syncPushToken } from "@/components";
 import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
+import Constants from "expo-constants";
 import {
   useAudioPlayerStore,
   useAuth,
@@ -30,6 +31,7 @@ const queryClient = new QueryClient();
 
 function RootNavigator() {
   const isLoggedIn = useAuth((state) => !!state.session && !!state.profile);
+  const isLoading = useAuth((state) => state.isLoading);
   const initialize = useAuth((state) => state.initialize);
   const profile = useAuth((state) => state.profile);
   const country = useLocales((state) => state.country);
@@ -81,6 +83,10 @@ function RootNavigator() {
     pause();
   }, [segments]);
 
+  // Don't render navigator until auth state is determined,
+  // otherwise the deep link URL gets consumed while guards are wrong
+  if (isLoading) return null;
+
   return (
     <Stack>
       {/* Screens for unauthenticated users */}
@@ -117,7 +123,7 @@ export default function Root() {
         <StripeProvider
           publishableKey={STRIPE_PUBLISHABLE_KEY}
           merchantIdentifier="merchant.com.weeshway.weeshway"
-          urlScheme="weeshway"
+          urlScheme={Constants.expoConfig?.scheme as string}
         >
           <QueryClientProvider client={queryClient}>
             <StatusBar style="auto" />
