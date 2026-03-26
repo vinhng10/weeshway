@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import Constants from "expo-constants";
 import { Stack, useSegments } from "expo-router";
-import { hideAsync } from "expo-splash-screen";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -27,6 +27,8 @@ configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
   strict: false, // Reanimated runs in strict mode by default
 });
+
+SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
@@ -89,7 +91,7 @@ function RootNavigator() {
   // before the navigator is ready.
   useEffect(() => {
     if (!isLoading) {
-      hideAsync();
+      SplashScreen.hide();
     }
   }, [isLoading]);
 
