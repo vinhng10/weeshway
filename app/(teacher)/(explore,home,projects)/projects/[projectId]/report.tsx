@@ -45,9 +45,7 @@ function ReportContent() {
 
   if (data) {
     return (
-      <View style={styles.container}>
-        <Header title="Report" />
-
+      <>
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
@@ -95,7 +93,7 @@ function ReportContent() {
             </View>
           )}
         </ScrollView>
-      </View>
+      </>
     );
   }
 
@@ -143,9 +141,7 @@ function ReportContent() {
   };
 
   return (
-    <View style={styles.container}>
-      <Header title="Report" />
-
+    <>
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -177,15 +173,18 @@ function ReportContent() {
       </ScrollView>
 
       <Button stickyBottom label="Send" onPress={handleSend} />
-    </View>
+    </>
   );
 }
 
 export default function Report() {
   return (
-    <Boundary>
-      <ReportContent />
-    </Boundary>
+    <View style={styles.container}>
+      <Header title="Report" />
+      <Boundary>
+        <ReportContent />
+      </Boundary>
+    </View>
   );
 }
 

@@ -1,26 +1,49 @@
+diff --git a/ios/StripeSdkImpl+CustomerSheet.swift b/ios/StripeSdkImpl+CustomerSheet.swift
+--- a/ios/StripeSdkImpl+CustomerSheet.swift
++++ b/ios/StripeSdkImpl+CustomerSheet.swift
+@@ -207,7 +207,9 @@
+
+     @objc(clientSecretProviderSetupIntentClientSecretCallback:resolver:rejecter:)
+     public func clientSecretProviderSetupIntentClientSecretCallback(setupIntentClientSecret: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+-        self.clientSecretProviderSetupIntentClientSecretCallback?(setupIntentClientSecret)
++        let callback = self.clientSecretProviderSetupIntentClientSecretCallback
++        self.clientSecretProviderSetupIntentClientSecretCallback = nil
++        callback?(setupIntentClientSecret)
+         resolve([])
+     }
+
+@@ -220,7 +222,9 @@
+         }
+
+         let customerSessionClientSecret = CustomerSessionClientSecret(customerId: customerId, clientSecret: clientSecret)
+-        self.clientSecretProviderCustomerSessionClientSecretCallback?(customerSessionClientSecret)
++        let callback = self.clientSecretProviderCustomerSessionClientSecretCallback
++        self.clientSecretProviderCustomerSessionClientSecretCallback = nil
++        callback?(customerSessionClientSecret)
+         resolve([])
+     }
+ }
 diff --git a/ios/StripeSwiftInterop.h b/ios/StripeSwiftInterop.h
-index c7a804d3045c22312bcfa39ee2c669ba2b7f10a8..2dfbfdbcc01e445a1b09ce5a6ec3f00956963a9a 100644
 --- a/ios/StripeSwiftInterop.h
 +++ b/ios/StripeSwiftInterop.h
 @@ -11,7 +11,7 @@
  @protocol STPPaymentCardTextFieldDelegate;
  @protocol STPCardFormViewDelegate;
- 
+
 -typedef NS_ENUM(NSUInteger, STPPaymentStatus);
 +typedef NS_ENUM(NSInteger, STPPaymentStatus);
- 
+
  // stripe_react_native-Swift.h also depends on these headers.
  #import <React/RCTBridgeModule.h>
 diff --git a/stripe-react-native.podspec b/stripe-react-native.podspec
-index 4da885908022da45ee0a4d982c857a8a3337d857..f6bb5ce16a3ee29059e1960f5e3486d15fa6c62d 100644
 --- a/stripe-react-native.podspec
 +++ b/stripe-react-native.podspec
-@@ -2,7 +2,7 @@ require 'json'
- 
+@@ -2,7 +2,7 @@
+
  package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
  # Keep stripe_version in sync with https://github.com/stripe/stripe-identity-react-native/blob/main/stripe-identity-react-native.podspec
 -stripe_version = '~> 25.6.0'
 +stripe_version = '~> 25.9.0'
- 
+
  fabric_enabled = ENV['RCT_NEW_ARCH_ENABLED'] == '1'
- 
+

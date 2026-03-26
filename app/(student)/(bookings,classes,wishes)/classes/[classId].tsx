@@ -190,9 +190,7 @@ function ClassContent() {
   const handlePress = isReleased ? handleBook : handleWatch;
 
   return (
-    <View style={styles.container}>
-      <Header title="Class" />
-
+    <>
       {/* Scrollable Content */}
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
@@ -308,15 +306,18 @@ function ClassContent() {
           description="Show this to your teacher to check in"
         />
       )}
-    </View>
+    </>
   );
 }
 
 export default function Class() {
   return (
-    <Boundary>
-      <ClassContent />
-    </Boundary>
+    <View style={styles.container}>
+      <Header title="Class" />
+      <Boundary>
+        <ClassContent />
+      </Boundary>
+    </View>
   );
 }
 

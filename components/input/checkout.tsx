@@ -1,4 +1,3 @@
-import Constants from "expo-constants";
 import { useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileType, ProjectEnrichedType } from "@/types";
@@ -109,7 +108,6 @@ export function Checkout({
           customerId,
           paymentIntentClientSecret,
           customerSessionClientSecret,
-          returnURL: `${Constants.expoConfig?.scheme}://stripe-redirect`,
           paymentMethodOrder: ["card"],
           paymentMethodLayout: PaymentMethodLayout.Horizontal,
           appearance: {
