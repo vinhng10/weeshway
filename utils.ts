@@ -40,30 +40,20 @@ export async function share(data: ProjectEnrichedType): Promise<void> {
   const message = `Check out "${title}" class on WeeshWay!\n${url}`;
   const artworkUrl =
     data.artworkUrl || getArtworkUrl(data.song?.artworkUrl, 1080);
-  let file: File | undefined;
-
   Clipboard.setStringAsync(url);
 
+  let file: File | undefined;
   try {
     if (artworkUrl) {
-      file = await File.downloadFileAsync(
-        artworkUrl,
-        new File(Paths.cache, `share-artwork-${data.id}.jpg`),
-      );
-      await Share.open({
-        title,
-        message,
-        url: file.uri,
-        type: "image/jpeg",
-      });
+      const dest = new File(Paths.cache, `share-artwork-${Date.now()}.jpg`);
+      file = await File.downloadFileAsync(artworkUrl, dest);
+      await Share.open({ title, message, url: file.uri, type: "image/jpeg" });
     } else {
       await Share.open({ title, message, url });
     }
   } catch {
   } finally {
-    if (file?.exists) {
-      file.delete();
-    }
+    if (file?.exists) await file.delete();
   }
 }
 

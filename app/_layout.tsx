@@ -1,6 +1,5 @@
 import { Alert, syncLocation, syncPushToken } from "@/components";
 import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
-import Constants from "expo-constants";
 import {
   useAudioPlayerStore,
   useAuth,
@@ -12,7 +11,9 @@ import {
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import Constants from "expo-constants";
 import { Stack, useSegments } from "expo-router";
+import { hideAsync } from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -83,14 +84,19 @@ function RootNavigator() {
     pause();
   }, [segments]);
 
-  // Don't render navigator until auth state is determined,
-  // otherwise the deep link URL gets consumed while guards are wrong
-  if (isLoading) return null;
+  // Hide splash screen once auth state is determined.
+  // We always render the Stack so Android doesn't consume the deep link intent
+  // before the navigator is ready.
+  useEffect(() => {
+    if (!isLoading) {
+      hideAsync();
+    }
+  }, [isLoading]);
 
   return (
     <Stack>
       {/* Screens for unauthenticated users */}
-      <Stack.Protected guard={!isLoggedIn}>
+      <Stack.Protected guard={!isLoading && !isLoggedIn}>
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="sign-up" options={{ headerShown: false }} />
         <Stack.Screen name="verify-otp" options={{ headerShown: false }} />
