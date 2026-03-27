@@ -1,9 +1,11 @@
-import { IconSymbol } from "@/components";
+import { Avatar, IconSymbol } from "@/components";
+import { useAuth } from "@/hooks";
 import { Tabs } from "expo-router";
 import { useUnistyles } from "react-native-unistyles";
 
 export default function TabLayout() {
   const { theme } = useUnistyles();
+  const { profile } = useAuth();
 
   return (
     <Tabs
@@ -24,6 +26,16 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen
         name="(home)"
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "(home)" }],
+              });
+            }
+          },
+        })}
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
@@ -33,6 +45,16 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="(explore)"
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "(explore)" }],
+              });
+            }
+          },
+        })}
         options={{
           title: "Explore",
           tabBarIcon: ({ color }) => (
@@ -42,6 +64,16 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="(projects)"
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "(projects)" }],
+              });
+            }
+          },
+        })}
         options={{
           title: "Projects",
           headerShown: false,
@@ -52,10 +84,25 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="profile"
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "profile" }],
+              });
+            }
+          },
+        })}
         options={{
           title: "Profile",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person-sharp" color={color} />
+          tabBarLabel: () => null,
+          tabBarItemStyle: {
+            flexDirection: "row",
+            alignSelf: "center",
+          },
+          tabBarIcon: () => (
+            <Avatar bordered shape="circle" source={profile?.avatarUrl} />
           ),
         }}
       />

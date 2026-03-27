@@ -20,11 +20,14 @@ export const ButtonGroup: React.FunctionComponent<ButtonGroupProps> = ({
 
   return (
     <View style={[styles.style, style]} {...rest}>
-      {Children.map(children, (child, index) => (
-        <View key={index} style={styles.childWrapper}>
-          {child}
-        </View>
-      ))}
+      {Children.map(children, (child, index) => {
+        if (!child) return null;
+        return (
+          <View key={index} style={styles.childWrapper}>
+            {child}
+          </View>
+        );
+      })}
     </View>
   );
 };
@@ -53,6 +56,13 @@ const styles = StyleSheet.create((theme) => ({
     },
   },
   childWrapper: {
-    flex: 1,
+    variants: {
+      direction: {
+        default: {
+          flex: 1,
+        },
+        column: {},
+      },
+    },
   },
 }));

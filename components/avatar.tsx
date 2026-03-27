@@ -37,7 +37,10 @@ export const Avatar = React.memo(
     };
 
     return (
-      <Pressable onPress={handleImagePicker}>
+      <Pressable
+        onPress={handleImagePicker}
+        disabled={!editable || !onSourceChange}
+      >
         <UniImage
           source={getArtworkUrl(source as string, size === "large" ? 100 : 60)}
           style={[styles.avatar, style]}

@@ -27,13 +27,13 @@ import { useCallback, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-interface ClassesContentProps {
+interface HomeContentProps {
   status?: ProjectStatusType;
   style?: StyleType;
   level?: LevelType;
 }
 
-function ClassesContent({ status, style, level }: ClassesContentProps) {
+function HomeContent({ status, style, level }: HomeContentProps) {
   const profile = useAuth((state) => state.profile);
 
   const {
@@ -158,7 +158,7 @@ function ClassesContent({ status, style, level }: ClassesContentProps) {
   );
 }
 
-export default function Classes() {
+export default function Home() {
   const [status, setStatus] = useState<ProjectStatusType>();
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
@@ -194,7 +194,7 @@ export default function Classes() {
         <ChipBar items={options} />
       </View>
       <Boundary>
-        <ClassesContent status={status} style={style} level={level} />
+        <HomeContent status={status} style={style} level={level} />
       </Boundary>
       <LocationPermission />
     </View>
