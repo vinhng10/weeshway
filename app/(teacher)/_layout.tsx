@@ -1,5 +1,6 @@
 import { Avatar, IconSymbol } from "@/components";
 import { useAuth } from "@/hooks";
+import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import { useUnistyles } from "react-native-unistyles";
 
@@ -17,10 +18,22 @@ export default function TabLayout() {
           backgroundColor: theme.colors.background,
         },
         tabBarAllowFontScaling: false,
-        tabBarStyle: {
-          backgroundColor: theme.colors.background,
-          borderTopWidth: 0,
+        tabBarItemStyle: {
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
         },
+        tabBarStyle: {
+          position: "absolute",
+          overflow: "hidden",
+          backgroundColor: "transparent",
+          height: theme.gap(8),
+          borderTopWidth: 0,
+          paddingBottom: 0,
+          margin: theme.gap(2),
+          borderRadius: theme.gap(4),
+        },
+        tabBarBackground: () => <BlurView intensity={50} style={{ flex: 1 }} />,
       }}
     >
       <Tabs.Screen name="index" options={{ href: null }} />
@@ -97,10 +110,6 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarLabel: () => null,
-          tabBarItemStyle: {
-            flexDirection: "row",
-            alignSelf: "center",
-          },
           tabBarIcon: () => (
             <Avatar bordered shape="circle" source={profile?.avatarUrl} />
           ),
