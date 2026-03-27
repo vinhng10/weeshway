@@ -95,7 +95,7 @@ const styles = StyleSheet.create((theme) => ({
           width: "70%",
           position: "absolute",
           alignSelf: "center",
-          bottom: theme.gap(2),
+          bottom: theme.gap(2 + 9),
         },
       },
     },
