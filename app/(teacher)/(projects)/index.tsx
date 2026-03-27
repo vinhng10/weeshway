@@ -126,7 +126,7 @@ function ProjectsContent({ status, style, level }: ProjectsContentProps) {
       />
 
       <Button
-        stickyBottom
+        position="stickyBottom"
         label="Create Project"
         onPress={() => router.navigate("./create")}
       />

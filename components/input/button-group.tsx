@@ -5,18 +5,17 @@ import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
 export type ButtonGroupProps = {
   children: ReactNode;
   direction?: "row" | "column";
-  stickyBottom?: boolean;
 } & ViewProps &
   UnistylesVariants<typeof styles>;
 
 export const ButtonGroup: React.FunctionComponent<ButtonGroupProps> = ({
   children,
   direction,
-  stickyBottom,
+  position,
   style,
   ...rest
 }) => {
-  styles.useVariants({ direction, stickyBottom });
+  styles.useVariants({ direction, position });
 
   return (
     <View style={[styles.style, style]} {...rest}>
@@ -46,10 +45,16 @@ const styles = StyleSheet.create((theme) => ({
           flexDirection: "column",
         },
       },
-      stickyBottom: {
-        true: {
+      position: {
+        default: {},
+        stickyBottom: {
           position: "absolute",
-          bottom: theme.gap(2 + 9),
+          bottom: theme.gap(2 + 7.5),
+          paddingHorizontal: theme.gap(2),
+        },
+        stickyBottomAbsolute: {
+          position: "absolute",
+          bottom: theme.gap(2),
           paddingHorizontal: theme.gap(2),
         },
       },
@@ -62,6 +67,11 @@ const styles = StyleSheet.create((theme) => ({
           flex: 1,
         },
         column: {},
+      },
+      position: {
+        default: {},
+        stickyBottom: {},
+        stickyBottomAbsolute: {},
       },
     },
   },

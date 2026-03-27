@@ -121,7 +121,7 @@ export default function MakeAWish() {
         />
       </KeyboardAwareScrollView>
 
-      <Button label={"Create"} onPress={handleCreate} stickyBottom />
+      <Button label={"Create"} onPress={handleCreate} position="stickyBottom" />
     </View>
   );
 }

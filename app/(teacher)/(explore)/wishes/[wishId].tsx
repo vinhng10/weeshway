@@ -110,7 +110,7 @@ function WishContent() {
       <Button
         label="Create Project"
         onPress={handleCreateProject}
-        stickyBottom
+        position="stickyBottom"
       />
     </>
   );

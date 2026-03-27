@@ -244,7 +244,7 @@ export function Checkout({
         </View>
 
         {/* Action Buttons */}
-        <ButtonGroup direction="column" stickyBottom>
+        <ButtonGroup direction="column" position="stickyBottomAbsolute">
           <Button
             label={status === "success" ? "See you in class!" : "Pay"}
             onPress={handlePay}

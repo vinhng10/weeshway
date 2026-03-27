@@ -159,7 +159,7 @@ function WishContent() {
         />
       </KeyboardAwareScrollView>
 
-      <ButtonGroup stickyBottom>
+      <ButtonGroup position="stickyBottom">
         <Button label="Delete" onPress={handleDelete} outlined />
         <Button label="Save" onPress={handleSave} />
       </ButtonGroup>

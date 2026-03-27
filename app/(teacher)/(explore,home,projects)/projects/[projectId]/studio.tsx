@@ -150,7 +150,7 @@ export default function Studio() {
       <Header title="Studio" />
 
       <View style={styles.studioContainer}>
-        <Button label="Save" stickyBottom onPress={syncToServer} />
+        <Button label="Save" position="stickyBottom" onPress={syncToServer} />
 
         <ControlBar
           isPlaying={isPlaying}

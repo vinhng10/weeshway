@@ -284,7 +284,11 @@ function ClassContent() {
       {isBooked ? (
         <FAB label="Actions" items={fabItems} />
       ) : (
-        <Button stickyBottom label={buttonLabel} onPress={handlePress} />
+        <Button
+          position="stickyBottom"
+          label={buttonLabel}
+          onPress={handlePress}
+        />
       )}
 
       <Checkout

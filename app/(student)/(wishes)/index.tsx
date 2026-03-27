@@ -129,7 +129,7 @@ function WishesContent({ style, level }: WishesContentProps) {
         isRefetching={isRefetching}
       />
       <Button
-        stickyBottom
+        position="stickyBottom"
         label="Make A Wish"
         onPress={() => {
           router.navigate("./create");

@@ -250,7 +250,7 @@ export default function CreateProject() {
       </KeyboardAwareScrollView>
 
       {/* Create Button */}
-      <Button label={"Create"} onPress={handleCreate} stickyBottom />
+      <Button label={"Create"} onPress={handleCreate} position="stickyBottom" />
     </View>
   );
 }

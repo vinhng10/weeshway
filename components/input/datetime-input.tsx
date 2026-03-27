@@ -146,7 +146,13 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
           </View>
         </View>
 
-        {editable && <Button stickyBottom label="Save" onPress={handleSave} />}
+        {editable && (
+          <Button
+            position="stickyBottomAbsolute"
+            label="Save"
+            onPress={handleSave}
+          />
+        )}
       </Modal>
     </>
   );

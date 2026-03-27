@@ -1,7 +1,6 @@
 // Main Components
 export { Avatar, type AvatarProps } from "./avatar";
 export { AvatarGroup, type AvatarGroupProps } from "./avatar-group";
-export { Blur, BlurProvider, type BlurProps } from "./blur";
 export { VibeBadge } from "./badge";
 export { Boundary } from "./boundary";
 export { Branding } from "./branding";

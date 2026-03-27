@@ -21,13 +21,13 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
   disabled,
   color,
   outlined,
-  stickyBottom,
+  position,
   style,
   ...rest
 }) => {
   const [loading, setLoading] = useState(false);
   const isDisabled = disabled || loading;
-  styles.useVariants({ color, outlined, stickyBottom });
+  styles.useVariants({ color, outlined, position });
 
   const handlePress = (event: GestureResponderEvent) => {
     if (!onPress || loading) return;
@@ -90,12 +90,19 @@ const styles = StyleSheet.create((theme) => ({
           borderColor: theme.colors.typography,
         },
       },
-      stickyBottom: {
-        true: {
+      position: {
+        default: {},
+        stickyBottom: {
           width: "70%",
           position: "absolute",
           alignSelf: "center",
-          bottom: theme.gap(2 + 9),
+          bottom: theme.gap(2 + 7.5),
+        },
+        stickyBottomAbsolute: {
+          width: "70%",
+          position: "absolute",
+          alignSelf: "center",
+          bottom: theme.gap(2),
         },
       },
     },
@@ -118,7 +125,11 @@ const styles = StyleSheet.create((theme) => ({
           color: theme.colors.typography,
         },
       },
-      stickyBottom: { true: {} },
+      position: {
+        default: {},
+        stickyBottom: {},
+        stickyBottomAbsolute: {},
+      },
     },
   },
 }));

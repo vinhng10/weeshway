@@ -191,7 +191,7 @@ function StudentWalletContent() {
         refetch={refetch}
         isRefetching={isRefetching}
       />
-      <Button label="Setup" onPress={handleSetup} stickyBottom />
+      <Button label="Setup" onPress={handleSetup} position="stickyBottom" />
     </>
   );
 }
@@ -365,7 +365,7 @@ function TeacherWalletContent() {
       <Button
         label="Stripe Dashboard"
         onPress={handleOpenDashboard}
-        stickyBottom
+        position="stickyBottom"
       />
     </>
   ) : (
@@ -375,7 +375,11 @@ function TeacherWalletContent() {
         refetch={refetch}
         isRefetching={isRefetching}
       />
-      <Button label="Setup" onPress={handleStartOnboarding} stickyBottom />
+      <Button
+        label="Setup"
+        onPress={handleStartOnboarding}
+        position="stickyBottom"
+      />
     </>
   );
 }

@@ -172,7 +172,7 @@ function ReportContent() {
         </View>
       </ScrollView>
 
-      <Button stickyBottom label="Send" onPress={handleSend} />
+      <Button position="stickyBottom" label="Send" onPress={handleSend} />
     </>
   );
 }
