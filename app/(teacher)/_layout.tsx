@@ -4,12 +4,17 @@ import { Tabs } from "expo-router";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+export const unstable_settings = {
+  initialRouteName: "index",
+};
+
 export default function TabLayout() {
   const { theme } = useUnistyles();
   const { profile } = useAuth();
 
   return (
     <Tabs
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
         tabBarInactiveTintColor: theme.colors.dimmed,
