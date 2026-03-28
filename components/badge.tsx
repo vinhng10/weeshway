@@ -71,6 +71,8 @@ export function VibeBadge({ songId }: VibeBadgeProps) {
     </Animated.View>
   );
 
+  if (!count) return null;
+
   return (
     <Animated.View style={wrapperStyle}>
       {content}
