@@ -30,20 +30,28 @@ export default function TabLayout() {
         },
         tabBarStyle: {
           position: "absolute",
-          overflow: "hidden",
           height: theme.gap(8),
           borderTopWidth: 0,
           paddingBottom: theme.gap(0.5),
           margin: theme.gap(1.5),
           marginBottom: theme.gap(1),
           borderRadius: theme.gap(4),
+          shadowColor: "#787878",
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 4.65,
+          elevation: 8,
         },
         tabBarBackground: () => (
           <View
             style={{
               flex: 1,
-              backgroundColor: theme.colors.foreground,
+              backgroundColor: theme.colors.background,
               opacity: 0.95,
+              borderRadius: theme.gap(4),
             }}
           />
         ),
