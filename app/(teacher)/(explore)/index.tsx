@@ -168,7 +168,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   toolbar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingLeft: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
     paddingVertical: theme.gap(1),
     gap: theme.gap(1),
   },

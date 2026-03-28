@@ -103,8 +103,7 @@ export const ChipBar = ({ items, padding }: ChipBarProps) => {
 
 const styles = StyleSheet.create((theme) => ({
   scrollView: {
-    flexGrow: 0,
-    flexShrink: 0,
+    flexShrink: 1,
   },
   scrollContainer: {
     gap: theme.gap(1),
