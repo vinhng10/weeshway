@@ -124,7 +124,7 @@ const styles = StyleSheet.create((theme) => ({
     position: "absolute",
     width: "70%",
     alignSelf: "center",
-    bottom: theme.gap(10 + 7.5),
+    bottom: theme.gap(10 + 8),
     gap: theme.gap(1),
   },
   action: {
@@ -156,7 +156,7 @@ const styles = StyleSheet.create((theme) => ({
     height: theme.gap(6),
     position: "absolute",
     alignSelf: "center",
-    bottom: theme.gap(2 + 7.5),
+    bottom: theme.gap(2 + 8),
     justifyContent: "center",
     alignItems: "center",
     borderRadius: theme.gap(2),

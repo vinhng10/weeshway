@@ -1,6 +1,8 @@
+import { useRole } from "@/hooks";
+import { CommonActions } from "@react-navigation/native";
 import { PostgrestError } from "@supabase/postgrest-js";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { View } from "react-native";
@@ -9,7 +11,6 @@ import { Button } from "./input/button";
 import { ButtonGroup } from "./input/button-group";
 import { ThemedActivityIndicator } from "./themed-activity-indicator";
 import { ThemedText } from "./themed-text";
-import { useRole } from "@/hooks";
 
 function isRetryable(error: unknown) {
   if (error instanceof PostgrestError) return false;
@@ -18,6 +19,7 @@ function isRetryable(error: unknown) {
 
 export function Boundary({ children }: { children: React.ReactNode }) {
   const role = useRole((state) => state.role.toLowerCase());
+  const navigation = useNavigation();
 
   return (
     <QueryErrorResetBoundary>
@@ -41,8 +43,13 @@ export function Boundary({ children }: { children: React.ReactNode }) {
                   outlined
                   onPress={() => {
                     resetErrorBoundary();
-                    if (router.canDismiss()) router.dismissAll();
-                    router.navigate(`/(${role})/(home)`);
+                    navigation.dispatch(
+                      CommonActions.reset({
+                        index: 0,
+                        routes: [{ name: "index" }],
+                      }),
+                    );
+                    router.replace(`/(${role})/(home)`);
                   }}
                 />
               </ButtonGroup>

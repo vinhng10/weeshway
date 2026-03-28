@@ -29,7 +29,8 @@ export default function TabLayout() {
           height: theme.gap(8),
           borderTopWidth: 0,
           paddingBottom: theme.gap(0.5),
-          margin: theme.gap(0.5),
+          margin: theme.gap(1.5),
+          marginBottom: theme.gap(1),
           borderRadius: theme.gap(4),
         },
         tabBarBackground: () => (
@@ -46,16 +47,6 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen
         name="(home)"
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            if (navigation.isFocused()) {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: "(home)" }],
-              });
-            }
-          },
-        })}
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
@@ -65,16 +56,6 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="(wishes)"
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            if (navigation.isFocused()) {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: "(wishes)" }],
-              });
-            }
-          },
-        })}
         options={{
           title: "Wishes",
           tabBarIcon: ({ color }) => (
@@ -84,16 +65,6 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="(bookings)"
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            if (navigation.isFocused()) {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: "(bookings)" }],
-              });
-            }
-          },
-        })}
         options={{
           title: "Bookings",
           headerShown: false,
@@ -104,16 +75,6 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="profile"
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            if (navigation.isFocused()) {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: "profile" }],
-              });
-            }
-          },
-        })}
         options={{
           title: "Profile",
           tabBarLabel: () => null,

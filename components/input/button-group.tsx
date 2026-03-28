@@ -49,7 +49,7 @@ const styles = StyleSheet.create((theme) => ({
         default: {},
         stickyBottom: {
           position: "absolute",
-          bottom: theme.gap(2 + 7.5),
+          bottom: theme.gap(2 + 8),
           paddingHorizontal: theme.gap(2),
         },
         stickyBottomAbsolute: {

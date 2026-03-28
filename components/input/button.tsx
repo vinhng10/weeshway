@@ -96,7 +96,7 @@ const styles = StyleSheet.create((theme) => ({
           width: "70%",
           position: "absolute",
           alignSelf: "center",
-          bottom: theme.gap(2 + 7.5),
+          bottom: theme.gap(2 + 8),
         },
         stickyBottomAbsolute: {
           width: "70%",

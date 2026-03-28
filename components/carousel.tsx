@@ -60,6 +60,7 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
 
 const styles = StyleSheet.create((theme) => ({
   carousel: {
+    marginTop: theme.gap(-2),
     alignSelf: "center",
   },
   carouselItem: {

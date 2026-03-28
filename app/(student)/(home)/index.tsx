@@ -23,7 +23,7 @@ import {
   StyleType,
 } from "@/types";
 import { router } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -129,15 +129,30 @@ function HomeContent({ status, style, level }: HomeContentProps) {
     [],
   );
 
+  const { featured, upcoming } = useMemo(() => {
+    const recommended = recommendations[0] ?? [];
+    const carousel = [
+      ...recommended,
+      ...projects
+        .filter((p) => !recommended.some((r) => r.id === p.id))
+        .slice(0, 3),
+    ];
+    const carouselIds = new Set(carousel.map((p) => p.id));
+    return {
+      featured: [carousel],
+      upcoming: projects.filter((p) => !carouselIds.has(p.id)),
+    };
+  }, [recommendations, projects]);
+
   const sections = [
     {
       title: "You might like",
-      data: recommendations,
+      data: featured,
       render: renderCarousel,
     },
     {
       title: "Upcoming",
-      data: projects,
+      data: upcoming,
       render: renderTile,
     },
   ];

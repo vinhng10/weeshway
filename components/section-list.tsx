@@ -1,5 +1,6 @@
-import { FlashList } from "@shopify/flash-list";
-import React, { useMemo } from "react";
+import { useScrollToTop } from "@react-navigation/native";
+import { FlashList, FlashListRef } from "@shopify/flash-list";
+import React, { useMemo, useRef } from "react";
 import { RefreshControl, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ThemedText } from "./themed-text";
@@ -35,6 +36,9 @@ export function SectionListView({
   refetch,
   isRefetching,
 }: SectionListViewProps) {
+  const ref = useRef<FlashListRef<FlashItem>>(null);
+  useScrollToTop(ref);
+
   const data = useMemo(() => {
     const result: FlashItem[] = [];
     for (let i = 0; i < sections.length; i++) {
@@ -58,6 +62,7 @@ export function SectionListView({
 
   return (
     <FlashList
+      ref={ref}
       data={data}
       renderItem={({ item }) => {
         if (item.type === "footer") return <View style={styles.footer} />;
