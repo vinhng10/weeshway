@@ -1517,6 +1517,12 @@ CREATE UNIQUE INDEX "booking_secrets_token_key" ON "public"."booking_secrets" US
 CREATE INDEX "bookings_project_id_idx" ON "public"."bookings" USING "btree" ("project_id");
 
 
+CREATE INDEX "bookings_project_id_status_idx" ON "public"."bookings" USING "btree" ("project_id", "status");
+
+
+CREATE INDEX "bookings_user_id_idx" ON "public"."bookings" USING "btree" ("user_id");
+
+
 CREATE INDEX "centroids_embedding_idx" ON "public"."centroids" USING "hnsw" ("embedding" "extensions"."vector_cosine_ops");
 
 
