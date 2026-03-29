@@ -27,10 +27,7 @@ export default function SignIn() {
         router.replace({ pathname: "/verify-otp", params: { email } });
         return;
       }
-      setError(
-        error.message ||
-          "Couldn't sign in. Please check your credentials and try again.",
-      );
+      setError("Couldn't sign in. Please try again.");
     }
   };
 
@@ -43,11 +40,9 @@ export default function SignIn() {
       >
         <Branding />
 
-        {error ? (
-          <ThemedText type="h5" color="danger" style={styles.error}>
-            {error}
-          </ThemedText>
-        ) : null}
+        <ThemedText type="h5" color="danger" style={styles.error}>
+          {error}
+        </ThemedText>
 
         <TextInput
           type="h5"

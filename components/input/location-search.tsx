@@ -182,6 +182,7 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
   };
 
   const handlePress = () => {
+    Keyboard.dismiss();
     if (editable) {
       setVisible(true);
     } else {

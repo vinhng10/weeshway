@@ -1,6 +1,6 @@
 import { formatDate, formatTime } from "@/utils";
 import React, { useState } from "react";
-import { Modal, Pressable, View } from "react-native";
+import { Keyboard, Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
@@ -30,6 +30,7 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
   const [error, setError] = useState<string>();
 
   const handlePress = () => {
+    Keyboard.dismiss();
     setError(undefined);
     setVisible(true);
   };

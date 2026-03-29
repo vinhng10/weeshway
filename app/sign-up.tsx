@@ -50,9 +50,7 @@ export default function CreateAccountScreen() {
         params: { email: trimmedEmail },
       });
     } catch (error: any) {
-      setError(
-        error.message || "Couldn't create your account. Please try again.",
-      );
+      setError("Couldn't create your account. Please try again.");
     }
   };
 
@@ -65,11 +63,9 @@ export default function CreateAccountScreen() {
       >
         <Branding />
 
-        {error ? (
-          <ThemedText type="h5" color="danger" style={styles.error}>
-            {error}
-          </ThemedText>
-        ) : null}
+        <ThemedText type="h5" color="danger" style={styles.error}>
+          {error}
+        </ThemedText>
 
         <TextInput
           type="h5"

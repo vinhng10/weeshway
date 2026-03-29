@@ -26,7 +26,7 @@ export default function VerifyOtpScreen() {
     try {
       await verifyOtp(email, trimmed);
     } catch (e: any) {
-      setError(e.message || "Invalid code. Please try again.");
+      setError("Couldn't verify code. Please try again.");
     }
   };
 
@@ -38,7 +38,7 @@ export default function VerifyOtpScreen() {
       await resendOtp(email);
       setResent(true);
     } catch (e: any) {
-      setError(e.message || "Couldn't resend code. Please try again.");
+      setError("Couldn't resend code. Please try again.");
     }
   };
 

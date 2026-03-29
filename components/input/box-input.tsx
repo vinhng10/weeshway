@@ -1,6 +1,6 @@
 import { formatDate, formatTime } from "@/utils";
 import React, { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Keyboard, Pressable, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { StyleSheet } from "react-native-unistyles";
 import { IconSymbol, IconSymbolName } from "../icon-symbol";
@@ -80,6 +80,7 @@ export const SelectBoxInput: React.FunctionComponent<SelectBoxInputProps> = ({
 
   const handlePress = () => {
     if (editable) {
+      Keyboard.dismiss();
       setVisible(true);
     }
   };
@@ -211,6 +212,7 @@ export const DateTimeBoxInput: React.FunctionComponent<
 
   const handlePress = () => {
     if (editable) {
+      Keyboard.dismiss();
       setOpen(true);
     }
   };
