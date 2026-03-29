@@ -27,19 +27,30 @@ Deno.serve(async (req) => {
 
     const projectIds = jobs.map((j) => j.id);
 
-    // Fetch all booked users with push tokens for these projects
+    // Fetch all booked students and the teaching teacher with push tokens
     const targets = await sql`
       SELECT
         b.project_id,
         p.expo_push_token,
-        s.name AS song_name,
-        pr.start_at
+        s.name AS song_name
       FROM public.bookings b
       JOIN public.profiles p ON b.user_id = p.id
       JOIN public.projects pr ON b.project_id = pr.id
       LEFT JOIN public.songs s ON pr.song_id = s.id
       WHERE b.project_id = ANY(${projectIds})
         AND b.status IN ('Succeeded', 'CheckedIn')
+        AND p.expo_push_token IS NOT NULL
+
+      UNION ALL
+
+      SELECT
+        pr.id AS project_id,
+        p.expo_push_token,
+        s.name AS song_name
+      FROM public.projects pr
+      JOIN public.profiles p ON pr.user_id = p.id
+      LEFT JOIN public.songs s ON pr.song_id = s.id
+      WHERE pr.id = ANY(${projectIds})
         AND p.expo_push_token IS NOT NULL
     `;
 
