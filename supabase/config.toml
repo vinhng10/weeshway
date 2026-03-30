@@ -114,7 +114,6 @@ file_size_limit = "50MiB"
 public = true
 file_size_limit = "50MiB"
 allowed_mime_types = ["image/*", "video/*"]
-objects_path = "./profiles"
 
 
 [auth]

@@ -732,7 +732,7 @@ function renderFeaturedCard(container, song) {
                 ${ICONS.TIME}
                 <span>${date}, ${time}</span>
               </div>
-              <span class="featured-spots">0/${cls.spots} ${ICONS.USERS}</span>
+              <span class="featured-spots">${cls.booked}/${cls.spots} ${ICONS.USERS}</span>
             </div>
           </div>
           <div class="featured-card-actions">
@@ -836,7 +836,7 @@ function buildBookingsDemo(song) {
   bookings.forEach((b) => {
     const artInner = b.artworkUrl
       ? `<img src="${b.artworkUrl}" alt="" />`
-      : `<div class="booking-tile-art-placeholder" style="background:linear-gradient(135deg,${b.color || "#555"}66,${b.color || "#555"}22);"></div>`;
+      : `<div class="booking-tile-art-placeholder" style="background: #cececeff;"></div>`;
 
     const metadata = b.style + (b.level ? ` \u2022 ${b.level}` : "");
 
@@ -861,8 +861,6 @@ function buildBookingsDemo(song) {
 }
 
 // initCarousel removed — single featured card is used instead
-
-
 
 // ══════════════════════════════════════════
 // TEACHER — Song search → smooth transition
