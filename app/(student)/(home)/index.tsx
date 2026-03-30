@@ -90,6 +90,7 @@ function HomeContent({ status, style, level }: HomeContentProps) {
       *,
       profile:profiles(*),
       song:songs(id, name, artist_name, preview_url, artwork_url),
+      location:locations(*),
       bookings:bookings(*),
       watchings:watchings(*)
     `,
@@ -135,7 +136,7 @@ function HomeContent({ status, style, level }: HomeContentProps) {
       ...recommended,
       ...projects
         .filter((p) => !recommended.some((r) => r.id === p.id))
-        .slice(0, 3),
+        .slice(0, 2),
     ];
     const carouselIds = new Set(carousel.map((p) => p.id));
     return {
