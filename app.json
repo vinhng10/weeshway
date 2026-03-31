@@ -122,7 +122,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow access to photos to set cover images for your dance classes.",
+          "photosPermission": "Allow access to photos to set profile avatar and cover images for your dance classes.",
           "cameraPermission": "Allow access to camera to scan booking QR codes and capture photos as evidence for reports."
         }
       ],

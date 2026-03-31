@@ -11,6 +11,7 @@ import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
 import { SpotsSelector } from "./spots-selector";
+import { MERCHANT_COUNTRY_CODE } from "@/constants";
 
 type PaymentIntentResponse = {
   customerId: string;
@@ -108,8 +109,14 @@ export function Checkout({
           customerId,
           paymentIntentClientSecret,
           customerSessionClientSecret,
-          paymentMethodOrder: ["apple_pay", "google_pay", "card"],
+          paymentMethodOrder: ["card"],
           paymentMethodLayout: PaymentMethodLayout.Horizontal,
+          applePay: {
+            merchantCountryCode: MERCHANT_COUNTRY_CODE,
+          },
+          googlePay: {
+            merchantCountryCode: MERCHANT_COUNTRY_CODE,
+          },
           appearance: {
             colors: {
               primary: theme.colors.primary,

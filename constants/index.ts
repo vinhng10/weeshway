@@ -6,6 +6,7 @@ export const PAGE_SIZE = 10;
 export const SCAN_DELAY_MS = 2000;
 export const WEBSITE_URL = process.env.EXPO_PUBLIC_WEBSITE_URL!;
 export const RETURN_URL = `${WEBSITE_URL}/profile/wallet`;
+export const MERCHANT_COUNTRY_CODE = "FI";
 export const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 export const SUPABASE_PUBLISHABLE_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
