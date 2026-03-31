@@ -58,11 +58,13 @@ export async function share(data: ProjectEnrichedType): Promise<void> {
 }
 
 export async function pickImage(): Promise<string | undefined> {
-  const { status } = await requestMediaLibraryPermissionsAsync();
+  const { status, canAskAgain } = await requestMediaLibraryPermissionsAsync();
   if (status !== "granted") {
-    useAlert
-      .getState()
-      .showAlert("Photo Access Denied", "You can change this in Settings.");
+    if (!canAskAgain) {
+      useAlert
+        .getState()
+        .showAlert("Photo Access Denied", "You can change this in Settings.");
+    }
     return;
   }
 

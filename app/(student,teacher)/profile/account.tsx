@@ -53,9 +53,12 @@ export default function Account() {
 
     try {
       // Request permissions
-      const { status } = await requestMediaLibraryPermissionsAsync();
+      const { status, canAskAgain } =
+        await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        showAlert("Photo Access Denied", "You can change this in Settings.");
+        if (!canAskAgain) {
+          showAlert("Photo Access Denied", "You can change this in Settings.");
+        }
         return;
       }
 
