@@ -55,10 +55,7 @@ export default function Account() {
       // Request permissions
       const { status } = await requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        showAlert(
-          "Permission Needed",
-          "Please allow access to your photo library to upload a video.",
-        );
+        showAlert("Photo Access Denied", "You can change this in Settings.");
         return;
       }
 

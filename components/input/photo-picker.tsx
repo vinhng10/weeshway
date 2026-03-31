@@ -27,10 +27,7 @@ export function PhotoPicker({
     try {
       const { status } = await requestCameraPermissionsAsync();
       if (status !== "granted") {
-        showAlert(
-          "Permission Needed",
-          "Please allow camera access to take photos.",
-        );
+        showAlert("Camera Access Denied", "You can change this in Settings.");
         return;
       }
 

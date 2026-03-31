@@ -108,7 +108,7 @@ export function Checkout({
           customerId,
           paymentIntentClientSecret,
           customerSessionClientSecret,
-          paymentMethodOrder: ["card"],
+          paymentMethodOrder: ["apple_pay", "google_pay", "card"],
           paymentMethodLayout: PaymentMethodLayout.Horizontal,
           appearance: {
             colors: {

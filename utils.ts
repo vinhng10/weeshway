@@ -62,10 +62,7 @@ export async function pickImage(): Promise<string | undefined> {
   if (status !== "granted") {
     useAlert
       .getState()
-      .showAlert(
-        "Permission Needed",
-        "Please allow access to your photo library to upload an image.",
-      );
+      .showAlert("Photo Access Denied", "You can change this in Settings.");
     return;
   }
 

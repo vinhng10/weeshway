@@ -73,15 +73,13 @@ export const LocationPermission = () => {
         </ThemedText>
         {role === ROLE.STUDENT ? (
           <>
-            <Bullet text={"Find fun classes around the corner"} />
-            <Bullet
-              text={"Let local teachers bring your dream classes to life"}
-            />
+            <Bullet text={"Find dance classes near you"} />
+            <Bullet text={"Help local teachers discover your wishes"} />
           </>
         ) : (
           <>
             <Bullet text={"Explore what your local students are wishing for"} />
-            <Bullet text={"Launch new classes where the demand is highest"} />
+            <Bullet text={"Help students discover your classes"} />
           </>
         )}
 

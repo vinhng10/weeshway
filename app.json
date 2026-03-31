@@ -79,7 +79,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+          "microphonePermission": "Allow access to microphone to record audio for dance class teaching."
         }
       ],
       [
@@ -108,13 +108,22 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationWhenInUsePermission": "Turning on location will allow us to show you nearby dance classes and wishes.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
         }
       ],
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+          "cameraPermission": "Allow access to camera to scan booking QR codes and capture photos as evidence for reports."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow access to photos to set cover images for your dance classes.",
+          "cameraPermission": "Allow access to camera to scan booking QR codes and capture photos as evidence for reports."
         }
       ],
       "expo-image",
