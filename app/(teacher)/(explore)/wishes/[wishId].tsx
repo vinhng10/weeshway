@@ -135,7 +135,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   scrollContainer: {
     gap: theme.gap(2),
     paddingHorizontal: theme.gap(2),
-    paddingBottom: theme.gap(16),
+    paddingBottom: theme.gap(32),
   },
   wishInfo: {
     gap: theme.gap(2),

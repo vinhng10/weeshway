@@ -278,7 +278,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   scrollContainer: {
     padding: theme.gap(2),
-    paddingBottom: theme.gap(16),
+    paddingBottom: theme.gap(48),
   },
   messageContainer: {
     flex: 1,

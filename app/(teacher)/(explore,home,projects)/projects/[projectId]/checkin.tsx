@@ -249,7 +249,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     gap: theme.gap(1),
   },
   list: {
-    paddingBottom: theme.gap(16),
+    paddingBottom: theme.gap(32),
   },
   banner: {
     position: "absolute",

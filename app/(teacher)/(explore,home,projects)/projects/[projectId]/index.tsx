@@ -333,7 +333,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   scrollContainer: {
     paddingHorizontal: theme.gap(2),
-    paddingBottom: theme.gap(16),
+    paddingBottom: theme.gap(32),
     gap: theme.gap(2),
   },
   row: {
