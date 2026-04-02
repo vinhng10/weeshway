@@ -8,13 +8,14 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { useShallow } from "zustand/react/shallow";
 import { Avatar } from "./avatar";
 import { Chip } from "./chip";
 import { IconSymbol } from "./icon-symbol";
 import { Button, Checkout, IconButton } from "./input";
+import { Pressable } from "./pressable";
 import { ProjectStats } from "./project-stats";
 import { ThemedText } from "./themed-text";
 

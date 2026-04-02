@@ -1,9 +1,10 @@
 import { OptionItem } from "@/types";
 import { FlashList, ListRenderItem } from "@shopify/flash-list";
 import React, { useCallback, useMemo } from "react";
-import { Modal, Pressable, View } from "react-native";
+import { Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { Pressable } from "../pressable";
 import { Separator } from "../separator";
 import { ThemedText } from "../themed-text";
 

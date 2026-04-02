@@ -1,6 +1,7 @@
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 import { IconSymbol, IconSymbolName } from "./icon-symbol";
+import { Pressable } from "./pressable";
 import { ThemedText, styles as textStyles } from "./themed-text";
 
 type ProfileMenuItemProps = {

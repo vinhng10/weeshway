@@ -1,7 +1,7 @@
 import { PIXELS_PER_SECOND } from "@/constants";
 import { ItemType } from "@/types";
-import { Pressable } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
+import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 
 type ItemProps = UnistylesVariants<typeof styles> & {

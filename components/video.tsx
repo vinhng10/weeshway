@@ -1,8 +1,9 @@
 import { Image } from "expo-image";
 import { useVideoPlayer, type VideoThumbnail, VideoView } from "expo-video";
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Pressable } from "./pressable";
 import { ThemedActivityIndicator } from "./themed-activity-indicator";
 
 interface VideoProps {

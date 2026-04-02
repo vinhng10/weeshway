@@ -1,8 +1,8 @@
-import { Branding, ThemedText } from "@/components";
+import { Branding, Pressable, ThemedText } from "@/components";
 import { ROLE } from "@/constants";
 import { useOnboarding, useRole } from "@/hooks";
 import { RoleType } from "@/types";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function OnboardingScreen() {

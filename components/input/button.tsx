@@ -1,11 +1,11 @@
 import { useState } from "react";
 import {
   GestureResponderEvent,
-  Pressable,
   type PressableProps,
   type ViewProps,
 } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
+import { Pressable } from "../pressable";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 

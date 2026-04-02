@@ -12,6 +12,7 @@ import {
   Hero,
   IntBoxInput,
   LocationSearch,
+  Pressable,
   QRCode,
   TextBoxInput,
   ThemedText,
@@ -28,7 +29,7 @@ import { share } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 function ClassContent() {

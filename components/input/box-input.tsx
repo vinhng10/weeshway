@@ -1,9 +1,10 @@
 import { formatDate, formatTime } from "@/utils";
 import React, { useState } from "react";
-import { Keyboard, Pressable, View } from "react-native";
+import { Keyboard, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { StyleSheet } from "react-native-unistyles";
 import { IconSymbol, IconSymbolName } from "../icon-symbol";
+import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { Options } from "./options";
 import { TextInput, TextInputProps } from "./text-input";

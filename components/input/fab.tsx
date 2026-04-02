@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GestureResponderEvent, Pressable, View } from "react-native";
+import { GestureResponderEvent, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -8,6 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
 import { IconSymbol, type IconSymbolName } from "../icon-symbol";
+import { Pressable } from "../pressable";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 

@@ -1,11 +1,12 @@
 import { useAudioPlayerStore } from "@/hooks";
 import { ProjectEnrichedType } from "@/types";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Avatar } from "./avatar";
 import { AvatarGroup } from "./avatar-group";
 import { IconButton } from "./input/icon-button";
+import { Pressable } from "./pressable";
 import { ProjectStats } from "./project-stats";
 import { ThemedText } from "./themed-text";
 

@@ -1,9 +1,10 @@
 import { formatDate, formatTime } from "@/utils";
 import React, { useState } from "react";
-import { Keyboard, Modal, Pressable, View } from "react-native";
+import { Keyboard, Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
+import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { DateTimeBoxInput } from "./box-input";
 import { Button } from "./button";

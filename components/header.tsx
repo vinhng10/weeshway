@@ -1,7 +1,8 @@
 import { router } from "expo-router";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { IconSymbol } from "./icon-symbol";
+import { Pressable } from "./pressable";
 import { ThemedText } from "./themed-text";
 
 type HeaderProps = {

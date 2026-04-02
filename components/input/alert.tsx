@@ -1,6 +1,7 @@
 import { useAlert } from "@/hooks/useAlert";
-import { Modal, Pressable, View } from "react-native";
+import { Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 

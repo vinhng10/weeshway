@@ -1,7 +1,8 @@
-import { Modal, Pressable, View } from "react-native";
+import { Modal, View } from "react-native";
 import QRCodeSVG from "react-native-qrcode-svg";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { Button } from "./input/button";
+import { Pressable } from "./pressable";
 import { ThemedText } from "./themed-text";
 
 type QRModalProps = {

@@ -13,6 +13,7 @@ export { Header } from "./header";
 export { Hero } from "./hero";
 export { MenuItem } from "./menu-item";
 export { Photo } from "./photo";
+export { Pressable } from "./pressable";
 export { ProjectCard } from "./project-card";
 export { ProjectStats } from "./project-stats";
 export { QRCode } from "./qr-code";

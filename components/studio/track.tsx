@@ -3,7 +3,7 @@ import { PIXELS_PER_SECOND, TICK_INTERVAL } from "@/constants";
 import { useAudioPlayerStore, type StudioStoreHook } from "@/hooks";
 import { ItemType, TrackType } from "@/types";
 import React, { useEffect, useMemo, useRef } from "react";
-import { Dimensions, Pressable, View } from "react-native";
+import { Dimensions, View } from "react-native";
 import Animated, {
   cancelAnimation,
   Easing,
@@ -18,6 +18,7 @@ import Animated, {
 import { StyleSheet } from "react-native-unistyles";
 import { scheduleOnRN } from "react-native-worklets";
 import { useShallow } from "zustand/react/shallow";
+import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { Item } from "./item";
 
@@ -62,7 +63,7 @@ export default function Track({ type, useStudioStore }: TrackProps) {
       toggle: state.toggle,
       isActive: state.isActive(type),
       setActive: state.setActive,
-    }))
+    })),
   );
 
   const {
@@ -82,14 +83,14 @@ export default function Track({ type, useStudioStore }: TrackProps) {
       setShouldPlay: state.setShouldPlay,
       didJustFinish: state.didJustFinish(source),
       playbackRate: state.playbackRate,
-    }))
+    })),
   );
 
   styles.useVariants({ disabled: !isActive });
 
   const duration = useMemo(
     () => items[items.length - 1]?.endTime ?? 0,
-    [items]
+    [items],
   );
 
   const sync = async (time: number) => {
@@ -115,7 +116,7 @@ export default function Track({ type, useStudioStore }: TrackProps) {
           () => {
             "worklet";
             scheduleOnRN(seek);
-          }
+          },
         );
         return [itemAnimation, gapAnimation];
       }
@@ -158,13 +159,13 @@ export default function Track({ type, useStudioStore }: TrackProps) {
             scheduleOnRN(pause);
             scheduleOnRN(setShouldPlay, false);
           }
-        }
+        },
       );
 
       offset.value = withSequence(
         ...leadIn,
         ...createAnimations(clipped, rate),
-        trailOut
+        trailOut,
       );
     } else {
       const remainingTime = duration - fromTime;
@@ -268,7 +269,7 @@ export default function Track({ type, useStudioStore }: TrackProps) {
                       {formatTime(time)}
                     </ThemedText>
                   );
-                }
+                },
               )}
             </Animated.View>
             <Animated.View style={styles.itemRow}>

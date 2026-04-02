@@ -1,13 +1,14 @@
 import { getArtworkUrl, pickImage } from "@/utils";
 import { Image, type ImageProps } from "expo-image";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import {
   StyleSheet,
   type UnistylesVariants,
   withUnistyles,
 } from "react-native-unistyles";
 import { IconSymbol } from "./icon-symbol";
+import { Pressable } from "./pressable";
 
 const UniImage = withUnistyles(Image);
 

@@ -1,9 +1,10 @@
 import { PermissionResponse } from "expo-camera";
 import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
-import { AppState, Linking, Modal, Pressable, View } from "react-native";
+import { AppState, Linking, Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Bullet } from "../bullet";
+import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
