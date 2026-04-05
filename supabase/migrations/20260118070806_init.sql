@@ -801,7 +801,20 @@ BEGIN
                 RAISE EXCEPTION 'This project has already been released to students and can''t be moved back to draft.';
             END IF;
 
-            IF NEW::text IS DISTINCT FROM OLD::text AND NEW.status = OLD.status THEN
+            -- Block changes to core fields, but allow song_items/count_items updates
+            IF NEW.status = OLD.status AND (
+                NEW.style IS DISTINCT FROM OLD.style OR
+                NEW.level IS DISTINCT FROM OLD.level OR
+                NEW.price IS DISTINCT FROM OLD.price OR
+                NEW.spots IS DISTINCT FROM OLD.spots OR
+                NEW.start_at IS DISTINCT FROM OLD.start_at OR
+                NEW.end_at IS DISTINCT FROM OLD.end_at OR
+                NEW.description IS DISTINCT FROM OLD.description OR
+                NEW.song_id IS DISTINCT FROM OLD.song_id OR
+                NEW.currency IS DISTINCT FROM OLD.currency OR
+                NEW.location_id IS DISTINCT FROM OLD.location_id OR
+                NEW.artwork_url IS DISTINCT FROM OLD.artwork_url
+            ) THEN
                 RAISE EXCEPTION 'This project is released. Only the status can be changed to Canceled.';
             END IF;
         END IF;
