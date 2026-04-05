@@ -204,6 +204,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
     return trackState;
   },
   setPlaybackRate: (rate: TempoType) => {
+    if (get().status?.playing) return;
     const { player } = get();
     const numericRate = parseFloat(rate);
     if (player && !isNaN(numericRate)) {

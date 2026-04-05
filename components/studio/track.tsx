@@ -219,7 +219,14 @@ export default function Track({ type, useStudioStore }: TrackProps) {
           animateFrom(leadInTime, rate);
         })();
       } else {
-        animateFrom(offsetToTime(offset.value), rate);
+        (async () => {
+          let startTime = offsetToTime(offset.value);
+          if (startTime >= duration) {
+            await sync(0);
+            startTime = 0;
+          }
+          animateFrom(startTime, rate);
+        })();
       }
     } else {
       // Rate changed mid-playback — resume from current position

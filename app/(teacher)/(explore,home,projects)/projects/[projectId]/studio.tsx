@@ -111,7 +111,12 @@ export default function Studio() {
   };
 
   const handleTogglePlayback = () => {
-    if (didJustFinish) return;
+    if (didJustFinish) {
+      // Audio reached the very end — restart from beginning
+      setShouldPlay(true);
+      toggleAudio(activeSource, true);
+      return;
+    }
     setShouldPlay(!shouldPlay);
     toggleAudio(activeSource, false);
   };
