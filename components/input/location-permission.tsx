@@ -64,9 +64,9 @@ export const LocationPermission = () => {
       animationType="slide"
       presentationStyle="overFullScreen"
       transparent={true}
-      onRequestClose={() => handleAction(false)}
+      onRequestClose={() => handleAction(true)}
     >
-      <Pressable style={styles.container} onPress={() => handleAction(false)} />
+      <Pressable style={styles.container} onPress={() => handleAction(true)} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Explore What's Nearby</ThemedText>
         <ThemedText type="h5" color="dimmed">
@@ -84,10 +84,7 @@ export const LocationPermission = () => {
           </>
         )}
 
-        <ButtonGroup>
-          <Button outlined label="Later" onPress={() => handleAction(false)} />
-          <Button label="Allow" onPress={() => handleAction(true)} />
-        </ButtonGroup>
+        <Button label="Continue" onPress={() => handleAction(true)} />
       </View>
     </Modal>
   );

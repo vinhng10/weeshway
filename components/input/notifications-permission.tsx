@@ -83,9 +83,9 @@ export const NotificationsPermission = () => {
       animationType="slide"
       presentationStyle="overFullScreen"
       transparent={true}
-      onRequestClose={() => handleAction(false)}
+      onRequestClose={() => handleAction(true)}
     >
-      <Pressable style={styles.container} onPress={() => handleAction(false)} />
+      <Pressable style={styles.container} onPress={() => handleAction(true)} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Stay Notified</ThemedText>
         <ThemedText type="h5" color="dimmed">
@@ -102,10 +102,7 @@ export const NotificationsPermission = () => {
           </>
         )}
 
-        <ButtonGroup>
-          <Button outlined label="Later" onPress={() => handleAction(false)} />
-          <Button label="Allow" onPress={() => handleAction(true)} />
-        </ButtonGroup>
+        <Button label="Continue" onPress={() => handleAction(true)} />
       </View>
     </Modal>
   );

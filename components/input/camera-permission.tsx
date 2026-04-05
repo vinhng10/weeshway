@@ -56,10 +56,10 @@ export const CameraPermission = ({
           Allow camera access to:
         </ThemedText>
         <Bullet text="Scan booking QR code. You only get paid for checked-in bookings." />
-        <ButtonGroup>
-          <Button outlined label="Later" onPress={() => router.back()} />
-          <Button label={denied ? "Settings" : "Allow"} onPress={handleAllow} />
-        </ButtonGroup>
+        <Button
+          label={denied ? "Settings" : "Continue"}
+          onPress={handleAllow}
+        />
       </View>
     </Modal>
   );
