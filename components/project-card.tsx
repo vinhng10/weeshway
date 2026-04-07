@@ -166,7 +166,7 @@ export const ProjectCard = ({ data }: CardProps) => {
                     ellipsizeMode="tail"
                     style={styles.flexShrink}
                   >
-                    {data.location?.displayName}
+                    {data.location?.displayName ?? "Location"}
                   </ThemedText>
                 </View>
                 <ThemedText type="h5">
@@ -189,7 +189,7 @@ export const ProjectCard = ({ data }: CardProps) => {
                         )}, ${formatTime(
                           new Date(data.startAt),
                         )} - ${formatTime(new Date(data.endAt))}`
-                      : ""}
+                      : "Date & time"}
                   </ThemedText>
                 </View>
                 <ProjectStats data={data} />

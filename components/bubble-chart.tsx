@@ -7,7 +7,7 @@ import {
   TextAlign,
   useFonts,
 } from "@shopify/react-native-skia";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
@@ -27,6 +27,11 @@ const BUBBLE_COLORS = [
   { color: "rgba(199, 136, 0, 0.95)", stroke: "rgb(151, 103, 0)" },
   { color: "rgba(16, 164, 142, 0.95)", stroke: "rgb(14, 142, 123)" },
 ];
+// Physics — tuned to match landing page stabilization
+const GRAVITY_STRENGTH = 0.003; // distance-proportional: weaker near center, auto-damps overshoot
+const ROTATE_STRENGTH = 0.0003; // perpendicular orbital drift, prevents chaotic bouncing
+const DAMPING = 0.9;
+const COLLISION_STRENGTH = 0.5;
 
 interface BubbleChartProps {
   data: BubbleType[];
@@ -89,10 +94,10 @@ function Bubble({ index, bubbles, offsetX, offsetY, scale }: BubbleProps) {
 
   // Access bubble properties directly from the array to ensure reactivity
   const cx = useDerivedValue(
-    () => offsetX.value + bubbles.value[index].x * scale.value
+    () => offsetX.value + bubbles.value[index].x * scale.value,
   );
   const cy = useDerivedValue(
-    () => offsetY.value + bubbles.value[index].y * scale.value
+    () => offsetY.value + bubbles.value[index].y * scale.value,
   );
   const r = useDerivedValue(() => bubbles.value[index].radius * scale.value);
 
@@ -100,18 +105,32 @@ function Bubble({ index, bubbles, offsetX, offsetY, scale }: BubbleProps) {
   const px = useDerivedValue(() => cx.value - width / 2);
   const py = useDerivedValue(() => cy.value - ph / 2);
 
-  // Get color values (these don't change, so we can access them once)
   const { color, stroke } = BUBBLE_COLORS[index % BUBBLE_COLORS.length];
+
+  const isDimmed = useDerivedValue(
+    () =>
+      bubbles.value.some((b) => b.selected) && !bubbles.value[index].selected,
+  );
+  const fillColor = useDerivedValue(() =>
+    isDimmed.value ? "rgba(160, 160, 160, 0.35)" : color,
+  );
+  const strokeColor = useDerivedValue(() =>
+    isDimmed.value
+      ? "rgba(130, 130, 130, 0.35)"
+      : bubbles.value[index].selected
+        ? "#FFFFFF"
+        : stroke,
+  );
 
   return (
     paragraph && (
       <>
-        <Circle cx={cx} cy={cy} r={r} color={Skia.Color(color)} />
+        <Circle cx={cx} cy={cy} r={r} color={fillColor} />
         <Circle
           cx={cx}
           cy={cy}
           r={r}
-          color={Skia.Color(bubbles.value[index].selected ? "#FFFFFF" : stroke)}
+          color={strokeColor}
           style="stroke"
           strokeWidth={2}
         />
@@ -121,7 +140,27 @@ function Bubble({ index, bubbles, offsetX, offsetY, scale }: BubbleProps) {
   );
 }
 
+function makeBubbleEntry(d: BubbleType): BubbleData {
+  return {
+    ...d,
+    radius: Math.max(Math.sqrt(d.value) * 15, 1),
+    x: (Math.random() - 0.5) * 200,
+    y: (Math.random() - 0.5) * 200,
+    vx: 0,
+    vy: 0,
+    selected: false,
+    dragging: false,
+    pointerStartX: 0,
+    pointerStartY: 0,
+    startX: 0,
+    startY: 0,
+    startScale: 1,
+  };
+}
+
 export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
+  const validData = useMemo(() => data.filter((d) => d.value > 0), [data]);
+
   const size = useSharedValue({ width: 0, height: 0 });
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
@@ -130,24 +169,11 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
   const savedOffsetX = useSharedValue(0);
   const savedOffsetY = useSharedValue(0);
 
-  // Single shared value containing all bubble data
-  const bubbles = useSharedValue<BubbleData[]>(
-    data.map((d) => ({
-      ...d,
-      radius: Math.sqrt(d.value) * 15,
-      x: (Math.random() - 0.5) * 200,
-      y: (Math.random() - 0.5) * 200,
-      vx: 0,
-      vy: 0,
-      selected: false,
-      dragging: false,
-      pointerStartX: 0,
-      pointerStartY: 0,
-      startX: 0,
-      startY: 0,
-      startScale: 1,
-    }))
-  );
+  const bubbles = useSharedValue<BubbleData[]>(validData.map(makeBubbleEntry));
+
+  useEffect(() => {
+    bubbles.value = validData.map(makeBubbleEntry);
+  }, [validData]);
 
   // Initialize offsets when size changes
   useAnimatedReaction(
@@ -159,7 +185,7 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
           offsetY.value = currentSize.height / 2;
         }
       }
-    }
+    },
   );
 
   // Pan background
@@ -276,51 +302,55 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
   const composed = Gesture.Simultaneous(
     pinch,
     pan,
-    Gesture.Exclusive(drag, tap)
+    Gesture.Exclusive(drag, tap),
   );
 
-  // Physics
   useFrameCallback(() => {
     "worklet";
-    const gravity = 0.4;
-    const damping = 0.85;
-
     bubbles.modify((bubblesArray) => {
       "worklet";
       for (let i = 0; i < bubblesArray.length; i++) {
         const b = bubblesArray[i];
         if (!b.dragging) {
-          const dx = -b.x;
-          const dy = -b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          // Distance-proportional gravity toward center (0,0)
+          b.vx += -b.x * GRAVITY_STRENGTH;
+          b.vy += -b.y * GRAVITY_STRENGTH;
 
-          b.vx += (dx / dist) * gravity;
-          b.vy += (dy / dist) * gravity;
-          b.vx *= damping;
-          b.vy *= damping;
+          // Slow orbital drift (perpendicular push)
+          b.vx -= b.y * ROTATE_STRENGTH;
+          b.vy += b.x * ROTATE_STRENGTH;
+
+          b.vx *= DAMPING;
+          b.vy *= DAMPING;
 
           b.x += b.vx;
           b.y += b.vy;
         }
 
-        // collisions - allow more overlap by reducing minDist threshold
         for (let j = i + 1; j < bubblesArray.length; j++) {
           const o = bubblesArray[j];
           const dx = o.x - b.x;
           const dy = o.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          // Allow bubbles to overlap by up to 40% before collision detection
           const minDist = (b.radius + o.radius) * 0.9;
 
           if (dist < minDist) {
-            const overlap = (minDist - dist) / 2;
-            const nx = dx / dist;
-            const ny = dy / dist;
+            const overlap = (minDist - dist) / dist;
+            const moveX = dx * overlap * COLLISION_STRENGTH;
+            const moveY = dy * overlap * COLLISION_STRENGTH;
 
-            b.x -= nx * overlap;
-            b.y -= ny * overlap;
-            o.x += nx * overlap;
-            o.y += ny * overlap;
+            if (!b.dragging) {
+              b.x -= moveX;
+              b.y -= moveY;
+              b.vx -= moveX * 0.1;
+              b.vy -= moveY * 0.1;
+            }
+            if (!o.dragging) {
+              o.x += moveX;
+              o.y += moveY;
+              o.vx += moveX * 0.1;
+              o.vy += moveY * 0.1;
+            }
           }
         }
       }
@@ -333,7 +363,7 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
     <GestureDetector gesture={composed}>
       <View style={[styles.container]}>
         <Canvas style={{ flex: 1 }} onSize={size}>
-          {data.map((_, i) => (
+          {validData.map((_, i) => (
             <Bubble
               key={i}
               index={i}

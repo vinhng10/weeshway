@@ -40,7 +40,7 @@ function ExploreContent({ style, level }: ExploreContentProps) {
           p_level: level,
         })
         .throwOnError();
-      return data;
+      return data ?? [];
     },
   });
 
