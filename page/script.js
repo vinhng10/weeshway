@@ -235,10 +235,6 @@ function prefillSearchExample(side) {
 function expandSide(side) {
   splitState = `expanded-${side}`;
 
-  // Hide hero store buttons
-  const heroStore = document.getElementById("hero-store-buttons");
-  if (heroStore) heroStore.style.opacity = "0";
-
   // Animate: selected panel grows, other shrinks
   splitContainer.className = "split-container";
   splitContainer.classList.add(`selecting-${side}`);
@@ -328,9 +324,6 @@ function collapseSide() {
     }
   });
 
-  // Show hero store buttons
-  const heroStore = document.getElementById("hero-store-buttons");
-  if (heroStore) heroStore.style.opacity = "1";
   navRoleToggle.classList.add("hidden");
 
   const drt = document.getElementById("drawer-role-toggle");
@@ -556,6 +549,7 @@ $("#nav-logo").addEventListener("click", (e) => {
   e.preventDefault();
   closeDrawer();
   collapseSide();
+  returnToHero();
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
@@ -1396,3 +1390,32 @@ document
   .forEach((section) => {
     pageRevealObserver.observe(section);
   });
+
+// ══════════════════════════════════════════
+// LANDING HERO
+// ══════════════════════════════════════════
+
+const landingHero = document.getElementById("landing-hero");
+const splitHero = document.getElementById("split-hero");
+
+function revealSplitFromHero() {
+  landingHero.classList.add("exiting");
+
+  setTimeout(() => {
+    landingHero.classList.add("gone");
+    splitHero.classList.remove("hero-hidden");
+  }, 300);
+}
+
+function returnToHero() {
+  splitHero.classList.add("hero-hidden");
+  landingHero.classList.remove("exiting", "gone");
+}
+
+// Single CTA button
+document.getElementById("hero-cta-btn").addEventListener("click", () => {
+  revealSplitFromHero();
+});
+
+// Initialize: split-hero hidden until CTA is clicked
+splitHero.classList.add("hero-hidden");

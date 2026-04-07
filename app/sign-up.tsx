@@ -177,7 +177,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: theme.gap(4),
     gap: theme.gap(1),
   },
 }));

@@ -1,5 +1,6 @@
 import { Branding, Button, TextInput, ThemedText } from "@/components";
 import { useAuth } from "@/hooks";
+import { statusCodes } from "@react-native-google-signin/google-signin";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -8,6 +9,7 @@ import { StyleSheet } from "react-native-unistyles";
 
 export default function SignIn() {
   const signIn = useAuth((state) => state.signIn);
+  const signInWithGoogle = useAuth((state) => state.signInWithGoogle);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,6 +30,16 @@ export default function SignIn() {
         return;
       }
       setError("Couldn't sign in. Please try again.");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      if (err.code === statusCodes.SIGN_IN_CANCELLED) return;
+      setError("Couldn't sign in with Google.\nPlease try again.");
     }
   };
 
@@ -64,10 +76,20 @@ export default function SignIn() {
           autoCorrect={false}
         />
 
+        <Button label="Sign In" onPress={handleSignIn} style={styles.button} />
+
+        <View style={styles.divider}>
+          <View style={styles.line} />
+          <ThemedText type="h5" color="dimmed">
+            or
+          </ThemedText>
+          <View style={styles.line} />
+        </View>
+
         <Button
-          label={"Sign In"}
-          onPress={handleSignIn}
-          style={[styles.button]}
+          icon="logo-google"
+          label="Sign in with Google"
+          onPress={handleGoogleSignIn}
         />
 
         <View style={styles.signup}>
@@ -102,11 +124,21 @@ const styles = StyleSheet.create((theme) => ({
   error: {
     textAlign: "center",
   },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(1),
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.colors.typography,
+    opacity: 0.3,
+  },
   signup: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: theme.gap(4),
     gap: theme.gap(1),
   },
 }));

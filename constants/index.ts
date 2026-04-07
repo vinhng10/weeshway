@@ -12,6 +12,10 @@ export const SUPABASE_PUBLISHABLE_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 export const STRIPE_PUBLISHABLE_KEY =
   process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
+export const GOOGLE_WEB_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID!;
+export const GOOGLE_IOS_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID!;
 
 export const STYLE = {
   BACHATA: "Bachata",

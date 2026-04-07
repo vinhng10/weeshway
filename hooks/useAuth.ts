@@ -1,5 +1,7 @@
+import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "@/constants";
 import { supabase } from "@/supabase";
 import { ProfileType } from "@/types";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Session } from "@supabase/supabase-js";
 import camelcaseKeys from "camelcase-keys";
 import { create } from "zustand";
@@ -11,6 +13,7 @@ interface AuthState {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   verifyOtp: (email: string, token: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -48,7 +51,7 @@ export const useAuth = create<AuthState>((set, get) => ({
         .getState()
         .showAlert(
           "Profile Error",
-          "Couldn't load your profile. Please try again."
+          "Couldn't load your profile. Please try again.",
         );
       set({ profile: null, isLoading: false });
     }
@@ -69,19 +72,43 @@ export const useAuth = create<AuthState>((set, get) => ({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      set({ session });
-
       if (event === "SIGNED_IN" && session) {
+        set({ session });
         // Do not await inside onAuthStateChange — it blocks the auth flow
         // and can deadlock when fetchProfile needs the token being set up.
         get().fetchProfile();
       } else if (event === "SIGNED_OUT") {
-        set({ profile: null, session: null, isLoading: false });
+        // Single atomic update avoids two renders (and the resulting double
+        // flash of the sign-in screen).
+        set({ session: null, profile: null, isLoading: false });
+      } else {
+        set({ session });
       }
     });
 
     // Return cleanup to the caller (usually a useEffect)
     return () => subscription.unsubscribe();
+  },
+
+  signInWithGoogle: async () => {
+    GoogleSignin.configure({
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+      iosClientId: GOOGLE_IOS_CLIENT_ID,
+    });
+
+    await GoogleSignin.hasPlayServices();
+    const response = await GoogleSignin.signIn();
+
+    if (!response.data?.idToken) {
+      throw new Error("Google Sign-In did not return an ID token");
+    }
+
+    const { error } = await supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: response.data.idToken,
+    });
+    if (error) throw error;
+    // onAuthStateChange listener handles fetchProfile automatically
   },
 
   signIn: async (email, password) => {
@@ -119,6 +146,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
+    await GoogleSignin.signOut().catch(() => {});
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   },

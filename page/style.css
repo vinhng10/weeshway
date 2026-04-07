@@ -14,6 +14,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
 
 :root {
@@ -133,10 +139,7 @@ img {
   right: 0;
   z-index: 100;
   padding: 16px 24px;
-  background: var(--nav-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
+  background: transparent;
 }
 
 .nav-inner {
@@ -154,6 +157,12 @@ img {
   font-size: 24px;
   font-weight: 600;
   letter-spacing: -0.02em;
+  color: var(--text);
+  transition: color 0.3s;
+}
+
+body:has(#landing-hero:not(.gone)) .nav-logo {
+  color: #ffffff;
 }
 
 .nav-links {
@@ -299,6 +308,115 @@ img {
 }
 
 /* ══════════════════════════════════════════
+   LANDING HERO
+   ══════════════════════════════════════════ */
+
+#landing-hero {
+  position: relative;
+  min-height: var(--vh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#landing-hero.exiting {
+  opacity: 0;
+  transform: translateY(-24px);
+  pointer-events: none;
+}
+
+#landing-hero.gone {
+  display: none;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url("/assets/dance0.webp") center/cover no-repeat #080808;
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 0 24px;
+  max-width: 900px;
+}
+
+.hero-store-btns {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hero-headline {
+  font-family: var(--font);
+  font-size: clamp(48px, 5vw, 96px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+}
+
+.hero-subtitle {
+  font-size: clamp(15px, 1.8vw, 32px);
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.hero-btn {
+  padding: 14px 28px;
+  border-radius: 100px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.hero-btn-solid {
+  background: var(--fg);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+}
+
+.hero-btn-solid:hover {
+  transform: translateY(-1px);
+}
+
+/* Split-hero hidden state (before CTA is clicked) */
+#split-hero.hero-hidden {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .hero-content {
+    gap: 32px;
+  }
+}
+
+/* ══════════════════════════════════════════
    SPLIT HERO
    ══════════════════════════════════════════ */
 
@@ -334,11 +452,11 @@ img {
 
 .split-student {
   flex: 1;
-  background: #ffffff;
+  background: var(--bg);
 }
 .split-teacher {
   flex: 1;
-  background: #050505;
+  background: var(--bg);
 }
 
 .split-bg-img {
@@ -355,10 +473,6 @@ img {
     filter 0.6s ease;
   border-radius: 0;
   filter: grayscale(100%);
-}
-
-.split-student .split-bg-img {
-  opacity: 0.8;
 }
 
 .split-panel:hover .split-bg-img,
@@ -386,14 +500,10 @@ img {
   text-align: center;
 }
 
-.split-student .split-label {
-  font-size: clamp(48px, 8vw, 150px);
-  color: #181818;
-}
-
+.split-student .split-label,
 .split-teacher .split-label {
   font-size: clamp(48px, 8vw, 150px);
-  color: #ffffff;
+  color: var(--text);
 }
 
 .split-panel:hover .split-label,
@@ -515,21 +625,12 @@ img {
   opacity: 0 !important;
 }
 
-.student-view::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: #ffffff; /* Student is always light */
-  z-index: -3;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-}
-
+.student-view::before,
 .teacher-view::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: #050505; /* Teacher is always dark */
+  background: var(--bg);
   z-index: -3;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -544,12 +645,9 @@ img {
   z-index: 1;
 }
 
-.student-view .expanded-title {
-  color: #111111; /* Dark text on light student background */
-}
-
+.student-view .expanded-title,
 .teacher-view .expanded-title {
-  color: #ffffff; /* Light text on dark teacher background */
+  color: var(--text);
 }
 
 /* ── Step animation ── */
@@ -1504,14 +1602,6 @@ img {
   gap: 12px;
 }
 
-/* Store buttons */
-.store-buttons {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
 .store-btn {
   display: inline-flex;
   align-items: center;
@@ -1755,31 +1845,6 @@ img {
   }
 }
 
-/* ── Mobile & Large Tablets (max-width: 900px) ── */
-@media (max-width: 900px) {
-  .pricing-hero {
-    flex-direction: column;
-  }
-  .pricing-left {
-    flex: 0 0 auto;
-    padding: 20px 16px 0;
-    padding-left: 16px;
-    gap: 30px;
-  }
-  .hero-img-col {
-    flex: 1 1 0%;
-  }
-  .pricing-per {
-    align-self: flex-start;
-  }
-  .hero-display {
-    font-size: clamp(60px, 15vw, 140px);
-  }
-  .hero-title {
-    font-size: clamp(32px, 10vw, 64px);
-  }
-}
-
 /* ── Mobile (max-width: 768px) ── */
 @media (max-width: 768px) {
   .nav {
@@ -1790,6 +1855,24 @@ img {
   }
   .nav-burger {
     display: flex;
+  }
+
+  .hero-headline {
+    font-size: clamp(40px, 12vw, 56px);
+  }
+
+  .hero-subtitle {
+    font-size: 15px;
+  }
+
+  .hero-cta {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-btn {
+    min-width: 200px;
+    text-align: center;
   }
 
   .split-hero {
@@ -1930,17 +2013,6 @@ img {
   .footer-legal {
     flex-direction: column;
     gap: 8px;
-  }
-}
-
-/* ── Small Mobile (max-width: 600px) ── */
-@media (max-width: 600px) {
-}
-
-/* ── Tiny Mobile (max-width: 480px) ── */
-@media (max-width: 480px) {
-  .pricing-left {
-    padding: 16px 12px 0;
   }
 }
 

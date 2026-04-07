@@ -69,8 +69,9 @@ export default function Profile() {
             {profile.bio}
           </ThemedText>
         )}
-        <ChipBar padding items={options} />
       </View>
+
+      <ChipBar items={options} centered />
 
       {/* Menu Items */}
       <ScrollView

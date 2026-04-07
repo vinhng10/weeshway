@@ -84,8 +84,8 @@ interface ChipBarProps extends UnistylesVariants<typeof styles> {
   items: ChipBarItemProps[];
 }
 
-export const ChipBar = ({ items, padding }: ChipBarProps) => {
-  styles.useVariants({ padding });
+export const ChipBar = ({ items, centered }: ChipBarProps) => {
+  styles.useVariants({ centered });
 
   return (
     <ScrollView
@@ -109,10 +109,10 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.gap(1),
     alignItems: "center",
     variants: {
-      padding: {
+      centered: {
         true: {
-          paddingVertical: theme.gap(1),
-          paddingHorizontal: theme.gap(2),
+          flexGrow: 1,
+          justifyContent: "center",
         },
         false: {},
       },

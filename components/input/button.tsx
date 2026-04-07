@@ -5,18 +5,21 @@ import {
   type ViewProps,
 } from "react-native";
 import { StyleSheet, type UnistylesVariants } from "react-native-unistyles";
+import { IconSymbol, type IconSymbolName } from "../icon-symbol";
 import { Pressable } from "../pressable";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 
 export type ButtonProps = {
   label: string;
+  icon?: IconSymbolName;
 } & ViewProps &
   PressableProps &
   UnistylesVariants<typeof styles>;
 
 export const Button: React.FunctionComponent<ButtonProps> = ({
   label,
+  icon,
   onPress,
   disabled,
   color,
@@ -56,9 +59,12 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
           }
         />
       ) : (
-        <ThemedText type="h4" style={styles.label}>
-          {label}
-        </ThemedText>
+        <>
+          {icon && <IconSymbol name={icon} size={20} style={styles.label} />}
+          <ThemedText type="h4" style={styles.label}>
+            {label}
+          </ThemedText>
+        </>
       )}
     </Pressable>
   );
@@ -66,10 +72,12 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
 
 const styles = StyleSheet.create((theme) => ({
   style: {
+    flexDirection: "row",
     height: theme.gap(6),
     paddingHorizontal: theme.gap(2),
     justifyContent: "center",
     alignItems: "center",
+    gap: theme.gap(1),
     borderRadius: theme.gap(2),
     variants: {
       color: {

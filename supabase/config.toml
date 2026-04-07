@@ -271,20 +271,11 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `slack`, `spotify`, `workos`, `zoom`.
-[auth.external.apple]
-enabled = false
-client_id = ""
-# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
-secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
-# Overrides the default auth redirectUrl.
-redirect_uri = ""
-# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
-# or any other third-party OIDC providers.
-url = ""
-# If enabled, the nonce check will be skipped. Required for local sign in with Google auth.
+[auth.external.google]
+enabled = true
+client_id = "417348737969-352b7bopbrpmn2oqligr1blri0ignu0m.apps.googleusercontent.com,417348737969-r8ivbhmlertc1rsb3f4cefgg7ohq5ap9.apps.googleusercontent.com,417348737969-mc02he29k16ita4p7k3j3qgen0q7j6qq.apps.googleusercontent.com,417348737969-d7ne22d0i0btub79ndhfjla3bvdu0gs3.apps.googleusercontent.com"
+secret = ""
 skip_nonce_check = false
-# If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
-email_optional = false
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
