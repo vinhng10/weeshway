@@ -1,26 +1,8 @@
 import { DEBOUNCE_TIME } from "@/constants";
+import { useLocales } from "@/hooks/useLocales";
+import { supabase } from "@/supabase";
 import { SongType } from "@/types";
 import { useEffect, useState } from "react";
-
-interface iTunesSearchResult {
-  trackId: number;
-  trackName: string;
-  artistName: string;
-  artworkUrl100?: string;
-  artworkUrl60?: string;
-  previewUrl?: string;
-  primaryGenreName?: string;
-}
-
-const mapITunesToSong = (result: iTunesSearchResult): SongType => ({
-  id: result.trackId.toString(),
-  name: result.trackName,
-  artistName: result.artistName,
-  artworkUrl: result.artworkUrl100 || result.artworkUrl60 || "",
-  genre: result.primaryGenreName,
-  previewUrl: result.previewUrl,
-  createdAt: new Date(),
-});
 
 interface SongSearchState {
   songs: SongType[];
@@ -29,6 +11,7 @@ interface SongSearchState {
 }
 
 export const useSongSearch = (query: string): SongSearchState => {
+  const country = useLocales((s) => s.country);
   const [state, setState] = useState<SongSearchState>({
     songs: [],
     loading: false,
@@ -47,19 +30,18 @@ export const useSongSearch = (query: string): SongSearchState => {
 
     const timeoutId = setTimeout(async () => {
       try {
-        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
-          trimmed,
-        )}&media=music&entity=song&limit=25`;
-        const response = await fetch(url, { signal: abortController.signal });
+        const { data, error } = await supabase.functions.invoke<{
+          songs: SongType[];
+        }>("apple-music", {
+          body: { term: trimmed, storefront: country.toLowerCase() },
+        });
 
-        if (!response.ok) throw new Error();
+        if (abortController.signal.aborted) return;
+        if (error) throw error;
 
-        const data = await response.json();
-        const mapped = data.results.map(mapITunesToSong);
-
-        setState({ songs: mapped, loading: false, error: null });
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+        setState({ songs: data?.songs ?? [], loading: false, error: null });
+      } catch {
+        if (!abortController.signal.aborted) {
           setState({
             songs: [],
             loading: false,
@@ -73,7 +55,7 @@ export const useSongSearch = (query: string): SongSearchState => {
       clearTimeout(timeoutId);
       abortController.abort();
     };
-  }, [query]);
+  }, [query, country]);
 
   return state;
 };
