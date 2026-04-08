@@ -61,13 +61,18 @@ interface BubbleProps {
   offsetX: SharedValue<number>;
   offsetY: SharedValue<number>;
   scale: SharedValue<number>;
+  fontMgr: ReturnType<typeof useFonts>;
 }
 
-function Bubble({ index, bubbles, offsetX, offsetY, scale }: BubbleProps) {
+function Bubble({
+  index,
+  bubbles,
+  offsetX,
+  offsetY,
+  scale,
+  fontMgr,
+}: BubbleProps) {
   const width = 100;
-  const fontMgr = useFonts({
-    MomoTrustDisplay: [require("@/assets/fonts/MomoTrustDisplay-Regular.ttf")],
-  });
 
   const paragraph = useMemo(() => {
     if (!fontMgr) {
@@ -159,6 +164,10 @@ function makeBubbleEntry(d: BubbleType): BubbleData {
 }
 
 export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
+  const fontMgr = useFonts({
+    MomoTrustDisplay: [require("@/assets/fonts/MomoTrustDisplay-Regular.ttf")],
+  });
+
   const validData = useMemo(() => data.filter((d) => d.value > 0), [data]);
 
   const size = useSharedValue({ width: 0, height: 0 });
@@ -371,6 +380,7 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
               offsetX={offsetX}
               offsetY={offsetY}
               scale={scale}
+              fontMgr={fontMgr}
             />
           ))}
         </Canvas>
