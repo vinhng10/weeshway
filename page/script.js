@@ -618,6 +618,7 @@ function setupItunesSearch(inputEl, resultsEl, spinnerEl, onSelect) {
               artist: r.artistName,
               artworkUrl: (r.artworkUrl100 || "").replace("100x100", "600x600"),
               previewUrl: r.previewUrl || null,
+              trackViewUrl: r.trackViewUrl || null,
             };
             resultsEl.classList.remove("open");
             inputEl.value = `${r.trackName} — ${r.artistName}`;
@@ -734,6 +735,14 @@ function renderFeaturedCard(container, song) {
             <button class="featured-play-btn" data-preview-url="${escapeHtml(previewUrl)}">
               ${ICONS.PLAY}
             </button>
+          </div>
+          <div class="promo-attribution-wrap">
+            <div class="promo-attribution">Provided courtesy of iTunes</div>
+            ${
+              song.trackViewUrl
+                ? `<a href="${escapeHtml(song.trackViewUrl)}" target="_blank" class="itunes-badge">Download on iTunes</a>`
+                : ""
+            }
           </div>
         </div>
       </div>

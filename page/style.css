@@ -939,6 +939,32 @@ body:has(#landing-hero:not(.gone)) .nav-logo {
   overflow: hidden;
 }
 
+.promo-attribution-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.promo-attribution {
+  font-size: 10px;
+  color: var(--dimmed);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.itunes-badge {
+  font-size: 10px;
+  color: var(--dimmed);
+  border: 1px solid;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  background: var(--surface);
+  transition: background 0.2s;
+}
+
 .featured-card {
   width: 100%;
   aspect-ratio: 1 / 1;
