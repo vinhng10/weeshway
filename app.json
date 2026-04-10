@@ -21,7 +21,8 @@
           "merchant.com.weeshway.weeshway"
         ],
         "com.apple.developer.associated-domains": ["applinks:weeshway.com"]
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -133,7 +134,8 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.417348737969-mc02he29k16ita4p7k3j3qgen0q7j6qq"
         }
-      ]
+      ],
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true

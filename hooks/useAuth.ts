@@ -4,6 +4,7 @@ import { ProfileType } from "@/types";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Session } from "@supabase/supabase-js";
 import camelcaseKeys from "camelcase-keys";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { create } from "zustand";
 import { useAlert } from "./useAlert";
 
@@ -14,6 +15,7 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
   verifyOtp: (email: string, token: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -106,6 +108,30 @@ export const useAuth = create<AuthState>((set, get) => ({
     const { error } = await supabase.auth.signInWithIdToken({
       provider: "google",
       token: response.data.idToken,
+    });
+    if (error) throw error;
+    // onAuthStateChange listener handles fetchProfile automatically
+  },
+
+  signInWithApple: async () => {
+    const rawNonce = crypto.randomUUID();
+
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+      nonce: rawNonce,
+    });
+
+    if (!credential.identityToken) {
+      throw new Error("Apple Sign-In did not return an identity token");
+    }
+
+    const { error } = await supabase.auth.signInWithIdToken({
+      provider: "apple",
+      token: credential.identityToken,
+      nonce: rawNonce,
     });
     if (error) throw error;
     // onAuthStateChange listener handles fetchProfile automatically

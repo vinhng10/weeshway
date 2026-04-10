@@ -3,13 +3,14 @@ import { useAuth } from "@/hooks";
 import { statusCodes } from "@react-native-google-signin/google-signin";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { StyleSheet } from "react-native-unistyles";
 
 export default function SignIn() {
   const signIn = useAuth((state) => state.signIn);
   const signInWithGoogle = useAuth((state) => state.signInWithGoogle);
+  const signInWithApple = useAuth((state) => state.signInWithApple);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -40,6 +41,16 @@ export default function SignIn() {
     } catch (err: any) {
       if (err.code === statusCodes.SIGN_IN_CANCELLED) return;
       setError("Couldn't sign in with Google.\nPlease try again.");
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setError("");
+    try {
+      await signInWithApple();
+    } catch (err: any) {
+      if (err.code === "ERR_REQUEST_CANCELED") return;
+      setError("Couldn't sign in with Apple.\nPlease try again.");
     }
   };
 
@@ -91,6 +102,14 @@ export default function SignIn() {
           label="Sign in with Google"
           onPress={handleGoogleSignIn}
         />
+
+        {Platform.OS === "ios" && (
+          <Button
+            icon="logo-apple"
+            label="Sign in with Apple"
+            onPress={handleAppleSignIn}
+          />
+        )}
 
         <View style={styles.signup}>
           <ThemedText type="h5" color="dimmed">
