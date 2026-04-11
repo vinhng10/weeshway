@@ -5,6 +5,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Session } from "@supabase/supabase-js";
 import camelcaseKeys from "camelcase-keys";
 import * as AppleAuthentication from "expo-apple-authentication";
+import * as ExpoCrypto from "expo-crypto";
 import { create } from "zustand";
 import { useAlert } from "./useAlert";
 
@@ -114,14 +115,18 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   signInWithApple: async () => {
-    const rawNonce = crypto.randomUUID();
+    const rawNonce = ExpoCrypto.randomUUID();
+    const hashedNonce = await ExpoCrypto.digestStringAsync(
+      ExpoCrypto.CryptoDigestAlgorithm.SHA256,
+      rawNonce,
+    );
 
     const credential = await AppleAuthentication.signInAsync({
       requestedScopes: [
         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
         AppleAuthentication.AppleAuthenticationScope.EMAIL,
       ],
-      nonce: rawNonce,
+      nonce: hashedNonce,
     });
 
     if (!credential.identityToken) {
