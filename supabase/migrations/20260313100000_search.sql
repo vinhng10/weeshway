@@ -328,3 +328,60 @@ BEGIN
   OFFSET p_offset;
 END;
 $$;
+
+-- =============================================================================
+-- RPC: search_profiles — find teachers by name for wish tagging
+-- Returns the same search_result shape for UI consistency.
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION public.search_profiles(
+  p_search_term text,
+  p_limit  int DEFAULT 10,
+  p_offset int DEFAULT 0
+)
+RETURNS TABLE (
+  type        text,
+  id          text,
+  title       text,
+  subtitle    text,
+  image_url   text,
+  metadata    text,
+  preview_url text,
+  avatar_url  text,
+  rank        real
+)
+LANGUAGE plpgsql STABLE SECURITY INVOKER
+SET search_path = public
+AS $$
+DECLARE
+  parsed tsquery;
+BEGIN
+  SELECT to_tsquery('simple', string_agg(word || ':*', ' & '))
+  INTO parsed
+  FROM unnest(string_to_array(trim(p_search_term), ' ')) AS word
+  WHERE word <> '';
+
+  IF parsed IS NULL THEN
+    RETURN;
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    'profile'::text,
+    pr.id::text,
+    coalesce(pr.full_name, 'Unknown')::text,
+    pr.bio::text,
+    pr.avatar_url::text,
+    NULL::text,
+    NULL::text,
+    NULL::text,
+    ts_rank(pr.fts, parsed)
+  FROM profiles pr
+  WHERE pr.fts @@ parsed
+  ORDER BY ts_rank(pr.fts, parsed) DESC
+  LIMIT p_limit
+  OFFSET p_offset;
+END;
+$$;
+
+GRANT ALL ON FUNCTION public.search_profiles(text, int, int) TO anon, authenticated, service_role;

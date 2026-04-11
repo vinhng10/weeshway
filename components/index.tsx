@@ -1,7 +1,7 @@
 // Main Components
 export { Avatar, type AvatarProps } from "./avatar";
 export { AvatarGroup, type AvatarGroupProps } from "./avatar-group";
-export { VibeBadge } from "./badge";
+export { Badge, VibeBadge } from "./badge";
 export { Boundary } from "./boundary";
 export { Branding } from "./branding";
 export { BubbleChart } from "./bubble-chart";

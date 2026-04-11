@@ -1,9 +1,10 @@
 import {
+  BOOKING_STATUS,
+  EXPLORE_FILTER,
   LEVEL,
   PROJECT_STATUS,
   REPORT_STATUS,
   ROLE,
-  BOOKING_STATUS,
   STUDENT_REPORT_REASON,
   STYLE,
   TEACHER_REPORT_REASON,
@@ -25,6 +26,7 @@ export type TimeType = ValueOf<typeof TIME>;
 export type TrackType = ValueOf<typeof TRACK>;
 export type RoleType = ValueOf<typeof ROLE>;
 export type WishWatchType = ValueOf<typeof WISH_WATCH>;
+export type ExploreFilterType = ValueOf<typeof EXPLORE_FILTER>;
 export type TempoType = ValueOf<typeof TEMPO>;
 export type StudentReportReasonType = ValueOf<typeof STUDENT_REPORT_REASON>;
 export type TeacherReportReasonType = ValueOf<typeof TEACHER_REPORT_REASON>;
@@ -45,20 +47,26 @@ export type WishType = {
   songId: string;
 };
 
+export type WishTeacherType = {
+  wishId: string;
+  teacherId: string;
+  createdAt: Date;
+};
+
 export type ProfileType = {
-  id: string; // uid type for browser
+  id: string;
   username?: string;
   fullName?: string;
   bio?: string;
   avatarUrl?: string;
   videoUrls?: string[];
-  stripeAccountId: string;
-  onboardingCompleted: boolean;
+  stripeAccountId?: string;
+  onboardingCompleted?: boolean;
   location?: string;
   country?: string;
   expoPushToken?: string;
   policiesAgreedAt?: Date;
-  currency: string;
+  currency?: string;
 };
 
 export type ItemType = {
@@ -164,9 +172,16 @@ export type WatchingType = {
   projectId: string;
 };
 
+export type WishTeacherJoinType = {
+  teacherId?: string;
+  profile?: ProfileType;
+};
+
 // Utility type: WishType with song_id replaced by joined songs relation
 export type WishEnrichedType = WishType & {
   song: SongType;
+  teachers: ProfileType[];
+  wishTeachers?: WishTeacherJoinType[];
 };
 
 export type WishRecommendationEnrichedType = WishEnrichedType & {

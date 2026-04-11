@@ -1,4 +1,5 @@
 import {
+  Badge,
   Boundary,
   Button,
   Header,
@@ -7,7 +8,7 @@ import {
   ThemedText,
   Tile,
 } from "@/components";
-import { useSuspenseQuery, useTempDataStore } from "@/hooks";
+import { useAuth, useSuspenseQuery, useTempDataStore } from "@/hooks";
 import { supabase } from "@/supabase";
 import { WishEnrichedType } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
@@ -29,6 +30,7 @@ type SimilarWish = {
 function WishContent() {
   const { wishId } = useLocalSearchParams<{ wishId: string }>();
   const setData = useTempDataStore((state) => state.setData);
+  const profile = useAuth((state) => state.profile);
 
   const { data, refetch, isRefetching } =
     useSuspenseQuery<WishWithSimilarCount>({
@@ -37,7 +39,7 @@ function WishContent() {
         const { data } = await supabase
           .from("wishes")
           .select(
-            `*, song:songs(id, name, artist_name, preview_url, artwork_url), similar_wish_count`,
+            `*, song:songs(id, name, artist_name, preview_url, artwork_url), wish_teachers(teacher_id), similar_wish_count`,
           )
           .eq("id", wishId)
           .single()
@@ -77,6 +79,13 @@ function WishContent() {
       >
         <View style={styles.wishInfo}>
           <SongCard data={data.song} />
+          <Badge
+            show={
+              data.wishTeachers?.some((wt) => wt.teacherId === profile?.id) ??
+              false
+            }
+            label="This wish is for you"
+          />
           <View style={styles.row}>
             <TextBoxInput label="Style" value={data.style} editable={false} />
             <TextBoxInput label="Level" value={data.level} editable={false} />

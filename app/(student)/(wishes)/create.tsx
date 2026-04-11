@@ -1,6 +1,7 @@
 import {
   Button,
   Header,
+  ProfileSearch,
   SelectBoxInput,
   SongCard,
   SongSearch,
@@ -9,7 +10,7 @@ import {
 import { LEVEL, STYLE } from "@/constants";
 import { useAlert, useAuth } from "@/hooks";
 import { supabase } from "@/supabase";
-import { LevelType, SongType, StyleType } from "@/types";
+import { LevelType, ProfileType, SongType, StyleType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -27,6 +28,7 @@ export default function MakeAWish() {
   const [level, setLevel] = useState<LevelType>();
   const [description, setDescription] = useState("");
   const [song, setSong] = useState<SongType | null>(null);
+  const [teachers, setTeachers] = useState<ProfileType[]>([]);
 
   const handleCreate = async () => {
     if (!isLoggedIn || !profile) {
@@ -60,18 +62,17 @@ export default function MakeAWish() {
           level: level,
           description: description.trim(),
         },
+        p_teacher_ids: teachers.map((t) => t.id),
       });
 
       if (error) {
         throw error;
       }
 
-      // Invalidate wishes queries to refresh the list
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes("wishes"),
       });
 
-      // Navigate back or show success message
       router.back();
     } catch {
       showAlert(
@@ -92,10 +93,8 @@ export default function MakeAWish() {
       >
         <SongSearch onSongPress={(song) => setSong(song)} />
 
-        {/* Song Card */}
         {song && <SongCard data={song} />}
 
-        {/* Style and Level Selects */}
         <View style={styles.row}>
           <SelectBoxInput
             label="Style"
@@ -111,7 +110,15 @@ export default function MakeAWish() {
           />
         </View>
 
-        {/* Wish Description */}
+        <ProfileSearch
+          label="Dream Teachers"
+          value={teachers}
+          onAdd={(p) => setTeachers((prev) => [...prev, p])}
+          onRemove={(id) =>
+            setTeachers((prev) => prev.filter((t) => t.id !== id))
+          }
+        />
+
         <TextBoxInput
           label="Description"
           value={description}

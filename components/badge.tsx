@@ -1,6 +1,6 @@
 import { supabase } from "@/supabase";
 import React, { useCallback, useEffect, useState } from "react";
-import { LayoutChangeEvent } from "react-native";
+import { LayoutChangeEvent, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -13,40 +13,33 @@ import { ThemedText } from "./themed-text";
 
 const AnimatedIconSymbol = Animated.createAnimatedComponent(IconSymbol);
 
-interface VibeBadgeProps {
-  songId: string;
+interface BadgeProps {
+  show: boolean;
+  label: string;
 }
 
-export function VibeBadge({ songId }: VibeBadgeProps) {
-  const [count, setCount] = useState<number>();
+export function Badge({ show, label }: BadgeProps) {
   const [contentHeight, setContentHeight] = useState(0);
   const height = useSharedValue(0);
   const opacity = useSharedValue(0);
+  const scale = useSharedValue(1);
+
+  const ready = show && contentHeight > 0;
 
   useEffect(() => {
-    supabase
-      .rpc("count_nearby_wishes_by_song", { p_song_id: songId })
-      .then(({ data }) => setCount(data ?? 0));
-  }, [songId]);
-
-  const show = !!count && contentHeight > 0;
+    height.value = withTiming(ready ? contentHeight : 0, { duration: 400 });
+    opacity.value = withTiming(ready ? 1 : 0, { duration: 600 });
+  }, [ready, contentHeight, height, opacity]);
 
   useEffect(() => {
-    height.value = withTiming(show ? contentHeight : 0, { duration: 400 });
-    opacity.value = withTiming(show ? 1 : 0, { duration: 600 });
-  }, [show, contentHeight, height, opacity]);
+    scale.value = withRepeat(withTiming(1.3, { duration: 800 }), -1, true);
+  }, [scale]);
 
   const wrapperStyle = useAnimatedStyle(() => ({
     height: height.value,
     opacity: opacity.value,
     overflow: "hidden" as const,
   }));
-
-  const scale = useSharedValue(1);
-
-  useEffect(() => {
-    scale.value = withRepeat(withTiming(1.3, { duration: 800 }), -1, true);
-  }, [scale]);
 
   const sparkleStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -62,31 +55,41 @@ export function VibeBadge({ songId }: VibeBadgeProps) {
       <Animated.View style={sparkleStyle}>
         <AnimatedIconSymbol name="sparkles" size={18} style={styles.icon} />
       </Animated.View>
-      <ThemedText type="h5">
-        Vibing with {count} {count === 1 ? "wish" : "wishes"}
-      </ThemedText>
+      <ThemedText type="h5">{label}</ThemedText>
       <Animated.View style={sparkleStyle}>
         <AnimatedIconSymbol name="sparkles" size={18} style={styles.icon} />
       </Animated.View>
     </Animated.View>
   );
 
-  if (!count) return null;
-
   return (
     <Animated.View style={wrapperStyle}>
       {content}
       {!contentHeight && (
-        <Animated.View
-          style={styles.offscreen}
-          onLayout={onLayout}
-          pointerEvents="none"
-        >
+        <View style={styles.offscreen} onLayout={onLayout} pointerEvents="none">
           {content}
-        </Animated.View>
+        </View>
       )}
     </Animated.View>
   );
+}
+
+interface VibeBadgeProps {
+  songId: string;
+}
+
+export function VibeBadge({ songId }: VibeBadgeProps) {
+  const [count, setCount] = useState<number>();
+
+  useEffect(() => {
+    supabase
+      .rpc("count_nearby_wishes_by_song", { p_song_id: songId })
+      .then(({ data }) => setCount(data ?? 0));
+  }, [songId]);
+
+  const label = `Vibing with ${count} ${count === 1 ? "wish" : "wishes"}`;
+
+  return <Badge show={!!count} label={label} />;
 }
 
 const styles = StyleSheet.create((theme) => ({

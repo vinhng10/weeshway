@@ -4,6 +4,7 @@ export const TICK_INTERVAL = 5;
 export const DEBOUNCE_TIME = 500;
 export const PAGE_SIZE = 10;
 export const SCAN_DELAY_MS = 2000;
+export const MAX_TEACHERS = 3;
 export const WEBSITE_URL = process.env.EXPO_PUBLIC_WEBSITE_URL!;
 export const RETURN_URL = `${WEBSITE_URL}/profile/wallet`;
 export const MERCHANT_COUNTRY_CODE = "FI";
@@ -153,6 +154,11 @@ export const TIME = {
 export const WISH_WATCH = {
   WISH: "Wish",
   WATCHING: "Watching",
+} as const;
+
+export const EXPLORE_FILTER = {
+  ALL: "All",
+  FOR_ME: "For Me",
 } as const;
 
 export const TEMPO = {

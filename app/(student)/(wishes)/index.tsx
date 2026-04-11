@@ -77,7 +77,7 @@ function WishesContent({ style, level }: WishesContentProps) {
         avatars={data.recommendations
           ?.map((r) => r.project.profile.avatarUrl)
           .filter((url): url is string => url !== undefined)}
-        onPress={() => router.navigate(`./${data.id}`)}
+        onPress={() => router.navigate(`./wishes/${data.id}`)}
       />
     ),
     [],

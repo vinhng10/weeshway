@@ -1,33 +1,16 @@
 import { useSearch } from "@/hooks";
 import { SearchResultType } from "@/types";
-import { FlashList, ListRenderItem } from "@shopify/flash-list";
-import { router, useLocalSearchParams } from "expo-router";
+import { ListRenderItem } from "@shopify/flash-list";
+import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
 import { Pressable } from "../pressable";
-import { Separator } from "../separator";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 import { Tile } from "../tile";
-import { TextInput } from "./text-input";
-
-interface SearchProps {
-  rpc: string;
-}
-
-export const Search: React.FunctionComponent<SearchProps> = ({ rpc }) => {
-  return (
-    <Pressable
-      style={styles.searchButton}
-      onPress={() => router.navigate({ pathname: "./search", params: { rpc } })}
-    >
-      <IconSymbol name="search" size={20} style={styles.icon} />
-    </Pressable>
-  );
-};
+import { SearchModal } from "./search-modal";
 
 const ROUTE_BY_TYPE: Record<string, string> = {
   profile: "teacher",
@@ -36,19 +19,31 @@ const ROUTE_BY_TYPE: Record<string, string> = {
   wish: "wishes",
 };
 
-const keyExtractor = (item: SearchResultType) => `${item.type}-${item.id}`;
+interface SearchProps {
+  rpc: string;
+}
 
-export const SearchScreen: React.FunctionComponent = () => {
-  const { rpc = "search" } = useLocalSearchParams<{ rpc?: string }>();
+export const Search: React.FunctionComponent<SearchProps> = ({ rpc }) => {
+  const [visible, setVisible] = useState(false);
   const [query, setQuery] = useState("");
   const { data, loading, error, fetchNextPage, hasNextPage, isDebouncing } =
     useSearch(query, rpc);
 
-  const handleSelect = useCallback((item: SearchResultType) => {
-    const prefix = ROUTE_BY_TYPE[item.type] ?? "";
-    router.back();
-    router.navigate(`./${prefix ? `${prefix}/` : ""}${item.id}`);
+  const open = useCallback(() => setVisible(true), []);
+
+  const close = useCallback(() => {
+    setVisible(false);
+    setQuery("");
   }, []);
+
+  const handleSelect = useCallback(
+    (item: SearchResultType) => {
+      close();
+      const prefix = ROUTE_BY_TYPE[item.type] ?? "";
+      router.navigate(`./${prefix ? `${prefix}/` : ""}${item.id}`);
+    },
+    [close],
+  );
 
   const renderItem: ListRenderItem<SearchResultType> = useCallback(
     ({ item }) => (
@@ -71,7 +66,6 @@ export const SearchScreen: React.FunctionComponent = () => {
 
   const renderEmptyState = () => {
     if (!query.trim() || isDebouncing) return null;
-
     if (loading) {
       return (
         <View style={styles.messageContainer}>
@@ -79,7 +73,6 @@ export const SearchScreen: React.FunctionComponent = () => {
         </View>
       );
     }
-
     if (error) {
       return (
         <View style={styles.messageContainer}>
@@ -87,63 +80,36 @@ export const SearchScreen: React.FunctionComponent = () => {
         </View>
       );
     }
-
-    if (query.trim()) {
-      return (
-        <View style={styles.messageContainer}>
-          <ThemedText color="dimmed">No results found</ThemedText>
-        </View>
-      );
-    }
-
-    return null;
+    return (
+      <View style={styles.messageContainer}>
+        <ThemedText color="dimmed">No results found</ThemedText>
+      </View>
+    );
   };
 
   return (
-    <View style={styles.container}>
-      <Header title="Search" />
-      <View style={styles.searchContainer}>
-        <TextInput
-          placeholder="What are you looking for?"
-          value={query}
-          onChangeText={setQuery}
-          autoFocus
-        />
-      </View>
-      <FlashList
+    <>
+      <Pressable style={styles.searchButton} onPress={open}>
+        <IconSymbol name="search" size={20} style={styles.icon} />
+      </Pressable>
+      <SearchModal
+        visible={visible}
+        title="Search"
+        placeholder="What are you looking for?"
+        query={query}
+        onQueryChange={setQuery}
+        onClose={close}
         data={data}
-        keyExtractor={keyExtractor}
+        keyExtractor={(item) => `${item.type}-${item.id}`}
         renderItem={renderItem}
         ListEmptyComponent={renderEmptyState}
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
         onEndReached={handleEndReached}
-        onEndReachedThreshold={0.5}
-        ItemSeparatorComponent={Separator}
       />
-    </View>
+    </>
   );
 };
 
-const styles = StyleSheet.create((theme, rt) => ({
-  container: {
-    flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
-  },
-  searchContainer: {
-    paddingHorizontal: theme.gap(2),
-  },
-  scrollContainer: {
-    padding: theme.gap(2),
-    paddingBottom: theme.gap(32),
-  },
-  messageContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+const styles = StyleSheet.create((theme) => ({
   searchButton: {
     width: theme.gap(4),
     height: theme.gap(4),
@@ -154,5 +120,10 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   icon: {
     color: theme.colors.typographyContrast,
+  },
+  messageContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 }));

@@ -99,12 +99,14 @@ function Bubble({
 
   // Access bubble properties directly from the array to ensure reactivity
   const cx = useDerivedValue(
-    () => offsetX.value + bubbles.value[index].x * scale.value,
+    () => offsetX.value + (bubbles.value[index]?.x ?? 0) * scale.value,
   );
   const cy = useDerivedValue(
-    () => offsetY.value + bubbles.value[index].y * scale.value,
+    () => offsetY.value + (bubbles.value[index]?.y ?? 0) * scale.value,
   );
-  const r = useDerivedValue(() => bubbles.value[index].radius * scale.value);
+  const r = useDerivedValue(
+    () => (bubbles.value[index]?.radius ?? 0) * scale.value,
+  );
 
   const ph = paragraph ? paragraph.getHeight() : 0;
   const px = useDerivedValue(() => cx.value - width / 2);
@@ -114,7 +116,8 @@ function Bubble({
 
   const isDimmed = useDerivedValue(
     () =>
-      bubbles.value.some((b) => b.selected) && !bubbles.value[index].selected,
+      bubbles.value.some((b) => b.selected) &&
+      !(bubbles.value[index]?.selected ?? false),
   );
   const fillColor = useDerivedValue(() =>
     isDimmed.value ? "rgba(160, 160, 160, 0.35)" : color,
@@ -122,7 +125,7 @@ function Bubble({
   const strokeColor = useDerivedValue(() =>
     isDimmed.value
       ? "rgba(130, 130, 130, 0.35)"
-      : bubbles.value[index].selected
+      : (bubbles.value[index]?.selected ?? false)
         ? "#FFFFFF"
         : stroke,
   );

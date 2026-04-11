@@ -1,8 +1,8 @@
 import { ROLE } from "@/constants";
-import { useRole } from "./useRole";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useEffect } from "react";
+import { useRole } from "./useRole";
 
 export const useNotificationObserver = (): void => {
   const role = useRole((state) => state.role);
@@ -17,7 +17,7 @@ export const useNotificationObserver = (): void => {
           router.navigate(`/(student)/(bookings)/classes/${data.projectId}`);
         }
       } else if (data?.wishId) {
-        router.navigate(`/(student)/(wishes)/${data.wishId}`);
+        router.navigate(`/(student)/(wishes)/wishes/${data.wishId}`);
       }
     };
 

@@ -530,32 +530,92 @@ end;$$;
 ALTER FUNCTION "public"."create_project_with_song"("p_song_data" "jsonb", "p_project_data" "jsonb") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."create_wish_with_song"("p_song_data" "jsonb", "p_wish_data" "jsonb") RETURNS "uuid"
-    LANGUAGE "plpgsql"
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
-declare
+CREATE OR REPLACE FUNCTION public.create_wish_with_song(
+  p_song_data   jsonb,
+  p_wish_data   jsonb,
+  p_teacher_ids uuid[] DEFAULT '{}'
+) RETURNS uuid
+LANGUAGE plpgsql
+SET search_path TO 'public', 'pg_catalog'
+AS $$
+DECLARE
   v_wish_id uuid;
-begin
-  insert into public.songs (id, name, artist_name, artwork_url, preview_url, genre)
-  values (p_song_data->>'id', p_song_data->>'name', p_song_data->>'artist_name', p_song_data->>'artwork_url', p_song_data->>'preview_url', p_song_data->>'genre')
-  on conflict (id) do nothing;
+BEGIN
+  INSERT INTO public.songs (id, name, artist_name, artwork_url, preview_url, genre)
+  VALUES (
+    p_song_data->>'id',
+    p_song_data->>'name',
+    p_song_data->>'artist_name',
+    p_song_data->>'artwork_url',
+    p_song_data->>'preview_url',
+    p_song_data->>'genre'
+  )
+  ON CONFLICT (id) DO NOTHING;
 
-  insert into public.wishes (song_id, style, level, description)
-  values (p_song_data->>'id', (p_wish_data->>'style')::public.style, (p_wish_data->>'level')::public.level, p_wish_data->>'description')
-  returning id into v_wish_id;
+  INSERT INTO public.wishes (song_id, style, level, description)
+  VALUES (
+    p_song_data->>'id',
+    (p_wish_data->>'style')::public.style,
+    (p_wish_data->>'level')::public.level,
+    p_wish_data->>'description'
+  )
+  RETURNING id INTO v_wish_id;
 
-  return v_wish_id;
-end;$$;
+  IF array_length(p_teacher_ids, 1) > 0 THEN
+    INSERT INTO public.wish_teachers (wish_id, teacher_id)
+    SELECT v_wish_id, unnest(p_teacher_ids);
+  END IF;
+
+  RETURN v_wish_id;
+END;
+$$;
+
+ALTER FUNCTION public.create_wish_with_song(jsonb, jsonb, uuid[]) OWNER TO postgres;
 
 
-ALTER FUNCTION "public"."create_wish_with_song"("p_song_data" "jsonb", "p_wish_data" "jsonb") OWNER TO "postgres";
+CREATE OR REPLACE FUNCTION public.update_wish(
+  p_wish_id     uuid,
+  p_style       public.style DEFAULT NULL,
+  p_level       public.level DEFAULT NULL,
+  p_description text         DEFAULT NULL,
+  p_teacher_ids uuid[]       DEFAULT '{}'
+) RETURNS void
+LANGUAGE plpgsql SECURITY INVOKER
+SET search_path TO 'public', 'pg_catalog'
+AS $$
+BEGIN
+  UPDATE public.wishes
+  SET
+    style       = p_style,
+    level       = p_level,
+    description = p_description
+  WHERE id = p_wish_id
+    AND user_id = auth.uid();
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'We couldn''t find your wish or you don''t have permission to edit it.';
+  END IF;
+
+  DELETE FROM public.wish_teachers WHERE wish_id = p_wish_id;
+
+  IF array_length(p_teacher_ids, 1) > 0 THEN
+    INSERT INTO public.wish_teachers (wish_id, teacher_id)
+    SELECT p_wish_id, unnest(p_teacher_ids);
+  END IF;
+END;
+$$;
+
+ALTER FUNCTION public.update_wish(uuid, public.style, public.level, text, uuid[]) OWNER TO postgres;
 
 
-CREATE OR REPLACE FUNCTION "public"."get_bubbles"("p_style" "public"."style" DEFAULT NULL::"public"."style", "p_level" "public"."level" DEFAULT NULL::"public"."level") RETURNS TABLE("label" bigint, "value" bigint)
-    LANGUAGE "plpgsql"
-    SET "search_path" TO 'public', 'pg_catalog', 'extensions'
-    AS $$
+CREATE OR REPLACE FUNCTION public.get_bubbles(
+  p_style      public.style DEFAULT NULL,
+  p_level      public.level DEFAULT NULL,
+  p_teacher_id uuid         DEFAULT NULL
+) RETURNS TABLE(label bigint, value bigint)
+LANGUAGE plpgsql
+SET search_path TO 'public', 'pg_catalog', 'extensions'
+AS $$
 DECLARE
   user_location geometry;
   user_country public.country_code;
@@ -566,8 +626,8 @@ BEGIN
 
   RETURN QUERY
   SELECT
-    s.centroid_id as label,
-    COUNT(w.id) AS value
+    s.centroid_id AS label,
+    COUNT(w.id)   AS value
   FROM
     public.wishes w
     INNER JOIN public.songs s ON w.song_id = s.id
@@ -579,6 +639,12 @@ BEGIN
     AND (p_level IS NULL OR w.level = p_level)
     AND w.user_id != auth.uid()
     AND (
+      p_teacher_id IS NULL OR EXISTS (
+        SELECT 1 FROM public.wish_teachers wt
+        WHERE wt.wish_id = w.id AND wt.teacher_id = p_teacher_id
+      )
+    )
+    AND (
       CASE
         WHEN user_location IS NOT NULL AND p.location IS NOT NULL THEN
           ST_DWithin(p.location, user_location, 1.0)
@@ -588,10 +654,10 @@ BEGIN
       END
     )
   GROUP BY s.centroid_id;
-END;$$;
+END;
+$$;
 
-
-ALTER FUNCTION "public"."get_bubbles"("p_style" "public"."style", "p_level" "public"."level") OWNER TO "postgres";
+ALTER FUNCTION public.get_bubbles(public.style, public.level, uuid) OWNER TO postgres;
 
 
 CREATE TABLE IF NOT EXISTS "public"."projects" (
@@ -1675,6 +1741,41 @@ ALTER TABLE ONLY "public"."wishes"
     ADD CONSTRAINT "wishes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
 
 
+-- =============================================================================
+-- Join table: wish_teachers (a wish can be directed at one or more teachers)
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS public.wish_teachers (
+  wish_id    uuid NOT NULL REFERENCES public.wishes(id)   ON DELETE CASCADE,
+  teacher_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (wish_id, teacher_id)
+);
+
+ALTER TABLE public.wish_teachers OWNER TO postgres;
+
+CREATE INDEX wish_teachers_teacher_id_idx ON public.wish_teachers (teacher_id);
+
+ALTER TABLE public.wish_teachers ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Enable read access for all users"
+  ON public.wish_teachers FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Enable insert for wish owner"
+  ON public.wish_teachers FOR INSERT TO authenticated
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.wishes w WHERE w.id = wish_id AND w.user_id = auth.uid())
+  );
+
+CREATE POLICY "Enable delete for wish owner"
+  ON public.wish_teachers FOR DELETE TO authenticated
+  USING (
+    EXISTS (SELECT 1 FROM public.wishes w WHERE w.id = wish_id AND w.user_id = auth.uid())
+  );
+
+GRANT ALL ON TABLE public.wish_teachers TO anon, authenticated, service_role;
+
+
 ALTER TABLE "public"."reports" ADD CONSTRAINT "reports_pkey" PRIMARY KEY ("id");
 ALTER TABLE "public"."reports" ADD CONSTRAINT "reports_user_project_key" UNIQUE ("user_id", "project_id");
 
@@ -1863,14 +1964,11 @@ GRANT ALL ON FUNCTION "public"."create_project_with_song"("p_song_data" "jsonb",
 GRANT ALL ON FUNCTION "public"."create_project_with_song"("p_song_data" "jsonb", "p_project_data" "jsonb") TO "service_role";
 
 
-GRANT ALL ON FUNCTION "public"."create_wish_with_song"("p_song_data" "jsonb", "p_wish_data" "jsonb") TO "anon";
-GRANT ALL ON FUNCTION "public"."create_wish_with_song"("p_song_data" "jsonb", "p_wish_data" "jsonb") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."create_wish_with_song"("p_song_data" "jsonb", "p_wish_data" "jsonb") TO "service_role";
+GRANT ALL ON FUNCTION public.create_wish_with_song(jsonb, jsonb, uuid[]) TO anon, authenticated, service_role;
 
+GRANT EXECUTE ON FUNCTION public.update_wish(uuid, public.style, public.level, text, uuid[]) TO authenticated;
 
-GRANT ALL ON FUNCTION "public"."get_bubbles"("p_style" "public"."style", "p_level" "public"."level") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_bubbles"("p_style" "public"."style", "p_level" "public"."level") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_bubbles"("p_style" "public"."style", "p_level" "public"."level") TO "service_role";
+GRANT ALL ON FUNCTION public.get_bubbles(public.style, public.level, uuid) TO anon, authenticated, service_role;
 
 
 GRANT ALL ON TABLE "public"."projects" TO "anon";

@@ -8,10 +8,16 @@ import {
   SectionListView,
   Tile,
 } from "@/components";
-import { LEVEL, STYLE } from "@/constants";
-import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
+import { EXPLORE_FILTER, LEVEL, STYLE } from "@/constants";
+import { useAuth, useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import { BubbleType, LevelType, StyleType, WishEnrichedType } from "@/types";
+import {
+  BubbleType,
+  ExploreFilterType,
+  LevelType,
+  StyleType,
+  WishEnrichedType,
+} from "@/types";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { View } from "react-native";
@@ -22,22 +28,26 @@ type WishWithSimilarCount = WishEnrichedType & { similarWishCount: number };
 interface ExploreContentProps {
   style?: StyleType;
   level?: LevelType;
+  filter: ExploreFilterType;
 }
 
-function ExploreContent({ style, level }: ExploreContentProps) {
+function ExploreContent({ style, level, filter }: ExploreContentProps) {
+  const profile = useAuth((state) => state.profile);
   const [centroidId, setCentroidId] = useState<number>();
+  const forMe = filter === EXPLORE_FILTER.FOR_ME;
 
   const {
     data: bubbles,
     refetch: refetchBubbles,
     isRefetching: isRefetchingBubbles,
   } = useSuspenseQuery<BubbleType[]>({
-    queryKey: ["bubbles", style, level],
+    queryKey: ["bubbles", style, level, filter],
     queryFn: async () => {
       const { data } = await supabase
         .rpc("get_bubbles", {
           p_style: style,
           p_level: level,
+          p_teacher_id: forMe ? profile?.id : null,
         })
         .throwOnError();
       return data ?? [];
@@ -51,19 +61,16 @@ function ExploreContent({ style, level }: ExploreContentProps) {
     refetch: refetchWishes,
     isRefetching: isRefetchingWishes,
   } = useSuspenseInfiniteQuery<WishWithSimilarCount>({
-    queryKey: ["wishes", style, level, centroidId],
+    queryKey: ["wishes", style, level, filter, centroidId],
     tableName: "nearby_wishes",
-    columns: `*, song:songs!inner(*)`,
+    columns: forMe
+      ? `*, song:songs!inner(*), wish_teachers!inner()`
+      : `*, song:songs!inner(*)`,
     trailingQuery: (query) => {
-      if (style) {
-        query = query.eq("style", style);
-      }
-      if (level) {
-        query = query.eq("level", level);
-      }
-      if (centroidId) {
-        query = query.eq("song.centroid_id", centroidId);
-      }
+      if (style) query = query.eq("style", style);
+      if (level) query = query.eq("level", level);
+      if (centroidId) query = query.eq("song.centroid_id", centroidId);
+      if (forMe) query = query.eq("wish_teachers.teacher_id", profile?.id);
       return query;
     },
   });
@@ -82,7 +89,7 @@ function ExploreContent({ style, level }: ExploreContentProps) {
   );
 
   const renderTile = useCallback(
-    (data: WishWithSimilarCount): React.ReactElement => (
+    (data: WishEnrichedType): React.ReactElement => (
       <Tile
         imageSource={data.song.artworkUrl}
         title={data.song.name}
@@ -125,10 +132,18 @@ function ExploreContent({ style, level }: ExploreContentProps) {
 }
 
 export default function Explore() {
+  const [filter, setFilter] = useState<ExploreFilterType>(EXPLORE_FILTER.ALL);
   const [style, setStyle] = useState<StyleType>();
   const [level, setLevel] = useState<LevelType>();
 
   const options: ChipBarItemProps[] = [
+    {
+      label: "Filter",
+      value: filter,
+      options: EXPLORE_FILTER,
+      modal: false,
+      onValueChange: setFilter,
+    },
     {
       label: "Style",
       value: style,
@@ -152,7 +167,7 @@ export default function Explore() {
         <ChipBar items={options} />
       </View>
       <Boundary>
-        <ExploreContent style={style} level={level} />
+        <ExploreContent style={style} level={level} filter={filter} />
       </Boundary>
       <LocationPermission />
     </View>
@@ -171,5 +186,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.gap(2),
     paddingVertical: theme.gap(1),
     gap: theme.gap(1),
+    backgroundColor: "transparent",
   },
 }));

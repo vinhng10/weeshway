@@ -1,7 +1,6 @@
 import { OptionItem } from "@/types";
-import { FlashList, ListRenderItem } from "@shopify/flash-list";
 import React, { useCallback, useMemo } from "react";
-import { Modal, View } from "react-native";
+import { Modal, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
 import { Pressable } from "../pressable";
@@ -44,22 +43,6 @@ export const Options = ({
     [options],
   );
 
-  const renderItem: ListRenderItem<OptionItem> = useCallback(
-    ({ item }) => {
-      return (
-        <Pressable onPress={() => handleSelect(item.value)}>
-          <ThemedText
-            type="h3"
-            color={currentValue !== item.value ? "dimmed" : undefined}
-          >
-            {renderFunction ? renderFunction(item) : item.value}
-          </ThemedText>
-        </Pressable>
-      );
-    },
-    [handleSelect, currentValue, renderFunction],
-  );
-
   return (
     <Modal
       visible={visible}
@@ -73,15 +56,24 @@ export const Options = ({
         <Header title={title} onPress={onClose} />
 
         {/* Options List */}
-        <FlashList
-          data={optionsArray}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.key}
-          extraData={currentValue}
+        <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <Separator gap={3} />}
-        />
+        >
+          {optionsArray.map((item, index) => (
+            <React.Fragment key={item.key}>
+              {index > 0 && <Separator gap={3} />}
+              <Pressable onPress={() => handleSelect(item.value)}>
+                <ThemedText
+                  type="h3"
+                  color={currentValue !== item.value ? "dimmed" : undefined}
+                >
+                  {renderFunction ? renderFunction(item) : item.value}
+                </ThemedText>
+              </Pressable>
+            </React.Fragment>
+          ))}
+        </ScrollView>
       </View>
     </Modal>
   );

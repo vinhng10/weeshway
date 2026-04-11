@@ -4,6 +4,7 @@ import {
   ButtonGroup,
   Carousel,
   Header,
+  ProfileSearch,
   SelectBoxInput,
   SongCard,
   TextBoxInput,
@@ -13,7 +14,7 @@ import {
 import { LEVEL, STYLE } from "@/constants";
 import { useAlert, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import { WishRecommendationEnrichedType } from "@/types";
+import { ProfileType, WishRecommendationEnrichedType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -35,6 +36,7 @@ function WishContent() {
           .select(
             `*,
             song:songs(id, name, artist_name, preview_url, artwork_url),
+            wish_teachers(profile:profiles(*)),
             recommendations:recommendations(
               project:projects(
                 *,
@@ -56,6 +58,11 @@ function WishContent() {
   const [style, setStyle] = useState(data.style);
   const [level, setLevel] = useState(data.level);
   const [description, setDescription] = useState(data.description);
+  const [teachers, setTeachers] = useState<ProfileType[]>(
+    data.wishTeachers
+      ?.map((wt) => wt.profile)
+      .filter((p): p is ProfileType => !!p) ?? [],
+  );
 
   const hasRecommendations =
     data.recommendations && data.recommendations.length > 0;
@@ -63,13 +70,13 @@ function WishContent() {
   const handleSave = async () => {
     try {
       await supabase
-        .from("wishes")
-        .update({
-          style: style ?? null,
-          level: level ?? null,
-          description: description ?? null,
+        .rpc("update_wish", {
+          p_wish_id: wishId,
+          p_style: style ?? null,
+          p_level: level ?? null,
+          p_description: description ?? null,
+          p_teacher_ids: teachers.map((t) => t.id),
         })
-        .eq("id", wishId)
         .throwOnError();
 
       await queryClient.invalidateQueries({
@@ -133,6 +140,14 @@ function WishContent() {
         ) : (
           <SongCard data={data.song} />
         )}
+        <ProfileSearch
+          label="Dream Teachers"
+          value={teachers}
+          onAdd={(p) => setTeachers((prev) => [...prev, p])}
+          onRemove={(id) =>
+            setTeachers((prev) => prev.filter((t) => t.id !== id))
+          }
+        />
 
         {/* Editable Fields */}
         <View style={styles.row}>
