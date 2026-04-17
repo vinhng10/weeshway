@@ -93,7 +93,7 @@ const styles = StyleSheet.create((theme) => ({
       },
       outlined: {
         true: {
-          backgroundColor: "transparent",
+          backgroundColor: theme.colors.background,
           borderWidth: theme.gap(0.4),
           borderColor: theme.colors.typography,
         },
