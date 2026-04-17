@@ -57,6 +57,7 @@ interface BubbleData {
 
 interface BubbleProps {
   index: number;
+  value: number;
   bubbles: SharedValue<BubbleData[]>;
   offsetX: SharedValue<number>;
   offsetY: SharedValue<number>;
@@ -66,6 +67,7 @@ interface BubbleProps {
 
 function Bubble({
   index,
+  value,
   bubbles,
   offsetX,
   offsetY,
@@ -86,8 +88,6 @@ function Bubble({
       fontFamilies: ["MomoTrustDisplay"],
       fontSize: 12,
     };
-    // Use initial bubble data for text that doesn't change
-    const { label, value } = bubbles.value[index];
     const para = Skia.ParagraphBuilder.Make(paragraphStyle, fontMgr)
       .pushStyle(textStyle)
       .addText(`${value} wishes`)
@@ -95,7 +95,7 @@ function Bubble({
 
     para.layout(width);
     return para;
-  }, [fontMgr, index]);
+  }, [fontMgr, value]);
 
   // Access bubble properties directly from the array to ensure reactivity
   const cx = useDerivedValue(
@@ -375,10 +375,11 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
     <GestureDetector gesture={composed}>
       <View style={[styles.container]}>
         <Canvas style={{ flex: 1 }} onSize={size}>
-          {validData.map((_, i) => (
+          {validData.map((d, i) => (
             <Bubble
               key={i}
               index={i}
+              value={d.value}
               bubbles={bubbles}
               offsetX={offsetX}
               offsetY={offsetY}

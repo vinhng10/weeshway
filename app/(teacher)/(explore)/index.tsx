@@ -67,6 +67,7 @@ function ExploreContent({ style, level, filter }: ExploreContentProps) {
       ? `*, song:songs!inner(*), wish_teachers!inner()`
       : `*, song:songs!inner(*)`,
     trailingQuery: (query) => {
+      query = query.not("song.centroid_id", "is", null);
       if (style) query = query.eq("style", style);
       if (level) query = query.eq("level", level);
       if (centroidId) query = query.eq("song.centroid_id", centroidId);
