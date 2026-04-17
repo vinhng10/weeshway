@@ -1,3 +1,4 @@
+import { MERCHANT_COUNTRY_CODE } from "@/constants";
 import { useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileType, ProjectEnrichedType } from "@/types";
@@ -11,7 +12,6 @@ import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
 import { SpotsSelector } from "./spots-selector";
-import { MERCHANT_COUNTRY_CODE } from "@/constants";
 
 type PaymentIntentResponse = {
   customerId: string;
