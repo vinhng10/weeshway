@@ -1,6 +1,7 @@
 import postgres from "postgres";
 import Stripe from "stripe";
 import { handleError, HttpError } from "../_shared/errors.ts";
+import { flagEnabled } from "../_shared/flags.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- Configuration ---
@@ -67,7 +68,12 @@ async function handleEvent(event: Stripe.Event): Promise<void> {
   switch (event.type) {
     case "payment_intent.created": {
       const pi = event.data.object;
-      await upsertBooking(pi.id, "Created", pi.metadata);
+      const stripeEnabled = await flagEnabled(sql, "stripe");
+      await upsertBooking(
+        pi.id,
+        stripeEnabled ? "Created" : "Succeeded",
+        pi.metadata,
+      );
       break;
     }
     case "payment_intent.succeeded": {

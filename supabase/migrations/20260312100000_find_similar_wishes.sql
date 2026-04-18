@@ -55,17 +55,6 @@ $$;
 
 ALTER FUNCTION "public"."find_similar_wishes"("p_wish_id" "uuid", "p_threshold" double precision, "p_limit" integer) OWNER TO "postgres";
 
--- Computed column: allows `.select("*, similar_wish_count")` via PostgREST
-CREATE OR REPLACE FUNCTION "public"."similar_wish_count"("wish_row" "public"."wishes")
-RETURNS bigint
-    LANGUAGE "sql" SECURITY INVOKER STABLE
-    SET "search_path" TO 'public', 'extensions'
-    AS $$
-  SELECT count(*) FROM find_similar_wishes(wish_row.id);
-$$;
-
-ALTER FUNCTION "public"."similar_wish_count"("wish_row" "public"."wishes") OWNER TO "postgres";
-
 -- Computed column for the nearby_wishes view
 CREATE OR REPLACE FUNCTION "public"."similar_wish_count"("wish_row" "public"."nearby_wishes")
 RETURNS bigint

@@ -1,5 +1,5 @@
 import { MERCHANT_COUNTRY_CODE } from "@/constants";
-import { useLocales } from "@/hooks";
+import { useFeatureFlags, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProfileType, ProjectEnrichedType } from "@/types";
 import { PaymentMethodLayout, useStripe } from "@stripe/stripe-react-native";
@@ -36,6 +36,7 @@ export function Checkout({
 }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { theme } = useUnistyles();
+  const stripeEnabled = useFeatureFlags((s) => s.isEnabled("stripe"));
   const formatMoney = useLocales((state) => state.formatMoney);
   const bookingFee = useLocales((state) => state.bookingFee);
   const exchange = useLocales((state) => state.exchange);
@@ -150,15 +151,15 @@ export function Checkout({
         setIsInitialized(true);
       }
 
-      // Present payment sheet for user interaction
-      const { error } = await presentPaymentSheet();
-
-      if (error) {
-        setStatus("error");
-        setStatusMessage(
-          `Payment ${error.code.toLowerCase()}. Please try again.`,
-        );
-        return;
+      if (stripeEnabled) {
+        const { error } = await presentPaymentSheet();
+        if (error) {
+          setStatus("error");
+          setStatusMessage(
+            `Payment ${error.code.toLowerCase()}. Please try again.`,
+          );
+          return;
+        }
       }
 
       setStatus("success");

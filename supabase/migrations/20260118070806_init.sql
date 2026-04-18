@@ -511,7 +511,7 @@ begin
     (p_project_data->>'status')::public.status,
     (p_project_data->>'style')::public.style,
     (p_project_data->>'level')::public.level,
-    (p_project_data->>'price')::integer * 100,
+    ROUND((p_project_data->>'price')::numeric * 100)::integer,
     (p_project_data->>'spots')::smallint,
     p_project_data->>'description',
     (p_project_data->>'start_at')::timestamp with time zone,

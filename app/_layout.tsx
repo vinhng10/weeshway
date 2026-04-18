@@ -3,6 +3,7 @@ import { ROLE, STRIPE_PUBLISHABLE_KEY } from "@/constants";
 import {
   useAudioPlayerStore,
   useAuth,
+  useFeatureFlags,
   useLocales,
   useNotificationObserver,
   useOnboarding,
@@ -52,6 +53,7 @@ function RootNavigator() {
   const currency = useLocales((state) => state.currency);
   const syncLocales = useLocales((state) => state.syncLocales);
   const initFees = useLocales((state) => state.initFees);
+  const initFlags = useFeatureFlags((state) => state.initFlags);
   const setPlayer = useAudioPlayerStore((state) => state.setPlayer);
   const pause = useAudioPlayerStore((state) => state.pause);
   const player = useAudioPlayer();
@@ -76,6 +78,11 @@ function RootNavigator() {
   useEffect(() => {
     initFees();
   }, [initFees]);
+
+  // Fetch feature flags on mount
+  useEffect(() => {
+    initFlags();
+  }, [initFlags]);
 
   // Sync country and currency
   useEffect(() => {
