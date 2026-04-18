@@ -32,7 +32,7 @@ AS $$
 BEGIN
   IF NEW.status = 'Canceled'::public.status AND OLD.status IS DISTINCT FROM 'Canceled'::public.status THEN
     UPDATE public.bookings
-    SET status = CASE WHEN public.flag_enabled('stripe') THEN 'Refunding' ELSE 'Canceled' END
+    SET status = (CASE WHEN public.flag_enabled('stripe') THEN 'Refunding' ELSE 'Canceled' END)::public.booking_status
     WHERE project_id = NEW.id
       AND status IN ('Succeeded', 'CheckedIn');
   END IF;
