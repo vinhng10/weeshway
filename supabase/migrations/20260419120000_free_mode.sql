@@ -9,7 +9,7 @@ ALTER TABLE public.flags ENABLE ROW LEVEL SECURITY;
 
 GRANT SELECT ON public.flags TO authenticated, anon;
 
-CREATE POLICY "flags_select" ON public.flags FOR SELECT USING (true);
+CREATE POLICY "Enable read access for all users" ON public.flags FOR SELECT TO authenticated USING (true);
 
 -- Returns false if the flag is missing (fail-closed).
 CREATE OR REPLACE FUNCTION public.flag_enabled(flag_name text)

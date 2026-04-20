@@ -1,9 +1,16 @@
+import postgres from "postgres";
 import Stripe from "stripe";
 import { z } from "zod";
-import { authenticateRequest } from "../_shared/auth.ts";
+import {
+  authenticateRequest,
+  createServiceRoleClient,
+} from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
 import { exchange, getFees } from "../_shared/fees.ts";
+import { flagEnabled } from "../_shared/flags.ts";
 import { jsonResponse } from "../_shared/response.ts";
+
+const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 
@@ -185,6 +192,36 @@ Deno.serve(async (req) => {
           to_stripe_account_id: toStripeAccountId,
           end_at: project.end_at,
         },
+      });
+    }
+
+    const stripeEnabled = await flagEnabled(sql, "stripe");
+
+    if (!stripeEnabled) {
+      // Upsert the booking synchronously so the client can refetch immediately.
+      // The webhook will later fire payment_intent.created and no-op (same intent, same status).
+      const serviceClient = createServiceRoleClient();
+      await serviceClient.from("bookings").upsert(
+        {
+          stripe_payment_intent_id: intent.id,
+          status: "Succeeded",
+          user_id: user.id,
+          project_id: projectId,
+          spots,
+          price: project.price,
+          currency: project.currency,
+          to_stripe_account_id: toStripeAccountId,
+          project_end_at: project.end_at,
+        },
+        { onConflict: "user_id,project_id" },
+      );
+
+      return jsonResponse({
+        customerId: customer.stripe_account_id,
+        paymentIntentClientSecret: intent.client_secret,
+        customerSessionClientSecret: session.client_secret,
+        autoConfirmed: true,
+        status: "succeeded",
       });
     }
 
