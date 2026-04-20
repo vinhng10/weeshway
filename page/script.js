@@ -100,16 +100,16 @@ function generateMockClasses(song) {
 }
 
 const BUBBLE_DATA = [
-  { label: "Hip Hop", value: 42, color: "var(--bubble-1)" },
-  { label: "Bachata", value: 35, color: "var(--bubble-2)" },
-  { label: "Heels", value: 28, color: "var(--bubble-3)" },
+  { label: "Pop", value: 42, color: "var(--bubble-1)" },
+  { label: "Hip Hop", value: 35, color: "var(--bubble-2)" },
+  { label: "R&B", value: 28, color: "var(--bubble-3)" },
   { label: "K-Pop", value: 24, color: "var(--bubble-4)" },
-  { label: "Salsa", value: 19, color: "var(--bubble-1)" },
-  { label: "Contemporary", value: 16, color: "var(--bubble-2)" },
-  { label: "Breaking", value: 14, color: "var(--bubble-3)" },
+  { label: "Latin", value: 19, color: "var(--bubble-1)" },
+  { label: "Afrobeats", value: 16, color: "var(--bubble-2)" },
+  { label: "Electronic", value: 14, color: "var(--bubble-3)" },
   { label: "Reggaeton", value: 12, color: "var(--bubble-4)" },
-  { label: "Jazz", value: 10, color: "var(--bubble-1)" },
-  { label: "Popping", value: 8, color: "var(--bubble-2)" },
+  { label: "Indie", value: 10, color: "var(--bubble-1)" },
+  { label: "House", value: 8, color: "var(--bubble-2)" },
 ];
 
 const ICONS = {
@@ -204,17 +204,17 @@ function moveSharedSections(role) {
   const footer = document.querySelector(".footer");
 
   // Ensure they snap nicely into view
-  activePricing.style.scrollSnapAlign = "center";
-  download.style.scrollSnapAlign = "center";
-  footer.style.scrollSnapAlign = "end";
+  if (activePricing) activePricing.style.scrollSnapAlign = "center";
+  if (download) download.style.scrollSnapAlign = "center";
+  if (footer) footer.style.scrollSnapAlign = "end";
 
-  download.classList.remove("hidden");
-  footer.classList.remove("hidden");
+  if (download) download.classList.remove("hidden");
+  if (footer) footer.classList.remove("hidden");
 
   // Move them to the active scroll container
-  scrollContainer.appendChild(activePricing);
-  scrollContainer.appendChild(download);
-  scrollContainer.appendChild(footer);
+  if (activePricing) scrollContainer.appendChild(activePricing);
+  if (download) scrollContainer.appendChild(download);
+  if (footer) scrollContainer.appendChild(footer);
 }
 
 // Example queries to prefill the song search bar with for each role
@@ -777,10 +777,13 @@ function renderFeaturedCard(container, song) {
 }
 
 function showStudentClasses(song) {
-  renderFeaturedCard($("#featured-card-wrap"), song);
+  // Old renders (kept for reference — may return to them):
+  // renderFeaturedCard($("#featured-card-wrap"), song);
+  // buildBookingsDemo(song);
 
-  // Build bookings demo list
-  buildBookingsDemo(song);
+  // New v2 phone-frame visuals
+  renderPhoneCard($("#student-phone-1"), song);
+  renderPhoneBookings($("#student-phone-2"), song);
 
   // Hide background image when entering step 2
   studentView.classList.add("bg-hidden");
@@ -897,18 +900,224 @@ function showTeacherFeatures(song) {
     if (artistEl) artistEl.textContent = song.artist;
   }
 
-  // Render single featured card
-  renderFeaturedCard($("#teacher-card-wrap"), song);
+  // Old render (kept for reference — may return to it):
+  // renderFeaturedCard($("#teacher-card-wrap"), song);
+
+  // New v2 publish-card visual
+  renderPublishCard($("#teacher-publish-card"), song);
 
   transitionSteps($("#teacher-step-1"), $("#teacher-step-2"));
 
   // Init features after transition starts
   setTimeout(() => {
     showFeatureScroll("teacher-feature-scroll");
-    initBubbleChart();
+    initBubbleChart(song);
     initStudioDemo(song);
     initRevealSections("teacher-feature-scroll");
   }, 200);
+}
+
+// ══════════════════════════════════════════
+// PHONE / PUBLISH CARD RENDERERS (v2 visuals)
+// ══════════════════════════════════════════
+
+function phoneCardHTML(song, cls, loc, avatar, date, time) {
+  const art = song.artworkUrl
+    ? `<img class="bg" src="${song.artworkUrl}" alt="" />`
+    : `<div class="bg" style="background: linear-gradient(135deg, ${cls.song.color}66, ${cls.song.color}22);"></div>`;
+  return `
+    <div class="phone-featured">
+      <div class="phone-featured-header">
+        <h3>Featured</h3>
+      </div>
+      <div class="phone-featured-card">
+        ${art}
+        <div class="overlay">
+          <div class="phone-featured-top">
+            <div class="phone-featured-avatar">${avatar}</div>
+            <div class="phone-featured-teacher">${escapeHtml(cls.teacher)}</div>
+            <div class="phone-featured-badges">
+              <span>${escapeHtml(cls.style)}</span>
+              <span>${escapeHtml(cls.level)}</span>
+            </div>
+          </div>
+          <div class="phone-featured-bottom">
+            <div class="phone-featured-song">
+              <div class="phone-featured-song-name">${escapeHtml(song.name)}</div>
+              <div class="phone-featured-song-artist">${escapeHtml(song.artist)}</div>
+            </div>
+            <div class="phone-featured-meta">
+              <div class="phone-featured-meta-row">
+                <div class="left">${ICONS.LOCATION}<span>${escapeHtml(loc)}</span></div>
+                <span class="phone-featured-price">$${cls.price}</span>
+              </div>
+              <div class="phone-featured-meta-row">
+                <div class="left">${ICONS.TIME}<span>${date}, ${time}</span></div>
+                <span>${cls.booked}/${cls.spots} ${ICONS.USERS}</span>
+              </div>
+            </div>
+            <div class="phone-featured-actions">
+              <button class="phone-featured-book">Book</button>
+              <button class="phone-featured-play">${ICONS.PLAY}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPhoneCard(container, song) {
+  if (!container) return;
+  const mockSong = { ...MOCK_SONGS[0], name: song.name, artist: song.artist };
+  const cls = generateMockClasses(mockSong)[0];
+  const loc = MOCK_LOCATIONS[Math.floor(Math.random() * MOCK_LOCATIONS.length)];
+  const avatar = MOCK_AVATARS[Math.floor(Math.random() * MOCK_AVATARS.length)];
+  const date = randomDate();
+  const time = randomTime();
+  container.innerHTML = `
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen dark">
+        ${phoneCardHTML(song, cls, loc, avatar, date, time)}
+      </div>
+    </div>
+  `;
+}
+
+function renderPhoneBookings(container, song) {
+  if (!container) return;
+
+  const bookings = [];
+  bookings.push({
+    name: song.name,
+    artist: song.artist,
+    artworkUrl: song.artworkUrl || "",
+    style: STYLES[Math.floor(Math.random() * STYLES.length)],
+    level: LEVELS[Math.floor(Math.random() * LEVELS.length)],
+    teacher: MOCK_TEACHERS[Math.floor(Math.random() * MOCK_TEACHERS.length)],
+    booked: Math.floor(Math.random() * 20),
+    spots: 25,
+    date: randomDate(),
+    time: randomTime(),
+  });
+  for (let i = 0; i < 3; i++) {
+    const s = MOCK_SONGS[Math.floor(Math.random() * MOCK_SONGS.length)];
+    bookings.push({
+      name: s.name,
+      artist: s.artist,
+      artworkUrl: "",
+      color: s.color,
+      style: STYLES[Math.floor(Math.random() * STYLES.length)],
+      level: LEVELS[Math.floor(Math.random() * LEVELS.length)],
+      teacher: MOCK_TEACHERS[Math.floor(Math.random() * MOCK_TEACHERS.length)],
+      booked: Math.floor(Math.random() * 20),
+      spots: 25,
+      date: randomDate(),
+      time: randomTime(),
+    });
+  }
+
+  const tiles = bookings
+    .map((b) => {
+      const art = b.artworkUrl
+        ? `<img src="${b.artworkUrl}" alt="" />`
+        : `<div style="width:100%;height:100%;background:${b.color || "#cecece"};"></div>`;
+      const initials = b.teacher
+        .split(" ")
+        .map((n) => n[0])
+        .join("");
+      const sub = Math.random() > 0.5 ? b.style : `${b.style} • ${b.level}`;
+      return `
+      <div class="phone-booking-tile">
+        <div class="phone-booking-art">${art}</div>
+        <div class="phone-booking-info">
+          <div class="phone-booking-row">
+            <div class="phone-booking-title">${escapeHtml(b.name)}</div>
+            <div class="phone-booking-avatar">${initials}</div>
+          </div>
+          <div class="phone-booking-artist">${escapeHtml(b.artist)}</div>
+          <div class="phone-booking-row">
+            <div class="phone-booking-sub">${escapeHtml(sub)}</div>
+            <div class="phone-booking-capacity">${b.booked}/${b.spots} ${ICONS.USERS}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  container.innerHTML = `
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen dark">
+        <div class="phone-bookings">
+          <div class="phone-bookings-header">
+            <h3>Bookings</h3>
+          </div>
+          <div class="phone-bookings-list">${tiles}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPublishCard(container, song) {
+  if (!container) return;
+  const mockSong = { ...MOCK_SONGS[0], name: song.name, artist: song.artist };
+  const cls = generateMockClasses(mockSong)[0];
+  const loc = MOCK_LOCATIONS[Math.floor(Math.random() * MOCK_LOCATIONS.length)];
+  const avatar = MOCK_AVATARS[Math.floor(Math.random() * MOCK_AVATARS.length)];
+  const date = randomDate();
+  const time = randomTime();
+  const art = song.artworkUrl
+    ? `<img class="bg" src="${song.artworkUrl}" alt="" />`
+    : `<div class="bg" style="background: linear-gradient(135deg, ${cls.song.color}66, ${cls.song.color}22);"></div>`;
+  container.innerHTML = `
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen dark">
+        <div class="phone-featured">
+          <div class="phone-featured-header">
+            <h3>Publish</h3>
+          </div>
+          <div class="phone-featured-card">
+            ${art}
+            <div class="overlay">
+              <div class="phone-featured-top">
+                <div class="phone-featured-avatar">${avatar}</div>
+                <div class="phone-featured-teacher">${escapeHtml(cls.teacher)}</div>
+                <div class="phone-featured-badges">
+                  <span>${escapeHtml(cls.style)}</span>
+                  <span>${escapeHtml(cls.level)}</span>
+                </div>
+              </div>
+              <div class="phone-featured-bottom">
+                <div class="phone-featured-song">
+                  <div class="phone-featured-song-name">${escapeHtml(song.name)}</div>
+                  <div class="phone-featured-song-artist">${escapeHtml(song.artist)}</div>
+                </div>
+                <div class="phone-featured-meta">
+                  <div class="phone-featured-meta-row">
+                    <div class="left">${ICONS.LOCATION}<span>${escapeHtml(loc)}</span></div>
+                    <span class="phone-featured-price">$${cls.price}</span>
+                  </div>
+                  <div class="phone-featured-meta-row">
+                    <div class="left">${ICONS.TIME}<span>${date}, ${time}</span></div>
+                    <span>${cls.booked}/${cls.spots} ${ICONS.USERS}</span>
+                  </div>
+                </div>
+                <div class="phone-featured-actions">
+                  <button class="phone-featured-book">Publish</button>
+                  <button class="phone-featured-play">${ICONS.PLAY}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 // ══════════════════════════════════════════
@@ -924,7 +1133,7 @@ function cancelBubbleAnim() {
   }
 }
 
-function initBubbleChart() {
+function initBubbleChart(song) {
   cancelBubbleAnim();
 
   // FIX: JQuery returns a collection, we need the raw element for getContext
@@ -965,12 +1174,18 @@ function initBubbleChart() {
   const H = ch();
   const responsiveScale = Math.min(W, 600) / 600;
 
+  let bubbleImage = null;
+  if (song && song.artworkUrl) {
+    bubbleImage = new Image();
+    bubbleImage.src = song.artworkUrl;
+  }
+
   const bubbles = BUBBLE_DATA.map((d) => {
-    // 0.15 of width on desktop, but scaled down for mobile
-    // + 10 is the minimum "touchable" size in pixels
+    // 0.35 of width on desktop to make bubbles larger
+    // + 15 is the minimum "touchable" size in pixels
     const r =
-      (d.value / maxVal) * (W * 0.2 * responsiveScale) +
-      (10 * responsiveScale + 8);
+      (d.value / maxVal) * (W * 0.35 * responsiveScale) +
+      (15 * responsiveScale + 12);
 
     return {
       ...d,
@@ -1146,11 +1361,33 @@ function initBubbleChart() {
 
     // Render Phase
     bubbles.forEach((b) => {
+      const isLargest = b.value === maxVal;
       const color = resolvedColors[b.color] || "#ffffff";
+
       ctx.beginPath();
       ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-      ctx.fillStyle = color + "22";
-      ctx.fill();
+
+      if (
+        isLargest &&
+        bubbleImage &&
+        bubbleImage.complete &&
+        bubbleImage.naturalWidth > 0
+      ) {
+        ctx.save();
+        ctx.clip();
+
+        // drawImage covering the whole circle
+        const dim = b.r * 2;
+        ctx.drawImage(bubbleImage, b.x - b.r, b.y - b.r, dim, dim);
+
+        // dim overlay so text is readable
+        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        ctx.fill();
+        ctx.restore();
+      } else {
+        ctx.fillStyle = color + "22";
+        ctx.fill();
+      }
       ctx.strokeStyle = color + "55";
       ctx.lineWidth = 1.5;
       ctx.stroke();
@@ -1399,6 +1636,54 @@ document
   .forEach((section) => {
     pageRevealObserver.observe(section);
   });
+
+// ══════════════════════════════════════════
+// KINETIC HERO (rotating italic word)
+// ══════════════════════════════════════════
+
+const KINETIC_WORDS = ["dance.", "move.", "groove.", "vibe.", "flow."];
+const KINETIC_INTERVAL_MS = 2000;
+
+function initKineticHero() {
+  const container = document.getElementById("hero-kinetic-word");
+  if (!container) return;
+
+  // Resize the sizer span to the longest word so the grid cell is stable.
+  const sizer = container.querySelector(".kinetic-sizer");
+  if (sizer) {
+    const longest = KINETIC_WORDS.reduce(
+      (a, b) => (b.length > a.length ? b : a),
+      "",
+    );
+    sizer.textContent = longest;
+  }
+
+  let index = 0;
+
+  const spawn = (word) => {
+    const em = document.createElement("em");
+    em.textContent = word;
+    container.appendChild(em);
+    // Next frame → add .active to trigger transition
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => em.classList.add("active"));
+    });
+    return em;
+  };
+
+  let current = spawn(KINETIC_WORDS[index]);
+
+  setInterval(() => {
+    index = (index + 1) % KINETIC_WORDS.length;
+    const outgoing = current;
+    outgoing.classList.remove("active");
+    outgoing.classList.add("exiting");
+    setTimeout(() => outgoing.remove(), 600);
+    current = spawn(KINETIC_WORDS[index]);
+  }, KINETIC_INTERVAL_MS);
+}
+
+initKineticHero();
 
 // ══════════════════════════════════════════
 // LANDING HERO

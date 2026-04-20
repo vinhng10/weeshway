@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css" />
@@ -51,7 +51,7 @@
               Teacher
             </button>
           </div>
-          <a href="#pricing" id="nav-pricing">Pricing</a>
+          <!-- <a href="#pricing" id="nav-pricing">Pricing</a> -->
           <a href="#download" id="nav-download">Download</a>
         </div>
         <button class="nav-burger" id="nav-burger" aria-label="Menu">
@@ -111,7 +111,7 @@
         </button>
       </div>
       <div class="drawer-links">
-        <a href="#pricing" class="drawer-link" id="drawer-pricing">Pricing</a>
+        <!-- <a href="#pricing" class="drawer-link" id="drawer-pricing">Pricing</a> -->
         <a href="#download" class="drawer-link" id="drawer-download"
           >Download</a
         >
@@ -121,58 +121,163 @@
     <!-- Landing Hero -->
     <section id="landing-hero">
       <div class="hero-bg"></div>
+      <div class="hero-noise"></div>
+
+      <div class="hero-ticker top">
+        <div class="hero-ticker-track">
+          <span
+            >Hip Hop<span class="hero-ticker-dot"></span>Bachata<span
+              class="hero-ticker-dot"
+            ></span
+            >Heels<span class="hero-ticker-dot"></span>K-Pop<span
+              class="hero-ticker-dot"
+            ></span
+            >Salsa<span class="hero-ticker-dot"></span>Contemporary<span
+              class="hero-ticker-dot"
+            ></span
+            >Breaking<span class="hero-ticker-dot"></span>Reggaeton<span
+              class="hero-ticker-dot"
+            ></span
+            >Jazz<span class="hero-ticker-dot"></span>Popping<span
+              class="hero-ticker-dot"
+            ></span
+          ></span>
+          <span
+            >Hip Hop<span class="hero-ticker-dot"></span>Bachata<span
+              class="hero-ticker-dot"
+            ></span
+            >Heels<span class="hero-ticker-dot"></span>K-Pop<span
+              class="hero-ticker-dot"
+            ></span
+            >Salsa<span class="hero-ticker-dot"></span>Contemporary<span
+              class="hero-ticker-dot"
+            ></span
+            >Breaking<span class="hero-ticker-dot"></span>Reggaeton<span
+              class="hero-ticker-dot"
+            ></span
+            >Jazz<span class="hero-ticker-dot"></span>Popping<span
+              class="hero-ticker-dot"
+            ></span
+          ></span>
+        </div>
+      </div>
+
       <div class="hero-content">
-        <div class="hero-store-btns">
+        <div
+          class="hero-store-buttons-top"
+          style="
+            display: flex;
+            gap: 12px;
+            margin-bottom: 36px;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+          "
+        >
           <a
             href="https://apps.apple.com/us/app/weeshway/id6760827339"
-            class="store-btn"
+            class="store-btn hero-store-btn"
             aria-label="Download on the App Store"
           >
-            <svg
-              width="20"
-              height="24"
-              viewBox="0 0 384 512"
-              fill="currentColor"
-            >
+            <svg viewBox="0 0 384 512" fill="currentColor">
               <path
                 d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"
               />
             </svg>
-            <div class="store-btn-text">
-              <span class="store-btn-small">Download on the</span
-              ><span class="store-btn-big">App Store</span>
-            </div>
+            <span class="store-btn-text">
+              <span class="store-btn-small">Download on the</span>
+              <span class="store-btn-big">App Store</span>
+            </span>
           </a>
           <a
             href="https://play.google.com/store/apps/details?id=com.weeshway.weeshway"
-            class="store-btn"
+            class="store-btn hero-store-btn"
             aria-label="Get it on Google Play"
           >
-            <svg
-              width="20"
-              height="22"
-              viewBox="0 0 512 512"
-              fill="currentColor"
-            >
+            <svg viewBox="0 0 512 512" fill="currentColor">
               <path
                 d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"
               />
             </svg>
-            <div class="store-btn-text">
-              <span class="store-btn-small">Get it on</span
-              ><span class="store-btn-big">Google Play</span>
-            </div>
+            <span class="store-btn-text">
+              <span class="store-btn-small">Get it on</span>
+              <span class="store-btn-big">Google Play</span>
+            </span>
           </a>
         </div>
-        <h1 class="hero-headline">Music First<br />Dance Platform.</h1>
-        <p class="hero-subtitle">
-          Dancing is better when it's to the songs you love. So make your wish.
+
+        <h1 class="hero-headline">
+          <span class="line"><span>Any song.</span></span>
+          <span class="line italic">
+            <span>
+              <span class="hero-kinetic">
+                <span>Any</span>
+                <span class="hero-kinetic-word" id="hero-kinetic-word"
+                  ><span class="kinetic-sizer">groove.</span></span
+                >
+              </span>
+            </span>
+          </span>
+        </h1>
+
+        <p class="hero-sub">
+          WeeshWay is a music first dance platform.<br />We believe dancing is
+          better with the songs you love.
         </p>
-        <div class="hero-cta">
-          <button class="hero-btn hero-btn-solid" id="hero-cta-btn">
-            Let's dance &rarr;
+
+        <div class="hero-actions">
+          <button class="btn-primary" id="hero-cta-btn">
+            <span>Get started</span>
+            <svg
+              class="arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
           </button>
         </div>
+      </div>
+
+      <div class="hero-ticker bottom">
+        <div class="hero-ticker-track">
+          <span
+            >Student<span class="hero-ticker-dot"></span>Teacher<span
+              class="hero-ticker-dot"
+            ></span
+            >Book class<span class="hero-ticker-dot"></span>Run class<span
+              class="hero-ticker-dot"
+            ></span
+            >Any song<span class="hero-ticker-dot"></span>Any style<span
+              class="hero-ticker-dot"
+            ></span
+          ></span>
+          <span
+            >Student<span class="hero-ticker-dot"></span>Teacher<span
+              class="hero-ticker-dot"
+            ></span
+            >Book class<span class="hero-ticker-dot"></span>Run class<span
+              class="hero-ticker-dot"
+            ></span
+            >Any song<span class="hero-ticker-dot"></span>Any style<span
+              class="hero-ticker-dot"
+            ></span
+          ></span>
+        </div>
+      </div>
+
+      <div class="hero-meta">
+        <div>WeeshWay / 2026</div>
+        <div>Edition 01 — Bodies in motion</div>
+      </div>
+      <div class="hero-meta-right">
+        <div>Scroll or press "Get started"</div>
       </div>
     </section>
 
@@ -182,13 +287,15 @@
         <div class="split-panel split-student" id="panel-student">
           <img src="/assets/dance1.webp" alt="" class="split-bg-img" />
           <div class="split-panel-content">
-            <div class="split-label">I want to<br />dance.</div>
+            <div class="split-label">I want to<br /><em>dance.</em></div>
+            <div class="split-panel-tag">Student</div>
           </div>
         </div>
         <div class="split-panel split-teacher" id="panel-teacher">
           <img src="/assets/dance2.webp" alt="" class="split-bg-img" />
           <div class="split-panel-content">
-            <div class="split-label">I want to<br />teach.</div>
+            <div class="split-label">I want to<br /><em>teach.</em></div>
+            <div class="split-panel-tag">Teacher</div>
           </div>
         </div>
       </div>
@@ -198,14 +305,17 @@
         <img src="/assets/dance1.webp" alt="" class="expanded-bg-img" />
         <!-- Step 1: Song search only -->
         <div class="step-animate" id="student-step-1">
-          <h2 class="expanded-title">What song do you want to dance?</h2>
+          <div class="step1-eyebrow">Student · Step 01</div>
+          <h2 class="expanded-title">
+            Name a song<br /><em>you want to dance to.</em>
+          </h2>
           <div class="wish-form">
             <div class="wish-search-wrap">
               <input
                 type="text"
                 class="wish-search"
                 id="wish-search"
-                placeholder="Search song name"
+                placeholder="e.g. APT. — ROSÉ & Bruno Mars"
                 autocomplete="off"
               />
               <div class="wish-search-spinner hidden" id="wish-spinner">
@@ -214,37 +324,97 @@
               <div class="wish-search-results" id="wish-results"></div>
             </div>
           </div>
+          <div class="step1-helper">
+            Search powered by iTunes · Tap a result
+          </div>
         </div>
 
         <!-- Step 2: Scroll-snap feature story -->
         <div class="step-animate step-hidden" id="student-step-2">
           <div class="feature-scroll" id="student-feature-scroll">
+            <!-- Feature 01 — Make your wish -->
             <section class="feature-snap reveal-section">
-              <div class="progressive-layout">
-                <div class="progressive-visual-side reveal-el reveal-left">
-                  <div class="featured-card-wrap" id="featured-card-wrap"></div>
+              <div class="fsection">
+                <div class="fsection-index reveal-el">
+                  <span class="num">01</span>
+                  <span class="rule"></span>
+                  <span>Make your wish</span>
                 </div>
-                <div class="progressive-text-side reveal-el reveal-right">
-                  <h2 class="progressive-headline">Make Your Wish.</h2>
-                  <p class="progressive-body">
-                    Drop the song you want to dance. Let teachers make your
-                    wishes come true.
+                <div class="f-text">
+                  <div class="f-kicker reveal-el">For students</div>
+                  <h2 class="f-headline reveal-el">
+                    Pick a song.<br /><em>Find your class.</em>
+                  </h2>
+                  <p class="f-body reveal-el">
+                    Every class on WeeshWay is built around a specific track.
+                    Drop your favorite song and we surface every teacher
+                    choreographing to it — filtered by style, level,
+                    neighborhood and vibe.
                   </p>
+                  <div class="f-cta-row reveal-el">
+                    <span class="f-chip">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                      </svg>
+                      Song-first discovery
+                    </span>
+                  </div>
+                </div>
+                <div class="f-visual reveal-el" id="student-phone-1">
+                  <div
+                    class="featured-card-wrap"
+                    id="featured-card-wrap"
+                    style="display: none"
+                  ></div>
                 </div>
               </div>
             </section>
 
+            <!-- Feature 02 — Bookings -->
             <section class="feature-snap reveal-section">
-              <div class="progressive-layout">
-                <div class="progressive-visual-side reveal-el reveal-left">
-                  <div class="bookings-demo" id="bookings-demo"></div>
+              <div class="fsection">
+                <div class="fsection-index reveal-el">
+                  <span class="num">02</span>
+                  <span class="rule"></span>
+                  <span>Your bookings</span>
                 </div>
-                <div class="progressive-text-side reveal-el reveal-right">
-                  <h2 class="progressive-headline">Manage Your Bookings.</h2>
-                  <p class="progressive-body">
-                    See your schedule, cancel if plans change, and get reminders
-                    so you never miss a class.
+                <div class="f-text">
+                  <div class="f-kicker reveal-el">Bookings, simplified</div>
+                  <h2 class="f-headline reveal-el">
+                    All your bookings<br /><em>in one place.</em>
+                  </h2>
+                  <p class="f-body reveal-el">
+                    Book, reschedule, and show up. Your upcoming classes,
+                    receipts, and reminders live together — no more texting, no
+                    more spreadsheets, no more "what time was that again?"
                   </p>
+                  <div class="f-cta-row reveal-el">
+                    <span class="f-chip">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z" />
+                      </svg>
+                      Instant reminders
+                    </span>
+                  </div>
+                </div>
+                <div class="f-visual reveal-el" id="student-phone-2">
+                  <div
+                    class="bookings-demo"
+                    id="bookings-demo"
+                    style="display: none"
+                  ></div>
                 </div>
               </div>
             </section>
@@ -257,14 +427,17 @@
         <img src="/assets/dance2.webp" alt="" class="expanded-bg-img" />
         <!-- Step 1: Song search -->
         <div class="step-animate" id="teacher-step-1">
-          <h2 class="expanded-title">What song do you want to teach?</h2>
+          <div class="step1-eyebrow">Teacher · Step 01</div>
+          <h2 class="expanded-title">
+            Pick a song<br /><em>you love to teach.</em>
+          </h2>
           <div class="wish-form">
             <div class="wish-search-wrap">
               <input
                 type="text"
                 class="wish-search"
                 id="teacher-search"
-                placeholder="Search song name"
+                placeholder="e.g. Birds of a Feather — Billie Eilish"
                 autocomplete="off"
               />
               <div class="wish-search-spinner hidden" id="teacher-spinner">
@@ -273,191 +446,285 @@
               <div class="wish-search-results" id="teacher-results"></div>
             </div>
           </div>
+          <div class="step1-helper">
+            Search powered by iTunes · Tap a result
+          </div>
         </div>
 
         <!-- Step 2: Scroll-snap feature story -->
         <div class="step-animate step-hidden" id="teacher-step-2">
           <div class="feature-scroll" id="teacher-feature-scroll">
+            <!-- Feature 01 — Know Your Audience -->
             <section class="feature-snap reveal-section">
-              <div class="progressive-layout">
-                <div class="progressive-visual-side reveal-el reveal-left">
-                  <div class="featured-card-wrap" id="teacher-card-wrap"></div>
+              <div class="fsection">
+                <div class="fsection-index reveal-el">
+                  <span class="num">01</span>
+                  <span class="rule"></span>
+                  <span>Know your audience</span>
                 </div>
-                <div class="progressive-text-side reveal-el reveal-right">
-                  <h2 class="progressive-headline">
-                    Publish Your Class In Seconds.
+                <div class="f-text">
+                  <div class="f-kicker reveal-el">Wish insights</div>
+                  <h2 class="f-headline reveal-el">
+                    Teach what your students<br />
+                    <em>actually want to dance.</em><br />
                   </h2>
-                  <p class="progressive-body">
-                    Pick a song, set your price, and go live.
+                  <p class="f-body reveal-el">
+                    Stop guessing what to teach. See exactly which songs and
+                    styles are trending in your city, and turn student requests
+                    into sold-out classes.
                   </p>
-                </div>
-              </div>
-            </section>
-
-            <section class="feature-snap reveal-section">
-              <div class="progressive-layout">
-                <div
-                  class="progressive-visual-side progressive-visual-square reveal-el reveal-left"
-                >
-                  <div class="bubble-container" id="bubble-container">
-                    <canvas id="bubble-canvas"></canvas>
+                  <div class="f-cta-row reveal-el">
+                    <span class="f-chip">Real-time insights</span>
                   </div>
                 </div>
-                <div class="progressive-text-side reveal-el reveal-right">
-                  <h2 class="progressive-headline">Know Your Audience.</h2>
-                  <p class="progressive-body">
-                    See what students are wishing for, then plan classes that
-                    match the moment.
-                  </p>
-                  <div class="bubble-legend" id="bubble-legend"></div>
-                </div>
-              </div>
-            </section>
-
-            <section class="feature-snap reveal-section">
-              <div class="progressive-layout">
-                <div
-                  class="progressive-visual-side progressive-visual-square reveal-el reveal-left"
-                >
-                  <div class="studio-demo" id="studio-demo">
-                    <div class="studio-song-header" id="studio-song-header">
-                      <img
-                        class="studio-song-art"
-                        id="studio-song-art"
-                        src=""
-                        alt=""
-                      />
-                      <div class="studio-song-info">
+                <div class="f-visual reveal-el">
+                  <div class="phone-frame">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen dark">
+                      <div class="phone-featured">
+                        <div class="phone-featured-header">
+                          <h3>Explore</h3>
+                        </div>
                         <div
-                          class="studio-song-name"
-                          id="studio-song-name"
-                        ></div>
+                          class="phone-featured-card bubble-container"
+                          id="bubble-container"
+                        >
+                          <canvas id="bubble-canvas"></canvas>
+                        </div>
                         <div
-                          class="studio-song-artist"
-                          id="studio-song-artist"
+                          class="bubble-legend hidden"
+                          id="bubble-legend"
                         ></div>
                       </div>
                     </div>
-                    <div class="studio-toolbar">
-                      <button class="studio-toolbar-btn" title="Files">
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path
-                            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                          />
-                        </svg>
-                      </button>
-                      <button class="studio-toolbar-btn" title="Record">
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path
-                            d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
-                          />
-                          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                          <line x1="12" y1="19" x2="12" y2="23" />
-                          <line x1="8" y1="23" x2="16" y2="23" />
-                        </svg>
-                      </button>
-                      <button
-                        class="studio-toolbar-btn studio-play-btn"
-                        id="studio-play"
-                        title="Play"
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Feature 02 — Publish -->
+            <section class="feature-snap reveal-section">
+              <div class="fsection">
+                <div class="fsection-index reveal-el">
+                  <span class="num">02</span>
+                  <span class="rule"></span>
+                  <span>Publish a class</span>
+                </div>
+                <div class="f-text">
+                  <div class="f-kicker reveal-el">For teachers</div>
+                  <h2 class="f-headline reveal-el">
+                    Your class,<br /><em>your stage.</em>
+                  </h2>
+                  <p class="f-body reveal-el">
+                    Create your class in seconds. Set your song, style, and
+                    price, then hit publish. Your class goes live instantly for
+                    students to discover and book.
+                  </p>
+                  <div class="f-cta-row reveal-el">
+                    <span class="f-chip">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
                       >
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <polygon points="5 3 19 12 5 21 5 3" />
-                        </svg>
-                      </button>
-                      <button class="studio-toolbar-btn" title="Split Cells">
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 128 128"
-                          fill="currentColor"
-                        >
-                          <g transform="scale(0.125)">
-                            <path
-                              d="M938.2 508.4L787.3 389c-3-2.4-7.3-0.2-7.3 3.6V478H636V184h204v128c0 2.2 1.8 4 4 4h60c2.2 0 4-1.8 4-4V144c0-15.5-12.5-28-28-28H596c-15.5 0-28 12.5-28 28v736c0 15.5 12.5 28 28 28h284c15.5 0 28-12.5 28-28V712c0-2.2-1.8-4-4-4h-60c-2.2 0-4 1.8-4 4v128H636V546h144v85.4c0 3.8 4.4 6 7.3 3.6l150.9-119.4c2.4-1.8 2.4-5.4 0-7.2zM428 116H144c-15.5 0-28 12.5-28 28v168c0 2.2 1.8 4 4 4h60c2.2 0 4-1.8 4-4V184h204v294H244v-85.4c0-3.8-4.3-6-7.3-3.6l-151 119.4c-2.3 1.8-2.3 5.3 0 7.1l151 119.5c2.9 2.3 7.3 0.2 7.3-3.6V546h144v294H184V712c0-2.2-1.8-4-4-4h-60c-2.2 0-4 1.8-4 4v168c0 15.5 12.5 28 28 28h284c15.5 0 28-12.5 28-28V144c0-15.5-12.5-28-28-28z"
-                            />
-                          </g>
-                        </svg>
-                      </button>
-                      <button class="studio-toolbar-btn" title="Merge Cells">
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 128 128"
-                          fill="currentColor"
-                        >
-                          <g transform="scale(0.125)">
-                            <path
-                              d="M482.2 508.4L331.3 389c-3-2.4-7.3-0.2-7.3 3.6V478H184V184h204v128c0 2.2 1.8 4 4 4h60c2.2 0 4-1.8 4-4V144c0-15.5-12.5-28-28-28H144c-15.5 0-28 12.5-28 28v736c0 15.5 12.5 28 28 28h284c15.5 0 28-12.5 28-28V712c0-2.2-1.8-4-4-4h-60c-2.2 0-4 1.8-4 4v128H184V546h140v85.4c0 3.8 4.4 6 7.3 3.6l150.9-119.4c2.4-1.8 2.4-5.4 0-7.2zM880 116H596c-15.5 0-28 12.5-28 28v168c0 2.2 1.8 4 4 4h60c2.2 0 4-1.8 4-4V184h204v294H700v-85.4c0-3.8-4.3-6-7.3-3.6l-151 119.4c-2.3 1.8-2.3 5.3 0 7.1l151 119.5c2.9 2.3 7.3 0.2 7.3-3.6V546h140v294H636V712c0-2.2-1.8-4-4-4h-60c-2.2 0-4 1.8-4 4v168c0 15.5 12.5 28 28 28h284c15.5 0 28-12.5 28-28V144c0-15.5-12.5-28-28-28z"
-                            />
-                          </g>
-                        </svg>
-                      </button>
-                    </div>
-                    <div class="studio-tempo-row">
-                      <span class="studio-tempo-label">Tempo</span>
-                      <button class="tempo-chip" data-tempo="0.5">0.5x</button>
-                      <button class="tempo-chip" data-tempo="0.75">
-                        0.75x
-                      </button>
-                      <button class="tempo-chip active" data-tempo="1">
-                        1x
-                      </button>
-                    </div>
-                    <div
-                      class="studio-track-section track-selected"
-                      id="track-song"
-                      data-track="song"
-                    >
-                      <div class="studio-track-label">Song</div>
-                      <div class="studio-timeline" id="song-timeline">
-                        <div class="timeline-playhead" id="song-playhead"></div>
-                      </div>
-                    </div>
-                    <div
-                      class="studio-track-section track-dimmed"
-                      id="track-count"
-                      data-track="count"
-                    >
-                      <div class="studio-track-label bold">Count</div>
-                      <div class="studio-timeline" id="count-timeline">
-                        <div
-                          class="timeline-playhead"
-                          id="count-playhead"
-                        ></div>
-                      </div>
-                    </div>
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Go live instantly
+                    </span>
                   </div>
                 </div>
-                <div class="progressive-text-side reveal-el reveal-right">
-                  <h2 class="progressive-headline">Your Pocket Studio.</h2>
-                  <p class="progressive-body">
+                <div class="f-visual reveal-el" id="teacher-publish-card">
+                  <div
+                    class="featured-card-wrap"
+                    id="teacher-card-wrap"
+                    style="display: none"
+                  ></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Feature 03 — Studio -->
+            <section class="feature-snap reveal-section">
+              <div class="fsection">
+                <div class="fsection-index reveal-el">
+                  <span class="num">03</span>
+                  <span class="rule"></span>
+                  <span>Pocket studio</span>
+                </div>
+                <div class="f-text">
+                  <div class="f-kicker reveal-el">Plan &amp; prep</div>
+                  <h2 class="f-headline reveal-el">
+                    A studio<br /><em>in your pocket.</em>
+                  </h2>
+                  <p class="f-body reveal-el">
                     Walk into class fully prepared. Split music and record
                     counting in advance.
                   </p>
+                  <div class="f-cta-row reveal-el">
+                    <span class="f-chip">Audio tools</span>
+                  </div>
+                </div>
+                <div class="f-visual reveal-el">
+                  <div class="phone-frame">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen dark">
+                      <div class="phone-featured">
+                        <div class="phone-featured-header">
+                          <h3>Studio</h3>
+                        </div>
+                        <div
+                          class="phone-featured-card studio-demo"
+                          id="studio-demo"
+                        >
+                          <div
+                            class="studio-song-header"
+                            id="studio-song-header"
+                          >
+                            <img
+                              class="studio-song-art"
+                              id="studio-song-art"
+                              src=""
+                              alt=""
+                            />
+                            <div class="studio-song-info">
+                              <div
+                                class="studio-song-name"
+                                id="studio-song-name"
+                              ></div>
+                              <div
+                                class="studio-song-artist"
+                                id="studio-song-artist"
+                              ></div>
+                            </div>
+                          </div>
+                          <div class="studio-toolbar">
+                            <button class="studio-toolbar-btn" title="Files">
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path
+                                  d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                                />
+                              </svg>
+                            </button>
+                            <button class="studio-toolbar-btn" title="Record">
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path
+                                  d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+                                />
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                <line x1="12" y1="19" x2="12" y2="23" />
+                                <line x1="8" y1="23" x2="16" y2="23" />
+                              </svg>
+                            </button>
+                            <button
+                              class="studio-toolbar-btn studio-play-btn"
+                              id="studio-play"
+                              title="Play"
+                            >
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                              </svg>
+                            </button>
+                            <button
+                              class="studio-toolbar-btn"
+                              title="Split Cells"
+                            >
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 128 128"
+                                fill="currentColor"
+                              >
+                                <g transform="scale(0.125)">
+                                  <path
+                                    d="M938.2 508.4L787.3 389c-3-2.4-7.3-0.2-7.3 3.6V478H636V184h204v128c0 2.2 1.8 4 4 4h60c2.2 0 4-1.8 4-4V144c0-15.5-12.5-28-28-28H596c-15.5 0-28 12.5-28 28v736c0 15.5 12.5 28 28 28h284c15.5 0 28-12.5 28-28V712c0-2.2-1.8-4-4-4h-60c-2.2 0-4 1.8-4 4v128H636V546h144v85.4c0 3.8 4.4 6 7.3 3.6l150.9-119.4c2.4-1.8 2.4-5.4 0-7.2zM428 116H144c-15.5 0-28 12.5-28 28v168c0 2.2 1.8 4 4 4h60c2.2 0 4-1.8 4-4V184h204v294H244v-85.4c0-3.8-4.3-6-7.3-3.6l-151 119.4c-2.3 1.8-2.3 5.3 0 7.1l151 119.5c2.9 2.3 7.3 0.2 7.3-3.6V546h144v294H184V712c0-2.2-1.8-4-4-4h-60c-2.2 0-4 1.8-4 4v168c0 15.5 12.5 28 28 28h284c15.5 0 28-12.5 28-28V144c0-15.5-12.5-28-28-28z"
+                                  />
+                                </g>
+                              </svg>
+                            </button>
+                            <button
+                              class="studio-toolbar-btn"
+                              title="Merge Cells"
+                            >
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 128 128"
+                                fill="currentColor"
+                              >
+                                <g transform="scale(0.125)">
+                                  <path
+                                    d="M482.2 508.4L331.3 389c-3-2.4-7.3-0.2-7.3 3.6V478H184V184h204v128c0 2.2 1.8 4 4 4h60c2.2 0 4-1.8 4-4V144c0-15.5-12.5-28-28-28H144c-15.5 0-28 12.5-28 28v736c0 15.5 12.5 28 28 28h284c15.5 0 28-12.5 28-28V712c0-2.2-1.8-4-4-4h-60c-2.2 0-4 1.8-4 4v128H184V546h140v85.4c0 3.8 4.4 6 7.3 3.6l150.9-119.4c2.4-1.8 2.4-5.4 0-7.2zM880 116H596c-15.5 0-28 12.5-28 28v168c0 2.2 1.8 4 4 4h60c2.2 0 4-1.8 4-4V184h204v294H700v-85.4c0-3.8-4.3-6-7.3-3.6l-151 119.4c-2.3 1.8-2.3 5.3 0 7.1l151 119.5c2.9 2.3 7.3 0.2 7.3-3.6V546h140v294H636V712c0-2.2-1.8-4-4-4h-60c-2.2 0-4 1.8-4 4v168c0 15.5 12.5 28 28 28h284c15.5 0 28-12.5 28-28V144c0-15.5-12.5-28-28-28z"
+                                  />
+                                </g>
+                              </svg>
+                            </button>
+                          </div>
+                          <div class="studio-tempo-row">
+                            <span class="studio-tempo-label">Tempo</span>
+                            <button class="tempo-chip" data-tempo="0.5">
+                              0.5x
+                            </button>
+                            <button class="tempo-chip" data-tempo="0.75">
+                              0.75x
+                            </button>
+                            <button class="tempo-chip active" data-tempo="1">
+                              1x
+                            </button>
+                          </div>
+                          <div
+                            class="studio-track-section track-selected"
+                            id="track-song"
+                            data-track="song"
+                          >
+                            <div class="studio-track-label">Song</div>
+                            <div class="studio-timeline" id="song-timeline">
+                              <div
+                                class="timeline-playhead"
+                                id="song-playhead"
+                              ></div>
+                            </div>
+                          </div>
+                          <div
+                            class="studio-track-section track-dimmed"
+                            id="track-count"
+                            data-track="count"
+                          >
+                            <div class="studio-track-label bold">Count</div>
+                            <div class="studio-timeline" id="count-timeline">
+                              <div
+                                class="timeline-playhead"
+                                id="count-playhead"
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
@@ -466,73 +733,87 @@
       </div>
     </section>
 
-    <section
+    <!-- PRICING — STUDENT -->
+    <!-- <section
       id="pricing"
       class="pricing-hero role-section role-student reveal-section hidden"
     >
       <div class="pricing-left">
-        <h2 class="hero-title reveal-el">Pay Only When You Book.</h2>
+        <div class="pricing-index reveal-el">03 — Pricing</div>
+        <h2 class="hero-title reveal-el">
+          Pay only<br />when <em>you book.</em>
+        </h2>
         <div
           class="pricing-price-block reveal-el"
           style="transition-delay: 100ms"
         >
-          <div class="hero-display">$0.50</div>
+          <div class="hero-display">$0.00</div>
           <div class="pricing-per">per booking spot</div>
         </div>
-        <ul
-          class="pricing-features hero-caption reveal-el"
-          style="transition-delay: 200ms"
-        >
-          <li>No subscriptions.</li>
-          <li>No commitment.</li>
+        <ul class="pricing-features reveal-el" style="transition-delay: 200ms">
+          <li>Unlimited song requests</li>
+          <li>Book any class, any teacher</li>
+          <li>No subscription, no commitment</li>
         </ul>
       </div>
       <div class="hero-img-col">
         <img src="/assets/dance4.webp" alt="" class="hero-img" />
       </div>
-    </section>
+    </section> -->
 
     <!-- PRICING — TEACHER -->
-    <section
+    <!-- <section
       id="pricing-teacher"
       class="pricing-hero role-section role-teacher reveal-section hidden"
     >
       <div class="pricing-left">
-        <h2 class="hero-title reveal-el">When You Win, We Win.</h2>
+        <div class="pricing-index reveal-el">03 — Pricing</div>
+        <h2 class="hero-title reveal-el">
+          When <em>you win,</em><br />we win.
+        </h2>
         <div
           class="pricing-price-block reveal-el"
           style="transition-delay: 100ms"
         >
-          <div class="hero-display">3%</div>
+          <div class="hero-display">0%</div>
           <div class="pricing-per">per booking</div>
         </div>
-        <ul
-          class="pricing-features hero-caption reveal-el"
-          style="transition-delay: 200ms"
-        >
-          <li>No subscriptions.</li>
-          <li>No commitment.</li>
+        <ul class="pricing-features reveal-el" style="transition-delay: 200ms">
+          <li>Unlimited class listing</li>
+          <li>Real-time demand insights</li>
+          <li>No subscription, no commitment</li>
         </ul>
       </div>
       <div class="hero-img-col">
         <img src="/assets/dance4.webp" alt="" class="hero-img" />
       </div>
-    </section>
+    </section> -->
 
     <!-- Download CTA -->
     <section
       class="pricing-hero download-hero reveal-section hidden"
       id="download"
     >
+      <div class="hero-img-col reveal-el" style="transition-delay: 120ms">
+        <img src="/assets/dance6.webp" alt="" class="hero-img" />
+      </div>
       <div class="pricing-left">
+        <div class="pricing-index reveal-el">— Download</div>
         <div class="download-title-group">
-          <h2 class="hero-title reveal-el">Get</h2>
-          <div
-            class="pricing-price-block reveal-el"
-            style="transition-delay: 80ms"
+          <h2 class="hero-title reveal-el">Get<br />Weeshway.</h2>
+          <p
+            class="hero-sub reveal-el"
+            style="
+              transition-delay: 80ms;
+              opacity: 1;
+              animation: none;
+              max-width: 400px;
+              color: var(--dimmed);
+              margin-top: 12px;
+            "
           >
-            <div class="hero-display">WeeshWay</div>
-          </div>
+            Available on iOS and Android.
+          </p>
         </div>
         <div
           class="download-store-buttons reveal-el"
@@ -579,9 +860,6 @@
             </div>
           </a>
         </div>
-      </div>
-      <div class="hero-img-col reveal-el" style="transition-delay: 120ms">
-        <img src="/assets/dance6.webp" alt="" class="hero-img" />
       </div>
     </section>
 
