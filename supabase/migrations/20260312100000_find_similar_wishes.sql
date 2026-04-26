@@ -66,6 +66,17 @@ $$;
 
 ALTER FUNCTION "public"."similar_wish_count"("wish_row" "public"."nearby_wishes") OWNER TO "postgres";
 
+-- Computed column for the wishes table
+CREATE OR REPLACE FUNCTION "public"."similar_wish_count"("wish_row" "public"."wishes")
+RETURNS bigint
+    LANGUAGE "sql" SECURITY INVOKER STABLE
+    SET "search_path" TO 'public', 'extensions'
+    AS $$
+  SELECT count(*) FROM find_similar_wishes(wish_row.id);
+$$;
+
+ALTER FUNCTION "public"."similar_wish_count"("wish_row" "public"."wishes") OWNER TO "postgres";
+
 -- Count nearby wishes whose song is similar to a given song
 CREATE OR REPLACE FUNCTION "public"."count_nearby_wishes_by_song"(
   "p_song_id" "text",
