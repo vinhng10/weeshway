@@ -921,14 +921,25 @@ function showTeacherFeatures(song) {
 // PHONE / PUBLISH CARD RENDERERS (v2 visuals)
 // ══════════════════════════════════════════
 
-function phoneCardHTML(song, cls, loc, avatar, date, time) {
+function phoneCardHTML(
+  song,
+  cls,
+  loc,
+  avatar,
+  date,
+  time,
+  title = "Featured",
+  bookText = "Book",
+) {
   const art = song.artworkUrl
     ? `<img class="bg" src="${song.artworkUrl}" alt="" />`
     : `<div class="bg" style="background: linear-gradient(135deg, ${cls.song.color}66, ${cls.song.color}22);"></div>`;
+  const previewUrl = song.previewUrl || "";
+
   return `
     <div class="phone-featured">
       <div class="phone-featured-header">
-        <h3>Featured</h3>
+        <h3>${escapeHtml(title)}</h3>
       </div>
       <div class="phone-featured-card">
         ${art}
@@ -957,8 +968,8 @@ function phoneCardHTML(song, cls, loc, avatar, date, time) {
               </div>
             </div>
             <div class="phone-featured-actions">
-              <button class="phone-featured-book">Book</button>
-              <button class="phone-featured-play">${ICONS.PLAY}</button>
+              <button class="phone-featured-book">${escapeHtml(bookText)}</button>
+              <button class="phone-featured-play" data-preview-url="${escapeHtml(previewUrl)}">${ICONS.PLAY}</button>
             </div>
           </div>
         </div>
@@ -967,7 +978,47 @@ function phoneCardHTML(song, cls, loc, avatar, date, time) {
   `;
 }
 
-function renderPhoneCard(container, song) {
+function wireUpPhoneCardEvents(container) {
+  const playBtn = container.querySelector(".phone-featured-play");
+  if (playBtn) {
+    playBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const url = playBtn.dataset.previewUrl;
+      if (!url) return;
+
+      if (playBtn.classList.contains("playing")) {
+        stopPreview();
+        playBtn.classList.remove("playing");
+        playBtn.innerHTML = ICONS.PLAY;
+        return;
+      }
+
+      // Stop any other playing audio and reset their buttons
+      $$(".phone-featured-play.playing, .featured-play-btn.playing").forEach(
+        (btn) => {
+          if (btn !== playBtn) {
+            btn.classList.remove("playing");
+            btn.innerHTML = ICONS.PLAY;
+          }
+        },
+      );
+
+      stopPreview();
+      previewAudio = new Audio(url);
+      previewAudio.volume = 0.5;
+      previewAudio.play();
+      playBtn.classList.add("playing");
+      playBtn.innerHTML = ICONS.PAUSE;
+
+      previewAudio.addEventListener("ended", () => {
+        playBtn.classList.remove("playing");
+        playBtn.innerHTML = ICONS.PLAY;
+      });
+    });
+  }
+}
+
+function renderPhoneCard(container, song, title = "Featured", bookText = "Book") {
   if (!container) return;
   const mockSong = { ...MOCK_SONGS[0], name: song.name, artist: song.artist };
   const cls = generateMockClasses(mockSong)[0];
@@ -979,10 +1030,11 @@ function renderPhoneCard(container, song) {
     <div class="phone-frame">
       <div class="phone-notch"></div>
       <div class="phone-screen dark">
-        ${phoneCardHTML(song, cls, loc, avatar, date, time)}
+        ${phoneCardHTML(song, cls, loc, avatar, date, time, title, bookText)}
       </div>
     </div>
   `;
+  wireUpPhoneCardEvents(container);
 }
 
 function renderPhoneBookings(container, song) {
@@ -1063,61 +1115,7 @@ function renderPhoneBookings(container, song) {
 }
 
 function renderPublishCard(container, song) {
-  if (!container) return;
-  const mockSong = { ...MOCK_SONGS[0], name: song.name, artist: song.artist };
-  const cls = generateMockClasses(mockSong)[0];
-  const loc = MOCK_LOCATIONS[Math.floor(Math.random() * MOCK_LOCATIONS.length)];
-  const avatar = MOCK_AVATARS[Math.floor(Math.random() * MOCK_AVATARS.length)];
-  const date = randomDate();
-  const time = randomTime();
-  const art = song.artworkUrl
-    ? `<img class="bg" src="${song.artworkUrl}" alt="" />`
-    : `<div class="bg" style="background: linear-gradient(135deg, ${cls.song.color}66, ${cls.song.color}22);"></div>`;
-  container.innerHTML = `
-    <div class="phone-frame">
-      <div class="phone-notch"></div>
-      <div class="phone-screen dark">
-        <div class="phone-featured">
-          <div class="phone-featured-header">
-            <h3>Publish</h3>
-          </div>
-          <div class="phone-featured-card">
-            ${art}
-            <div class="overlay">
-              <div class="phone-featured-top">
-                <div class="phone-featured-avatar">${avatar}</div>
-                <div class="phone-featured-teacher">${escapeHtml(cls.teacher)}</div>
-                <div class="phone-featured-badges">
-                  <span>${escapeHtml(cls.style)}</span>
-                  <span>${escapeHtml(cls.level)}</span>
-                </div>
-              </div>
-              <div class="phone-featured-bottom">
-                <div class="phone-featured-song">
-                  <div class="phone-featured-song-name">${escapeHtml(song.name)}</div>
-                  <div class="phone-featured-song-artist">${escapeHtml(song.artist)}</div>
-                </div>
-                <div class="phone-featured-meta">
-                  <div class="phone-featured-meta-row">
-                    <div class="left">${ICONS.LOCATION}<span>${escapeHtml(loc)}</span></div>
-                    <span class="phone-featured-price">$${cls.price}</span>
-                  </div>
-                  <div class="phone-featured-meta-row">
-                    <div class="left">${ICONS.TIME}<span>${date}, ${time}</span></div>
-                    <span>${cls.booked}/${cls.spots} ${ICONS.USERS}</span>
-                  </div>
-                </div>
-                <div class="phone-featured-actions">
-                  <button class="phone-featured-book">Publish</button>
-                  <button class="phone-featured-play">${ICONS.PLAY}</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  renderPhoneCard(container, song, "Publish", "Publish");
 }
 
 // ══════════════════════════════════════════
