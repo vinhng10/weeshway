@@ -7,7 +7,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { IconSymbol } from "./icon-symbol";
 import { ThemedText } from "./themed-text";
 
@@ -19,17 +19,22 @@ interface BadgeProps {
 }
 
 export function Badge({ show, label }: BadgeProps) {
+  const { theme } = useUnistyles();
+  const halfGap = theme.gap(2) / 2;
+
   const [contentHeight, setContentHeight] = useState(0);
   const height = useSharedValue(0);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(1);
+  const margin = useSharedValue(-halfGap);
 
   const ready = show && contentHeight > 0;
 
   useEffect(() => {
     height.value = withTiming(ready ? contentHeight : 0, { duration: 400 });
     opacity.value = withTiming(ready ? 1 : 0, { duration: 600 });
-  }, [ready, contentHeight, height, opacity]);
+    margin.value = withTiming(ready ? 0 : -halfGap, { duration: 400 });
+  }, [ready, contentHeight, height, opacity, margin, halfGap]);
 
   useEffect(() => {
     scale.value = withRepeat(withTiming(1.3, { duration: 800 }), -1, true);
@@ -39,6 +44,7 @@ export function Badge({ show, label }: BadgeProps) {
     height: height.value,
     opacity: opacity.value,
     overflow: "hidden" as const,
+    marginVertical: margin.value,
   }));
 
   const sparkleStyle = useAnimatedStyle(() => ({
