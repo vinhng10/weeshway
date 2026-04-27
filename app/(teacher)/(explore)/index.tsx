@@ -168,7 +168,12 @@ export default function Explore() {
         <ChipBar items={options} />
       </View>
       <Boundary>
-        <ExploreContent style={style} level={level} filter={filter} />
+        <ExploreContent
+          key={`${filter}-${style}-${level}`}
+          style={style}
+          level={level}
+          filter={filter}
+        />
       </Boundary>
       <LocationPermission />
     </View>

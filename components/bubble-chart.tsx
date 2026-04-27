@@ -293,19 +293,19 @@ export function BubbleChart({ data, onBubbleTap }: BubbleChartProps) {
     const wx = (e.x - offsetX.value) / scale.value;
     const wy = (e.y - offsetY.value) / scale.value;
 
-    // Hit testing bubbles
     bubbles.modify((bubblesArray) => {
       "worklet";
-      for (let b of bubblesArray) {
-        const dx = wx - b.x;
-        const dy = wy - b.y;
-        const distSq = dx * dx + dy * dy;
-        if (distSq <= b.radius * b.radius) {
-          b.selected = !b.selected;
-          scheduleOnRN(onBubbleTap, { label: b.label, value: b.value });
-        } else {
-          b.selected = false;
-        }
+      const hit = bubblesArray.find((b) => {
+        const dx = wx - b.x,
+          dy = wy - b.y;
+        return dx * dx + dy * dy <= b.radius * b.radius;
+      });
+      if (hit) {
+        hit.selected = !hit.selected;
+        bubblesArray.forEach((b) => {
+          if (b !== hit) b.selected = false;
+        });
+        scheduleOnRN(onBubbleTap, { label: hit.label, value: hit.value });
       }
       return bubblesArray;
     });
