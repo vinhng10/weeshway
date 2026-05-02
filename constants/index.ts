@@ -49,6 +49,12 @@ export const LEVEL = {
   OPENLEVEL: "Open Level",
 } as const;
 
+export const CLASS_FORMAT = {
+  IN_PERSON: "In-Person",
+  LIVE_STREAM: "Live Stream",
+  // ON_DEMAND: "On Demand",
+} as const;
+
 export const PROJECT_STATUS = {
   DRAFT: "Draft",
   RELEASED: "Released",

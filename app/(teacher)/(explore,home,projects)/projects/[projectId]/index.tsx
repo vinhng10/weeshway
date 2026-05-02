@@ -16,6 +16,7 @@ import {
 } from "@/components";
 import {
   BOOKING_ACTIVE_STATUSES,
+  CLASS_FORMAT,
   LEVEL,
   PROJECT_ACTION_TO_STATUS,
   PROJECT_STATUS,
@@ -25,7 +26,12 @@ import {
 } from "@/constants";
 import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase, uploadMedia } from "@/supabase";
-import { ProjectEnrichedType, ProjectStatusType } from "@/types";
+import {
+  Format,
+  ProjectEnrichedType,
+  ProjectStatusType,
+  projectToFormat,
+} from "@/types";
 import { share } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
@@ -82,7 +88,7 @@ function ProjectContent() {
   const [artworkUri, setArtworkUri] = useState<string | undefined>(
     data.artworkUrl,
   );
-  const [location, setLocation] = useState(data.location);
+  const [format, setFormat] = useState<Format>(projectToFormat(data));
 
   const succeededBookingsCount = data.bookings
     .filter((b) => BOOKING_ACTIVE_STATUSES.includes(b.status))
@@ -117,7 +123,15 @@ function ProjectContent() {
             start_at: startAt ?? null,
             end_at: endAt ?? null,
             description: description ?? null,
-            location_id: location?.id ?? null,
+            format: format.format,
+            location_id:
+              format.format === CLASS_FORMAT.IN_PERSON
+                ? (format.place?.id ?? null)
+                : null,
+            meeting_url:
+              format.format !== CLASS_FORMAT.IN_PERSON
+                ? format.meetingUrl?.trim() || null
+                : null,
             artwork_url: artworkUrl ?? null,
           })
           .eq("id", projectId)
@@ -144,6 +158,32 @@ function ProjectContent() {
         { confirmLabel: "Confirm", onConfirm: doSave },
       );
       return;
+    }
+
+    const isReleasing =
+      status === PROJECT_STATUS.RELEASED &&
+      data.status !== PROJECT_STATUS.RELEASED;
+
+    if (isReleasing && format.format !== CLASS_FORMAT.IN_PERSON) {
+      const url = format.meetingUrl?.trim();
+      if (!url) {
+        showAlert(
+          "Meeting Link Required",
+          "Please paste the URL where your online class will be hosted.",
+        );
+        return;
+      }
+      try {
+        const u = new URL(url);
+        if (u.protocol !== "http:" && u.protocol !== "https:")
+          throw new Error();
+      } catch {
+        showAlert(
+          "Invalid Link",
+          "Please paste a valid http(s) URL for your online class.",
+        );
+        return;
+      }
     }
 
     await doSave();
@@ -293,8 +333,8 @@ function ProjectContent() {
         {/* Location Row */}
         <LocationSearch
           label="Location"
-          value={location}
-          onValueChange={setLocation}
+          value={format}
+          onValueChange={setFormat}
           editable={canEditDetails}
         />
 

@@ -30,7 +30,7 @@ import {
   useSuspenseQuery,
 } from "@/hooks";
 import { supabase } from "@/supabase";
-import { ProjectEnrichedType } from "@/types";
+import { ProjectEnrichedType, projectToFormat } from "@/types";
 import { share } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
@@ -279,7 +279,7 @@ function ClassContent() {
         {/* Location Row */}
         <LocationSearch
           label="Location"
-          value={data.location}
+          value={projectToFormat(data)}
           editable={false}
         />
 

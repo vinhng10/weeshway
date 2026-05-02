@@ -14,6 +14,7 @@ import {
   VibeBadge,
 } from "@/components";
 import {
+  CLASS_FORMAT,
   LEVEL,
   PROJECT_ACTION_TO_STATUS,
   PROJECT_STATUS,
@@ -23,8 +24,8 @@ import {
 import { useAlert, useAuth, useLocales, useTempDataStore } from "@/hooks";
 import { supabase, uploadMedia } from "@/supabase";
 import {
+  Format,
   LevelType,
-  LocationType,
   ProjectStatusType,
   SongType,
   StyleType,
@@ -57,7 +58,9 @@ export default function CreateProject() {
   const [endAt, setEndAt] = useState<Date>();
   const [song, setSong] = useState<SongType>();
   const [artworkUri, setArtworkUri] = useState<string>();
-  const [location, setLocation] = useState<LocationType>();
+  const [format, setFormat] = useState<Format>({
+    format: CLASS_FORMAT.IN_PERSON,
+  });
   const hasInitialized = useRef(false);
 
   // Initialize form with wish data from store when component mounts
@@ -110,6 +113,30 @@ export default function CreateProject() {
       return;
     }
 
+    if (
+      status === PROJECT_STATUS.RELEASED &&
+      format.format !== CLASS_FORMAT.IN_PERSON
+    ) {
+      const url = format.meetingUrl?.trim();
+      if (!url) {
+        showAlert(
+          "Meeting Link Required",
+          "Please paste the URL where your online class will be hosted.",
+        );
+        return;
+      }
+      try {
+        const u = new URL(url);
+        if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error();
+      } catch {
+        showAlert(
+          "Invalid Link",
+          "Please paste a valid http(s) URL for your online class.",
+        );
+        return;
+      }
+    }
+
     try {
       const { data: projectId } = await supabase
         .rpc("create_project_with_song", {
@@ -130,7 +157,15 @@ export default function CreateProject() {
             description: description?.trim(),
             start_at: startAt,
             end_at: endAt,
-            location_id: location?.id,
+            format: format.format,
+            location_id:
+              format.format === CLASS_FORMAT.IN_PERSON
+                ? format.place?.id ?? null
+                : null,
+            meeting_url:
+              format.format !== CLASS_FORMAT.IN_PERSON
+                ? format.meetingUrl?.trim() ?? null
+                : null,
             currency: currency,
           },
         })
@@ -235,8 +270,8 @@ export default function CreateProject() {
         {/* Location Row */}
         <LocationSearch
           label="Location"
-          value={location}
-          onValueChange={setLocation}
+          value={format}
+          onValueChange={setFormat}
         />
 
         {/* Project Description Input */}

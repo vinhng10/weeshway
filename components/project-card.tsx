@@ -1,4 +1,8 @@
-import { BOOKING_ACTIVE_STATUSES, PROJECT_STATUS } from "@/constants";
+import {
+  BOOKING_ACTIVE_STATUSES,
+  CLASS_FORMAT,
+  PROJECT_STATUS,
+} from "@/constants";
 import { useAlert, useAudioPlayerStore, useAuth, useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { ProjectEnrichedType } from "@/types";
@@ -166,7 +170,9 @@ export const ProjectCard = ({ data }: CardProps) => {
                     ellipsizeMode="tail"
                     style={styles.flexShrink}
                   >
-                    {data.location?.displayName ?? "Location"}
+                    {data.format === CLASS_FORMAT.IN_PERSON
+                      ? (data.location?.displayName ?? "Location")
+                      : data.format}
                   </ThemedText>
                 </View>
                 <ThemedText type="h5">

@@ -1,11 +1,14 @@
+import { CLASS_FORMAT } from "@/constants";
 import { useAlert, useLocationSearch } from "@/hooks";
 import { PlaceSuggestion } from "@/hooks/useLocationSearch";
 import { supabase } from "@/supabase";
-import { LocationType } from "@/types";
+import { Format, FormatType } from "@/types";
 import { FlashList } from "@shopify/flash-list";
+import * as Clipboard from "expo-clipboard";
 import React, { useState } from "react";
 import { Keyboard, Linking, Modal, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { ChipBar } from "../chip-bar";
 import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
 import { MenuItem } from "../menu-item";
@@ -15,80 +18,63 @@ import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
 import { TextBoxInput } from "./box-input";
 import { Button } from "./button";
+import { ButtonGroup } from "./button-group";
 import { TextInput } from "./text-input";
 
-interface LocationProps {
+function isValidUrl(s?: string): boolean {
+  if (!s) return false;
+  try {
+    const u = new URL(s.trim());
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+interface LocationSearchProps {
   label: string;
-  value?: LocationType;
+  value?: Format;
   editable?: boolean;
-  onValueChange?: (location: LocationType) => void;
+  onValueChange?: (value: Format) => void;
 }
 
-interface LocationDetailProps {
-  visible: boolean;
-  value?: LocationType;
-  onClose: () => void;
-}
-
-const LocationDetail: React.FunctionComponent<LocationDetailProps> = ({
-  visible,
-  value,
-  onClose,
-}) => {
-  const handleOpenMaps = () => {
-    if (value?.googleMapsUri) {
-      Linking.openURL(value.googleMapsUri);
-    }
-  };
-
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalContainer}>
-        <Header title={"Location"} onPress={onClose} />
-
-        <View style={styles.modalContent}>
-          <View style={styles.row}>
-            <TextBoxInput
-              label="Name"
-              value={value?.displayName}
-              editable={false}
-            />
-          </View>
-          <View style={styles.row}>
-            <TextBoxInput
-              label="Address"
-              value={value?.formattedAddress}
-              editable={false}
-              multiline
-            />
-          </View>
-          {value?.googleMapsUri && (
-            <Button label="Open in Google Maps" onPress={handleOpenMaps} />
-          )}
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
-export const LocationSearch: React.FunctionComponent<LocationProps> = ({
+export const LocationSearch: React.FunctionComponent<LocationSearchProps> = ({
   label,
   value,
   onValueChange,
   editable = true,
 }) => {
   const showAlert = useAlert((state) => state.showAlert);
-  const [visible, setVisible] = useState(false);
-  const [locationDetailVisible, setLocationDetailVisible] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [detailVisible, setDetailVisible] = useState(false);
   const [query, setQuery] = useState("");
   const { suggestions, loading, error, getPlaceDetails, resetSessionToken } =
     useLocationSearch(query);
+
+  const format = value?.format ?? CLASS_FORMAT.IN_PERSON;
+  const place =
+    value?.format === CLASS_FORMAT.IN_PERSON ? value.place : undefined;
+  const meetingUrl =
+    value?.format !== CLASS_FORMAT.IN_PERSON ? value?.meetingUrl : undefined;
+
+  const compactValueText =
+    format === CLASS_FORMAT.IN_PERSON ? place?.displayName : format;
+
+  const handleFormatChange = (next: FormatType) => {
+    if (next === CLASS_FORMAT.IN_PERSON) {
+      onValueChange?.({ format: CLASS_FORMAT.IN_PERSON, place: undefined });
+    } else if (next === CLASS_FORMAT.LIVE_STREAM) {
+      onValueChange?.({
+        format: CLASS_FORMAT.LIVE_STREAM,
+        meetingUrl: undefined,
+      });
+    } else {
+      onValueChange?.({
+        format: CLASS_FORMAT.ON_DEMAND,
+        meetingUrl: undefined,
+      });
+    }
+  };
 
   const handleLocationPress = async (suggestion: PlaceSuggestion) => {
     try {
@@ -107,7 +93,6 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
         ? `POINT(${location.location.longitude} ${location.location.latitude})`
         : null;
 
-      // Upsert location to database
       await supabase
         .from("locations")
         .upsert(
@@ -127,8 +112,8 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
         .maybeSingle()
         .throwOnError();
 
-      if (onValueChange) onValueChange(location);
-      setVisible(false);
+      onValueChange?.({ format: CLASS_FORMAT.IN_PERSON, place: location });
+      setSearchVisible(false);
       setQuery("");
     } catch {
       showAlert(
@@ -177,7 +162,7 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
   };
 
   const handleDismiss = () => {
-    setVisible(false);
+    setSearchVisible(false);
     setQuery("");
     resetSessionToken();
   };
@@ -185,9 +170,9 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
   const handlePress = () => {
     Keyboard.dismiss();
     if (editable) {
-      setVisible(true);
+      setSearchVisible(true);
     } else {
-      setLocationDetailVisible(true);
+      setDetailVisible(true);
     }
   };
 
@@ -199,49 +184,157 @@ export const LocationSearch: React.FunctionComponent<LocationProps> = ({
         </View>
         <View style={styles.content}>
           <ThemedText color="dimmed">{label}</ThemedText>
-          <ThemedText type="h5">{value?.displayName}</ThemedText>
+          <ThemedText type="h5">{compactValueText}</ThemedText>
         </View>
       </Pressable>
 
+      {/* Search modal (editable=true) */}
       <Modal
-        visible={visible}
+        visible={searchVisible}
         animationType="slide"
         presentationStyle="overFullScreen"
         transparent={true}
         onRequestClose={handleDismiss}
       >
         <View style={styles.modalContainer}>
-          <Header title="Location" onPress={handleDismiss} />
+          <Header title={label} onPress={handleDismiss} />
 
-          <View style={styles.searchContainer}>
-            <TextInput
-              placeholder="Search location"
-              value={query}
-              onChangeText={setQuery}
-              returnKeyType="search"
-              autoCapitalize="none"
-              autoFocus
+          <View style={styles.modalContent}>
+            <ChipBar
+              items={[
+                {
+                  label: "Format",
+                  value: format,
+                  options: CLASS_FORMAT,
+                  modal: false,
+                  onValueChange: (next: string) =>
+                    handleFormatChange(next as FormatType),
+                },
+              ]}
             />
+            {format === CLASS_FORMAT.IN_PERSON ? (
+              <TextInput
+                placeholder="Search location"
+                value={query}
+                onChangeText={setQuery}
+                returnKeyType="search"
+                autoCapitalize="none"
+                autoFocus
+              />
+            ) : (
+              <View style={styles.row}>
+                <TextBoxInput
+                  label="URL"
+                  value={meetingUrl}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
+                  onChangeText={(text: string) =>
+                    onValueChange?.({
+                      format: format as
+                        | typeof CLASS_FORMAT.LIVE_STREAM
+                        | typeof CLASS_FORMAT.ON_DEMAND,
+                      meetingUrl: text,
+                    })
+                  }
+                />
+              </View>
+            )}
           </View>
 
-          <FlashList
-            data={suggestions}
-            keyExtractor={keyExtractor}
-            renderItem={renderLocation}
-            ListEmptyComponent={renderEmptyState}
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            ItemSeparatorComponent={Separator}
-          />
+          {format === CLASS_FORMAT.IN_PERSON && (
+            <FlashList
+              data={suggestions}
+              keyExtractor={keyExtractor}
+              renderItem={renderLocation}
+              ListEmptyComponent={renderEmptyState}
+              contentContainerStyle={styles.scrollContainer}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              ItemSeparatorComponent={Separator}
+            />
+          )}
         </View>
+
+        {format !== CLASS_FORMAT.IN_PERSON && (
+          <Button
+            position="stickyBottomAbsolute"
+            label="Save"
+            onPress={handleDismiss}
+          />
+        )}
       </Modal>
 
-      <LocationDetail
-        visible={locationDetailVisible}
-        value={value}
-        onClose={() => setLocationDetailVisible(false)}
-      />
+      {/* Detail modal (editable=false) */}
+      <Modal
+        visible={detailVisible}
+        animationType="slide"
+        presentationStyle="overFullScreen"
+        transparent={true}
+        onRequestClose={() => setDetailVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <Header title={label} onPress={() => setDetailVisible(false)} />
+
+          {format === CLASS_FORMAT.IN_PERSON ? (
+            <View style={styles.modalContent}>
+              <View style={styles.row}>
+                <TextBoxInput
+                  label="Name"
+                  value={place?.displayName}
+                  editable={false}
+                />
+              </View>
+              <View style={styles.row}>
+                <TextBoxInput
+                  label="Address"
+                  value={place?.formattedAddress}
+                  editable={false}
+                  multiline
+                />
+              </View>
+              {place?.googleMapsUri && (
+                <Button
+                  icon="location-sharp"
+                  label="Open in Google Maps"
+                  onPress={() => Linking.openURL(place.googleMapsUri!)}
+                />
+              )}
+            </View>
+          ) : (
+            <View style={styles.modalContent}>
+              <View style={styles.row}>
+                <TextBoxInput
+                  label="URL"
+                  value={meetingUrl}
+                  editable={false}
+                  multiline
+                />
+              </View>
+              <ButtonGroup>
+                <Button
+                  label="Copy Link"
+                  icon="copy"
+                  disabled={!isValidUrl(meetingUrl)}
+                  onPress={async () => {
+                    if (!meetingUrl) return;
+                    await Clipboard.setStringAsync(meetingUrl);
+                  }}
+                />
+                <Button
+                  label="Open Link"
+                  icon="open"
+                  disabled={!isValidUrl(meetingUrl)}
+                  onPress={async () => {
+                    if (!meetingUrl || !isValidUrl(meetingUrl)) return;
+                    await Linking.openURL(meetingUrl);
+                  }}
+                />
+              </ButtonGroup>
+            </View>
+          )}
+        </View>
+      </Modal>
     </>
   );
 };
@@ -273,9 +366,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     flex: 1,
     marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
-  },
-  searchContainer: {
-    paddingHorizontal: theme.gap(2),
   },
   scrollContainer: {
     padding: theme.gap(2),

@@ -1,5 +1,6 @@
 import {
   BOOKING_STATUS,
+  CLASS_FORMAT,
   EXPLORE_FILTER,
   LEVEL,
   PROJECT_STATUS,
@@ -17,6 +18,7 @@ import {
 
 type ValueOf<T> = T[keyof T];
 
+export type FormatType = ValueOf<typeof CLASS_FORMAT>;
 export type LevelType = ValueOf<typeof LEVEL>;
 export type ProjectStatusType = ValueOf<typeof PROJECT_STATUS>;
 export type BookingStatusType = ValueOf<typeof BOOKING_STATUS>;
@@ -94,6 +96,8 @@ export type ProjectType = {
   songItems: ItemType[];
   countItems: ItemType[];
   currency: string;
+  format: FormatType;
+  meetingUrl?: string;
 };
 
 export type SongType = {
@@ -188,6 +192,23 @@ export type WishRecommendationEnrichedType = WishEnrichedType & {
   recommendations: RecommendationEnrichedType[];
   status: WishStatusType;
 };
+
+export type Format =
+  | { format: "In-Person"; place?: LocationType }
+  | { format: "Live Stream"; meetingUrl?: string }
+  | { format: "On Demand"; meetingUrl?: string };
+
+export function projectToFormat(
+  p: Pick<ProjectType, "format" | "meetingUrl"> & {
+    location?: LocationType;
+  },
+): Format {
+  if (p.format === "Live Stream")
+    return { format: "Live Stream", meetingUrl: p.meetingUrl };
+  if (p.format === "On Demand")
+    return { format: "On Demand", meetingUrl: p.meetingUrl };
+  return { format: "In-Person", place: p.location };
+}
 
 export type ProjectEnrichedType = ProjectType & {
   profile: ProfileType;
