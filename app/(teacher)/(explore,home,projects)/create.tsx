@@ -127,7 +127,8 @@ export default function CreateProject() {
       }
       try {
         const u = new URL(url);
-        if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error();
+        if (u.protocol !== "http:" && u.protocol !== "https:")
+          throw new Error();
       } catch {
         showAlert(
           "Invalid Link",
@@ -160,11 +161,11 @@ export default function CreateProject() {
             format: format.format,
             location_id:
               format.format === CLASS_FORMAT.IN_PERSON
-                ? format.place?.id ?? null
+                ? (format.place?.id ?? null)
                 : null,
             meeting_url:
               format.format !== CLASS_FORMAT.IN_PERSON
-                ? format.meetingUrl?.trim() ?? null
+                ? (format.meetingUrl?.trim() ?? null)
                 : null,
             currency: currency,
           },
@@ -290,11 +291,9 @@ export default function CreateProject() {
   );
 }
 
-const styles = StyleSheet.create((theme, rt) => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
   },
   scrollContainer: {
     paddingHorizontal: theme.gap(2),

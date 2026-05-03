@@ -4,13 +4,13 @@ import { supabase } from "@/supabase";
 import { ProfileType } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Location from "expo-location";
-import { Modal, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Bullet } from "../bullet";
+import { Modal } from "../modal";
 import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
-import { ButtonGroup } from "./button-group";
 
 export async function syncLocation(profile: ProfileType | null): Promise<void> {
   if (!profile?.id) return;
@@ -59,13 +59,7 @@ export const LocationPermission = () => {
   };
 
   return (
-    <Modal
-      visible={!prompted}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={() => handleAction(true)}
-    >
+    <Modal visible={!prompted} onRequestClose={() => handleAction(true)}>
       <Pressable style={styles.container} onPress={() => handleAction(true)} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Explore What's Nearby</ThemedText>
@@ -93,8 +87,6 @@ export const LocationPermission = () => {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
     opacity: 0.95,
   },
   sheet: {

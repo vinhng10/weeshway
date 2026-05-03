@@ -1,8 +1,9 @@
 import { FlashList, ListRenderItem } from "@shopify/flash-list";
 import React from "react";
-import { Modal, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { Modal } from "../modal";
 import { Separator } from "../separator";
 import { TextInput } from "./text-input";
 
@@ -34,46 +35,33 @@ export function SearchModal<T>({
   onEndReached,
 }: SearchModalProps<T>) {
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent
-      onRequestClose={onClose}
-    >
-      <View style={styles.container}>
-        <Header title={title} onPress={onClose} />
-        <View style={styles.searchContainer}>
-          <TextInput
-            placeholder={placeholder}
-            value={query}
-            onChangeText={onQueryChange}
-            autoFocus
-          />
-        </View>
-        <FlashList
-          data={data}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          ListEmptyComponent={ListEmptyComponent}
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          onEndReached={onEndReached}
-          onEndReachedThreshold={0.5}
-          ItemSeparatorComponent={Separator}
+    <Modal visible={visible} onRequestClose={onClose}>
+      <Header title={title} onPress={onClose} />
+      <View style={styles.searchContainer}>
+        <TextInput
+          placeholder={placeholder}
+          value={query}
+          onChangeText={onQueryChange}
+          autoFocus
         />
       </View>
+      <FlashList
+        data={data}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ListEmptyComponent={ListEmptyComponent}
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5}
+        ItemSeparatorComponent={Separator}
+      />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-  container: {
-    flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
-  },
   searchContainer: {
     paddingHorizontal: theme.gap(2),
   },

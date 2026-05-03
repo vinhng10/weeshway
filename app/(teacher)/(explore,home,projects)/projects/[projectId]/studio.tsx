@@ -180,11 +180,9 @@ export default function Studio() {
   );
 }
 
-const styles = StyleSheet.create((theme, rt) => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
   },
   studioContainer: {
     flex: 1,

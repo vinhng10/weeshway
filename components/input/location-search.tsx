@@ -6,12 +6,13 @@ import { Format, FormatType } from "@/types";
 import { FlashList } from "@shopify/flash-list";
 import * as Clipboard from "expo-clipboard";
 import React, { useState } from "react";
-import { Keyboard, Linking, Modal, View } from "react-native";
+import { Keyboard, Linking, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ChipBar } from "../chip-bar";
 import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
 import { MenuItem } from "../menu-item";
+import { Modal } from "../modal";
 import { Pressable } from "../pressable";
 import { Separator } from "../separator";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
@@ -189,72 +190,64 @@ export const LocationSearch: React.FunctionComponent<LocationSearchProps> = ({
       </Pressable>
 
       {/* Search modal (editable=true) */}
-      <Modal
-        visible={searchVisible}
-        animationType="slide"
-        presentationStyle="overFullScreen"
-        transparent={true}
-        onRequestClose={handleDismiss}
-      >
-        <View style={styles.modalContainer}>
-          <Header title={label} onPress={handleDismiss} />
+      <Modal visible={searchVisible} onRequestClose={handleDismiss}>
+        <Header title={label} onPress={handleDismiss} />
 
-          <View style={styles.modalContent}>
-            <ChipBar
-              items={[
-                {
-                  label: "Format",
-                  value: format,
-                  options: CLASS_FORMAT,
-                  modal: false,
-                  onValueChange: (next: string) =>
-                    handleFormatChange(next as FormatType),
-                },
-              ]}
+        <View style={styles.modalContent}>
+          <ChipBar
+            items={[
+              {
+                label: "Format",
+                value: format,
+                options: CLASS_FORMAT,
+                modal: false,
+                onValueChange: (next: string) =>
+                  handleFormatChange(next as FormatType),
+              },
+            ]}
+          />
+          {format === CLASS_FORMAT.IN_PERSON ? (
+            <TextInput
+              placeholder="Search location"
+              value={query}
+              onChangeText={setQuery}
+              returnKeyType="search"
+              autoCapitalize="none"
+              autoFocus
             />
-            {format === CLASS_FORMAT.IN_PERSON ? (
-              <TextInput
-                placeholder="Search location"
-                value={query}
-                onChangeText={setQuery}
-                returnKeyType="search"
+          ) : (
+            <View style={styles.row}>
+              <TextBoxInput
+                label="URL"
+                value={meetingUrl}
                 autoCapitalize="none"
-                autoFocus
+                autoCorrect={false}
+                keyboardType="url"
+                onChangeText={(text: string) =>
+                  onValueChange?.({
+                    format: format as
+                      | typeof CLASS_FORMAT.LIVE_STREAM
+                      | typeof CLASS_FORMAT.ON_DEMAND,
+                    meetingUrl: text,
+                  })
+                }
               />
-            ) : (
-              <View style={styles.row}>
-                <TextBoxInput
-                  label="URL"
-                  value={meetingUrl}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  keyboardType="url"
-                  onChangeText={(text: string) =>
-                    onValueChange?.({
-                      format: format as
-                        | typeof CLASS_FORMAT.LIVE_STREAM
-                        | typeof CLASS_FORMAT.ON_DEMAND,
-                      meetingUrl: text,
-                    })
-                  }
-                />
-              </View>
-            )}
-          </View>
-
-          {format === CLASS_FORMAT.IN_PERSON && (
-            <FlashList
-              data={suggestions}
-              keyExtractor={keyExtractor}
-              renderItem={renderLocation}
-              ListEmptyComponent={renderEmptyState}
-              contentContainerStyle={styles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              ItemSeparatorComponent={Separator}
-            />
+            </View>
           )}
         </View>
+
+        {format === CLASS_FORMAT.IN_PERSON && (
+          <FlashList
+            data={suggestions}
+            keyExtractor={keyExtractor}
+            renderItem={renderLocation}
+            ListEmptyComponent={renderEmptyState}
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            ItemSeparatorComponent={Separator}
+          />
+        )}
 
         {format !== CLASS_FORMAT.IN_PERSON && (
           <Button
@@ -268,72 +261,67 @@ export const LocationSearch: React.FunctionComponent<LocationSearchProps> = ({
       {/* Detail modal (editable=false) */}
       <Modal
         visible={detailVisible}
-        animationType="slide"
-        presentationStyle="overFullScreen"
-        transparent={true}
         onRequestClose={() => setDetailVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <Header title={label} onPress={() => setDetailVisible(false)} />
+        <Header title={label} onPress={() => setDetailVisible(false)} />
 
-          {format === CLASS_FORMAT.IN_PERSON ? (
-            <View style={styles.modalContent}>
-              <View style={styles.row}>
-                <TextBoxInput
-                  label="Name"
-                  value={place?.displayName}
-                  editable={false}
-                />
-              </View>
-              <View style={styles.row}>
-                <TextBoxInput
-                  label="Address"
-                  value={place?.formattedAddress}
-                  editable={false}
-                  multiline
-                />
-              </View>
-              {place?.googleMapsUri && (
-                <Button
-                  icon="location-sharp"
-                  label="Open in Google Maps"
-                  onPress={() => Linking.openURL(place.googleMapsUri!)}
-                />
-              )}
+        {format === CLASS_FORMAT.IN_PERSON ? (
+          <View style={styles.modalContent}>
+            <View style={styles.row}>
+              <TextBoxInput
+                label="Name"
+                value={place?.displayName}
+                editable={false}
+              />
             </View>
-          ) : (
-            <View style={styles.modalContent}>
-              <View style={styles.row}>
-                <TextBoxInput
-                  label="URL"
-                  value={meetingUrl}
-                  editable={false}
-                  multiline
-                />
-              </View>
-              <ButtonGroup>
-                <Button
-                  label="Copy Link"
-                  icon="copy"
-                  disabled={!isValidUrl(meetingUrl)}
-                  onPress={async () => {
-                    if (!meetingUrl) return;
-                    await Clipboard.setStringAsync(meetingUrl);
-                  }}
-                />
-                <Button
-                  label="Open Link"
-                  icon="open"
-                  disabled={!isValidUrl(meetingUrl)}
-                  onPress={async () => {
-                    if (!meetingUrl || !isValidUrl(meetingUrl)) return;
-                    await Linking.openURL(meetingUrl);
-                  }}
-                />
-              </ButtonGroup>
+            <View style={styles.row}>
+              <TextBoxInput
+                label="Address"
+                value={place?.formattedAddress}
+                editable={false}
+                multiline
+              />
             </View>
-          )}
-        </View>
+            {place?.googleMapsUri && (
+              <Button
+                icon="location-sharp"
+                label="Open in Google Maps"
+                onPress={() => Linking.openURL(place.googleMapsUri!)}
+              />
+            )}
+          </View>
+        ) : (
+          <View style={styles.modalContent}>
+            <View style={styles.row}>
+              <TextBoxInput
+                label="URL"
+                value={meetingUrl}
+                editable={false}
+                multiline
+              />
+            </View>
+            <ButtonGroup>
+              <Button
+                label="Copy Link"
+                icon="copy"
+                disabled={!isValidUrl(meetingUrl)}
+                onPress={async () => {
+                  if (!meetingUrl) return;
+                  await Clipboard.setStringAsync(meetingUrl);
+                }}
+              />
+              <Button
+                label="Open Link"
+                icon="open"
+                disabled={!isValidUrl(meetingUrl)}
+                onPress={async () => {
+                  if (!meetingUrl || !isValidUrl(meetingUrl)) return;
+                  await Linking.openURL(meetingUrl);
+                }}
+              />
+            </ButtonGroup>
+          </View>
+        )}
       </Modal>
     </>
   );
@@ -361,11 +349,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   content: {
     flex: 1,
     gap: theme.gap(0.5),
-  },
-  modalContainer: {
-    flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
   },
   scrollContainer: {
     padding: theme.gap(2),

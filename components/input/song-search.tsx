@@ -2,9 +2,10 @@ import { useSongSearch } from "@/hooks";
 import { SongType } from "@/types";
 import { FlashList } from "@shopify/flash-list";
 import React, { useState } from "react";
-import { Keyboard, Modal, View } from "react-native";
+import { Keyboard, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { Modal } from "../modal";
 import { Separator } from "../separator";
 import { ThemedActivityIndicator } from "../themed-activity-indicator";
 import { ThemedText } from "../themed-text";
@@ -81,36 +82,28 @@ export const SongSearch: React.FunctionComponent<SongSearchProps> = ({
         What song is in your mind?
       </ThemedText>
 
-      <Modal
-        visible={visible}
-        animationType="slide"
-        presentationStyle="overFullScreen"
-        transparent
-        onRequestClose={handleClose}
-      >
-        <View style={styles.modalContainer}>
-          <Header title="Search Song" onPress={handleClose} />
+      <Modal visible={visible} onRequestClose={handleClose}>
+        <Header title="Search Song" onPress={handleClose} />
 
-          <View style={styles.searchContainer}>
-            <TextInput
-              placeholder="What song is in your mind?"
-              value={query}
-              onChangeText={setQuery}
-              autoFocus
-            />
-          </View>
-
-          <FlashList
-            data={songs}
-            keyExtractor={keyExtractor}
-            renderItem={renderSong}
-            ListEmptyComponent={renderEmptyState}
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            ItemSeparatorComponent={Separator}
+        <View style={styles.searchContainer}>
+          <TextInput
+            placeholder="What song is in your mind?"
+            value={query}
+            onChangeText={setQuery}
+            autoFocus
           />
         </View>
+
+        <FlashList
+          data={songs}
+          keyExtractor={keyExtractor}
+          renderItem={renderSong}
+          ListEmptyComponent={renderEmptyState}
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          ItemSeparatorComponent={Separator}
+        />
       </Modal>
     </>
   );
@@ -123,11 +116,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.foreground,
     padding: theme.gap(2),
     borderRadius: theme.gap(2),
-  },
-  modalContainer: {
-    flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
   },
   searchContainer: {
     paddingHorizontal: theme.gap(2),

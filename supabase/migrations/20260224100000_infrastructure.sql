@@ -116,4 +116,4 @@ SELECT cron.schedule(
 INSERT INTO "public"."fees" ("key", "value")
 VALUES
   ('booking_fee', '50'),
-  ('transaction_fee', '5');
+  ('transaction_fee', '3');

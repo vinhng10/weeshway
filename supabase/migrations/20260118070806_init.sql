@@ -1459,7 +1459,7 @@ CREATE OR REPLACE VIEW "public"."stats" WITH ("security_invoker"='true') AS
     "date_trunc"('month'::"text", "now"()) AS "current_month"
    FROM ("public"."bookings" "b"
      JOIN "public"."projects" "p" ON (("b"."project_id" = "p"."id")))
-  WHERE (("b"."status" IN ('CheckedIn', 'Transferred')) AND ("b"."updated_at" >= "date_trunc"('month'::"text", "now"())))
+  WHERE (("b"."status" IN ('Succeeded', 'CheckedIn', 'Transferred')) AND ("b"."updated_at" >= "date_trunc"('month'::"text", "now"())))
   GROUP BY "p"."user_id", "b"."currency";
 
 

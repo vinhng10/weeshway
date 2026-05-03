@@ -1,13 +1,13 @@
 import { PermissionResponse } from "expo-camera";
 import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
-import { AppState, Linking, Modal, View } from "react-native";
+import { AppState, Linking, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Bullet } from "../bullet";
+import { Modal } from "../modal";
 import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
-import { ButtonGroup } from "./button-group";
 
 interface CameraPermissionProps {
   permission: PermissionResponse;
@@ -42,13 +42,7 @@ export const CameraPermission = ({
   };
 
   return (
-    <Modal
-      visible
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={() => router.back()}
-    >
+    <Modal visible onRequestClose={() => router.back()}>
       <Pressable style={styles.container} onPress={() => router.back()} />
       <View style={styles.sheet}>
         <ThemedText type="h2">Check In Students</ThemedText>
@@ -68,8 +62,6 @@ export const CameraPermission = ({
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
     opacity: 0.95,
   },
   sheet: {

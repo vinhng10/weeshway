@@ -256,11 +256,9 @@ export default function Account() {
   );
 }
 
-const styles = StyleSheet.create((theme, rt) => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
   },
   scrollContainer: {
     paddingHorizontal: theme.gap(2),

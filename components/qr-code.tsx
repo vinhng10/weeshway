@@ -1,7 +1,8 @@
-import { Modal, View } from "react-native";
+import { View } from "react-native";
 import QRCodeSVG from "react-native-qrcode-svg";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { Button } from "./input/button";
+import { Modal } from "./modal";
 import { Pressable } from "./pressable";
 import { ThemedText } from "./themed-text";
 
@@ -27,13 +28,7 @@ export const QRCode: React.FunctionComponent<QRModalProps> = ({
   description,
 }) => {
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose} />
       <View style={styles.sheet}>
         {title && <ThemedText type="h4">{title}</ThemedText>}
@@ -54,8 +49,6 @@ export const QRCode: React.FunctionComponent<QRModalProps> = ({
 const styles = StyleSheet.create((theme, rt) => ({
   overlay: {
     flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
     opacity: 0.95,
   },
   sheet: {

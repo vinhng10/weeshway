@@ -1,9 +1,10 @@
 import { formatDate, formatTime } from "@/utils";
 import React, { useState } from "react";
-import { Keyboard, Modal, View } from "react-native";
+import { Keyboard, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
 import { IconSymbol } from "../icon-symbol";
+import { Modal } from "../modal";
 import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { DateTimeBoxInput } from "./box-input";
@@ -88,64 +89,56 @@ export const DateTimeInput: React.FunctionComponent<DateTimeProps> = ({
         </View>
       </Pressable>
 
-      <Modal
-        visible={visible}
-        animationType="slide"
-        presentationStyle="overFullScreen"
-        transparent={true}
-        onRequestClose={handleClose}
-      >
-        <View style={styles.modalContainer}>
-          <Header title="Date & Time" onPress={handleClose} />
+      <Modal visible={visible} onRequestClose={handleClose}>
+        <Header title="Date & Time" onPress={handleClose} />
 
-          <View style={styles.modalContent}>
-            {/* Date Input */}
-            <View style={styles.row}>
-              <DateTimeBoxInput
-                label="Date"
-                value={date}
-                onValueChange={setDate}
-                icon="calendar"
-                mode="date"
-                minimumDate={new Date()}
-                editable={editable}
-              />
-            </View>
-
-            {/* Time Inputs */}
-            <View style={styles.row}>
-              <DateTimeBoxInput
-                label="Start Time"
-                value={startTime}
-                onValueChange={(value) => {
-                  setStartTime(value);
-                  setError(undefined);
-                }}
-                icon="time"
-                mode="time"
-                editable={editable}
-              />
-              <DateTimeBoxInput
-                label="End Time"
-                value={endTime}
-                onValueChange={(value) => {
-                  setEndTime(value);
-                  setError(undefined);
-                }}
-                icon="time"
-                mode="time"
-                minimumDate={startTime}
-                editable={editable}
-              />
-            </View>
-
-            {/* Error Message */}
-            {error && (
-              <ThemedText color="danger" style={styles.errorText}>
-                {error}
-              </ThemedText>
-            )}
+        <View style={styles.modalContent}>
+          {/* Date Input */}
+          <View style={styles.row}>
+            <DateTimeBoxInput
+              label="Date"
+              value={date}
+              onValueChange={setDate}
+              icon="calendar"
+              mode="date"
+              minimumDate={new Date()}
+              editable={editable}
+            />
           </View>
+
+          {/* Time Inputs */}
+          <View style={styles.row}>
+            <DateTimeBoxInput
+              label="Start Time"
+              value={startTime}
+              onValueChange={(value) => {
+                setStartTime(value);
+                setError(undefined);
+              }}
+              icon="time"
+              mode="time"
+              editable={editable}
+            />
+            <DateTimeBoxInput
+              label="End Time"
+              value={endTime}
+              onValueChange={(value) => {
+                setEndTime(value);
+                setError(undefined);
+              }}
+              icon="time"
+              mode="time"
+              minimumDate={startTime}
+              editable={editable}
+            />
+          </View>
+
+          {/* Error Message */}
+          {error && (
+            <ThemedText color="danger" style={styles.errorText}>
+              {error}
+            </ThemedText>
+          )}
         </View>
 
         {editable && (
@@ -180,11 +173,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   content: {
     flex: 1,
     gap: theme.gap(0.5),
-  },
-  modalContainer: {
-    flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
   },
   modalContent: {
     gap: theme.gap(2),

@@ -1,6 +1,7 @@
 import { useAlert } from "@/hooks/useAlert";
-import { Modal, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Modal } from "../modal";
 import { Pressable } from "../pressable";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
@@ -15,13 +16,7 @@ export const Alert = () => {
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={hideAlert}
-    >
+    <Modal visible={visible} onRequestClose={hideAlert}>
       <Pressable style={styles.container} onPress={hideAlert} />
       <View style={styles.sheet}>
         {title && <ThemedText type="h4">{title}</ThemedText>}
@@ -55,7 +50,6 @@ export const Alert = () => {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top,
     backgroundColor: theme.colors.background,
     opacity: 0.95,
   },

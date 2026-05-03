@@ -5,9 +5,10 @@ import { ProfileType, ProjectEnrichedType } from "@/types";
 import { PaymentMethodLayout, useStripe } from "@stripe/stripe-react-native";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Modal, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Header } from "../header";
+import { Modal } from "../modal";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
@@ -182,95 +183,82 @@ export function Checkout({
   }, [visible, project.id, customer?.id]);
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={onExit}
-    >
-      <View style={styles.container}>
-        <Header title="Checkout" onPress={onExit} />
+    <Modal visible={visible} onRequestClose={onExit}>
+      <Header title="Checkout" onPress={onExit} />
 
-        <View style={styles.content}>
-          {/* Class Info */}
-          <View style={styles.classInfo}>
-            <ThemedText type="h2">{project.song.name}</ThemedText>
-            {project.song.artistName && (
-              <ThemedText color="dimmed" type="h4">
-                {project.song.artistName}
-              </ThemedText>
-            )}
-            {project.profile.fullName && (
-              <ThemedText color="dimmed" type="h4">
-                with {project.profile.fullName}
-              </ThemedText>
-            )}
+      <View style={styles.content}>
+        {/* Class Info */}
+        <View style={styles.classInfo}>
+          <ThemedText type="h2">{project.song.name}</ThemedText>
+          {project.song.artistName && (
+            <ThemedText color="dimmed" type="h4">
+              {project.song.artistName}
+            </ThemedText>
+          )}
+          {project.profile.fullName && (
+            <ThemedText color="dimmed" type="h4">
+              with {project.profile.fullName}
+            </ThemedText>
+          )}
+        </View>
+
+        {/* Price and Quantity Row */}
+        <SpotsSelector
+          spots={spots}
+          onSpotsChange={setSpots}
+          loading={loading}
+          disabled={status === "success"}
+        />
+
+        {/* Price Breakdown */}
+        <View style={styles.priceBreakdown}>
+          <View style={[styles.row, styles.priceRow]}>
+            <ThemedText type="h3">Price</ThemedText>
+            <ThemedText type="h3">{formatMoney(price, currency)}</ThemedText>
           </View>
-
-          {/* Price and Quantity Row */}
-          <SpotsSelector
-            spots={spots}
-            onSpotsChange={setSpots}
-            loading={loading}
-            disabled={status === "success"}
-          />
-
-          {/* Price Breakdown */}
-          <View style={styles.priceBreakdown}>
-            <View style={[styles.row, styles.priceRow]}>
-              <ThemedText type="h3">Price</ThemedText>
-              <ThemedText type="h3">{formatMoney(price, currency)}</ThemedText>
-            </View>
-            <View style={[styles.row, styles.priceRow]}>
-              <ThemedText type="h3" color="dimmed">
-                Fee
-              </ThemedText>
-              <ThemedText type="h3" color="dimmed">
-                {formatMoney(fee, currency)}
-              </ThemedText>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.totalRow}>
-              <ThemedText type="h1">{formatMoney(total, currency)}</ThemedText>
-            </View>
+          <View style={[styles.row, styles.priceRow]}>
+            <ThemedText type="h3" color="dimmed">
+              Fee
+            </ThemedText>
+            <ThemedText type="h3" color="dimmed">
+              {formatMoney(fee, currency)}
+            </ThemedText>
           </View>
-
-          {/* Status Messages */}
-          <View style={styles.statusContainer}>
-            {status === "error" && (
-              <ThemedText type="h5" color="danger">
-                {statusMessage}
-              </ThemedText>
-            )}
-            {status === "success" && (
-              <ThemedText type="h5" color="primary">
-                {statusMessage}
-              </ThemedText>
-            )}
+          <View style={styles.divider} />
+          <View style={styles.totalRow}>
+            <ThemedText type="h1">{formatMoney(total, currency)}</ThemedText>
           </View>
         </View>
 
-        {/* Action Buttons */}
-        <ButtonGroup direction="column" position="stickyBottomAbsolute">
-          <Button
-            label={status === "success" ? "See you in class!" : "Pay"}
-            onPress={handlePay}
-            disabled={status === "success"}
-          />
-          <Button outlined label="Cancel" onPress={onExit} />
-        </ButtonGroup>
+        {/* Status Messages */}
+        <View style={styles.statusContainer}>
+          {status === "error" && (
+            <ThemedText type="h5" color="danger">
+              {statusMessage}
+            </ThemedText>
+          )}
+          {status === "success" && (
+            <ThemedText type="h5" color="primary">
+              {statusMessage}
+            </ThemedText>
+          )}
+        </View>
       </View>
+
+      {/* Action Buttons */}
+      <ButtonGroup direction="column" position="stickyBottomAbsolute">
+        <Button
+          label={status === "success" ? "See you in class!" : "Pay"}
+          onPress={handlePay}
+          disabled={status === "success"}
+        />
+        <Button outlined label="Cancel" onPress={onExit} />
+      </ButtonGroup>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-  container: {
-    flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
-  },
   content: {
     flex: 1,
     paddingHorizontal: theme.gap(2),

@@ -1,8 +1,9 @@
 import { OptionItem } from "@/types";
 import React, { useCallback, useMemo } from "react";
-import { Modal, ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Header } from "../header";
+import { Modal } from "../modal";
 import { Pressable } from "../pressable";
 import { Separator } from "../separator";
 import { ThemedText } from "../themed-text";
@@ -44,47 +45,34 @@ export const Options = ({
   );
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={styles.container}>
-        {/* Header */}
-        <Header title={title} onPress={onClose} />
+    <Modal visible={visible} onRequestClose={onClose}>
+      {/* Header */}
+      <Header title={title} onPress={onClose} />
 
-        {/* Options List */}
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-        >
-          {optionsArray.map((item, index) => (
-            <React.Fragment key={item.key}>
-              {index > 0 && <Separator gap={3} />}
-              <Pressable onPress={() => handleSelect(item.value)}>
-                <ThemedText
-                  type="h3"
-                  color={currentValue !== item.value ? "dimmed" : undefined}
-                >
-                  {renderFunction ? renderFunction(item) : item.value}
-                </ThemedText>
-              </Pressable>
-            </React.Fragment>
-          ))}
-        </ScrollView>
-      </View>
+      {/* Options List */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {optionsArray.map((item, index) => (
+          <React.Fragment key={item.key}>
+            {index > 0 && <Separator gap={3} />}
+            <Pressable onPress={() => handleSelect(item.value)}>
+              <ThemedText
+                type="h3"
+                color={currentValue !== item.value ? "dimmed" : undefined}
+              >
+                {renderFunction ? renderFunction(item) : item.value}
+              </ThemedText>
+            </Pressable>
+          </React.Fragment>
+        ))}
+      </ScrollView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create((theme, rt) => ({
-  container: {
-    flex: 1,
-    marginTop: rt.insets.top,
-    backgroundColor: theme.colors.background,
-  },
   scrollContainer: {
     paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(32),

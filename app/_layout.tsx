@@ -24,6 +24,7 @@ import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from "react-native-reanimated";
+import { useUnistyles } from "react-native-unistyles";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -61,6 +62,7 @@ function RootNavigator() {
   const role = useRole((state) => state.role);
   const roleSelected = useOnboarding((state) => state.prompted.role);
   const segments = useSegments();
+  const { theme, rt } = useUnistyles();
   useNotificationObserver();
 
   // Initialize audio player on mount
@@ -114,7 +116,16 @@ function RootNavigator() {
   }, [isLoading]);
 
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: {
+          backgroundColor: theme.colors.background,
+          paddingTop: rt.insets.top,
+          paddingBottom: rt.insets.bottom,
+        },
+      }}
+    >
       {/* Screens for unauthenticated users */}
       <Stack.Protected guard={!isLoading && !isLoggedIn}>
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
