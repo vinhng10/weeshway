@@ -34,7 +34,7 @@ export default function TabLayout() {
           borderTopWidth: 0,
           paddingBottom: theme.gap(0.5),
           margin: theme.gap(1.5),
-          marginBottom: theme.gap(1),
+          marginBottom: theme.gap(0.5),
           borderRadius: theme.gap(4),
           shadowColor: "#787878",
           shadowOffset: {
