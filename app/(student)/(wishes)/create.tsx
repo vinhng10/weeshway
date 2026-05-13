@@ -136,7 +136,6 @@ export default function MakeAWish() {
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
-    marginTop: rt.insets.top,
   },
   scrollContainer: {
     gap: theme.gap(2),
