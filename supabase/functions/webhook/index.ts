@@ -10,6 +10,55 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
 // --- Helpers ---
+async function upsertPassPurchase(
+  piId: string,
+  status: string,
+  metadata: Stripe.PaymentIntent["metadata"],
+  chargeId?: string | null,
+): Promise<void> {
+  const isSucceeded = status === "Succeeded";
+  const sessions = parseInt(metadata.sessions ?? "0");
+  const expiryDays = parseInt(metadata.expiry_days ?? "0");
+  const insertRemaining = isSucceeded ? sessions : 0;
+  const expiresAt =
+    isSucceeded && expiryDays > 0
+      ? new Date(Date.now() + expiryDays * 86400 * 1000)
+      : null;
+
+  await sql`
+    INSERT INTO public.pass_purchases (
+      user_id, pass_id, sessions, remaining_sessions,
+      stripe_payment_intent_id, stripe_charge_id, status,
+      price, booking_fee, currency, expires_at
+    ) VALUES (
+      ${metadata.user_id}::uuid,
+      ${metadata.pass_id}::uuid,
+      ${sessions},
+      ${insertRemaining},
+      ${piId},
+      ${chargeId ?? null},
+      ${status}::public.pass_status,
+      ${parseInt(metadata.price ?? "0")},
+      ${parseInt(metadata.booking_fee ?? "0")},
+      ${metadata.currency},
+      ${expiresAt}
+    )
+    ON CONFLICT (stripe_payment_intent_id) DO UPDATE
+    SET status = EXCLUDED.status,
+        stripe_charge_id = COALESCE(EXCLUDED.stripe_charge_id, pass_purchases.stripe_charge_id),
+        remaining_sessions = CASE
+          WHEN EXCLUDED.status = 'Succeeded'::public.pass_status
+            THEN EXCLUDED.remaining_sessions
+          ELSE pass_purchases.remaining_sessions
+        END,
+        expires_at = CASE
+          WHEN EXCLUDED.status = 'Succeeded'::public.pass_status
+            THEN EXCLUDED.expires_at
+          ELSE pass_purchases.expires_at
+        END
+  `;
+}
+
 async function upsertBooking(
   paymentIntentId: string,
   status: string,
@@ -69,35 +118,61 @@ async function handleEvent(event: Stripe.Event): Promise<void> {
     case "payment_intent.created": {
       const pi = event.data.object;
       const stripeEnabled = await flagEnabled(sql, "stripe");
-      await upsertBooking(
-        pi.id,
-        stripeEnabled ? "Created" : "Succeeded",
-        pi.metadata,
-      );
+      const status = stripeEnabled ? "Created" : "Succeeded";
+      if (pi.metadata?.kind === "pass") {
+        await upsertPassPurchase(pi.id, status, pi.metadata);
+      } else {
+        await upsertBooking(pi.id, status, pi.metadata);
+      }
       break;
     }
     case "payment_intent.succeeded": {
       const pi = event.data.object;
-      await upsertBooking(pi.id, "Succeeded", pi.metadata);
+      if (pi.metadata?.kind === "pass") {
+        await upsertPassPurchase(
+          pi.id,
+          "Succeeded",
+          pi.metadata,
+          (pi.latest_charge as string) ?? null,
+        );
+      } else {
+        await upsertBooking(pi.id, "Succeeded", pi.metadata);
+      }
       break;
     }
     case "payment_intent.payment_failed": {
       const pi = event.data.object;
-      await upsertBooking(pi.id, "Failed", pi.metadata);
+      if (pi.metadata?.kind === "pass") {
+        await upsertPassPurchase(pi.id, "Failed", pi.metadata);
+      } else {
+        await upsertBooking(pi.id, "Failed", pi.metadata);
+      }
       break;
     }
     case "payment_intent.canceled": {
       const pi = event.data.object;
-      await upsertBooking(pi.id, "Canceled", pi.metadata);
+      if (pi.metadata?.kind === "pass") {
+        await upsertPassPurchase(pi.id, "Canceled", pi.metadata);
+      } else {
+        await upsertBooking(pi.id, "Canceled", pi.metadata);
+      }
       break;
     }
     case "charge.refunded": {
       const charge = event.data.object;
-      await upsertBooking(
-        charge.payment_intent as string,
-        "Refunded",
-        charge.metadata,
-      );
+      if (charge.metadata?.kind === "pass") {
+        await upsertPassPurchase(
+          charge.payment_intent as string,
+          "Refunded",
+          charge.metadata,
+        );
+      } else {
+        await upsertBooking(
+          charge.payment_intent as string,
+          "Refunded",
+          charge.metadata,
+        );
+      }
       break;
     }
     case "refund.updated": {

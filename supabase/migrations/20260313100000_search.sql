@@ -91,8 +91,8 @@ BEGIN
     JOIN songs s ON p.song_id = s.id
     JOIN profiles prof ON p.user_id = prof.id
     WHERE s.fts @@ parsed
-      AND p.status != 'Canceled'::status
-      AND p.status != 'Deleted'::status
+      AND p.status IN ('Draft'::status, 'Released'::status)
+      AND (p.end_at IS NULL OR p.end_at > NOW())
   ) results
   ORDER BY rank DESC
   LIMIT p_limit

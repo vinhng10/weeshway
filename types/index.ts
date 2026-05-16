@@ -8,6 +8,7 @@ import {
   ROLE,
   STUDENT_REPORT_REASON,
   STYLE,
+  TEACHER_PROFILE_VIEW,
   TEACHER_REPORT_REASON,
   TEMPO,
   TIME,
@@ -28,6 +29,7 @@ export type TimeType = ValueOf<typeof TIME>;
 export type TrackType = ValueOf<typeof TRACK>;
 export type RoleType = ValueOf<typeof ROLE>;
 export type WishWatchType = ValueOf<typeof WISH_WATCH>;
+export type TeacherProfileViewType = ValueOf<typeof TEACHER_PROFILE_VIEW>;
 export type ExploreFilterType = ValueOf<typeof EXPLORE_FILTER>;
 export type TempoType = ValueOf<typeof TEMPO>;
 export type StudentReportReasonType = ValueOf<typeof STUDENT_REPORT_REASON>;
@@ -259,4 +261,51 @@ export type ReportType = {
   photoUrls: string[];
   status: string;
   resolution?: string;
+};
+
+export type PassPurchaseStatus =
+  | "Created"
+  | "Succeeded"
+  | "Used"
+  | "Expired"
+  | "Refunding"
+  | "Refunded"
+  | "Failed"
+  | "Canceled";
+
+export type PassType = {
+  id: string;
+  userId: string;
+  name: string;
+  description: string | null;
+  photoUrl: string | null;
+  sessions: number;
+  price: number;
+  currency: string;
+  expiryDays: number;
+  active: boolean;
+  createdAt: string;
+};
+
+export type PassPurchaseType = {
+  id: string;
+  userId: string;
+  passId: string | null;
+  sessions: number;
+  remainingSessions: number;
+  expiresAt: string | null;
+  status: PassPurchaseStatus;
+  refundInitiator: RoleType | null;
+  stripePaymentIntentId: string;
+  stripeChargeId: string | null;
+  price: number;
+  bookingFee: number;
+  currency: string;
+  stripeExpiryTransferId: string | null;
+  createdAt: string;
+};
+
+export type PassPurchaseEnrichedType = PassPurchaseType & {
+  pass: PassType | null;
+  teacher: ProfileType | null;
 };

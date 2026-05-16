@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "stripe": "npm:stripe",
+    "zod": "npm:zod",
+    "jose": "npm:jose",
+    "supabase": "npm:@supabase/supabase-js",
+    "postgres": "npm:postgres"
+  }
+}

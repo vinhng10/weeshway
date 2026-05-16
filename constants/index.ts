@@ -110,6 +110,11 @@ export const BOOKING_ACTIVE_STATUSES: string[] = [
   BOOKING_STATUS.TRANSFERRED,
 ];
 
+export const BOOKING_ONGOING_STATUSES: string[] = [
+  ...BOOKING_ACTIVE_STATUSES,
+  BOOKING_STATUS.REFUNDING,
+];
+
 export const WISH_STATUS = {
   CLASS_RECOMMENDED: "Class recommended",
   GRANTED: "Granted",
@@ -162,6 +167,11 @@ export const WISH_WATCH = {
   WATCHING: "Watching",
 } as const;
 
+export const TEACHER_PROFILE_VIEW = {
+  CLASSES: "Classes",
+  PASSES: "Passes",
+} as const;
+
 export const EXPLORE_FILTER = {
   ALL: "All",
   FOR_ME: "For Me",
@@ -194,3 +204,18 @@ export const REPORT_STATUS = {
   RESOLVED: "Resolved",
   DISMISSED: "Dismissed",
 } as const;
+
+export const PassPurchaseStatuses = {
+  Created: "Created",
+  Succeeded: "Succeeded",
+  Used: "Used",
+  Expired: "Expired",
+  Refunding: "Refunding",
+  Refunded: "Refunded",
+  Failed: "Failed",
+  Canceled: "Canceled",
+} as const;
+
+export const PASS_EXPIRY_DAYS_OPTIONS = [30, 60, 90, 180, 365] as const;
+export const PASS_COOLING_OFF_DAYS = 7;
+export const PASS_TEACHER_CANCEL_GRACE_DAYS = 30;

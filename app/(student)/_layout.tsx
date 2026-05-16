@@ -80,7 +80,6 @@ export default function TabLayout() {
         name="(bookings)"
         options={{
           title: "Bookings",
-          headerShown: false,
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="ticket" color={color} />
           ),

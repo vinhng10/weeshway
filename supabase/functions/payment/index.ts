@@ -64,6 +64,8 @@ Deno.serve(async (req) => {
       throw new HttpError("Teacher cannot receive payments yet", 406);
     if (!project.price || project.price <= 0)
       throw new HttpError("Class price is invalid", 406);
+    if (project.end_at && new Date(project.end_at) < new Date())
+      throw new HttpError("This class has already ended", 406);
 
     // 4. Availability Check
     // Note: To be strictly accurate, we should query ALL Succeeded bookings for this project

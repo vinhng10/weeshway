@@ -80,7 +80,8 @@ function ClassContent() {
   const userBooking = data.bookings.find((b) => b.userId === profile?.id);
   const isBooked = !!userBooking;
   const isRefunding = userBooking?.status === BOOKING_STATUS.REFUNDING;
-  const isReleased = data.status === PROJECT_STATUS.RELEASED;
+  const isEnded = !!data.endAt && new Date(data.endAt) < new Date();
+  const isReleased = data.status === PROJECT_STATUS.RELEASED && !isEnded;
   const isWatching = data.watchings.some((w) => w.userId === profile?.id);
   const isCanceled = data.status === PROJECT_STATUS.CANCELED;
 

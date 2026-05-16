@@ -9,7 +9,7 @@ import {
   Tile,
 } from "@/components";
 import {
-  BOOKING_ACTIVE_STATUSES,
+  BOOKING_ONGOING_STATUSES,
   LEVEL,
   PROJECT_STATUS,
   STYLE,
@@ -58,7 +58,7 @@ function HomeContent({ status, style, level }: HomeContentProps) {
           )`,
         )
         .eq("wish.user_id", profile?.id)
-        .in("project.bookings.status", BOOKING_ACTIVE_STATUSES)
+        .in("project.bookings.status", BOOKING_ONGOING_STATUSES)
         .limit(20);
 
       if (style) {
@@ -99,7 +99,7 @@ function HomeContent({ status, style, level }: HomeContentProps) {
         .or(`start_at.is.null,start_at.gte.${new Date().toISOString()}`)
         .neq("status", PROJECT_STATUS.CANCELED)
         .neq("status", PROJECT_STATUS.DELETED)
-        .in("bookings.status", BOOKING_ACTIVE_STATUSES);
+        .in("bookings.status", BOOKING_ONGOING_STATUSES);
       if (status) query = query.eq("status", status);
       if (style) query = query.eq("style", style);
       if (level) query = query.eq("level", level);
