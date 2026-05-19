@@ -12,12 +12,18 @@ export const useNotificationObserver = (): void => {
       const data = notification.request.content.data;
       if (data?.projectId) {
         if (role === ROLE.TEACHER) {
-          router.navigate(`/(teacher)/(projects)/projects/${data.projectId}`);
+          router.navigate(`/(teacher)/(projects)/projects/${data.projectId}`, {
+            withAnchor: true,
+          });
         } else {
-          router.navigate(`/(student)/(bookings)/classes/${data.projectId}`);
+          router.navigate(`/(student)/(bookings)/classes/${data.projectId}`, {
+            withAnchor: true,
+          });
         }
       } else if (data?.wishId) {
-        router.navigate(`/(student)/(wishes)/wishes/${data.wishId}`);
+        router.navigate(`/(student)/(wishes)/wishes/${data.wishId}`, {
+          withAnchor: true,
+        });
       }
     };
 

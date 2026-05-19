@@ -83,6 +83,33 @@ async function processJob(job: Job, supabase: SupabaseClient) {
     `.catch(() => {});
   }
 
+  // ── 2.5. Pass purchases — refund outstanding credits ──────────────
+  //
+  // Flip Succeeded pass_purchases (remaining_sessions > 0) for THIS TEACHER's
+  // passes to Refunding. The validate_pass_refund_eligibility trigger enqueues
+  // a teacher-deletion job to pass_refund_jobs for the pass-refund cron.
+  // Must run after step 1 so session restorations from canceled future classes
+  // are counted before the refund amount is computed.
+  // Idempotent: only targets Succeeded rows.
+
+  const outstandingPasses: { id: string }[] = await sql`
+    SELECT pp.id
+    FROM public.pass_purchases pp
+    JOIN public.passes p ON p.id = pp.pass_id
+    WHERE p.user_id = ${userId}
+      AND pp.status = 'Succeeded'
+      AND pp.remaining_sessions > 0
+  `;
+
+  for (const { id } of outstandingPasses) {
+    await sql`
+      UPDATE public.pass_purchases
+      SET status = 'Refunding',
+          refund_initiator = 'Teacher'::public.role
+      WHERE id = ${id}
+    `.catch(() => {});
+  }
+
   // ── 3. Storage cleanup ──────────────────────────────────────────────
   // Idempotent: purging empty/missing folders is a no-op.
 
