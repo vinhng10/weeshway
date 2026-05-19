@@ -73,7 +73,7 @@ export const createStudioStore = (projectId: string) =>
             if (!items) return;
 
             const idx = items.findIndex(
-              (s) => time > s.startTime && time < s.endTime
+              (s) => time > s.startTime && time < s.endTime,
             );
             if (idx === -1) return;
 
@@ -82,7 +82,7 @@ export const createStudioStore = (projectId: string) =>
               idx,
               1,
               { startTime: item.startTime, endTime: time, selected: false },
-              { startTime: time, endTime: item.endTime, selected: false }
+              { startTime: time, endTime: item.endTime, selected: false },
             );
           });
         },
@@ -147,7 +147,9 @@ export const createStudioStore = (projectId: string) =>
           try {
             const { data } = await supabase
               .from("projects")
-              .select(`*, song:songs(id, name, artist_name, preview_url, artwork_url)`)
+              .select(
+                `*, song:songs(id, name, artist_name, preview_url, artwork_url)`,
+              )
               .eq("id", projectId)
               .single()
               .throwOnError();
@@ -165,8 +167,8 @@ export const createStudioStore = (projectId: string) =>
       {
         name: `studio-${projectId}`,
         storage: createJSONStorage(() => Storage),
-      }
-    )
+      },
+    ),
   );
 
 export type StudioStoreHook = ReturnType<typeof createStudioStore>;

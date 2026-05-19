@@ -80,9 +80,17 @@ export default function TabLayout() {
         name="(projects)"
         options={{
           title: "Projects",
-          headerShown: false,
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="grid" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(passes)"
+        options={{
+          title: "Passes",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="card" color={color} />
           ),
         }}
       />

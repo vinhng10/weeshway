@@ -73,7 +73,7 @@ export const Button: React.FunctionComponent<ButtonProps> = ({
 const styles = StyleSheet.create((theme) => ({
   style: {
     flexDirection: "row",
-    height: theme.gap(6),
+    height: theme.gap(5),
     paddingHorizontal: theme.gap(2),
     justifyContent: "center",
     alignItems: "center",
@@ -101,13 +101,13 @@ const styles = StyleSheet.create((theme) => ({
       position: {
         default: {},
         stickyBottom: {
-          width: "70%",
+          width: "60%",
           position: "absolute",
           alignSelf: "center",
           bottom: theme.gap(1.5 + 8),
         },
         stickyBottomAbsolute: {
-          width: "70%",
+          width: "60%",
           position: "absolute",
           alignSelf: "center",
           bottom: theme.gap(1.5),

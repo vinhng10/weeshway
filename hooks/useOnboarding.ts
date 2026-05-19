@@ -29,6 +29,6 @@ export const useOnboarding = create<OnboardingState>()(
     {
       name: "onboarding-storage",
       storage: createJSONStorage(() => Storage),
-    }
-  )
+    },
+  ),
 );

@@ -5,10 +5,7 @@ import { ThemedText } from "./themed-text";
 export function Branding() {
   return (
     <View style={styles.branding}>
-      <Image
-        source={require("@/assets/images/icon.png")}
-        style={styles.logo}
-      />
+      <Image source={require("@/assets/images/icon.png")} style={styles.logo} />
       <ThemedText type="h1">WeeshWay</ThemedText>
     </View>
   );

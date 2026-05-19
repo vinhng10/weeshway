@@ -13,6 +13,7 @@ export interface Section<T = any> {
 
 interface SectionListViewProps {
   sections: readonly Section[];
+  ListHeaderComponent?: React.ReactElement;
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   refetch?: () => void;
@@ -31,6 +32,7 @@ type FlashItem =
 
 export function SectionListView({
   sections,
+  ListHeaderComponent,
   hasNextPage,
   fetchNextPage,
   refetch,
@@ -82,6 +84,7 @@ export function SectionListView({
           return `header-${item.title}-${item.sectionIndex}`;
         return item.item?.id ?? `row-${item.sectionIndex}-${index}`;
       }}
+      ListHeaderComponent={ListHeaderComponent}
       contentContainerStyle={styles.scrollContainer}
       showsVerticalScrollIndicator={false}
       onEndReached={() => hasNextPage && fetchNextPage?.()}

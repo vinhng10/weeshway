@@ -20,6 +20,7 @@ export {
   syncPushToken,
 } from "./notifications-permission";
 export { Options } from "./options";
+export { PassCheckout } from "./pass-checkout";
 export { PhotoPicker } from "./photo-picker";
 export { ProfileSearch } from "./profile-search";
 export { Search } from "./search";

@@ -88,7 +88,8 @@ Deno.serve(async (req) => {
         const result = await processJob(job);
         completedJobs.push(result);
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Unknown error";
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
         failedJobs.push({ ...job, error: message });
       }
     }

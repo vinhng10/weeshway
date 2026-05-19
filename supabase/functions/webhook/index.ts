@@ -103,7 +103,8 @@ async function upsertBooking(
     price = EXCLUDED.price,
     currency = EXCLUDED.currency,
     to_stripe_account_id = EXCLUDED.to_stripe_account_id,
-    project_end_at = EXCLUDED.project_end_at
+    project_end_at = EXCLUDED.project_end_at,
+    pass_purchase_id = NULL
   WHERE
     -- 1. If it's the same payment intent, always allow the update (e.g. Created -> Succeeded)
     bookings.stripe_payment_intent_id = EXCLUDED.stripe_payment_intent_id

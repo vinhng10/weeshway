@@ -18,6 +18,6 @@ export const useRole = create<RoleState>()(
     {
       name: "role-storage",
       storage: createJSONStorage(() => Storage),
-    }
-  )
+    },
+  ),
 );

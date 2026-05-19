@@ -148,7 +148,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
         .getState()
         .showAlert(
           "Playback Error",
-          "Couldn't load the audio file. Please try again."
+          "Couldn't load the audio file. Please try again.",
         );
       return null;
     }
@@ -164,7 +164,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
         .getState()
         .showAlert(
           "Playback Error",
-          "Couldn't load the audio file. Please try again."
+          "Couldn't load the audio file. Please try again.",
         );
       return null;
     }

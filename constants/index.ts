@@ -216,6 +216,10 @@ export const PassPurchaseStatuses = {
   Canceled: "Canceled",
 } as const;
 
-export const PASS_EXPIRY_DAYS_OPTIONS = [30, 60, 90, 180, 365] as const;
+export const PASS_PURCHASE_ACTIVE_STATUSES: string[] = [
+  PassPurchaseStatuses.Succeeded,
+  PassPurchaseStatuses.Used,
+  PassPurchaseStatuses.Expired,
+];
+
 export const PASS_COOLING_OFF_DAYS = 7;
-export const PASS_TEACHER_CANCEL_GRACE_DAYS = 30;

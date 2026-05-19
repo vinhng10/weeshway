@@ -5,6 +5,7 @@ import {
   Carousel,
   Header,
   ProfileSearch,
+  ProjectCard,
   SelectBoxInput,
   SongCard,
   TextBoxInput,
@@ -125,6 +126,7 @@ function WishContent() {
               data={data.recommendations.map(
                 (recommendation) => recommendation.project,
               )}
+              renderItem={(item) => <ProjectCard data={item} />}
             />
           </View>
         )}

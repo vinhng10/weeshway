@@ -70,7 +70,7 @@ export const useLocationSearch = (query: string) => {
 
         const suggestions: PlaceSuggestion[] =
           data?.suggestions
-            ?.filter((s) => s.placePrediction?.placeId)
+            ?.filter((state) => state.placePrediction?.placeId)
             .map((s) => ({
               placeId: s.placePrediction!.placeId,
               displayName:

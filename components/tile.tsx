@@ -22,7 +22,6 @@ const AudioPlayButton = React.memo(function AudioPlayButton({
     <View style={styles.playButtonOverlay}>
       <IconButton
         icon={isPlaying ? "pause" : "play"}
-        iconSize={24}
         onPress={(e?: any) => {
           e?.stopPropagation?.();
           toggle(previewUrl);

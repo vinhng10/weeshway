@@ -72,7 +72,6 @@ export const Hero = ({
             )}
             <IconButton
               icon={isPlaying ? "pause" : "play"}
-              iconSize={36}
               onPress={handleAudioPlayer}
             />
           </View>

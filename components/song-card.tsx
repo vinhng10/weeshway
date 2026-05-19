@@ -49,7 +49,6 @@ export const SongCard = ({ data }: SongCardProps) => {
           </View>
           <IconButton
             icon={isPlaying ? "pause" : "play"}
-            iconSize={36}
             onPress={handlePlay}
           />
         </View>

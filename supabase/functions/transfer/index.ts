@@ -44,26 +44,43 @@ async function processJob(job: Job, fees: Fees) {
       );
     }
 
-    // 2. Retrieve the original charge from the PaymentIntent
-    const paymentIntent = await stripe.paymentIntents.retrieve(
-      booking.stripe_payment_intent_id,
-    );
+    // 2. Determine source charge and transfer amount
+    let transferAmount: number;
+    let chargeId: string;
 
-    if (!paymentIntent.latest_charge) {
-      throw new HttpError(
-        `Booking ${job.id}: no charge found on payment intent`,
-        400,
+    if (booking.pass_purchase_id) {
+      const [pp] = await sql`
+        SELECT stripe_charge_id, price, sessions
+        FROM public.pass_purchases
+        WHERE id = ${booking.pass_purchase_id}
+      `;
+      if (!pp)
+        throw new HttpError(
+          `Booking ${job.id}: pass_purchases row missing`,
+          400,
+        );
+      const perCreditNet = Math.ceil(
+        (pp.price * (1 - fees.transactionFee / 100)) / pp.sessions,
+      );
+      transferAmount = booking.spots * perCreditNet;
+      chargeId = pp.stripe_charge_id;
+    } else {
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        booking.stripe_payment_intent_id,
+      );
+      if (!paymentIntent.latest_charge) {
+        throw new HttpError(
+          `Booking ${job.id}: no charge found on payment intent`,
+          400,
+        );
+      }
+      chargeId = paymentIntent.latest_charge as string;
+      transferAmount = Math.round(
+        booking.price * booking.spots * (1 - fees.transactionFee / 100),
       );
     }
 
-    const chargeId = paymentIntent.latest_charge as string;
-    const classPrice = booking.price * booking.spots;
     const currency = booking.currency.toLowerCase();
-
-    // Teacher gets class price minus transaction fee
-    const transferAmount = Math.round(
-      classPrice * (1 - fees.transactionFee / 100),
-    );
 
     // 3. Create Stripe Transfer to teacher
     const transfer = await stripe.transfers.create({
@@ -71,10 +88,12 @@ async function processJob(job: Job, fees: Fees) {
       currency,
       destination: booking.to_stripe_account_id,
       source_transaction: chargeId,
-      transfer_group: `booking_${booking.project_id}_${booking.user_id}`,
       metadata: {
         jobId: job.jobId.toString(),
         bookingId: booking.id.toString(),
+        ...(booking.pass_purchase_id
+          ? { passPurchaseId: booking.pass_purchase_id }
+          : {}),
       },
     });
 

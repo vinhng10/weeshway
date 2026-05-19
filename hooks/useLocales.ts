@@ -15,7 +15,7 @@ interface LocaleState {
   exchange: (
     amount: number,
     fromCurrency: string,
-    toCurrency: string
+    toCurrency: string,
   ) => number;
 }
 
@@ -33,7 +33,7 @@ export const useLocales = create<LocaleState>((set, get) => ({
       const [{ data }, ratesRes] = await Promise.all([
         supabase.from("fees").select("key, value"),
         fetch(
-          "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json"
+          "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
         ),
       ]);
       const rates = await ratesRes.json();

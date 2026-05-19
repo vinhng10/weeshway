@@ -23,7 +23,7 @@ export class HttpError extends Error {
  */
 export function handleError(
   context: string,
-  error: unknown
+  error: unknown,
 ): { message: string; status: number } {
   console.error(`${context}:`, error);
 
@@ -42,8 +42,8 @@ export function handleError(
     error instanceof Error
       ? error.message
       : typeof error === "string"
-      ? error
-      : "Internal Server Error";
+        ? error
+        : "Internal Server Error";
 
   return { message, status: 500 };
 }

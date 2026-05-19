@@ -1,5 +1,6 @@
 import {
   BOOKING_ACTIVE_STATUSES,
+  BOOKING_STATUS,
   CLASS_FORMAT,
   PROJECT_STATUS,
 } from "@/constants";
@@ -87,7 +88,8 @@ export const ProjectCard = ({ data }: CardProps) => {
   const handleCheckoutExit = async () => {
     setVisible(false);
     await queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey.includes("classes"),
+      predicate: (query) =>
+        query.queryKey.includes("classes") || query.queryKey.includes("passes"),
     });
   };
 
@@ -96,23 +98,31 @@ export const ProjectCard = ({ data }: CardProps) => {
   };
 
   // Compute booking and wish status
-  const userBooking = data.bookings.find(
+  const userActiveBooking = data.bookings.find(
     (b) =>
       b.userId === profile?.id &&
       b.projectId === data.id &&
       BOOKING_ACTIVE_STATUSES.includes(b.status),
   );
-  const booked = !!userBooking;
+  const isRefunding = data.bookings.some(
+    (b) =>
+      b.userId === profile?.id &&
+      b.projectId === data.id &&
+      b.status === BOOKING_STATUS.REFUNDING,
+  );
+  const booked = !!userActiveBooking || isRefunding;
   const watching = data.watchings.some((w) => w.userId === profile?.id);
-  const spots = userBooking?.spots ?? 0;
+  const spots = userActiveBooking?.spots ?? 0;
   const released = data.status === PROJECT_STATUS.RELEASED;
-  const label = booked
-    ? `Booked x${spots}`
-    : released
-      ? "Book"
-      : watching
-        ? "Unwatch"
-        : "Watch";
+  const label = isRefunding
+    ? "Refunding"
+    : booked
+      ? `Booked x${spots}`
+      : released
+        ? "Book"
+        : watching
+          ? "Unwatch"
+          : "Watch";
   const onPress = booked ? undefined : released ? handleBook : handleWatch;
 
   return (
@@ -210,7 +220,6 @@ export const ProjectCard = ({ data }: CardProps) => {
             </View>
             <IconButton
               icon={isPlaying ? "pause" : "play"}
-              iconSize={36}
               onPress={handleAudioPlayer}
             />
           </View>

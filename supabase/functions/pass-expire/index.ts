@@ -32,7 +32,7 @@ async function processJob(job: Job): Promise<Job> {
 
     if (!pp) throw new Error("pass_purchase not found");
     if (pp.stripe_expiry_transfer_id) return job; // already transferred — idempotent skip
-    if (pp.remaining_sessions <= 0) return job;   // nothing to sweep
+    if (pp.remaining_sessions <= 0) return job; // nothing to sweep
 
     const fees = await getFees();
     const perCreditNet = Math.ceil(
@@ -89,7 +89,8 @@ Deno.serve(async (req) => {
         const result = await processJob(job);
         completedJobs.push(result);
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Unknown error";
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
         failedJobs.push({ ...job, error: message });
       }
     }

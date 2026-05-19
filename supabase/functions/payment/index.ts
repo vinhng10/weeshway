@@ -214,6 +214,7 @@ Deno.serve(async (req) => {
           currency: project.currency,
           to_stripe_account_id: toStripeAccountId,
           project_end_at: project.end_at,
+          pass_purchase_id: null,
         },
         { onConflict: "user_id,project_id" },
       );

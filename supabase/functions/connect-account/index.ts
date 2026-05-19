@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
   } catch (error: unknown) {
     const { message, status } = handleError(
       "Stripe Account Creation Error",
-      error
+      error,
     );
     return jsonResponse({ error: message }, status);
   }

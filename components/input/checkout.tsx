@@ -1,25 +1,50 @@
 import { MERCHANT_COUNTRY_CODE } from "@/constants";
-import { useFeatureFlags, useLocales } from "@/hooks";
+import { useFeatureFlags, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import { ProfileType, ProjectEnrichedType } from "@/types";
+import {
+  PassPurchaseStatus,
+  PassType,
+  PaymentIntentResponse,
+  ProfileType,
+  ProjectEnrichedType,
+} from "@/types";
+import { createStripeAppearance, parseFunctionsError } from "@/utils";
 import { PaymentMethodLayout, useStripe } from "@stripe/stripe-react-native";
-import { FunctionsHttpError } from "@supabase/supabase-js";
-import React, { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { Carousel } from "../carousel";
+import { Chip } from "../chip";
 import { Header } from "../header";
 import { Modal } from "../modal";
+import {
+  PassPurchaseCard,
+  PassPurchaseCardData,
+  PassSummaryCard,
+} from "../pass-card";
 import { ThemedText } from "../themed-text";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
+import { PassCheckout } from "./pass-checkout";
 import { SpotsSelector } from "./spots-selector";
 
-type PaymentIntentResponse = {
-  customerId: string;
-  paymentIntentClientSecret: string;
-  customerSessionClientSecret: string;
-  autoConfirmed?: boolean;
-  status?: string;
+type Tab = "pass" | "card";
+
+type EligiblePass = {
+  id: string;
+  sessions: number;
+  remainingSessions: number;
+  expiresAt: string;
+  status: PassPurchaseStatus;
+  price: number;
+  createdAt: string;
+  passes: {
+    id: string;
+    name: string;
+    photoUrl: string | null;
+    userId: string;
+  };
 };
 
 type CheckoutProps = {
@@ -29,25 +54,103 @@ type CheckoutProps = {
   project: ProjectEnrichedType;
 };
 
-export function Checkout({
-  visible,
-  onExit,
-  customer,
-  project,
-}: CheckoutProps) {
+export function Checkout(props: CheckoutProps) {
+  return (
+    <Modal visible={props.visible} onRequestClose={props.onExit}>
+      <Header title="Checkout" onPress={props.onExit} />
+      {props.visible && (
+        <Suspense fallback={null}>
+          <CheckoutContent {...props} />
+        </Suspense>
+      )}
+    </Modal>
+  );
+}
+
+function CheckoutContent({ onExit, project }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { theme } = useUnistyles();
-  const stripeEnabled = useFeatureFlags((s) => s.isEnabled("stripe"));
+  const stripeEnabled = useFeatureFlags((state) => state.isEnabled("stripe"));
   const formatMoney = useLocales((state) => state.formatMoney);
   const bookingFee = useLocales((state) => state.bookingFee);
   const exchange = useLocales((state) => state.exchange);
+  const queryClient = useQueryClient();
 
-  // States to manage separate stages
+  const teacherId = project.profile.id;
+
+  const { data: allEligible } = useSuspenseQuery<EligiblePass[]>({
+    queryKey: ["passes", teacherId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("pass_purchases")
+        .select(
+          "id, sessions, remaining_sessions, expires_at, status, price, created_at, passes!inner(id, name, photo_url, user_id)",
+        )
+        .eq("passes.user_id", teacherId)
+        .eq("status", "Succeeded")
+        .gt("expires_at", new Date().toISOString())
+        .order("expires_at", { ascending: true })
+        .throwOnError();
+      return (data ?? []) as any;
+    },
+  });
+
+  const { data: teacherPasses } = useSuspenseQuery<PassType[]>({
+    queryKey: ["classes", "profiles", teacherId, "passes"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("passes")
+        .select("*")
+        .eq("user_id", teacherId)
+        .eq("active", true)
+        .throwOnError();
+      return data ?? [];
+    },
+  });
+
+  const [spots, setSpots] = useState(1);
   const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
   const [statusMessage, setStatusMessage] = useState<string>("");
-  const [spots, setSpots] = useState(1);
+  const [redeemIndex, setRedeemIndex] = useState(0);
+  const [catalogIndex, setCatalogIndex] = useState(0);
+  const [passCheckoutVisible, setPassCheckoutVisible] = useState(false);
+
+  const eligible = useMemo(
+    () => allEligible.filter((p) => p.remainingSessions >= spots),
+    [allEligible, spots],
+  );
+
+  const hasEligible = eligible.length > 0;
+  const hasCatalog = teacherPasses.length > 0;
+  const hasPassOption = hasEligible || hasCatalog;
+
+  const [tab, setTab] = useState<Tab>(hasEligible ? "pass" : "card");
+
+  useEffect(() => {
+    if (!hasPassOption) setTab("card");
+  }, [hasPassOption]);
+
+  useEffect(() => {
+    if (tab === "pass") setSpots(1);
+  }, [tab]);
+
+  const prevAllEligibleLength = useRef(allEligible.length);
+  useEffect(() => {
+    if (allEligible.length > prevAllEligibleLength.current) {
+      setRedeemIndex(Math.max(0, eligible.length - 1));
+    } else if (eligible.length > 0 && redeemIndex >= eligible.length) {
+      setRedeemIndex(0);
+    }
+    prevAllEligibleLength.current = allEligible.length;
+  }, [allEligible.length, eligible.length, redeemIndex]);
+
+  useEffect(() => {
+    if (teacherPasses.length > 0 && catalogIndex >= teacherPasses.length) {
+      setCatalogIndex(0);
+    }
+  }, [teacherPasses.length, catalogIndex]);
 
   const currency = project.currency;
   const amount = project.price ?? 0;
@@ -55,56 +158,106 @@ export function Checkout({
   const fee = exchange(bookingFee, "USD", currency) * spots;
   const total = price + fee;
 
-  const fetchPaymentSheetParams = async () => {
-    if (amount <= 0) {
-      throw new Error("Error occurred. Please try again.");
-    }
+  const selectedEligible = eligible[redeemIndex];
+  const selectedCatalog = teacherPasses[catalogIndex];
 
+  const isCardTab = tab === "card";
+  const showRedeem = tab === "pass" && hasEligible;
+  const showCatalog = tab === "pass" && !hasEligible && hasCatalog;
+
+  const passPurchaseCards: PassPurchaseCardData[] = useMemo(
+    () =>
+      eligible.map((ep) => ({
+        id: ep.id,
+        status: ep.status,
+        sessions: ep.sessions,
+        remainingSessions: ep.remainingSessions,
+        expiresAt: ep.expiresAt,
+        price: ep.price,
+        createdAt: ep.createdAt,
+        pass: {
+          id: ep.passes.id,
+          name: ep.passes.name,
+          photoUrl: ep.passes.photoUrl,
+          teacher: {
+            id: project.profile.id,
+            fullName: project.profile.fullName,
+            avatarUrl: project.profile.avatarUrl,
+          },
+        },
+      })),
+    [
+      eligible,
+      project.profile.id,
+      project.profile.fullName,
+      project.profile.avatarUrl,
+    ],
+  );
+
+  const fetchPaymentSheetParams = async () => {
+    if (amount <= 0) throw new Error("Error occurred. Please try again.");
     const { data, error } =
       await supabase.functions.invoke<PaymentIntentResponse>("payment", {
         body: { projectId: project.id, spots },
       });
-
-    if (error) {
-      if (error instanceof FunctionsHttpError) {
-        const errorMessage = await error.context.json();
-        throw new Error(errorMessage.error);
-      } else {
-        throw new Error("Error occurred. Please try again.");
-      }
-    }
-
+    if (error) throw new Error(await parseFunctionsError(error));
     if (!data?.paymentIntentClientSecret || !data.customerSessionClientSecret) {
       throw new Error("Error occurred. Please try again.");
     }
-
     return data;
   };
 
-  const handlePay = async () => {
-    if (loading) return;
+  const redeemPass = async (passPurchaseId: string) => {
+    const { error } = await supabase.functions.invoke("pass-redeem", {
+      body: { passPurchaseId, projectId: project.id, spots },
+    });
+    if (error) throw new Error(await parseFunctionsError(error));
+  };
 
+  const handleTabChange = (newTab: Tab) => {
+    setTab(newTab);
     setStatus("idle");
     setStatusMessage("");
-    setLoading(true);
+  };
 
+  const handleAction = async () => {
+    if (loading) return;
+    setStatus("idle");
+    setStatusMessage("");
+
+    if (showCatalog) {
+      if (!selectedCatalog) return;
+      setPassCheckoutVisible(true);
+      return;
+    }
+
+    setLoading(true);
     try {
+      if (showRedeem) {
+        if (!selectedEligible) throw new Error("No pass selected.");
+        await redeemPass(selectedEligible.id);
+        setStatus("success");
+        setStatusMessage("Booking completed!");
+        await queryClient.invalidateQueries({
+          predicate: (q) => q.queryKey.includes("passes"),
+        });
+        return;
+      }
+
       const {
         customerId,
         paymentIntentClientSecret,
         customerSessionClientSecret,
         autoConfirmed,
-        status,
+        status: paymentStatus,
       } = await fetchPaymentSheetParams();
 
-      // Handle auto-confirmed payment with saved payment method
-      if (autoConfirmed && status === "succeeded") {
+      if (autoConfirmed && paymentStatus === "succeeded") {
         setStatus("success");
-        setStatusMessage("Payment completed!");
+        setStatusMessage("Booking completed!");
         return;
       }
 
-      // Initialize payment sheet if needed
       if (!isInitialized) {
         const { error } = await initPaymentSheet({
           merchantDisplayName: "WeeshWay",
@@ -113,41 +266,10 @@ export function Checkout({
           customerSessionClientSecret,
           paymentMethodOrder: ["card"],
           paymentMethodLayout: PaymentMethodLayout.Horizontal,
-          applePay: {
-            merchantCountryCode: MERCHANT_COUNTRY_CODE,
-          },
-          googlePay: {
-            merchantCountryCode: MERCHANT_COUNTRY_CODE,
-          },
-          appearance: {
-            colors: {
-              primary: theme.colors.primary,
-              background: theme.colors.background,
-              componentBackground: theme.colors.foreground,
-              componentBorder: theme.colors.dimmed,
-              componentDivider: theme.colors.dimmed,
-              primaryText: theme.colors.typography,
-              secondaryText: theme.colors.dimmed,
-              componentText: theme.colors.typography,
-              placeholderText: theme.colors.dimmed,
-              icon: theme.colors.dimmed,
-              error: theme.colors.danger,
-            },
-            shapes: {
-              borderRadius: theme.gap(2),
-            },
-            primaryButton: {
-              colors: {
-                background: theme.colors.contrast,
-                text: theme.colors.typographyContrast,
-              },
-              shapes: {
-                borderRadius: theme.gap(2),
-              },
-            },
-          },
+          applePay: { merchantCountryCode: MERCHANT_COUNTRY_CODE },
+          googlePay: { merchantCountryCode: MERCHANT_COUNTRY_CODE },
+          appearance: createStripeAppearance(theme),
         });
-
         if (error) throw new Error(error.message);
         setIsInitialized(true);
       }
@@ -173,21 +295,25 @@ export function Checkout({
     }
   };
 
-  useEffect(() => {
-    // Reset when modal closes or when project/customer changes
-    setLoading(false);
-    setIsInitialized(false);
-    setStatus("idle");
-    setStatusMessage("");
-    setSpots(1);
-  }, [visible, project.id, customer?.id]);
+  const handlePassCheckoutExit = async () => {
+    setPassCheckoutVisible(false);
+    await queryClient.invalidateQueries({
+      predicate: (q) => q.queryKey.includes("passes"),
+    });
+  };
+
+  const buttonLabel = (() => {
+    if (status === "success") return "See you in class!";
+    if (showCatalog) return "Purchase";
+    if (showRedeem) return "Redeem";
+    return "Pay";
+  })();
+
+  const carouselHeight = theme.gap(30);
 
   return (
-    <Modal visible={visible} onRequestClose={onExit}>
-      <Header title="Checkout" onPress={onExit} />
-
+    <>
       <View style={styles.content}>
-        {/* Class Info */}
         <View style={styles.classInfo}>
           <ThemedText type="h2">{project.song.name}</ThemedText>
           {project.song.artistName && (
@@ -202,35 +328,83 @@ export function Checkout({
           )}
         </View>
 
-        {/* Price and Quantity Row */}
-        <SpotsSelector
-          spots={spots}
-          onSpotsChange={setSpots}
-          loading={loading}
-          disabled={status === "success"}
-        />
+        {hasPassOption && (
+          <View style={styles.tabBar}>
+            <Chip
+              size="large"
+              color={tab === "pass" ? "contrast" : undefined}
+              label="By Pass"
+              onPress={
+                status !== "success" ? () => handleTabChange("pass") : undefined
+              }
+            />
+            <Chip
+              size="large"
+              color={tab === "card" ? "contrast" : undefined}
+              label="By Card"
+              onPress={
+                status !== "success" ? () => handleTabChange("card") : undefined
+              }
+            />
+          </View>
+        )}
 
-        {/* Price Breakdown */}
-        <View style={styles.priceBreakdown}>
-          <View style={[styles.row, styles.priceRow]}>
-            <ThemedText type="h3">Price</ThemedText>
-            <ThemedText type="h3">{formatMoney(price, currency)}</ThemedText>
-          </View>
-          <View style={[styles.row, styles.priceRow]}>
-            <ThemedText type="h3" color="dimmed">
-              Fee
-            </ThemedText>
-            <ThemedText type="h3" color="dimmed">
-              {formatMoney(fee, currency)}
-            </ThemedText>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.totalRow}>
-            <ThemedText type="h1">{formatMoney(total, currency)}</ThemedText>
-          </View>
-        </View>
+        {isCardTab && (
+          <SpotsSelector
+            spots={spots}
+            onSpotsChange={setSpots}
+            loading={loading}
+            disabled={status === "success"}
+          />
+        )}
 
-        {/* Status Messages */}
+        {showRedeem && (
+          <Carousel
+            data={passPurchaseCards}
+            height={carouselHeight}
+            onSnapToItem={setRedeemIndex}
+            parallaxScrollingScale={0.95}
+            parallaxAdjacentItemScale={0.88}
+            renderItem={(item) => (
+              <PassPurchaseCard passPurchase={item} showAction={false} />
+            )}
+          />
+        )}
+
+        {showCatalog && (
+          <Carousel
+            data={teacherPasses}
+            height={carouselHeight}
+            onSnapToItem={setCatalogIndex}
+            parallaxScrollingScale={0.95}
+            parallaxAdjacentItemScale={0.88}
+            renderItem={(item) => (
+              <PassSummaryCard pass={item} teacher={project.profile} />
+            )}
+          />
+        )}
+
+        {isCardTab && (
+          <View style={styles.priceBreakdown}>
+            <View style={[styles.row, styles.priceRow]}>
+              <ThemedText type="h3">Price</ThemedText>
+              <ThemedText type="h3">{formatMoney(price, currency)}</ThemedText>
+            </View>
+            <View style={[styles.row, styles.priceRow]}>
+              <ThemedText type="h3" color="dimmed">
+                Fee
+              </ThemedText>
+              <ThemedText type="h3" color="dimmed">
+                {formatMoney(fee, currency)}
+              </ThemedText>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.totalRow}>
+              <ThemedText type="h1">{formatMoney(total, currency)}</ThemedText>
+            </View>
+          </View>
+        )}
+
         <View style={styles.statusContainer}>
           {status === "error" && (
             <ThemedText type="h5" color="danger">
@@ -245,27 +419,40 @@ export function Checkout({
         </View>
       </View>
 
-      {/* Action Buttons */}
       <ButtonGroup direction="column" position="stickyBottomAbsolute">
         <Button
-          label={status === "success" ? "See you in class!" : "Pay"}
-          onPress={handlePay}
-          disabled={status === "success"}
+          label={buttonLabel}
+          onPress={handleAction}
+          disabled={status === "success" || loading}
         />
         <Button outlined label="Cancel" onPress={onExit} />
       </ButtonGroup>
-    </Modal>
+
+      {selectedCatalog && (
+        <PassCheckout
+          visible={passCheckoutVisible}
+          onExit={handlePassCheckoutExit}
+          pass={selectedCatalog}
+          teacherName={project.profile.fullName}
+        />
+      )}
+    </>
   );
 }
 
-const styles = StyleSheet.create((theme, rt) => ({
+const styles = StyleSheet.create((theme) => ({
   content: {
     flex: 1,
     paddingHorizontal: theme.gap(2),
-    gap: theme.gap(3),
+    gap: theme.gap(2),
   },
   classInfo: {
     gap: theme.gap(0.5),
+  },
+  tabBar: {
+    flexDirection: "row",
+    gap: theme.gap(1),
+    alignItems: "center",
   },
   row: {
     flexDirection: "row",

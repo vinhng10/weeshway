@@ -1,4 +1,3 @@
-import { ProjectEnrichedType } from "@/types";
 import * as React from "react";
 import { Dimensions, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
@@ -7,19 +6,35 @@ import RNCarousel, {
   Pagination,
 } from "react-native-reanimated-carousel";
 import { StyleSheet } from "react-native-unistyles";
-import { ProjectCard } from "./project-card";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-interface CarouselProps {
-  data: ProjectEnrichedType[];
+interface CarouselProps<T> {
+  data: T[];
+  renderItem: (item: T) => React.ReactElement;
+  width?: number;
+  height?: number;
+  onSnapToItem?: (index: number) => void;
+  parallaxScrollingScale?: number;
+  parallaxScrollingOffset?: number;
+  parallaxAdjacentItemScale?: number;
 }
 
-export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
+export function Carousel<T>({
+  data,
+  renderItem,
+  width,
+  height,
+  onSnapToItem,
+  parallaxScrollingScale,
+  parallaxScrollingOffset,
+  parallaxAdjacentItemScale,
+}: CarouselProps<T>) {
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
-  const carouselSize = screenWidth * 0.9; // 90% of screen width
-  const offset = carouselSize * 0.17;
+  const carouselWidth = width ?? screenWidth * 0.9;
+  const carouselHeight = height ?? carouselWidth;
+  const offset = carouselWidth * 0.17;
 
   if (!data || data.length === 0) return null;
 
@@ -28,35 +43,34 @@ export const Carousel: React.FunctionComponent<CarouselProps> = ({ data }) => {
       <RNCarousel
         ref={ref}
         loop={true}
-        width={carouselSize}
-        height={carouselSize}
+        width={carouselWidth}
+        height={carouselHeight}
         snapEnabled={true}
         pagingEnabled={true}
         data={data}
         onProgressChange={progress}
+        onSnapToItem={onSnapToItem}
         style={styles.carousel}
         mode="parallax"
         modeConfig={{
-          parallaxScrollingScale: 0.9,
-          parallaxScrollingOffset: offset,
-          parallaxAdjacentItemScale: 0.8,
+          parallaxScrollingScale: parallaxScrollingScale ?? 0.9,
+          parallaxScrollingOffset: parallaxScrollingOffset ?? offset,
+          parallaxAdjacentItemScale: parallaxAdjacentItemScale ?? 0.8,
         }}
-        renderItem={({ item }: { item: ProjectEnrichedType }) => (
-          <View style={styles.carouselItem}>
-            <ProjectCard data={item} />
-          </View>
+        renderItem={({ item }: { item: T }) => (
+          <View style={styles.carouselItem}>{renderItem(item)}</View>
         )}
       />
       <Pagination.Basic
         progress={progress}
-        data={data}
+        data={data as object[]}
         dotStyle={styles.dotStyle}
         activeDotStyle={styles.activeDotStyle}
         containerStyle={styles.dotContainer}
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create((theme) => ({
   carousel: {

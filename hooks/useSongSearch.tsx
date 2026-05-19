@@ -11,7 +11,7 @@ interface SongSearchState {
 }
 
 export const useSongSearch = (query: string): SongSearchState => {
-  const country = useLocales((s) => s.country);
+  const country = useLocales((state) => state.country);
   const [state, setState] = useState<SongSearchState>({
     songs: [],
     loading: false,

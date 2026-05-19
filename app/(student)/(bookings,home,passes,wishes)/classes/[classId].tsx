@@ -122,25 +122,30 @@ function ClassContent() {
   const handleCheckoutExit = async () => {
     setVisible(false);
     await queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey.includes("classes"),
+      predicate: (query) =>
+        query.queryKey.includes("classes") || query.queryKey.includes("passes"),
     });
   };
 
   const doCancel = async () => {
     if (!userBooking?.id) return;
     try {
+      const isPassFunded = !!userBooking.passPurchaseId;
       await supabase
         .from("bookings")
         .update({
-          status: stripeEnabled
-            ? BOOKING_STATUS.REFUNDING
-            : BOOKING_STATUS.CANCELED,
+          status:
+            stripeEnabled || isPassFunded
+              ? BOOKING_STATUS.REFUNDING
+              : BOOKING_STATUS.CANCELED,
         })
         .eq("id", userBooking.id)
         .throwOnError();
 
       await queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey.includes("classes"),
+        predicate: (query) =>
+          query.queryKey.includes("classes") ||
+          query.queryKey.includes("passes"),
       });
     } catch (error: any) {
       showAlert(

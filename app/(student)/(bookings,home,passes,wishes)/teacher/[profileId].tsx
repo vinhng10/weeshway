@@ -1,23 +1,45 @@
 import {
   Avatar,
   Boundary,
+  ChipBar,
+  ChipBarItemProps,
   Header,
+  PassCard,
   SectionListView,
   ThemedText,
   Tile,
   Video,
 } from "@/components";
-import { BOOKING_ACTIVE_STATUSES } from "@/constants";
+import { BOOKING_ACTIVE_STATUSES, TEACHER_PROFILE_VIEW } from "@/constants";
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
-import { ProfileEnrichedType, ProjectEnrichedType } from "@/types";
+import {
+  PassType,
+  ProfileEnrichedType,
+  ProjectEnrichedType,
+  TeacherProfileViewType,
+} from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useCallback, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-function TeacherProfileContent() {
-  const { profileId } = useLocalSearchParams<{ profileId: string }>();
+const renderTile = (data: ProjectEnrichedType): React.ReactElement => (
+  <Tile
+    imageSource={data.artworkUrl ?? data.song.artworkUrl}
+    title={data.song.name}
+    subtitle={data.song.artistName}
+    metadata={[data.style, data.level].filter(Boolean).join(" • ")}
+    previewUrl={data.song.previewUrl}
+    stats={data}
+    onPress={() => router.dismissTo(`../classes/${data.id}`)}
+  />
+);
+
+function TeacherProfileContent({ profileId }: { profileId: string }) {
+  const [view, setView] = useState<TeacherProfileViewType>(
+    TEACHER_PROFILE_VIEW.CLASSES,
+  );
 
   const {
     data: profile,
@@ -46,9 +68,9 @@ function TeacherProfileContent() {
     queryKey: ["classes", "profiles", profileId, "projects"],
     tableName: "projects",
     columns: `
-      *, 
+      *,
       song:songs(id, name, artist_name, preview_url, artwork_url),
-      bookings:bookings(*), 
+      bookings:bookings(*),
       watchings:watchings(*)
     `,
     trailingQuery: (query) =>
@@ -58,12 +80,49 @@ function TeacherProfileContent() {
         .or(`start_at.gte.${new Date().toISOString()},start_at.is.null`),
   });
 
-  const renderProfile = useCallback(
-    (data: ProfileEnrichedType): React.ReactElement => (
-      <View style={styles.header}>
-        <Avatar source={data.avatarUrl} size="large" shape="circle" bordered />
-        <ThemedText type="h3">{data.fullName}</ThemedText>
-        {data.bio && (
+  const {
+    data: passes,
+    refetch: refetchPasses,
+    isRefetching: isRefetchingPasses,
+  } = useSuspenseQuery<PassType[]>({
+    queryKey: ["classes", "profiles", profileId, "passes"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("passes")
+        .select("*")
+        .eq("user_id", profileId)
+        .eq("active", true)
+        .throwOnError();
+      return data ?? [];
+    },
+  });
+
+  const renderPassCard = useCallback(
+    (pass: PassType): React.ReactElement => <PassCard pass={pass} />,
+    [],
+  );
+
+  const chipItems: ChipBarItemProps[] = [
+    {
+      label: "View",
+      value: view,
+      options: TEACHER_PROFILE_VIEW,
+      modal: false,
+      onValueChange: setView,
+    },
+  ];
+
+  const listHeaderComponent = (
+    <View style={styles.listHeader}>
+      <View style={styles.profileHeader}>
+        <Avatar
+          source={profile.avatarUrl}
+          size="large"
+          shape="circle"
+          bordered
+        />
+        <ThemedText type="h3">{profile.fullName}</ThemedText>
+        {profile.bio && (
           <ThemedText
             type="h5"
             color="dimmed"
@@ -71,83 +130,60 @@ function TeacherProfileContent() {
             ellipsizeMode="tail"
             style={styles.bio}
           >
-            {data.bio}
+            {profile.bio}
           </ThemedText>
         )}
       </View>
-    ),
-    [],
+      {profile.videoUrls && (
+        <View style={styles.videoContainer}>
+          {profile.videoUrls.map((video, index) => (
+            <Video key={index} source={video} />
+          ))}
+        </View>
+      )}
+      <ChipBar items={chipItems} centered />
+    </View>
   );
 
-  const renderVideos = useCallback(
-    (data: string[]): React.ReactElement => (
-      <View style={styles.videoContainer}>
-        {data.map((video: string, index: number) => (
-          <Video key={index} source={video} />
-        ))}
-      </View>
-    ),
-    [],
-  );
+  const isClasses = view === TEACHER_PROFILE_VIEW.CLASSES;
 
-  const renderTile = useCallback(
-    (data: ProjectEnrichedType): React.ReactElement => (
-      <Tile
-        imageSource={data.artworkUrl ?? data.song.artworkUrl}
-        title={data.song.name}
-        subtitle={data.song.artistName}
-        metadata={[data.style, data.level].filter(Boolean).join(" • ")}
-        previewUrl={data.song.previewUrl}
-        stats={data}
-        onPress={() => router.dismissTo(`../classes/${data.id}`)}
-      />
-    ),
-    [],
-  );
-
-  const videoData = useMemo(
-    () => (profile.videoUrls ? [profile.videoUrls] : []),
-    [profile.videoUrls],
-  );
-
-  const sections = [
-    {
-      data: [profile],
-      render: renderProfile,
-    },
-    {
-      data: videoData,
-      render: renderVideos,
-    },
-    {
-      title: "Classes",
-      data: projects,
-      render: renderTile,
-    },
-  ];
+  const sections = isClasses
+    ? [{ title: "Classes", data: projects, render: renderTile }]
+    : [{ title: "Passes", data: passes, render: renderPassCard }];
 
   const refetch = useCallback(() => {
     refetchProfile();
-    refetchProjects();
-  }, [refetchProfile, refetchProjects]);
+    if (isClasses) {
+      refetchProjects();
+    } else {
+      refetchPasses();
+    }
+  }, [refetchProfile, refetchProjects, refetchPasses, isClasses]);
+
+  const isRefetching =
+    isRefetchingProfile ||
+    (isClasses ? isRefetchingProjects : isRefetchingPasses);
 
   return (
     <SectionListView
       sections={sections}
-      hasNextPage={hasNextPage}
-      fetchNextPage={fetchNextPage}
+      ListHeaderComponent={listHeaderComponent}
+      hasNextPage={isClasses ? hasNextPage : false}
+      fetchNextPage={isClasses ? fetchNextPage : undefined}
       refetch={refetch}
-      isRefetching={isRefetchingProfile || isRefetchingProjects}
+      isRefetching={isRefetching}
     />
   );
 }
 
 export default function TeacherProfile() {
+  const { profileId } = useLocalSearchParams<{ profileId: string }>();
+
   return (
     <View style={styles.container}>
       <Header title="Profile" />
       <Boundary>
-        <TeacherProfileContent />
+        <TeacherProfileContent profileId={profileId} />
       </Boundary>
     </View>
   );
@@ -157,7 +193,11 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
   },
-  header: {
+  listHeader: {
+    gap: theme.gap(1),
+    paddingBottom: theme.gap(1),
+  },
+  profileHeader: {
     alignSelf: "center",
     alignItems: "center",
     textAlign: "center",

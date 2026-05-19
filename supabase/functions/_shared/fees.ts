@@ -17,12 +17,12 @@ export async function getFees(): Promise<Fees> {
     const [{ data }, ratesRes] = await Promise.all([
       supabase.from("fees").select("key, value"),
       fetch(
-        "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json"
+        "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
       ),
     ]);
     const rates = await ratesRes.json();
     const map = Object.fromEntries(
-      (data ?? []).map((r: { key: string; value: number }) => [r.key, r.value])
+      (data ?? []).map((r: { key: string; value: number }) => [r.key, r.value]),
     );
     return {
       bookingFee: map.booking_fee ?? defaults.bookingFee,
@@ -42,7 +42,7 @@ export function exchange(
   amount: number,
   fromCurrency: string,
   toCurrency: string,
-  usdRates: Record<string, number>
+  usdRates: Record<string, number>,
 ): number {
   if (fromCurrency.toLowerCase() === toCurrency.toLowerCase()) return amount;
   const from = fromCurrency.toLowerCase();

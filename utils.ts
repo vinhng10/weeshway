@@ -2,6 +2,7 @@ import { DAY, MONTH, WEBSITE_URL } from "@/constants";
 import { useAlert } from "@/hooks";
 import { ProjectEnrichedType } from "@/types";
 import * as Clipboard from "expo-clipboard";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { File, Paths } from "expo-file-system";
 import {
   launchImageLibraryAsync,
@@ -23,6 +24,17 @@ export const formatDate = (date?: Date, compact: boolean = false): string => {
   return compact
     ? `${month.slice(0, 3)} ${day}`
     : `${dayOfWeek.slice(0, 3)}, ${month.slice(0, 3)} ${day}, ${year}`;
+};
+
+export const formatExpiry = (date: Date, compact: boolean = false): string => {
+  const ms = date.getTime() - Date.now();
+  const days = Math.round(ms / 86_400_000);
+  if (compact) return `${days} days`;
+  if (days > 1) return `Expires in ${days} days`;
+  if (days === 1) return "Expires tomorrow";
+  if (days === 0) return "Expires today";
+  if (days === -1) return "Expired yesterday";
+  return `Expired ${-days} days ago`;
 };
 
 export const formatTime = (date?: Date): string => {
@@ -55,6 +67,52 @@ export async function share(data: ProjectEnrichedType): Promise<void> {
   } finally {
     if (file?.exists) await file.delete();
   }
+}
+
+export async function parseFunctionsError(error: unknown): Promise<string> {
+  if (error instanceof FunctionsHttpError) {
+    const body = await error.context.json();
+    return body.error ?? "Error occurred. Please try again.";
+  }
+  return "Error occurred. Please try again.";
+}
+
+export function createStripeAppearance(theme: {
+  colors: {
+    primary: string;
+    background: string;
+    foreground: string;
+    dimmed: string;
+    typography: string;
+    typographyContrast: string;
+    contrast: string;
+    danger: string;
+  };
+  gap: (n: number) => number;
+}) {
+  return {
+    colors: {
+      primary: theme.colors.primary,
+      background: theme.colors.background,
+      componentBackground: theme.colors.foreground,
+      componentBorder: theme.colors.dimmed,
+      componentDivider: theme.colors.dimmed,
+      primaryText: theme.colors.typography,
+      secondaryText: theme.colors.dimmed,
+      componentText: theme.colors.typography,
+      placeholderText: theme.colors.dimmed,
+      icon: theme.colors.dimmed,
+      error: theme.colors.danger,
+    },
+    shapes: { borderRadius: theme.gap(2) },
+    primaryButton: {
+      colors: {
+        background: theme.colors.contrast,
+        text: theme.colors.typographyContrast,
+      },
+      shapes: { borderRadius: theme.gap(2) },
+    },
+  };
 }
 
 export async function pickImage(): Promise<string | undefined> {

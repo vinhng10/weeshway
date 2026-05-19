@@ -142,6 +142,7 @@ export type BookingType = {
   userId: string;
   projectId: string;
   stripePaymentIntentId: string;
+  passPurchaseId?: string | null;
   status: BookingStatusType;
   spots: number;
   price: number;
@@ -308,4 +309,12 @@ export type PassPurchaseType = {
 export type PassPurchaseEnrichedType = PassPurchaseType & {
   pass: PassType | null;
   teacher: ProfileType | null;
+};
+
+export type PaymentIntentResponse = {
+  customerId: string;
+  paymentIntentClientSecret: string;
+  customerSessionClientSecret: string;
+  autoConfirmed?: boolean;
+  status?: string;
 };

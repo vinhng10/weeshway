@@ -391,11 +391,31 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
+[functions.pass-expire]
+enabled = true
+verify_jwt = false
+
+[functions.pass-payment]
+enabled = true
+verify_jwt = false
+
+[functions.pass-redeem]
+enabled = true
+verify_jwt = false
+
+[functions.pass-refund]
+enabled = true
+verify_jwt = false
+
 [functions.payment]
 enabled = true
 verify_jwt = false
 
 [functions.payment-methods]
+enabled = true
+verify_jwt = false
+
+[functions.penalty]
 enabled = true
 verify_jwt = false
 

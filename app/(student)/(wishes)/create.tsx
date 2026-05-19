@@ -42,7 +42,7 @@ export default function MakeAWish() {
     if (!song) {
       showAlert(
         "Song Required",
-        "Please search and select a song before making a wish.",
+        "Please select a song before making a wish.",
       );
       return;
     }

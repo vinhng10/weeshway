@@ -42,7 +42,7 @@ function lazy<T>(init: () => Promise<T>): () => Promise<T> {
 
 const getFaad2Module = lazy(async () => {
   const resp = await fetch(
-    "https://unpkg.com/@ohrstrom/faad2-wasm@2.11.2-rc.4/faad2_wasm.wasm"
+    "https://unpkg.com/@ohrstrom/faad2-wasm@2.11.2-rc.4/faad2_wasm.wasm",
   );
   if (!resp.ok) throw new HttpError("Failed to fetch FAAD2 WASM", 502);
   return Faad2ModuleFactory({
@@ -57,7 +57,7 @@ const getOnnxSession = lazy(async () => {
   if (error || !data)
     throw new HttpError(
       `Failed to download ONNX model: ${error?.message}`,
-      502
+      502,
     );
   const buf = new Uint8Array(await data.arrayBuffer());
   return ort.InferenceSession.create(buf, {
@@ -86,7 +86,7 @@ function sampleRateFromASC(asc: Uint8Array): number {
  */
 function selectMiddleFrames(
   frames: { offset: number; size: number }[],
-  ascSampleRate: number
+  ascSampleRate: number,
 ): { offset: number; size: number }[] {
   const neededFrames = Math.ceil((15 * ascSampleRate) / AAC_FRAME_SAMPLES);
   const margin = 4; // extra frames for AAC decoder priming
@@ -106,7 +106,7 @@ function boxType(bytes: Uint8Array, offset: number): string {
     bytes[offset],
     bytes[offset + 1],
     bytes[offset + 2],
-    bytes[offset + 3]
+    bytes[offset + 3],
   );
 }
 
@@ -262,7 +262,7 @@ function parseMp4(buffer: ArrayBuffer): Mp4ParseResult {
 // --- Decode M4A to mono PCM using FAAD2 ---
 
 async function decodeM4a(
-  fileBuffer: ArrayBuffer
+  fileBuffer: ArrayBuffer,
 ): Promise<{ samples: Float32Array; sampleRate: number }> {
   const { asc, frames: allFrames } = parseMp4(fileBuffer);
   const fileBytes = new Uint8Array(fileBuffer);
@@ -294,7 +294,7 @@ async function decodeM4a(
     const inPtr = mod._malloc(frame.size + PAD);
     mod.HEAPU8.set(
       fileBytes.subarray(frame.offset, frame.offset + frame.size),
-      inPtr
+      inPtr,
     );
     mod.HEAPU8.fill(0, inPtr + frame.size, inPtr + frame.size + PAD);
 
@@ -310,8 +310,8 @@ async function decodeM4a(
 
     pcmChunks.push(
       new Float32Array(
-        mod.HEAPU8.buffer.slice(outPtr, outPtr + totalSamples * 4)
-      )
+        mod.HEAPU8.buffer.slice(outPtr, outPtr + totalSamples * 4),
+      ),
     );
   }
 
@@ -451,12 +451,12 @@ Deno.serve(async (req) => {
       Promise.all(Array.from({ length: CONCURRENCY_LIMIT }, worker)),
       new Promise((_, reject) =>
         addEventListener("beforeunload", () =>
-          reject(new Error("Worker terminating"))
-        )
+          reject(new Error("Worker terminating")),
+        ),
       ),
     ]).catch(() => {
       pendingJobs.forEach((j) =>
-        failedJobs.push({ ...j, error: "Termination" })
+        failedJobs.push({ ...j, error: "Termination" }),
       );
     });
 
@@ -470,12 +470,12 @@ Deno.serve(async (req) => {
       {
         "X-Completed-Jobs": completedJobs.length.toString(),
         "X-Failed-Jobs": failedJobs.length.toString(),
-      }
+      },
     );
   } catch (error: unknown) {
     const { message, status } = handleError(
       "Embedding Processing Error",
-      error
+      error,
     );
     return jsonResponse({ error: message }, status);
   }

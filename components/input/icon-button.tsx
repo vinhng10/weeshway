@@ -32,8 +32,8 @@ export const IconButton: React.FunctionComponent<IconButtonProps> = ({
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    width: theme.gap(6),
-    height: theme.gap(6),
+    width: theme.gap(5),
+    height: theme.gap(5),
     borderRadius: 999,
     justifyContent: "center",
     alignItems: "center",

@@ -99,7 +99,8 @@ Deno.serve(async (req) => {
         WHERE public.bookings.status NOT IN ('Succeeded', 'CheckedIn', 'Transferred', 'Refunding')
         RETURNING id
       `;
-      if (!booking) throw new HttpError("You've already booked this class.", 409);
+      if (!booking)
+        throw new HttpError("You've already booked this class.", 409);
 
       await tx`
         UPDATE public.pass_purchases

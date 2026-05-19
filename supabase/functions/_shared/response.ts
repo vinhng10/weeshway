@@ -7,7 +7,7 @@
 export const jsonResponse = (
   data: object,
   status = 200,
-  headers: Record<string, string> = {}
+  headers: Record<string, string> = {},
 ) =>
   new Response(JSON.stringify(data), {
     status,

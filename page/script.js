@@ -1018,7 +1018,12 @@ function wireUpPhoneCardEvents(container) {
   }
 }
 
-function renderPhoneCard(container, song, title = "Featured", bookText = "Book") {
+function renderPhoneCard(
+  container,
+  song,
+  title = "Featured",
+  bookText = "Book",
+) {
   if (!container) return;
   const mockSong = { ...MOCK_SONGS[0], name: song.name, artist: song.artist };
   const cls = generateMockClasses(mockSong)[0];

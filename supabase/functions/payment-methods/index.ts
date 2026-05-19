@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
       stripeAccountId,
       {
         type: "card",
-      }
+      },
     );
 
     // Extract only card brand and last4
@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
   } catch (error: unknown) {
     const { message, status } = handleError(
       "List Payment Methods Error",
-      error
+      error,
     );
     return jsonResponse({ error: message }, status);
   }

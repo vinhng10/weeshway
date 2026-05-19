@@ -12,6 +12,12 @@ export { ChipBar, ChipBarItem, type ChipBarItemProps } from "./chip-bar";
 export { Header } from "./header";
 export { Hero } from "./hero";
 export { MenuItem } from "./menu-item";
+export {
+  PassCard,
+  PassPurchaseCard,
+  PassSummaryCard,
+  type PassPurchaseCardData,
+} from "./pass-card";
 export { Photo } from "./photo";
 export { Pressable } from "./pressable";
 export { ProjectCard } from "./project-card";

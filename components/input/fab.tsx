@@ -123,9 +123,9 @@ const styles = StyleSheet.create((theme) => ({
   },
   menu: {
     position: "absolute",
-    width: "70%",
+    width: "60%",
     alignSelf: "center",
-    bottom: theme.gap(9.5 + 8),
+    bottom: theme.gap(8.5 + 8),
     gap: theme.gap(1),
   },
   action: {
@@ -142,9 +142,9 @@ const styles = StyleSheet.create((theme) => ({
     },
   },
   iconContainer: {
-    width: theme.gap(5),
-    height: theme.gap(5),
-    borderRadius: theme.gap(2),
+    width: theme.gap(4.5),
+    height: theme.gap(4.5),
+    borderRadius: theme.gap(1.5),
     backgroundColor: theme.colors.contrast,
     justifyContent: "center",
     alignItems: "center",
@@ -153,8 +153,8 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.typographyContrast,
   },
   button: {
-    width: "70%",
-    height: theme.gap(6),
+    width: "60%",
+    height: theme.gap(5),
     position: "absolute",
     alignSelf: "center",
     bottom: theme.gap(1.5 + 8),

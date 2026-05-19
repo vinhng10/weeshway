@@ -4,6 +4,7 @@ import {
   ChipBar,
   ChipBarItemProps,
   LocationPermission,
+  ProjectCard,
   Search,
   SectionListView,
   Tile,
@@ -109,7 +110,10 @@ function HomeContent({ status, style, level }: HomeContentProps) {
 
   const renderCarousel = useCallback(
     (data: ProjectEnrichedType[]): React.ReactElement => (
-      <Carousel data={data} />
+      <Carousel
+        data={data}
+        renderItem={(item) => <ProjectCard data={item} />}
+      />
     ),
     [],
   );

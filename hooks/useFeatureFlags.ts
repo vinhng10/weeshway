@@ -16,7 +16,7 @@ export const useFeatureFlags = create<FeatureFlagsState>((set, get) => ({
     try {
       const { data } = await supabase.from("flags").select("flag, enabled");
       const map = Object.fromEntries(
-        (data ?? []).map((r) => [r.flag, r.enabled])
+        (data ?? []).map((r) => [r.flag, r.enabled]),
       );
       set({ flags: map, isLoaded: true });
     } catch {

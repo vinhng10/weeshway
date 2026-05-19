@@ -69,14 +69,21 @@ CREATE INDEX pass_purchases_user_status_idx ON public.pass_purchases (user_id, s
 -- Step 4 — bookings.pass_purchase_id column
 -- Pass-funded bookings have no Stripe PaymentIntent — drop the NOT NULL on
 -- stripe_payment_intent_id so pass-redeem can insert rows without one.
--- (No CHECK enforcing PI-XOR-pass: ON DELETE SET NULL cascades on user/pass
--- can null both columns on orphaned rows.)
+--
+-- CHECK enforces "at most one funding source set". Both NULL is permitted so
+-- ON DELETE SET NULL cascades on the pass_purchases FK don't trip the
+-- constraint when a parent pass is removed. The XOR-style (exactly one) form
+-- would break those orphan-handling paths. Any writer that takes over a row
+-- (pass-redeem → card, or card → pass) must clear the other column or the
+-- UPDATE will fail at the DB.
 -- -----------------------------------------------------------------------------
 
 ALTER TABLE public.bookings
   ADD COLUMN pass_purchase_id uuid REFERENCES public.pass_purchases(id) ON DELETE SET NULL,
   ADD COLUMN stripe_penalty_charge_id text,
-  ALTER COLUMN stripe_payment_intent_id DROP NOT NULL;
+  ALTER COLUMN stripe_payment_intent_id DROP NOT NULL,
+  ADD CONSTRAINT bookings_single_funding_source
+    CHECK (pass_purchase_id IS NULL OR stripe_payment_intent_id IS NULL);
 
 CREATE INDEX bookings_pass_purchase_id_idx
   ON public.bookings (pass_purchase_id) WHERE pass_purchase_id IS NOT NULL;
@@ -113,7 +120,7 @@ CREATE TRIGGER validate_pass_immutability
 
 CREATE OR REPLACE FUNCTION public.validate_pass_refund_eligibility()
 RETURNS TRIGGER
-LANGUAGE plpgsql
+LANGUAGE plpgsql SECURITY DEFINER
 SET search_path TO ''
 AS $$
 BEGIN
@@ -272,10 +279,18 @@ SELECT pgmq.create('penalty_jobs');
 ALTER TABLE public.passes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pass_purchases ENABLE ROW LEVEL SECURITY;
 
--- passes: any authenticated user reads active passes; owner reads/writes all their own
+-- passes: any authenticated user reads active passes; owner reads/writes all their own;
+-- purchasers retain read access to inactive passes so wallet cards keep rendering.
 CREATE POLICY "Enable read access for all users"
   ON public.passes FOR SELECT TO authenticated
   USING (active = true OR user_id = (SELECT auth.uid()));
+
+CREATE POLICY "Purchasers can read pass"
+  ON public.passes FOR SELECT TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM public.pass_purchases pp
+    WHERE pp.pass_id = passes.id AND pp.user_id = (SELECT auth.uid())
+  ));
 
 CREATE POLICY "Enable insert for users based on user_id"
   ON public.passes FOR INSERT TO authenticated
