@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
       // Lock pass_purchase; join passes + profiles to get teacher identity
       const [pp] = await tx`
         SELECT pp.id, pp.remaining_sessions, pp.expires_at, pp.status,
+               pp.price, pp.sessions,
                p.user_id AS pass_teacher_id,
                prof.stripe_account_id AS teacher_stripe_account_id
         FROM public.pass_purchases pp
@@ -70,7 +71,9 @@ Deno.serve(async (req) => {
           400,
         );
 
-      // price = project class price (informational; transfer worker derives per-credit net from pass)
+      // price = per-credit gross (pp.price / pp.sessions). The stats view sums
+      // b.price * b.spots uniformly across cash and pass bookings, so storing the
+      // per-credit value here makes accrual earnings correct without a JOIN.
       // ON CONFLICT path lets the pass take over any non-active row — including a 'Created'
       // cash booking from an abandoned Stripe flow. Only confirmed/in-flight bookings block
       // the takeover; empty RETURNING then signals a genuine duplicate.
@@ -80,7 +83,7 @@ Deno.serve(async (req) => {
           price, currency, project_end_at, to_stripe_account_id
         ) VALUES (
           ${userId}, ${projectId}, ${passPurchaseId}, ${spots}, 'Succeeded',
-          ${project.price}, ${project.currency}, ${project.end_at},
+          ${pp.price / pp.sessions}, ${project.currency}, ${project.end_at},
           ${pp.teacher_stripe_account_id}
         )
         ON CONFLICT (user_id, project_id) DO UPDATE

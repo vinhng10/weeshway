@@ -217,14 +217,17 @@ BEGIN
                 END
             WHERE id = OLD.pass_purchase_id;
 
+            -- LOAD-BEARING: pass-funded refunds intentionally set NEW.status='Canceled'
+            -- (not 'Refunding') so the refund_bookings AFTER trigger — which fires on
+            -- NEW.status='Refunding' — does NOT enqueue a cash refund. Session
+            -- restoration above replaces the cash refund. Do not change to 'Refunding'
+            -- without also gating the AFTER trigger on pass_purchase_id IS NULL.
             NEW.status := 'Canceled';
 
             IF NEW.refund_initiator = 'Teacher'::public.role THEN
                 PERFORM pgmq.send('penalty_jobs', jsonb_build_object('booking_id', NEW.id));
             END IF;
 
-            -- Return with status='Canceled'; the refund_bookings AFTER trigger
-            -- checks NEW.status='Refunding' so it will not fire
             RETURN NEW;
         END IF;
 
