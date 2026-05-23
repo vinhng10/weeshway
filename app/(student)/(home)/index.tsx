@@ -62,6 +62,10 @@ function HomeContent({ status, style, level }: HomeContentProps) {
         .in("project.bookings.status", BOOKING_ONGOING_STATUSES)
         .limit(20);
 
+      query = query.in("project.status", [
+        PROJECT_STATUS.DRAFT,
+        PROJECT_STATUS.RELEASED,
+      ]);
       if (style) {
         query = query.eq("project.style", style);
       }
@@ -98,8 +102,7 @@ function HomeContent({ status, style, level }: HomeContentProps) {
     trailingQuery: (query) => {
       query = query
         .or(`start_at.is.null,start_at.gte.${new Date().toISOString()}`)
-        .neq("status", PROJECT_STATUS.CANCELED)
-        .neq("status", PROJECT_STATUS.DELETED)
+        .in("status", [PROJECT_STATUS.DRAFT, PROJECT_STATUS.RELEASED])
         .in("bookings.status", BOOKING_ONGOING_STATUSES);
       if (status) query = query.eq("status", status);
       if (style) query = query.eq("style", style);
@@ -187,7 +190,10 @@ export default function Home() {
     {
       label: "Status",
       value: status,
-      options: PROJECT_STATUS,
+      options: {
+        DRAFT: PROJECT_STATUS.DRAFT,
+        RELEASED: PROJECT_STATUS.RELEASED,
+      },
       modal: true,
       onValueChange: setStatus,
     },

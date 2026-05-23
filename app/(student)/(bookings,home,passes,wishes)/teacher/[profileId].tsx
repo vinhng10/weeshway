@@ -10,7 +10,11 @@ import {
   Tile,
   Video,
 } from "@/components";
-import { BOOKING_ACTIVE_STATUSES, TEACHER_PROFILE_VIEW } from "@/constants";
+import {
+  BOOKING_ACTIVE_STATUSES,
+  PROJECT_STATUS,
+  TEACHER_PROFILE_VIEW,
+} from "@/constants";
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
@@ -76,6 +80,7 @@ function TeacherProfileContent({ profileId }: { profileId: string }) {
     trailingQuery: (query) =>
       query
         .eq("user_id", profileId)
+        .in("status", [PROJECT_STATUS.DRAFT, PROJECT_STATUS.RELEASED])
         .in("bookings.status", BOOKING_ACTIVE_STATUSES)
         .or(`start_at.gte.${new Date().toISOString()},start_at.is.null`),
   });
