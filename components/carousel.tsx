@@ -83,7 +83,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   dotContainer: {
     gap: theme.gap(1),
-    marginTop: theme.gap(-2),
+    marginTop: theme.gap(-1.25),
   },
   dotStyle: {
     backgroundColor: theme.colors.dimmed,

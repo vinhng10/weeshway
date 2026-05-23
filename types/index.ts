@@ -141,8 +141,9 @@ export type BookingType = {
   createdAt: Date;
   userId: string;
   projectId: string;
-  stripePaymentIntentId: string;
+  stripePaymentIntentId?: string | null;
   passPurchaseId?: string | null;
+  stripePenaltyChargeId?: string | null;
   status: BookingStatusType;
   spots: number;
   price: number;
@@ -151,7 +152,11 @@ export type BookingType = {
   projectEndAt?: Date;
   checkedInAt?: Date;
   stripeTransferId?: string;
+};
+
+export type BookingDetailType = BookingType & {
   secret?: BookingSecretType | null;
+  passPurchase?: { status: PassPurchaseStatus } | null;
 };
 
 export type BookingSecretType = {
@@ -217,7 +222,7 @@ export type ProjectEnrichedType = ProjectType & {
   profile: ProfileType;
   song: SongType;
   location?: LocationType;
-  bookings: BookingType[];
+  bookings: BookingDetailType[];
   watchings: WatchingType[];
 };
 
@@ -229,11 +234,11 @@ export type RecommendationEnrichedType = RecommendationType & {
   project: ProjectEnrichedType;
 };
 
-export type BookingEnrichedType = BookingType & {
+export type BookingEnrichedType = BookingDetailType & {
   project: ProjectEnrichedType;
 };
 
-export type BookingCheckinEnrichedType = BookingType & {
+export type BookingCheckinEnrichedType = BookingDetailType & {
   profile: ProfileType;
 };
 

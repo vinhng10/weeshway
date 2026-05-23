@@ -60,7 +60,7 @@ function ClassContent() {
             profile:profiles(*),
             song:songs(id, name, artist_name, preview_url, artwork_url),
             location:locations(*),
-            bookings:bookings(*, secret:booking_secrets(*)),
+            bookings:bookings(*, secret:booking_secrets(*), passPurchase:pass_purchases(status)),
             watchings:watchings(*)
           `,
           )
@@ -84,6 +84,11 @@ function ClassContent() {
   const isReleased = data.status === PROJECT_STATUS.RELEASED && !isEnded;
   const isWatching = data.watchings.some((w) => w.userId === profile?.id);
   const isCanceled = data.status === PROJECT_STATUS.CANCELED;
+  const isPassFunded = !!userBooking?.passPurchaseId;
+  const isWithin24h =
+    !!data.startAt &&
+    new Date(data.startAt).getTime() - Date.now() < 24 * 60 * 60 * 1000;
+  const isPassExpired = userBooking?.passPurchase?.status === "Expired";
 
   const succeededBookingsCount = data.bookings
     .filter((b) => BOOKING_ACTIVE_STATUSES.includes(b.status))
@@ -130,7 +135,6 @@ function ClassContent() {
   const doCancel = async () => {
     if (!userBooking?.id) return;
     try {
-      const isPassFunded = !!userBooking.passPurchaseId;
       await supabase
         .from("bookings")
         .update({
@@ -157,11 +161,28 @@ function ClassContent() {
   };
 
   const handleCancel = () => {
-    showAlert(
-      "Cancel Your Booking?",
-      `A ${transactionFee}% cancellation fee applies. The booking fee is non-refundable. This cannot be undone.`,
-      { confirmLabel: "Confirm", onConfirm: doCancel },
-    );
+    if (isWithin24h) {
+      showAlert(
+        "Cancellation Closed",
+        "Cancellations are only allowed up to 24 hours before the class starts.",
+      );
+      return;
+    }
+    if (isPassFunded && isPassExpired) {
+      showAlert(
+        "Pass Expired",
+        "This pass has expired — the booking can no longer be canceled. Please attend the class.",
+      );
+      return;
+    }
+    const spots = userBooking?.spots ?? 0;
+    const message = isPassFunded
+      ? `${spots} ${spots === 1 ? "session" : "sessions"} will be returned to your pass. This cannot be undone.`
+      : `A ${transactionFee}% cancellation fee applies. The booking fee is non-refundable. This cannot be undone.`;
+    showAlert("Cancel Your Booking?", message, {
+      confirmLabel: "Confirm",
+      onConfirm: doCancel,
+    });
   };
 
   const handleCheckin = () => {

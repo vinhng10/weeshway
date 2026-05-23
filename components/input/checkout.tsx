@@ -287,9 +287,9 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
 
       setStatus("success");
       setStatusMessage("Payment completed!");
-    } catch (err: any) {
+    } catch {
       setStatus("error");
-      setStatusMessage(err?.message ?? "An unexpected error occurred.");
+      setStatusMessage("Please try again.");
     } finally {
       setLoading(false);
     }
@@ -363,8 +363,8 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
             data={passPurchaseCards}
             height={carouselHeight}
             onSnapToItem={setRedeemIndex}
-            parallaxScrollingScale={0.95}
-            parallaxAdjacentItemScale={0.88}
+            parallaxScrollingScale={1}
+            parallaxAdjacentItemScale={0.9}
             renderItem={(item) => (
               <PassPurchaseCard passPurchase={item} showAction={false} />
             )}
@@ -376,8 +376,8 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
             data={teacherPasses}
             height={carouselHeight}
             onSnapToItem={setCatalogIndex}
-            parallaxScrollingScale={0.95}
-            parallaxAdjacentItemScale={0.88}
+            parallaxScrollingScale={1}
+            parallaxAdjacentItemScale={0.9}
             renderItem={(item) => (
               <PassSummaryCard pass={item} teacher={project.profile} />
             )}

@@ -1,7 +1,6 @@
 import postgres from "postgres";
 import Stripe from "stripe";
 import { handleError, HttpError } from "../_shared/errors.ts";
-import { flagEnabled } from "../_shared/flags.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 // --- Configuration ---
@@ -10,169 +9,57 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
 // --- Helpers ---
-async function upsertPassPurchase(
+async function applyPassStatus(
   piId: string,
   status: string,
-  metadata: Stripe.PaymentIntent["metadata"],
   chargeId?: string | null,
 ): Promise<void> {
-  const isSucceeded = status === "Succeeded";
-  const sessions = parseInt(metadata.sessions ?? "0");
-  const expiryDays = parseInt(metadata.expiry_days ?? "0");
-  const insertRemaining = isSucceeded ? sessions : 0;
-  const expiresAt =
-    isSucceeded && expiryDays > 0
-      ? new Date(Date.now() + expiryDays * 86400 * 1000)
-      : null;
-
-  await sql`
-    INSERT INTO public.pass_purchases (
-      user_id, pass_id, sessions, remaining_sessions,
-      stripe_payment_intent_id, stripe_charge_id, status,
-      price, booking_fee, currency, expires_at
-    ) VALUES (
-      ${metadata.user_id}::uuid,
-      ${metadata.pass_id}::uuid,
-      ${sessions},
-      ${insertRemaining},
-      ${piId},
-      ${chargeId ?? null},
-      ${status}::public.pass_status,
-      ${parseInt(metadata.price ?? "0")},
-      ${parseInt(metadata.booking_fee ?? "0")},
-      ${metadata.currency},
-      ${expiresAt}
-    )
-    ON CONFLICT (stripe_payment_intent_id) DO UPDATE
-    SET status = EXCLUDED.status,
-        stripe_charge_id = COALESCE(EXCLUDED.stripe_charge_id, pass_purchases.stripe_charge_id),
-        remaining_sessions = CASE
-          WHEN EXCLUDED.status = 'Succeeded'::public.pass_status
-            THEN EXCLUDED.remaining_sessions
-          ELSE pass_purchases.remaining_sessions
-        END,
-        expires_at = CASE
-          WHEN EXCLUDED.status = 'Succeeded'::public.pass_status
-            THEN EXCLUDED.expires_at
-          ELSE pass_purchases.expires_at
-        END
-  `;
+  await sql`SELECT util.apply_pi_status_pass(${piId}, ${status}::public.pass_status, ${chargeId ?? null})`;
 }
 
-async function upsertBooking(
-  paymentIntentId: string,
-  status: string,
-  metadata: Stripe.PaymentIntent["metadata"] = {},
-) {
-  // We use ON CONFLICT (user_id, project_id) to ensure uniqueness.
-  // We only overwrite the record if:
-  // 1. It's the same payment intent we are updating (id match)
-  // 2. OR the previous booking was unsuccessful (Canceled/Refunded/Failed), allowing a retry.
-  //
-  // All data comes from Stripe metadata — no table JOINs needed.
-  // The payment function snapshots project details (price, currency,
-  // to_stripe_account_id, end_at) into metadata at intent creation time.
-  // This makes bookings self-contained for async money operations
-  // (refund/transfer crons) after account deletion.
-  //
-  // The WHERE clause on profiles/projects guards against stale webhooks
-  // arriving after account deletion — if the user or project no longer
-  // exists, the INSERT silently inserts nothing.
-  await sql`
-  INSERT INTO bookings (
-    stripe_payment_intent_id, status, user_id, project_id, spots, price, currency,
-    to_stripe_account_id, project_end_at
-  )
-  SELECT
-    ${paymentIntentId},
-    ${status},
-    ${metadata.user_id}::uuid,
-    ${metadata.project_id}::uuid,
-    ${metadata.spots}::int,
-    ${metadata.price}::int,
-    ${metadata.currency},
-    ${metadata.to_stripe_account_id},
-    ${metadata.end_at}::timestamptz
-  WHERE EXISTS (SELECT 1 FROM profiles WHERE id = ${metadata.user_id}::uuid)
-    AND EXISTS (SELECT 1 FROM projects WHERE id = ${metadata.project_id}::uuid)
-  ON CONFLICT (user_id, project_id)
-  DO UPDATE SET
-    stripe_payment_intent_id = EXCLUDED.stripe_payment_intent_id,
-    status = EXCLUDED.status,
-    spots = EXCLUDED.spots,
-    price = EXCLUDED.price,
-    currency = EXCLUDED.currency,
-    to_stripe_account_id = EXCLUDED.to_stripe_account_id,
-    project_end_at = EXCLUDED.project_end_at,
-    pass_purchase_id = NULL
-  WHERE
-    -- 1. If it's the same payment intent, always allow the update (e.g. Created -> Succeeded)
-    bookings.stripe_payment_intent_id = EXCLUDED.stripe_payment_intent_id
-    OR
-    -- 2. If it's a new payment intent, only allow overwriting "dead" states
-    bookings.status IN ('Canceled', 'Refunded', 'Failed')
-  `;
+async function applyBookingStatus(piId: string, status: string): Promise<void> {
+  await sql`SELECT util.apply_pi_status_booking(${piId}, ${status}::public.booking_status)`;
 }
 
 async function handleEvent(event: Stripe.Event): Promise<void> {
   switch (event.type) {
-    case "payment_intent.created": {
-      const pi = event.data.object;
-      const stripeEnabled = await flagEnabled(sql, "stripe");
-      const status = stripeEnabled ? "Created" : "Succeeded";
-      if (pi.metadata?.kind === "pass") {
-        await upsertPassPurchase(pi.id, status, pi.metadata);
-      } else {
-        await upsertBooking(pi.id, status, pi.metadata);
-      }
-      break;
-    }
     case "payment_intent.succeeded": {
       const pi = event.data.object;
       if (pi.metadata?.kind === "pass") {
-        await upsertPassPurchase(
+        await applyPassStatus(
           pi.id,
           "Succeeded",
-          pi.metadata,
           (pi.latest_charge as string) ?? null,
         );
       } else {
-        await upsertBooking(pi.id, "Succeeded", pi.metadata);
+        await applyBookingStatus(pi.id, "Succeeded");
       }
       break;
     }
     case "payment_intent.payment_failed": {
       const pi = event.data.object;
       if (pi.metadata?.kind === "pass") {
-        await upsertPassPurchase(pi.id, "Failed", pi.metadata);
+        await applyPassStatus(pi.id, "Failed");
       } else {
-        await upsertBooking(pi.id, "Failed", pi.metadata);
+        await applyBookingStatus(pi.id, "Failed");
       }
       break;
     }
     case "payment_intent.canceled": {
       const pi = event.data.object;
       if (pi.metadata?.kind === "pass") {
-        await upsertPassPurchase(pi.id, "Canceled", pi.metadata);
+        await applyPassStatus(pi.id, "Canceled");
       } else {
-        await upsertBooking(pi.id, "Canceled", pi.metadata);
+        await applyBookingStatus(pi.id, "Canceled");
       }
       break;
     }
     case "charge.refunded": {
       const charge = event.data.object;
       if (charge.metadata?.kind === "pass") {
-        await upsertPassPurchase(
-          charge.payment_intent as string,
-          "Refunded",
-          charge.metadata,
-        );
+        await applyPassStatus(charge.payment_intent as string, "Refunded");
       } else {
-        await upsertBooking(
-          charge.payment_intent as string,
-          "Refunded",
-          charge.metadata,
-        );
+        await applyBookingStatus(charge.payment_intent as string, "Refunded");
       }
       break;
     }

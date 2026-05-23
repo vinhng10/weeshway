@@ -104,6 +104,12 @@ export const Tile: React.FunctionComponent<TileProps> = React.memo(
     prev.stats?.id === next.stats?.id &&
     prev.stats?.status === next.stats?.status &&
     prev.stats?.bookings?.length === next.stats?.bookings?.length &&
+    (prev.stats?.bookings ?? []).every(
+      (b, i) =>
+        b.id === next.stats?.bookings?.[i]?.id &&
+        b.status === next.stats?.bookings?.[i]?.status &&
+        b.spots === next.stats?.bookings?.[i]?.spots,
+    ) &&
     prev.stats?.watchings?.length === next.stats?.watchings?.length,
 );
 

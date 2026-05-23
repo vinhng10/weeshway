@@ -34,5 +34,11 @@ export const ProjectStats = React.memo(
     prev.data.id === next.data.id &&
     prev.data.status === next.data.status &&
     prev.data.bookings?.length === next.data.bookings?.length &&
+    (prev.data.bookings ?? []).every(
+      (b, i) =>
+        b.id === next.data.bookings?.[i]?.id &&
+        b.status === next.data.bookings?.[i]?.status &&
+        b.spots === next.data.bookings?.[i]?.spots,
+    ) &&
     prev.data.watchings?.length === next.data.watchings?.length,
 );
