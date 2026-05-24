@@ -18,7 +18,8 @@ import {
   ThemedText,
 } from "@/components";
 import {
-  BOOKING_ACTIVE_STATUSES,
+  BOOKING_OCCUPYING_STATUSES,
+  BOOKING_ONGOING_STATUSES,
   BOOKING_STATUS,
   PROJECT_STATUS,
 } from "@/constants";
@@ -65,10 +66,7 @@ function ClassContent() {
           `,
           )
           .eq("id", classId)
-          .in("bookings.status", [
-            ...BOOKING_ACTIVE_STATUSES,
-            BOOKING_STATUS.REFUNDING,
-          ])
+          .in("bookings.status", BOOKING_ONGOING_STATUSES)
           .eq("watchings.user_id", profile?.id)
           .single()
           .throwOnError();
@@ -77,7 +75,9 @@ function ClassContent() {
     },
   );
 
-  const userBooking = data.bookings.find((b) => b.userId === profile?.id);
+  const userBooking = data.bookings.find(
+    (b) => b.userId === profile?.id && b.status !== BOOKING_STATUS.CREATED,
+  );
   const isBooked = !!userBooking;
   const isRefunding = userBooking?.status === BOOKING_STATUS.REFUNDING;
   const isEnded = !!data.endAt && new Date(data.endAt) < new Date();
@@ -90,8 +90,8 @@ function ClassContent() {
     new Date(data.startAt).getTime() - Date.now() < 24 * 60 * 60 * 1000;
   const isPassExpired = userBooking?.passPurchase?.status === "Expired";
 
-  const succeededBookingsCount = data.bookings
-    .filter((b) => BOOKING_ACTIVE_STATUSES.includes(b.status))
+  const occupiedBookingsCount = data.bookings
+    .filter((b) => BOOKING_OCCUPYING_STATUSES.includes(b.status))
     .reduce((acc, b) => acc + (b.spots || 0), 0);
 
   const handleBook = () => setVisible(true);
@@ -290,7 +290,7 @@ function ClassContent() {
           />
           <IntBoxInput
             label="Spots"
-            value={`${succeededBookingsCount} / ${data.spots ?? 0}`}
+            value={`${occupiedBookingsCount} / ${data.spots ?? 0}`}
             editable={false}
           />
         </View>

@@ -1,4 +1,4 @@
-import { BOOKING_ACTIVE_STATUSES, PROJECT_STATUS } from "@/constants";
+import { BOOKING_OCCUPYING_STATUSES, PROJECT_STATUS } from "@/constants";
 import { ProjectEnrichedType } from "@/types";
 import React from "react";
 import { Chip } from "./chip";
@@ -20,11 +20,11 @@ export const ProjectStats = React.memo(
         break;
       case PROJECT_STATUS.RELEASED:
         icon = "person-sharp";
-        const succeededCount =
+        const occupiedCount =
           data.bookings
-            ?.filter((b) => BOOKING_ACTIVE_STATUSES.includes(b.status))
+            ?.filter((b) => BOOKING_OCCUPYING_STATUSES.includes(b.status))
             .reduce((acc, b) => acc + (b.spots || 0), 0) ?? 0;
-        label = `${succeededCount}/${data.spots}`;
+        label = `${occupiedCount}/${data.spots}`;
         break;
     }
 
