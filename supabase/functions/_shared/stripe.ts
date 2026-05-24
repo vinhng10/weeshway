@@ -6,36 +6,62 @@ const UPDATABLE_STATUSES: Stripe.PaymentIntent.Status[] = [
   "requires_action",
 ];
 
-const TERMINAL_NOT_CANCELED: Stripe.PaymentIntent.Status[] = [
+const NON_RETRYABLE_STATUSES: Stripe.PaymentIntent.Status[] = [
   "succeeded",
   "processing",
   "requires_capture",
 ];
 
+export type ReconciliationResult =
+  | { action: "REUSE"; intent: Stripe.PaymentIntent }
+  | { action: "UPDATE"; intent: Stripe.PaymentIntent }
+  | { action: "RECREATE"; reason: string };
+
 /**
- * Returns:
- *   - the updated PI if we applied updates successfully
- *   - the existing PI as-is if it's in a terminal-but-not-canceled state (succeeded/processing)
- *   - null if the PI is canceled and the caller should create a fresh one
+ * Determines the reconciliation action for an existing Stripe PaymentIntent.
+ * 
+ * This is a side-effect-free decision function that does not execute updates directly,
+ * making it highly readable, predictable, and easy to unit test.
+ *
+ * Callers must retrieve the PI with `{ expand: ["latest_charge"] }` so the
+ * refund check works; without expansion `latest_charge` is a string id and
+ * we'd miss the refund and treat a refunded PI as genuinely paid.
  */
-export async function reconcilePaymentIntent(
+export function analyzePaymentIntent(
   pi: Stripe.PaymentIntent,
-  applyUpdate: () => Promise<Stripe.PaymentIntent>,
-): Promise<Stripe.PaymentIntent | null> {
-  if (TERMINAL_NOT_CANCELED.includes(pi.status)) {
-    console.log(`reconcilePaymentIntent: skipping update, PI ${pi.id} is ${pi.status}`);
-    return pi;
+  needsUpdate: boolean,
+): ReconciliationResult {
+  if (pi.status === "succeeded") {
+    // A refunded PI keeps status='succeeded' in Stripe (refunds are separate
+    // objects). For a rebook-after-refund, retrieving the old PI here would
+    // otherwise rebind a stale succeeded-but-refunded PI to the new booking.
+    const latestCharge =
+      typeof pi.latest_charge === "object" ? pi.latest_charge : null;
+    const refunded = (latestCharge?.amount_refunded ?? 0) > 0;
+    if (refunded) {
+      return {
+        action: "RECREATE",
+        reason: `PI ${pi.id} succeeded but refunded (amount_refunded=${latestCharge?.amount_refunded}), signaling caller to mint a new PI`,
+      };
+    }
+  }
+  if (NON_RETRYABLE_STATUSES.includes(pi.status)) {
+    return { action: "REUSE", intent: pi };
   }
   if (pi.status === "canceled") {
     // Stripe forbids confirming a canceled PI, so the caller must create a fresh
     // PaymentIntent. The booking/purchase row stays — only its PI id is replaced.
-    console.log(`reconcilePaymentIntent: PI ${pi.id} is canceled, signaling caller to mint a new PI`);
-    return null;
+    return {
+      action: "RECREATE",
+      reason: `PI ${pi.id} is canceled, signaling caller to mint a new PI`,
+    };
   }
   if (UPDATABLE_STATUSES.includes(pi.status)) {
-    return await applyUpdate();
+    return needsUpdate
+      ? { action: "UPDATE", intent: pi }
+      : { action: "REUSE", intent: pi };
   }
   // Unknown / future status — return as-is, don't risk a bad update.
-  console.log(`reconcilePaymentIntent: unknown status ${pi.status} on PI ${pi.id}, returning as-is`);
-  return pi;
+  return { action: "REUSE", intent: pi };
 }
+

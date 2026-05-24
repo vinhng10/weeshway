@@ -44,16 +44,24 @@ async function processJob(job: Job): Promise<Job> {
       amount = pp.remaining_sessions * (perCreditGross + perCreditBooking);
     }
 
-    await stripe.refunds.create({
-      payment_intent: pp.stripe_payment_intent_id,
-      amount,
-      reason: "requested_by_customer",
-      metadata: {
-        kind: "pass",
-        pass_purchase_id: pp.id,
-        refund_kind: job.kind,
+    // Deterministic idempotency key derived from pp.id (UUID, immutable).
+    // One pass_purchase → one refund lifecycle (the `pp.status === 'Refunded'`
+    // short-circuit above prevents double-execution within the tx; the key
+    // protects against worker retries between the Stripe call and the
+    // `refund.updated` webhook that dequeues the job).
+    await stripe.refunds.create(
+      {
+        payment_intent: pp.stripe_payment_intent_id,
+        amount,
+        reason: "requested_by_customer",
+        metadata: {
+          kind: "pass",
+          pass_purchase_id: pp.id,
+          refund_kind: job.kind,
+        },
       },
-    });
+      { idempotencyKey: `refund:pass:${pp.stripe_payment_intent_id}` },
+    );
 
     // Status flip to 'Refunded' is handled by the charge.refunded webhook
     return job;

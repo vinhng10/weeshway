@@ -205,21 +205,21 @@ export const REPORT_STATUS = {
   DISMISSED: "Dismissed",
 } as const;
 
-export const PassPurchaseStatuses = {
-  Created: "Created",
-  Succeeded: "Succeeded",
-  Used: "Used",
-  Expired: "Expired",
-  Refunding: "Refunding",
-  Refunded: "Refunded",
-  Failed: "Failed",
-  Canceled: "Canceled",
+export const PASS_PURCHASE_STATUS = {
+  CREATED: "Created",
+  SUCCEEDED: "Succeeded",
+  USED: "Used",
+  EXPIRED: "Expired",
+  REFUNDING: "Refunding",
+  REFUNDED: "Refunded",
+  FAILED: "Failed",
+  CANCELED: "Canceled",
 } as const;
 
 export const PASS_PURCHASE_ACTIVE_STATUSES: string[] = [
-  PassPurchaseStatuses.Succeeded,
-  PassPurchaseStatuses.Used,
-  PassPurchaseStatuses.Expired,
+  PASS_PURCHASE_STATUS.SUCCEEDED,
+  PASS_PURCHASE_STATUS.USED,
+  PASS_PURCHASE_STATUS.EXPIRED,
 ];
 
 export const PASS_COOLING_OFF_DAYS = 7;

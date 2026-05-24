@@ -3,6 +3,7 @@ import {
   CLASS_FORMAT,
   EXPLORE_FILTER,
   LEVEL,
+  PASS_PURCHASE_STATUS,
   PROJECT_STATUS,
   REPORT_STATUS,
   ROLE,
@@ -35,6 +36,7 @@ export type TempoType = ValueOf<typeof TEMPO>;
 export type StudentReportReasonType = ValueOf<typeof STUDENT_REPORT_REASON>;
 export type TeacherReportReasonType = ValueOf<typeof TEACHER_REPORT_REASON>;
 export type ReportStatusType = ValueOf<typeof REPORT_STATUS>;
+export type PassPurchaseStatusType = ValueOf<typeof PASS_PURCHASE_STATUS>;
 
 export type OptionItem = {
   key: string;
@@ -156,7 +158,7 @@ export type BookingType = {
 
 export type BookingDetailType = BookingType & {
   secret?: BookingSecretType | null;
-  passPurchase?: { status: PassPurchaseStatus } | null;
+  passPurchase?: { status: PassPurchaseStatusType } | null;
 };
 
 export type BookingSecretType = {
@@ -269,16 +271,6 @@ export type ReportType = {
   resolution?: string;
 };
 
-export type PassPurchaseStatus =
-  | "Created"
-  | "Succeeded"
-  | "Used"
-  | "Expired"
-  | "Refunding"
-  | "Refunded"
-  | "Failed"
-  | "Canceled";
-
 export type PassType = {
   id: string;
   userId: string;
@@ -297,10 +289,15 @@ export type PassPurchaseType = {
   id: string;
   userId: string;
   passId: string | null;
+  sellerId: string;
+  name: string;
+  description: string | null;
+  photoUrl: string | null;
   sessions: number;
   remainingSessions: number;
+  expiryDays: number;
   expiresAt: string | null;
-  status: PassPurchaseStatus;
+  status: PassPurchaseStatusType;
   refundInitiator: RoleType | null;
   stripePaymentIntentId: string;
   stripeChargeId: string | null;
@@ -312,8 +309,7 @@ export type PassPurchaseType = {
 };
 
 export type PassPurchaseEnrichedType = PassPurchaseType & {
-  pass: PassType | null;
-  teacher: ProfileType | null;
+  seller: ProfileType | null;
 };
 
 export type PaymentIntentResponse = {

@@ -7,7 +7,7 @@ import {
   SectionListView,
   ThemedText,
 } from "@/components";
-import { PassPurchaseStatuses } from "@/constants";
+import { PASS_PURCHASE_STATUS } from "@/constants";
 import { useAuth, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import { router } from "expo-router";
@@ -36,19 +36,16 @@ function PassesContent({ scope }: PassesContentProps) {
         .select(
           `
           *,
-          pass:passes (
-            id, name, photo_url,
-            teacher:profiles (id, full_name, avatar_url)
-          )
+          seller:profiles!seller_id (id, full_name, avatar_url)
         `,
         )
         .eq("user_id", profile!.id)
         .in("status", [
-          PassPurchaseStatuses.Succeeded,
-          PassPurchaseStatuses.Used,
-          PassPurchaseStatuses.Expired,
-          PassPurchaseStatuses.Refunding,
-          PassPurchaseStatuses.Refunded,
+          PASS_PURCHASE_STATUS.SUCCEEDED,
+          PASS_PURCHASE_STATUS.USED,
+          PASS_PURCHASE_STATUS.EXPIRED,
+          PASS_PURCHASE_STATUS.REFUNDING,
+          PASS_PURCHASE_STATUS.REFUNDED,
         ])
         .order("created_at", { ascending: false })
         .throwOnError();
@@ -59,7 +56,7 @@ function PassesContent({ scope }: PassesContentProps) {
   const filtered = useMemo(() => {
     const now = Date.now();
     const isActive = (p: PassPurchaseCardData) =>
-      p.status === PassPurchaseStatuses.Succeeded &&
+      p.status === PASS_PURCHASE_STATUS.SUCCEEDED &&
       p.remainingSessions > 0 &&
       !!p.expiresAt &&
       new Date(p.expiresAt).getTime() > now;

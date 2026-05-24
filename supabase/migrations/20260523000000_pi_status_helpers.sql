@@ -22,8 +22,7 @@ BEGIN
     expires_at = CASE
       WHEN p_new_status = 'Succeeded'::public.pass_status
        AND pp.expires_at IS NULL
-       AND EXISTS (SELECT 1 FROM public.passes WHERE id = pp.pass_id)
-        THEN now() + ((SELECT expiry_days FROM public.passes WHERE id = pp.pass_id) || ' days')::interval
+        THEN now() + (pp.expiry_days || ' days')::interval
       ELSE pp.expires_at
     END
   WHERE pp.stripe_payment_intent_id = p_pi_id

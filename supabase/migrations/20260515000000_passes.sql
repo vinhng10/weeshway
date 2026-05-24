@@ -7,6 +7,13 @@
 --   - validate_refund_eligibility restructured: teacher-initiated branch no longer
 --     early-returns before the pass-funded fork, so pass-funded bookings on
 --     canceled projects correctly restore sessions instead of hitting refund_jobs
+--   - pass_purchases snapshots seller_id + display fields (name, description,
+--     photo_url) from passes at insert time. This both (a) lets sellers see
+--     purchases of their passes via a direct column-compare RLS policy, and
+--     (b) eliminates the RLS cycle that would arise from cross-table EXISTS
+--     subqueries on passes/pass_purchases (see policy section below).
+--     "seller" rather than "teacher" so the column generalizes to non-teacher
+--     pass creators (e.g., studios) without renaming.
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -41,16 +48,36 @@ CREATE INDEX passes_user_id_active_idx ON public.passes (user_id) WHERE active;
 -- Step 3 — pass_purchases table
 -- -----------------------------------------------------------------------------
 
+-- Display fields (name, description, photo_url) and seller_id are snapshotted
+-- from passes at insert time. This:
+--   1. Removes the read-time dependency on passes — wallet cards and seller
+--      dashboards no longer need to join passes, so the "Purchasers can read pass"
+--      RLS policy (and its cycle with pass_purchases RLS) goes away.
+--   2. Lets seller_id drive a direct seller-side SELECT policy: a column
+--      compare, not an EXISTS subquery into another RLS-protected table.
+--   3. Keeps wallet rendering correct even if the pass row is later deleted
+--      (pass_id ON DELETE SET NULL) or the seller edits mutable fields — the
+--      purchase row preserves the values as of purchase time.
+-- seller_id (not teacher_id) so the column generalizes to studios or any
+-- future entity type that sells passes — user_id is the buyer.
 CREATE TABLE public.pass_purchases (
   id                        uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v7(),
   user_id                   uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   pass_id                   uuid REFERENCES public.passes(id) ON DELETE SET NULL,
+  seller_id                 uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  name                      text NOT NULL,
+  description               text,
+  photo_url                 text,
   sessions                  int  NOT NULL,
   remaining_sessions        int  NOT NULL,
+  expiry_days               int  NOT NULL,
   expires_at                timestamptz,
   status                    public.pass_status NOT NULL DEFAULT 'Created',
   refund_initiator          public.role,
-  stripe_payment_intent_id  text UNIQUE NOT NULL,
+  -- Nullable so pass-payment can reserve a Created row inside a tx with PI=NULL
+  -- and bind the PI id via UPDATE after the Stripe call returns. Mirrors the
+  -- two-phase pattern in bookings. Multiple NULLs are allowed under UNIQUE.
+  stripe_payment_intent_id  text UNIQUE,
   stripe_charge_id          text,
   price                     int  NOT NULL,
   booking_fee               int  NOT NULL,
@@ -64,6 +91,11 @@ CREATE UNIQUE INDEX pass_purchases_created_unique
   ON public.pass_purchases (user_id, pass_id) WHERE status = 'Created';
 
 CREATE INDEX pass_purchases_user_status_idx ON public.pass_purchases (user_id, status);
+
+-- Backs the seller-side RLS policy (seller_id = auth.uid()) and the seller
+-- dashboard count query (passes embed → pass_purchases per pass_id), where
+-- filtering by seller is the selective predicate.
+CREATE INDEX pass_purchases_seller_id_idx ON public.pass_purchases (seller_id);
 
 -- -----------------------------------------------------------------------------
 -- Step 4 — bookings.pass_purchase_id column
@@ -282,18 +314,15 @@ SELECT pgmq.create('penalty_jobs');
 ALTER TABLE public.passes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pass_purchases ENABLE ROW LEVEL SECURITY;
 
--- passes: any authenticated user reads active passes; owner reads/writes all their own;
--- purchasers retain read access to inactive passes so wallet cards keep rendering.
+-- passes: any authenticated user reads active passes; owner reads/writes all their own.
+-- No purchaser-read policy: wallet cards read display fields directly from
+-- pass_purchases (denormalized at purchase time), so they don't need to see
+-- the passes row. Avoiding that policy also avoids the RLS cycle that would
+-- arise from passes referencing pass_purchases while pass_purchases references
+-- passes (Postgres raises "infinite recursion detected in policy").
 CREATE POLICY "Enable read access for all users"
   ON public.passes FOR SELECT TO authenticated
   USING (active = true OR user_id = (SELECT auth.uid()));
-
-CREATE POLICY "Purchasers can read pass"
-  ON public.passes FOR SELECT TO authenticated
-  USING (EXISTS (
-    SELECT 1 FROM public.pass_purchases pp
-    WHERE pp.pass_id = passes.id AND pp.user_id = (SELECT auth.uid())
-  ));
 
 CREATE POLICY "Enable insert for users based on user_id"
   ON public.passes FOR INSERT TO authenticated
@@ -304,13 +333,18 @@ CREATE POLICY "Enable users to update their own data only"
   USING (user_id = (SELECT auth.uid()))
   WITH CHECK (user_id = (SELECT auth.uid()));
 
--- pass_purchases: student reads own rows; cooling-off refund is triggered by the
--- student updating status='Refunding' on their own row. The trigger
--- validate_pass_refund_eligibility enforces all business rules (window, unused
--- credits, initiator). RLS only enforces ownership.
+-- pass_purchases: buyer reads own rows; seller reads purchases of passes they
+-- sell — for dashboard counts, revenue, refund flows, etc. Cooling-off refund
+-- is triggered by the buyer updating status='Refunding' on their own row. The
+-- trigger validate_pass_refund_eligibility enforces all business rules (window,
+-- unused credits, initiator). RLS only enforces ownership.
 CREATE POLICY "Enable users to view their own data only"
   ON public.pass_purchases FOR SELECT TO authenticated
   USING (user_id = (SELECT auth.uid()));
+
+CREATE POLICY "Sellers can read purchases of their passes"
+  ON public.pass_purchases FOR SELECT TO authenticated
+  USING (seller_id = (SELECT auth.uid()));
 
 CREATE POLICY "Enable users to update their own data only"
   ON public.pass_purchases FOR UPDATE TO authenticated

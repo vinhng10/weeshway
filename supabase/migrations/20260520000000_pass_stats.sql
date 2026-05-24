@@ -28,12 +28,11 @@ WITH booking_earnings AS (
     AND date_trunc('month', b.project_end_at) = date_trunc('month', now())
 ),
 breakage_earnings AS (
-  SELECT pa.user_id,
+  SELECT pp.seller_id AS user_id,
          pp.currency,
          ((pp.price::numeric / pp.sessions) * pp.remaining_sessions) AS amount,
          NULL::uuid AS booking_id
   FROM public.pass_purchases pp
-  JOIN public.passes pa ON pp.pass_id = pa.id
   WHERE pp.status = 'Expired'
     AND pp.remaining_sessions > 0
     AND date_trunc('month', pp.expires_at) = date_trunc('month', now())

@@ -1,4 +1,4 @@
-import { PassPurchaseStatuses } from "@/constants";
+import { PASS_PURCHASE_STATUS } from "@/constants";
 import { useLocales } from "@/hooks";
 import { PassPurchaseType, PassType, ProfileType } from "@/types";
 import { formatExpiry } from "@/utils";
@@ -21,14 +21,17 @@ const UniLinearGradient = withUnistyles(LinearGradient, (theme) => ({
 
 export type PassPurchaseCardData = Pick<
   PassPurchaseType,
-  "id" | "status" | "remainingSessions" | "sessions" | "price" | "createdAt"
+  | "id"
+  | "status"
+  | "remainingSessions"
+  | "sessions"
+  | "price"
+  | "createdAt"
+  | "expiresAt"
+  | "name"
+  | "photoUrl"
 > & {
-  expiresAt: string | null;
-  pass:
-    | (Pick<PassType, "id" | "name" | "photoUrl"> & {
-        teacher: Pick<ProfileType, "id" | "fullName" | "avatarUrl"> | null;
-      })
-    | null;
+  seller: Pick<ProfileType, "id" | "fullName" | "avatarUrl"> | null;
 };
 
 type Stat = { label: string; value: string };
@@ -176,22 +179,22 @@ const statusLabel = (
   status: PassPurchaseType["status"],
   remainingSessions: number,
 ): string => {
-  if (status === PassPurchaseStatuses.Succeeded && remainingSessions === 0) {
-    return PassPurchaseStatuses.Used;
+  if (status === PASS_PURCHASE_STATUS.SUCCEEDED && remainingSessions === 0) {
+    return PASS_PURCHASE_STATUS.USED;
   }
-  if (status === PassPurchaseStatuses.Succeeded) return "Active";
+  if (status === PASS_PURCHASE_STATUS.SUCCEEDED) return "Active";
   return status;
 };
 
 function usePassPurchaseDisplay(passPurchase: PassPurchaseCardData) {
   const formatMoney = useLocales((state) => state.formatMoney);
 
-  const teacher = passPurchase.pass?.teacher ?? null;
+  const seller = passPurchase.seller ?? null;
   const expiresAt = passPurchase.expiresAt
     ? new Date(passPurchase.expiresAt)
     : null;
   const redeemable =
-    passPurchase.status === PassPurchaseStatuses.Succeeded &&
+    passPurchase.status === PASS_PURCHASE_STATUS.SUCCEEDED &&
     passPurchase.remainingSessions > 0 &&
     !!expiresAt &&
     expiresAt.getTime() > Date.now();
@@ -208,14 +211,12 @@ function usePassPurchaseDisplay(passPurchase: PassPurchaseCardData) {
   stats.push({ label: "PRICE", value: formatMoney(passPurchase.price) });
 
   return {
-    teacher,
+    seller,
     redeemable,
     stats,
-    photoUrl: passPurchase.pass?.photoUrl ?? null,
-    title: passPurchase.pass?.name ?? "Pass",
-    teacherSlot: passPurchase.pass?.teacher
-      ? { avatarUrl: passPurchase.pass.teacher.avatarUrl }
-      : { avatarUrl: null },
+    photoUrl: passPurchase.photoUrl,
+    title: passPurchase.name,
+    sellerSlot: seller ? { avatarUrl: seller.avatarUrl } : { avatarUrl: null },
   };
 }
 
@@ -230,14 +231,14 @@ export function PassPurchaseCard({
   onPress,
   showAction = true,
 }: PassPurchaseCardProps) {
-  const { teacher, redeemable, stats, photoUrl, title, teacherSlot } =
+  const { seller, redeemable, stats, photoUrl, title, sellerSlot } =
     usePassPurchaseDisplay(passPurchase);
 
   const action = showAction ? (
-    redeemable && teacher ? (
+    redeemable && seller ? (
       <Button
         label="Redeem"
-        onPress={() => router.navigate(`/teacher/${teacher.id}`)}
+        onPress={() => router.navigate(`/teacher/${seller.id}`)}
       />
     ) : (
       <Button
@@ -251,7 +252,7 @@ export function PassPurchaseCard({
     <PassCardLayout
       photoUrl={photoUrl}
       title={title}
-      teacher={teacherSlot}
+      teacher={sellerSlot}
       stats={stats}
       action={action}
       onPress={onPress}

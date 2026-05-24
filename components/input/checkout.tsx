@@ -1,8 +1,13 @@
 import { MERCHANT_COUNTRY_CODE } from "@/constants";
-import { useFeatureFlags, useLocales, useSuspenseQuery } from "@/hooks";
+import {
+  useAuth,
+  useFeatureFlags,
+  useLocales,
+  useSuspenseQuery,
+} from "@/hooks";
 import { supabase } from "@/supabase";
 import {
-  PassPurchaseStatus,
+  PassPurchaseStatusType,
   PassType,
   PaymentIntentResponse,
   ProfileType,
@@ -36,15 +41,11 @@ type EligiblePass = {
   sessions: number;
   remainingSessions: number;
   expiresAt: string;
-  status: PassPurchaseStatus;
+  status: PassPurchaseStatusType;
   price: number;
   createdAt: string;
-  passes: {
-    id: string;
-    name: string;
-    photoUrl: string | null;
-    userId: string;
-  };
+  name: string;
+  photoUrl: string | null;
 };
 
 type CheckoutProps = {
@@ -77,16 +78,21 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
   const queryClient = useQueryClient();
 
   const teacherId = project.profile.id;
+  const userId = useAuth((state) => state.profile!.id);
 
   const { data: allEligible } = useSuspenseQuery<EligiblePass[]>({
     queryKey: ["passes", teacherId],
     queryFn: async () => {
+      // Filter user_id explicitly: RLS now permits the pass seller to read
+      // purchases of their own passes, so a seller booking their own class
+      // would otherwise see other buyers' purchases as "redeemable" options.
       const { data } = await supabase
         .from("pass_purchases")
         .select(
-          "id, sessions, remaining_sessions, expires_at, status, price, created_at, passes!inner(id, name, photo_url, user_id)",
+          "id, sessions, remaining_sessions, expires_at, status, price, created_at, name, photo_url",
         )
-        .eq("passes.user_id", teacherId)
+        .eq("seller_id", teacherId)
+        .eq("user_id", userId)
         .eq("status", "Succeeded")
         .gt("expires_at", new Date().toISOString())
         .order("expires_at", { ascending: true })
@@ -175,15 +181,12 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
         expiresAt: ep.expiresAt,
         price: ep.price,
         createdAt: ep.createdAt,
-        pass: {
-          id: ep.passes.id,
-          name: ep.passes.name,
-          photoUrl: ep.passes.photoUrl,
-          teacher: {
-            id: project.profile.id,
-            fullName: project.profile.fullName,
-            avatarUrl: project.profile.avatarUrl,
-          },
+        name: ep.name,
+        photoUrl: ep.photoUrl,
+        seller: {
+          id: project.profile.id,
+          fullName: project.profile.fullName,
+          avatarUrl: project.profile.avatarUrl,
         },
       })),
     [
@@ -363,8 +366,8 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
             data={passPurchaseCards}
             height={carouselHeight}
             onSnapToItem={setRedeemIndex}
-            parallaxScrollingScale={1}
-            parallaxAdjacentItemScale={0.9}
+            parallaxScrollingScale={0.95}
+            parallaxAdjacentItemScale={0.88}
             renderItem={(item) => (
               <PassPurchaseCard passPurchase={item} showAction={false} />
             )}
@@ -376,8 +379,8 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
             data={teacherPasses}
             height={carouselHeight}
             onSnapToItem={setCatalogIndex}
-            parallaxScrollingScale={1}
-            parallaxAdjacentItemScale={0.9}
+            parallaxScrollingScale={0.95}
+            parallaxAdjacentItemScale={0.88}
             renderItem={(item) => (
               <PassSummaryCard pass={item} teacher={project.profile} />
             )}

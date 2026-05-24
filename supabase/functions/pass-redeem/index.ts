@@ -38,15 +38,15 @@ Deno.serve(async (req) => {
       `;
       const remainingSpots = project.spots - occupied;
 
-      // Lock pass_purchase; join passes + profiles to get teacher identity
+      // Lock pass_purchase; seller_id is snapshotted on the row, so we only
+      // need to join profiles for the seller's Stripe account.
       const [pp] = await tx`
         SELECT pp.id, pp.remaining_sessions, pp.expires_at, pp.status,
                pp.price, pp.sessions,
-               p.user_id AS pass_teacher_id,
-               prof.stripe_account_id AS teacher_stripe_account_id
+               pp.seller_id,
+               prof.stripe_account_id AS seller_stripe_account_id
         FROM public.pass_purchases pp
-        LEFT JOIN public.passes p ON p.id = pp.pass_id
-        LEFT JOIN public.profiles prof ON prof.id = p.user_id
+        LEFT JOIN public.profiles prof ON prof.id = pp.seller_id
         WHERE pp.id = ${passPurchaseId} AND pp.user_id = ${userId}
         FOR UPDATE OF pp
       `;
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
         );
       if (pp.expires_at && new Date(pp.expires_at) <= new Date())
         throw new HttpError("This pass has expired.", 400);
-      if (pp.pass_teacher_id !== project.teacher_id)
+      if (pp.seller_id !== project.teacher_id)
         throw new HttpError("This pass is not valid for this teacher.", 400);
       if (remainingSpots < spots)
         throw new HttpError(
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
         ) VALUES (
           ${userId}, ${projectId}, ${passPurchaseId}, ${spots}, 'Succeeded',
           ${pp.price / pp.sessions}, ${project.currency}, ${project.end_at},
-          ${pp.teacher_stripe_account_id}
+          ${pp.seller_stripe_account_id}
         )
         ON CONFLICT (user_id, project_id) DO UPDATE
         SET pass_purchase_id = EXCLUDED.pass_purchase_id,

@@ -95,8 +95,7 @@ async function processJob(job: Job, supabase: SupabaseClient) {
   const outstandingPasses: { id: string }[] = await sql`
     SELECT pp.id
     FROM public.pass_purchases pp
-    JOIN public.passes p ON p.id = pp.pass_id
-    WHERE p.user_id = ${userId}
+    WHERE pp.seller_id = ${userId}
       AND pp.status = 'Succeeded'
       AND pp.remaining_sessions > 0
   `;

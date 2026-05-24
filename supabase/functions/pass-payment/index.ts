@@ -6,7 +6,7 @@ import { handleError, HttpError } from "../_shared/errors.ts";
 import { exchange, getFees } from "../_shared/fees.ts";
 import { flagEnabled } from "../_shared/flags.ts";
 import { jsonResponse } from "../_shared/response.ts";
-import { reconcilePaymentIntent } from "../_shared/stripe.ts";
+import { analyzePaymentIntent } from "../_shared/stripe.ts";
 
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
@@ -15,15 +15,18 @@ const requestSchema = z.object({
   passId: z.uuidv7(),
 });
 
+type TxResult = {
+  purchaseId: string;
+  priorPiId: string | null;
+};
+
 Deno.serve(async (req) => {
   try {
     const { supabase, user } = await authenticateRequest(req);
 
-    // 1. Parse & validate
     const body = await req.json();
     const { passId } = requestSchema.parse(body);
 
-    // 2. Fetch student profile + pass (with teacher stripe account) in parallel
     const [{ data: student }, { data: pass }] = await Promise.all([
       supabase
         .from("profiles")
@@ -40,7 +43,6 @@ Deno.serve(async (req) => {
         .throwOnError(),
     ]);
 
-    // 3. Guards
     if (!pass) throw new HttpError("Pass not available.", 404);
 
     const toStripeAccountId = (
@@ -52,7 +54,6 @@ Deno.serve(async (req) => {
     if (!toStripeAccountId)
       throw new HttpError("Teacher cannot receive payments yet.", 406);
 
-    // 4. Compute amounts (all integer, smallest currency unit)
     const fees = await getFees();
     const bookingFeeInPassCurrency = exchange(
       fees.bookingFee,
@@ -63,7 +64,46 @@ Deno.serve(async (req) => {
     const bookingFeeTotal = bookingFeeInPassCurrency * pass.sessions;
     const totalAmount = pass.price + bookingFeeTotal;
 
-    // 5. Customer session (needed on both new and retry paths)
+    // Transactional Created-row reservation. The partial unique index
+    // pass_purchases_created_unique enforces at most one Created row per
+    // (user, pass) — retries land on the conflict path; dead-row rebooks
+    // (Refunded/Failed/Canceled/Succeeded/Used/Expired) fall through to INSERT
+    // as a fresh row, preserving purchase history.
+    const txResult: TxResult = await sql.begin(async (tx) => {
+      const [existing] = await tx`
+        SELECT id, stripe_payment_intent_id
+        FROM public.pass_purchases
+        WHERE user_id = ${user.id} AND pass_id = ${passId} AND status = 'Created'
+        FOR UPDATE
+      `;
+
+      const [row] = await tx`
+        INSERT INTO public.pass_purchases (
+          stripe_payment_intent_id, status, user_id, pass_id,
+          seller_id, name, description, photo_url,
+          sessions, remaining_sessions, expiry_days,
+          price, booking_fee, currency
+        ) VALUES (
+          NULL, 'Created', ${user.id}, ${passId},
+          ${pass.user_id}, ${pass.name}, ${pass.description}, ${pass.photo_url},
+          ${pass.sessions}, 0, ${pass.expiry_days},
+          ${pass.price}, ${bookingFeeTotal}, ${pass.currency}
+        )
+        ON CONFLICT (user_id, pass_id) WHERE status = 'Created' DO UPDATE
+        SET name = EXCLUDED.name,
+            description = EXCLUDED.description,
+            photo_url = EXCLUDED.photo_url
+        RETURNING id
+      `;
+
+      return {
+        purchaseId: row.id,
+        priorPiId: existing?.stripe_payment_intent_id ?? null,
+      };
+    });
+
+    const { purchaseId, priorPiId } = txResult;
+
     const session = await stripe.customerSessions.create({
       customer_account: student.stripe_account_id,
       components: {
@@ -77,15 +117,6 @@ Deno.serve(async (req) => {
         },
       },
     });
-
-    // 6. Pre-flight: check for an in-flight Created purchase (Decision #26)
-    const { data: existingPurchase } = await supabase
-      .from("pass_purchases")
-      .select("stripe_payment_intent_id")
-      .eq("user_id", user.id)
-      .eq("pass_id", passId)
-      .eq("status", "Created")
-      .maybeSingle();
 
     const piMetadata = {
       kind: "pass",
@@ -101,23 +132,51 @@ Deno.serve(async (req) => {
 
     let intent: Stripe.PaymentIntent | null = null;
 
-    if (existingPurchase?.stripe_payment_intent_id) {
-      // Retry path: retrieve authoritative Stripe state before deciding to update
-      const existing = await stripe.paymentIntents.retrieve(
-        existingPurchase.stripe_payment_intent_id,
+    if (priorPiId) {
+      const existing = await stripe.paymentIntents.retrieve(priorPiId, {
+        expand: ["latest_charge"],
+      });
+      const needsUpdate = existing.amount !== totalAmount;
+      const reconciliation = analyzePaymentIntent(existing, needsUpdate);
+
+      console.log(
+        `reconcilePaymentIntent: Action: ${reconciliation.action}. ${
+          reconciliation.action === "RECREATE"
+            ? `Reason: ${reconciliation.reason}`
+            : `PI ${existing.id} status is ${existing.status}`
+        }`,
       );
-      intent = await reconcilePaymentIntent(existing, () =>
-        stripe.paymentIntents.update(existing.id, {
-          amount: totalAmount,
-          transfer_group: `pass_${pass.id}_${user.id}`,
-          metadata: piMetadata,
-        }),
-      );
+
+      switch (reconciliation.action) {
+        case "REUSE":
+          intent = reconciliation.intent;
+          break;
+        case "UPDATE":
+          intent = await stripe.paymentIntents.update(
+            reconciliation.intent.id,
+            {
+              amount: totalAmount,
+              transfer_group: `pass_${pass.id}_${user.id}`,
+              metadata: piMetadata,
+            },
+          );
+          break;
+        case "RECREATE":
+          intent = null;
+          break;
+      }
     }
 
     if (intent === null) {
-      // New purchase, or PI was canceled — create fresh
-      const idempotencyKey = `pass:${pass.id}:${user.id}:${existingPurchase?.stripe_payment_intent_id ?? `${totalAmount}:${pass.currency}:${pass.sessions}`}`;
+      // Only key on priorPiId (canceled-PI rotation: a retry must return the
+      // same replacement PI). For brand-new or dead-row-rebook creates we
+      // intentionally omit the key — a fixed content-hash fallback would
+      // collide across cancel→rebook cycles for the same pass, making
+      // Stripe's 24h idempotency cache return the original refunded PI
+      // instead of a fresh one.
+      const createOpts: Stripe.RequestOptions = priorPiId
+        ? { idempotencyKey: `pass:${pass.id}:${user.id}:${priorPiId}` }
+        : {};
       intent = await stripe.paymentIntents.create(
         {
           amount: totalAmount,
@@ -127,33 +186,18 @@ Deno.serve(async (req) => {
           automatic_payment_methods: { enabled: true },
           metadata: piMetadata,
         },
-        { idempotencyKey },
+        createOpts,
       );
-
-      // Sole writer for the Created state (replaces payment_intent.created webhook).
-      // Conflict target = pass_purchases_created_unique (partial: WHERE status='Created').
-      // - No row, or only dead rows for (user, pass): INSERT.
-      // - Live Created row: re-point its PI id (canceled-race from plan #03).
-      // The predicate keeps the conflict from engaging on dead rows, so a webhook
-      // that flipped the prior row to Canceled mid-flight cleanly falls through
-      // to INSERT instead of mutating the now-Canceled row.
-      await sql`
-        INSERT INTO public.pass_purchases (
-          stripe_payment_intent_id, status, user_id, pass_id,
-          sessions, remaining_sessions, price, booking_fee, currency
-        ) VALUES (
-          ${intent.id}, 'Created', ${user.id}, ${passId},
-          ${pass.sessions}, 0, ${pass.price}, ${bookingFeeTotal}, ${pass.currency}
-        )
-        ON CONFLICT (user_id, pass_id) WHERE status = 'Created'
-        DO UPDATE SET stripe_payment_intent_id = EXCLUDED.stripe_payment_intent_id
-      `;
     }
 
-    // 7. stripe=false: drive pass_purchase to Succeeded synchronously (free/test mode).
-    // The state-machine helper handles Created → Succeeded, populates
-    // remaining_sessions and expires_at — keep this consistent with the
-    // booking path in payment/index.ts.
+    // Bind the held purchase row to the PI. From here on the state machine
+    // (util.apply_pi_status_pass) governs status transitions.
+    await sql`
+      UPDATE public.pass_purchases
+      SET stripe_payment_intent_id = ${intent.id}
+      WHERE id = ${purchaseId}
+    `;
+
     const stripeEnabled = await flagEnabled(sql, "stripe");
 
     if (!stripeEnabled) {

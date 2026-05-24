@@ -39,9 +39,9 @@ type FailedJob = z.infer<typeof failedJobSchema>;
 async function processJob(job: Job, fees: Fees) {
   const { transactionFee } = fees;
 
-  return await sql.begin(async () => {
+  return await sql.begin(async (tx) => {
     // 1. Fetch booking data — refund_initiator is set by the validate_refund_eligibility trigger
-    const [booking] = await sql`
+    const [booking] = await tx`
       SELECT * FROM public.bookings
       WHERE id = ${job.id} AND status = 'Refunding'
       FOR UPDATE
@@ -69,15 +69,24 @@ async function processJob(job: Job, fees: Fees) {
       initiator: booking.refund_initiator,
     };
 
+    // Deterministic idempotency keys derived from booking.stripe_payment_intent_id.
+    // One booking can be reused (ON CONFLICT DO UPDATE) for subsequent purchase/cancel
+    // lifecycles, meaning booking.id remains identical across bookings.
+    // Using stripe_payment_intent_id ensures uniqueness per transaction attempt.
+    const piId = booking.stripe_payment_intent_id;
+
     if (booking.refund_initiator === "Student") {
       const price = booking.spots * booking.price;
       const refundAmount = Math.round(price * (1 - transactionFee / 100));
 
-      const refund = await stripe.refunds.create({
-        payment_intent: booking.stripe_payment_intent_id,
-        amount: refundAmount,
-        metadata,
-      });
+      const refund = await stripe.refunds.create(
+        {
+          payment_intent: piId,
+          amount: refundAmount,
+          metadata,
+        },
+        { idempotencyKey: `refund:booking:${piId}` },
+      );
 
       return { ...job, refundId: refund.id, status: refund.status };
     } else {
@@ -90,7 +99,11 @@ async function processJob(job: Job, fees: Fees) {
 
       // Fully reverse the transfer if it exists
       if (hasTransfer) {
-        await stripe.transfers.createReversal(booking.stripe_transfer_id);
+        await stripe.transfers.createReversal(
+          booking.stripe_transfer_id,
+          {},
+          { idempotencyKey: `reversal:booking:${piId}` },
+        );
       }
 
       // Charge cancellation penalty (transactionFee% of class price) to the teacher
@@ -98,20 +111,26 @@ async function processJob(job: Job, fees: Fees) {
       const penaltyAmount = Math.round(classPrice * (transactionFee / 100));
 
       if (penaltyAmount > 0) {
-        await stripe.charges.create({
-          amount: penaltyAmount,
-          currency: booking.currency.toLowerCase(),
-          source: booking.to_stripe_account_id,
-          description: `Cancellation penalty for booking ${booking.id}`,
-          metadata,
-        });
+        await stripe.charges.create(
+          {
+            amount: penaltyAmount,
+            currency: booking.currency.toLowerCase(),
+            source: booking.to_stripe_account_id,
+            description: `Cancellation penalty for booking ${booking.id}`,
+            metadata,
+          },
+          { idempotencyKey: `penalty:booking:${piId}` },
+        );
       }
 
       // Full refund to student
-      const refund = await stripe.refunds.create({
-        payment_intent: booking.stripe_payment_intent_id,
-        metadata,
-      });
+      const refund = await stripe.refunds.create(
+        {
+          payment_intent: piId,
+          metadata,
+        },
+        { idempotencyKey: `refund:booking:${piId}` },
+      );
 
       return {
         ...job,

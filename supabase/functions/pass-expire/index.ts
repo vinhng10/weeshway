@@ -22,10 +22,9 @@ async function processJob(job: Job): Promise<Job> {
     const [pp] = await tx`
       SELECT pp.id, pp.remaining_sessions, pp.sessions, pp.price, pp.currency,
              pp.stripe_charge_id, pp.stripe_expiry_transfer_id,
-             prof.stripe_account_id AS teacher_account_id
+             prof.stripe_account_id AS seller_account_id
       FROM public.pass_purchases pp
-      LEFT JOIN public.passes p ON p.id = pp.pass_id
-      LEFT JOIN public.profiles prof ON prof.id = p.user_id
+      LEFT JOIN public.profiles prof ON prof.id = pp.seller_id
       WHERE pp.id = ${job.id}
       FOR UPDATE OF pp
     `;
@@ -43,7 +42,7 @@ async function processJob(job: Job): Promise<Job> {
     const transfer = await stripe.transfers.create({
       amount,
       currency: pp.currency.toLowerCase(),
-      destination: pp.teacher_account_id,
+      destination: pp.seller_account_id,
       source_transaction: pp.stripe_charge_id,
       metadata: {
         kind: "pass_expiry",

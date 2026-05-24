@@ -10,14 +10,13 @@ import { PassPurchaseCard } from "@/components/pass-card";
 import {
   BOOKING_ACTIVE_STATUSES,
   PASS_COOLING_OFF_DAYS,
-  PassPurchaseStatuses,
+  PASS_PURCHASE_STATUS,
 } from "@/constants";
-import { useAlert, useLocales, useSuspenseQuery } from "@/hooks";
+import { useAlert, useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   BookingType,
   PassPurchaseType,
-  PassType,
   ProfileType,
   ProjectType,
   SongType,
@@ -37,11 +36,7 @@ type Redemption = Pick<BookingType, "id" | "status"> & {
 };
 
 type PassPurchaseDetail = PassPurchaseType & {
-  pass:
-    | (Pick<PassType, "id" | "name" | "photoUrl" | "description"> & {
-        teacher: Pick<ProfileType, "id" | "fullName" | "avatarUrl"> | null;
-      })
-    | null;
+  seller: Pick<ProfileType, "id" | "fullName" | "avatarUrl"> | null;
   bookings: Redemption[];
 };
 
@@ -52,19 +47,20 @@ function PassDetailContent() {
   const queryClient = useQueryClient();
   const showAlert = useAlert((state) => state.showAlert);
   const transactionFee = useLocales((state) => state.transactionFee);
+  const userId = useAuth((state) => state.profile!.id);
 
   const { data, refetch, isRefetching } = useSuspenseQuery<PassPurchaseDetail>({
     queryKey: ["passes", passPurchaseId],
     queryFn: async () => {
+      // Filter user_id: the seller-side RLS policy would otherwise let a
+      // pass seller load this buyer-facing screen for a purchase of one of
+      // their passes.
       const { data } = await supabase
         .from("pass_purchases")
         .select(
           `
           *,
-          pass:passes (
-            id, name, photo_url, description,
-            teacher:profiles (id, full_name, avatar_url)
-          ),
+          seller:profiles!seller_id (id, full_name, avatar_url),
           bookings (
             id, status,
             project:projects (
@@ -75,6 +71,7 @@ function PassDetailContent() {
         `,
         )
         .eq("id", passPurchaseId)
+        .eq("user_id", userId)
         .in("bookings.status", BOOKING_ACTIVE_STATUSES)
         .single()
         .throwOnError();
@@ -84,7 +81,7 @@ function PassDetailContent() {
 
   const purchasedAt = new Date(data.createdAt);
   const canCancel =
-    data.status === PassPurchaseStatuses.Succeeded &&
+    data.status === PASS_PURCHASE_STATUS.SUCCEEDED &&
     data.remainingSessions === data.sessions &&
     Date.now() - purchasedAt.getTime() < COOLING_OFF_MS;
 
@@ -92,7 +89,7 @@ function PassDetailContent() {
     try {
       await supabase
         .from("pass_purchases")
-        .update({ status: PassPurchaseStatuses.Refunding })
+        .update({ status: PASS_PURCHASE_STATUS.REFUNDING })
         .eq("id", passPurchaseId)
         .throwOnError();
       await queryClient.invalidateQueries({
@@ -149,10 +146,10 @@ function PassDetailContent() {
         ListHeaderComponent={
           <View style={styles.header}>
             <PassPurchaseCard passPurchase={data} />
-            {!!data.pass?.description && (
+            {!!data.description && (
               <TextBoxInput
                 label="Description"
-                value={data.pass.description}
+                value={data.description}
                 multiline
                 numberOfLines={3}
                 editable={false}

@@ -438,3 +438,7 @@ verify_jwt = false
 [functions.transfer]
 enabled = true
 verify_jwt = false
+
+[functions.reconcile-payments]
+enabled = true
+verify_jwt = false

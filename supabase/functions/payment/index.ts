@@ -6,17 +6,19 @@ import { handleError, HttpError } from "../_shared/errors.ts";
 import { exchange, getFees } from "../_shared/fees.ts";
 import { flagEnabled } from "../_shared/flags.ts";
 import { jsonResponse } from "../_shared/response.ts";
-import { reconcilePaymentIntent } from "../_shared/stripe.ts";
+import { analyzePaymentIntent } from "../_shared/stripe.ts";
 
+// --- Configuration ---
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
-
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 
+// --- Schemas ---
 const requestSchema = z.object({
   projectId: z.uuidv7(),
   spots: z.number().positive().default(1),
 });
 
+// --- Core Logic ---
 type TxResult =
   | { alreadyPaid: true }
   | {
@@ -33,8 +35,14 @@ type TxResult =
       toStripeAccountId: string;
     };
 
+// --- Handler ---
 Deno.serve(async (req) => {
   try {
+    // Guard Clauses
+    if (req.method !== "POST") {
+      throw new HttpError("Method Not Allowed", 405);
+    }
+
     const { supabase, user } = await authenticateRequest(req);
 
     const body = await req.json();
@@ -149,10 +157,18 @@ Deno.serve(async (req) => {
       if (!booking)
         throw new HttpError("You've already booked this class.", 409);
 
+      // Only Created→Created retries can reuse the prior PI. For dead-row
+      // resets (Canceled/Refunded/Failed) the old PI is unusable — Refunded
+      // PIs stay in 'succeeded' status in Stripe (refunds are separate
+      // objects), so reusing the id would re-bind a succeeded PI to the new
+      // booking. Mirror the CASE in the upsert above.
+      const reusablePriorPi = existingBooking?.status === "Created";
       return {
         alreadyPaid: false,
         bookingId: booking.id,
-        priorPiId: existingBooking?.stripe_payment_intent_id ?? null,
+        priorPiId: reusablePriorPi
+          ? (existingBooking.stripe_payment_intent_id ?? null)
+          : null,
         priorSpots: existingBooking?.spots ?? spots,
         project: {
           id: project.id,
@@ -210,21 +226,51 @@ Deno.serve(async (req) => {
     let intent: Stripe.PaymentIntent | null = null;
 
     if (priorPiId) {
-      const existing = await stripe.paymentIntents.retrieve(priorPiId);
+      const existing = await stripe.paymentIntents.retrieve(priorPiId, {
+        expand: ["latest_charge"],
+      });
       const needsUpdate = priorSpots !== spots;
-      intent = await reconcilePaymentIntent(existing, () =>
-        needsUpdate
-          ? stripe.paymentIntents.update(existing.id, {
+      const reconciliation = analyzePaymentIntent(existing, needsUpdate);
+
+      console.log(
+        `reconcilePaymentIntent: Action: ${reconciliation.action}. ${
+          reconciliation.action === "RECREATE"
+            ? `Reason: ${reconciliation.reason}`
+            : `PI ${existing.id} status is ${existing.status}`
+        }`,
+      );
+
+      switch (reconciliation.action) {
+        case "REUSE":
+          intent = reconciliation.intent;
+          break;
+        case "UPDATE":
+          intent = await stripe.paymentIntents.update(
+            reconciliation.intent.id,
+            {
               amount: total,
               transfer_group: `booking_${project.id}_${user.id}`,
               metadata: piMetadata,
-            })
-          : Promise.resolve(existing),
-      );
+            },
+          );
+          break;
+        case "RECREATE":
+          intent = null;
+          break;
+      }
     }
 
     if (intent === null) {
-      const idempotencyKey = `booking:${project.id}:${user.id}:${priorPiId ?? `${total}:${project.currency}:${spots}`}`;
+      // Only key on priorPiId (canceled-PI rotation: retry must return the
+      // same replacement PI). For brand-new or dead-row-rebook creates we
+      // intentionally omit the key — a fixed `${total}:${currency}:${spots}`
+      // fallback collides across cancel→rebook cycles for the same project,
+      // making Stripe's 24h idempotency cache return the original succeeded
+      // PI (shown as "Partial refund" in the dashboard) instead of a fresh
+      // one. That stale PI then gets bound to the new booking row.
+      const createOpts: Stripe.RequestOptions = priorPiId
+        ? { idempotencyKey: `booking:${project.id}:${user.id}:${priorPiId}` }
+        : {};
       intent = await stripe.paymentIntents.create(
         {
           amount: total,
@@ -234,7 +280,7 @@ Deno.serve(async (req) => {
           automatic_payment_methods: { enabled: true },
           metadata: piMetadata,
         },
-        { idempotencyKey },
+        createOpts,
       );
     }
 
