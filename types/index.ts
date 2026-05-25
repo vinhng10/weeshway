@@ -226,6 +226,7 @@ export type ProjectEnrichedType = ProjectType & {
   location?: LocationType;
   bookings: BookingDetailType[];
   watchings: WatchingType[];
+  reports?: ReportType[];
 };
 
 export type ProfileEnrichedType = ProfileType & {

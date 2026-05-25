@@ -94,11 +94,16 @@ function ProjectContent() {
     .filter((b) => BOOKING_ACTIVE_STATUSES.includes(b.status))
     .reduce((acc, b) => acc + (b.spots || 0), 0);
 
-  // Logic Flags
+  // Project status
   const wasReleased = data.status === PROJECT_STATUS.RELEASED;
   const wasCanceled = data.status === PROJECT_STATUS.CANCELED;
   const wasDeleted = data.status === PROJECT_STATUS.DELETED;
   const canEditDetails = !wasReleased && !wasCanceled && !wasDeleted;
+
+  // Project timeline
+  const now = Date.now();
+  const isEnded = !!data.endAt && new Date(data.endAt).getTime() < now;
+  const isStarted = !!data.startAt && new Date(data.startAt).getTime() < now;
 
   const handleSave = async () => {
     const doSave = async () => {
@@ -211,16 +216,7 @@ function ProjectContent() {
     router.navigate(`./${projectId}/studio`);
   };
 
-  const handleCheckin = () => {
-    if (wasReleased) {
-      router.navigate(`./${projectId}/checkin`);
-    } else {
-      showAlert(
-        "Not Available",
-        "Check-in is only available for released projects.",
-      );
-    }
-  };
+  const handleCheckin = () => router.navigate(`./${projectId}/checkin`);
 
   const handleReport = () => {
     router.navigate(`./${projectId}/report`);
@@ -242,12 +238,12 @@ function ProjectContent() {
     {
       icon: "qr-code",
       label: "Check-in",
-      onPress: handleCheckin,
+      onPress: wasReleased && !isEnded ? handleCheckin : undefined,
     },
     {
       icon: "flag",
       label: "Report",
-      onPress: handleReport,
+      onPress: isStarted ? handleReport : undefined,
     },
     {
       icon: "share-social-sharp",

@@ -62,12 +62,14 @@ function ClassContent() {
             song:songs(id, name, artist_name, preview_url, artwork_url),
             location:locations(*),
             bookings:bookings(*, secret:booking_secrets(*), passPurchase:pass_purchases(status)),
-            watchings:watchings(*)
+            watchings:watchings(*),
+            reports:reports(*)
           `,
           )
           .eq("id", classId)
           .in("bookings.status", BOOKING_ONGOING_STATUSES)
           .eq("watchings.user_id", profile?.id)
+          .eq("reports.user_id", profile?.id)
           .single()
           .throwOnError();
         return data;
@@ -78,17 +80,28 @@ function ClassContent() {
   const userBooking = data.bookings.find(
     (b) => b.userId === profile?.id && b.status !== BOOKING_STATUS.CREATED,
   );
+  const now = Date.now();
+
+  // Booking state
   const isBooked = !!userBooking;
   const isRefunding = userBooking?.status === BOOKING_STATUS.REFUNDING;
-  const isEnded = !!data.endAt && new Date(data.endAt) < new Date();
-  const isReleased = data.status === PROJECT_STATUS.RELEASED && !isEnded;
-  const isWatching = data.watchings.some((w) => w.userId === profile?.id);
-  const isCanceled = data.status === PROJECT_STATUS.CANCELED;
   const isPassFunded = !!userBooking?.passPurchaseId;
+  const isPassExpired = userBooking?.passPurchase?.status === "Expired";
+
+  // Class timeline
+  const isEnded = !!data.endAt && new Date(data.endAt).getTime() < now;
+  const isStarted = !!data.startAt && new Date(data.startAt).getTime() < now;
   const isWithin24h =
     !!data.startAt &&
-    new Date(data.startAt).getTime() - Date.now() < 24 * 60 * 60 * 1000;
-  const isPassExpired = userBooking?.passPurchase?.status === "Expired";
+    new Date(data.startAt).getTime() - now < 24 * 60 * 60 * 1000;
+  const is48hPastEnd =
+    !!data.endAt && now - new Date(data.endAt).getTime() > 48 * 60 * 60 * 1000;
+
+  // Class availability
+  const isCanceled = data.status === PROJECT_STATUS.CANCELED;
+  const isReleased = data.status === PROJECT_STATUS.RELEASED && !isEnded;
+  const isWatching = data.watchings.some((w) => w.userId === profile?.id);
+  const hasReport = !!data.reports?.length;
 
   const occupiedBookingsCount = data.bookings
     .filter((b) => BOOKING_OCCUPYING_STATUSES.includes(b.status))
@@ -206,17 +219,18 @@ function ClassContent() {
     {
       icon: "close-circle",
       label: "Cancel Booking",
-      onPress: !isRefunding && !isCanceled ? handleCancel : undefined,
+      onPress:
+        !isRefunding && !isCanceled && !isStarted ? handleCancel : undefined,
     },
     {
       icon: "qr-code",
       label: "Check-in",
-      onPress: !isCanceled ? handleCheckin : undefined,
+      onPress: !isCanceled && !isEnded ? handleCheckin : undefined,
     },
     {
       icon: "flag",
       label: "Report",
-      onPress: handleReport,
+      onPress: isStarted ? handleReport : undefined,
     },
     {
       icon: "share-social-sharp",
@@ -227,6 +241,21 @@ function ClassContent() {
 
   const buttonLabel = isReleased ? "Book" : isWatching ? "Unwatch" : "Watch";
   const handlePress = isReleased ? handleBook : handleWatch;
+
+  const renderAction = () => {
+    if (isBooked) {
+      if (is48hPastEnd && !hasReport) return null;
+      return <FAB label="Actions" items={fabItems} />;
+    }
+    if (isEnded) return null;
+    return (
+      <Button
+        position="stickyBottom"
+        label={buttonLabel}
+        onPress={handlePress}
+      />
+    );
+  };
 
   return (
     <>
@@ -320,15 +349,7 @@ function ClassContent() {
         />
       </ScrollView>
 
-      {isBooked ? (
-        <FAB label="Actions" items={fabItems} />
-      ) : (
-        <Button
-          position="stickyBottom"
-          label={buttonLabel}
-          onPress={handlePress}
-        />
-      )}
+      {renderAction()}
 
       <Checkout
         visible={visible && !isBooked}
