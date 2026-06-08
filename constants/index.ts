@@ -38,6 +38,7 @@ export const STYLE = {
   SALSA: "Salsa",
   SHUFFLE: "Shuffle",
   TUTTING: "Tutting",
+  TWERK: "Twerk",
   WAACKING: "Waacking",
   ZUMBA: "Zumba",
 } as const;

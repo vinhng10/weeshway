@@ -8,8 +8,8 @@ import { jsonResponse } from "../_shared/response.ts";
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
 
-const PASS_THRESHOLD_MIN = 10;
-const BOOKING_THRESHOLD_MIN = 10;
+const PASS_THRESHOLD_MIN = 1;
+const BOOKING_THRESHOLD_MIN = 1;
 const BATCH_SIZE = 100;
 
 // Raw PaymentIntents created via paymentIntents.create() never auto-expire —

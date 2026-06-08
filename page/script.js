@@ -22,6 +22,7 @@ const STYLES = [
   "Salsa",
   "Shuffle",
   "Tutting",
+  "Twerk",
   "Waacking",
   "Zumba",
 ];
