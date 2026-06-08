@@ -39,6 +39,10 @@ export const useNotificationObserver = (): void => {
           router.navigate(`/(student)/(wishes)/wishes/${data.wishId}`, {
             withAnchor: true,
           });
+        } else if (data?.wallet) {
+          router.navigate("/(teacher)/profile/wallet", {
+            withAnchor: true,
+          });
         }
       }, 0);
     };

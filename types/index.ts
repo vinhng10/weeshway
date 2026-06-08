@@ -3,6 +3,7 @@ import {
   CLASS_FORMAT,
   EXPLORE_FILTER,
   LEVEL,
+  ONBOARDING_STATUS,
   PASS_PURCHASE_STATUS,
   PROJECT_STATUS,
   REPORT_STATUS,
@@ -37,6 +38,7 @@ export type StudentReportReasonType = ValueOf<typeof STUDENT_REPORT_REASON>;
 export type TeacherReportReasonType = ValueOf<typeof TEACHER_REPORT_REASON>;
 export type ReportStatusType = ValueOf<typeof REPORT_STATUS>;
 export type PassPurchaseStatusType = ValueOf<typeof PASS_PURCHASE_STATUS>;
+export type OnboardingStatusType = ValueOf<typeof ONBOARDING_STATUS>;
 
 export type OptionItem = {
   key: string;

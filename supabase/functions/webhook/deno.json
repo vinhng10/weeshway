@@ -1,6 +1,6 @@
 {
   "imports": {
-    "stripe": "npm:stripe",
+    "stripe": "npm:stripe@22.2.0",
     "zod": "npm:zod",
     "jose": "npm:jose",
     "supabase": "npm:@supabase/supabase-js",

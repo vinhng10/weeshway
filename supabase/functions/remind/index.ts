@@ -2,10 +2,10 @@ import postgres from "postgres";
 import { z } from "zod";
 import { authenticateInternalRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
+import { sendPush } from "../_shared/push.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
-const EXPO_ACCESS_TOKEN = Deno.env.get("EXPO_ACCESS_TOKEN");
 
 const jobSchema = z.array(
   z.object({
@@ -70,16 +70,7 @@ Deno.serve(async (req) => {
     }));
 
     // Dispatch to Expo Push API
-    const res = await fetch("https://exp.host/--/api/v2/push/send", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${EXPO_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(messages),
-    });
-
-    if (!res.ok) throw new HttpError("Expo service failure", 502);
+    await sendPush(messages);
 
     // Dequeue all processed jobs
     const jobIds = jobs.map((j) => j.jobId);

@@ -7,7 +7,7 @@ import {
   SectionListView,
   ThemedText,
 } from "@/components";
-import { RETURN_URL, ROLE } from "@/constants";
+import { ONBOARDING_STATUS, RETURN_URL, ROLE } from "@/constants";
 import {
   useAlert,
   useAuth,
@@ -16,6 +16,7 @@ import {
   useSuspenseQuery,
 } from "@/hooks";
 import { supabase } from "@/supabase";
+import { OnboardingStatusType } from "@/types";
 import {
   ClientSecretProvider,
   CustomerSessionClientSecret,
@@ -202,6 +203,7 @@ type RequirementItem = {
 
 type AccountResponse = {
   onboardingCompleted: boolean;
+  status: OnboardingStatusType;
   externalAccounts: Array<{
     bankName: string | null;
     currency: string;
@@ -240,7 +242,7 @@ function TeacherWalletContent() {
     },
   });
 
-  const { onboardingCompleted, externalAccounts } = data;
+  const { status, externalAccounts } = data;
 
   const handleStartOnboarding = async () => {
     try {
@@ -272,7 +274,8 @@ function TeacherWalletContent() {
   };
 
   const handleOpenDashboard = async () => {
-    if (!profile?.stripeAccountId || !onboardingCompleted) return;
+    if (!profile?.stripeAccountId || status !== ONBOARDING_STATUS.COMPLETED)
+      return;
 
     try {
       const { data, error } =
@@ -355,20 +358,78 @@ function TeacherWalletContent() {
     },
   ];
 
-  return onboardingCompleted ? (
-    <>
-      <SectionListView
-        sections={externalAccountsSections}
-        refetch={refetch}
-        isRefetching={isRefetching}
-      />
-      <Button
-        label="Stripe Dashboard"
-        onPress={handleOpenDashboard}
-        position="stickyBottom"
-      />
-    </>
-  ) : (
+  const pendingSections = [
+    {
+      title: "Verification in progress",
+      data: [
+        "We've received your details and Stripe is verifying your account. This usually takes a few minutes but can take up to a couple of days. We'll notify you the moment it's ready — no need to do anything.",
+      ],
+      render: renderHeader,
+    },
+  ];
+
+  const actionNeededSections = [
+    {
+      title: "A bit more info needed",
+      data: [
+        "Stripe needs some additional information to finish verifying your account. Tap below to pick up where you left off.",
+      ],
+      render: renderHeader,
+    },
+  ];
+
+  if (status === ONBOARDING_STATUS.COMPLETED) {
+    return (
+      <>
+        <SectionListView
+          sections={externalAccountsSections}
+          refetch={refetch}
+          isRefetching={isRefetching}
+        />
+        <Button
+          label="Stripe Dashboard"
+          onPress={handleOpenDashboard}
+          position="stickyBottom"
+        />
+      </>
+    );
+  }
+
+  if (status === ONBOARDING_STATUS.PENDING) {
+    return (
+      <>
+        <SectionListView
+          sections={pendingSections}
+          refetch={refetch}
+          isRefetching={isRefetching}
+        />
+        <Button
+          label="Refresh"
+          onPress={() => refetch()}
+          position="stickyBottom"
+        />
+      </>
+    );
+  }
+
+  if (status === ONBOARDING_STATUS.ACTION_NEEDED) {
+    return (
+      <>
+        <SectionListView
+          sections={actionNeededSections}
+          refetch={refetch}
+          isRefetching={isRefetching}
+        />
+        <Button
+          label="Continue Setup"
+          onPress={handleStartOnboarding}
+          position="stickyBottom"
+        />
+      </>
+    );
+  }
+
+  return (
     <>
       <SectionListView
         sections={onboardingSections}

@@ -223,6 +223,17 @@ export const PASS_PURCHASE_STATUS = {
   CANCELED: "Canceled",
 } as const;
 
+// Teacher Stripe onboarding lifecycle. Not a DB column — derived in the
+// `account` edge function from the connected account's capabilities/requirements
+// and returned in its response. The edge function keeps its own mirror of these
+// values (it can't import app code); keep the two in sync.
+export const ONBOARDING_STATUS = {
+  COMPLETED: "completed",
+  ACTION_NEEDED: "action_needed",
+  PENDING: "pending",
+  NOT_STARTED: "not_started",
+} as const;
+
 export const PASS_PURCHASE_ACTIVE_STATUSES: string[] = [
   PASS_PURCHASE_STATUS.SUCCEEDED,
   PASS_PURCHASE_STATUS.USED,

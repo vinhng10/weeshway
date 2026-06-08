@@ -2,10 +2,10 @@ import postgres from "postgres";
 import { z } from "zod";
 import { authenticateInternalRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
+import { sendPush } from "../_shared/push.ts";
 import { jsonResponse } from "../_shared/response.ts";
 
 const sql = postgres(Deno.env.get("SUPABASE_DB_URL")!);
-const EXPO_ACCESS_TOKEN = Deno.env.get("EXPO_ACCESS_TOKEN");
 
 const jobSchema = z.array(
   z.object({
@@ -69,16 +69,7 @@ Deno.serve(async (req) => {
     if (!toSend.length) return jsonResponse({ sent: 0, skipped: jobs.length });
 
     // 5. Dispatch to Expo
-    const res = await fetch("https://exp.host/--/api/v2/push/send", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${EXPO_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(toSend),
-    });
-
-    if (!res.ok) throw new HttpError("Expo service failure", 502);
+    await sendPush(toSend);
 
     // 6. Dequeue only the jobs we actually sent
     await sql`SELECT util.batch_dequeue('notification_jobs', ${successfulJobIds})`;
