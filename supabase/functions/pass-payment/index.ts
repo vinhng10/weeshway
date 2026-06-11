@@ -4,7 +4,6 @@ import { z } from "zod";
 import { authenticateRequest } from "../_shared/auth.ts";
 import { handleError, HttpError } from "../_shared/errors.ts";
 import { exchange, getFees } from "../_shared/fees.ts";
-import { flagEnabled } from "../_shared/flags.ts";
 import { jsonResponse } from "../_shared/response.ts";
 import { analyzePaymentIntent } from "../_shared/stripe.ts";
 
@@ -197,26 +196,6 @@ Deno.serve(async (req) => {
       SET stripe_payment_intent_id = ${intent.id}
       WHERE id = ${purchaseId}
     `;
-
-    const stripeEnabled = await flagEnabled(sql, "stripe");
-
-    if (!stripeEnabled) {
-      await sql`
-        SELECT util.apply_pi_status_pass(
-          ${intent.id},
-          'Succeeded'::public.pass_status,
-          NULL
-        )
-      `;
-
-      return jsonResponse({
-        customerId: student.stripe_account_id,
-        paymentIntentClientSecret: intent.client_secret,
-        customerSessionClientSecret: session.client_secret,
-        autoConfirmed: true,
-        status: "succeeded",
-      });
-    }
 
     return jsonResponse({
       customerId: student.stripe_account_id,

@@ -1,10 +1,5 @@
 import { MERCHANT_COUNTRY_CODE } from "@/constants";
-import {
-  useAuth,
-  useFeatureFlags,
-  useLocales,
-  useSuspenseQuery,
-} from "@/hooks";
+import { useAuth, useLocales, useSuspenseQuery } from "@/hooks";
 import { supabase } from "@/supabase";
 import {
   PassPurchaseStatusType,
@@ -71,7 +66,6 @@ export function Checkout(props: CheckoutProps) {
 function CheckoutContent({ onExit, project }: CheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { theme } = useUnistyles();
-  const stripeEnabled = useFeatureFlags((state) => state.isEnabled("stripe"));
   const formatMoney = useLocales((state) => state.formatMoney);
   const bookingFee = useLocales((state) => state.bookingFee);
   const exchange = useLocales((state) => state.exchange);
@@ -251,15 +245,7 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
         customerId,
         paymentIntentClientSecret,
         customerSessionClientSecret,
-        autoConfirmed,
-        status: paymentStatus,
       } = await fetchPaymentSheetParams();
-
-      if (autoConfirmed && paymentStatus === "succeeded") {
-        setStatus("success");
-        setStatusMessage("Booking completed!");
-        return;
-      }
 
       if (!isInitialized) {
         const { error } = await initPaymentSheet({
@@ -277,15 +263,13 @@ function CheckoutContent({ onExit, project }: CheckoutProps) {
         setIsInitialized(true);
       }
 
-      if (stripeEnabled) {
-        const { error } = await presentPaymentSheet();
-        if (error) {
-          setStatus("error");
-          setStatusMessage(
-            `Payment ${error.code.toLowerCase()}. Please try again.`,
-          );
-          return;
-        }
+      const { error } = await presentPaymentSheet();
+      if (error) {
+        setStatus("error");
+        setStatusMessage(
+          `Payment ${error.code.toLowerCase()}. Please try again.`,
+        );
+        return;
       }
 
       setStatus("success");

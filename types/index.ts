@@ -319,6 +319,5 @@ export type PaymentIntentResponse = {
   customerId: string;
   paymentIntentClientSecret: string;
   customerSessionClientSecret: string;
-  autoConfirmed?: boolean;
   status?: string;
 };

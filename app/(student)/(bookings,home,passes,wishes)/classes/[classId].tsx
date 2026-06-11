@@ -26,7 +26,6 @@ import {
 import {
   useAlert,
   useAuth,
-  useFeatureFlags,
   useLocales,
   useSuspenseQuery,
 } from "@/hooks";
@@ -48,7 +47,6 @@ function ClassContent() {
   const formatMoney = useLocales((state) => state.formatMoney);
   const transactionFee = useLocales((state) => state.transactionFee);
   const showAlert = useAlert((state) => state.showAlert);
-  const stripeEnabled = useFeatureFlags((state) => state.isEnabled("stripe"));
 
   const { data, refetch, isRefetching } = useSuspenseQuery<ProjectEnrichedType>(
     {
@@ -150,12 +148,7 @@ function ClassContent() {
     try {
       await supabase
         .from("bookings")
-        .update({
-          status:
-            stripeEnabled || isPassFunded
-              ? BOOKING_STATUS.REFUNDING
-              : BOOKING_STATUS.CANCELED,
-        })
+        .update({ status: BOOKING_STATUS.REFUNDING })
         .eq("id", userBooking.id)
         .throwOnError();
 

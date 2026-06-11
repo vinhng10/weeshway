@@ -1,7 +1,6 @@
 export { useAlert } from "./useAlert";
 export { useAudioPlayerStore } from "./useAudioPlayerStore";
 export { useAuth } from "./useAuth";
-export { useFeatureFlags } from "./useFeatureFlags";
 export { useLocales } from "./useLocales";
 export { useLocationSearch } from "./useLocationSearch";
 export { useNotificationObserver } from "./useNotificationObserver";

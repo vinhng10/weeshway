@@ -1,5 +1,5 @@
 import { MERCHANT_COUNTRY_CODE } from "@/constants";
-import { useFeatureFlags, useLocales } from "@/hooks";
+import { useLocales } from "@/hooks";
 import { supabase } from "@/supabase";
 import { PassType, PaymentIntentResponse } from "@/types";
 import { createStripeAppearance, parseFunctionsError } from "@/utils";
@@ -28,7 +28,6 @@ export function PassCheckout({
 }: PassCheckoutProps) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { theme } = useUnistyles();
-  const stripeEnabled = useFeatureFlags((state) => state.isEnabled("stripe"));
   const formatMoney = useLocales((state) => state.formatMoney);
   const bookingFee = useLocales((state) => state.bookingFee);
   const exchange = useLocales((state) => state.exchange);
@@ -63,12 +62,6 @@ export function PassCheckout({
         throw new Error("Error occurred. Please try again.");
       }
 
-      if (data.autoConfirmed && data.status === "succeeded") {
-        setStatus("success");
-        setStatusMessage("Payment completed!");
-        return;
-      }
-
       if (!isInitialized) {
         const { error: initError } = await initPaymentSheet({
           merchantDisplayName: "WeeshWay",
@@ -85,15 +78,13 @@ export function PassCheckout({
         setIsInitialized(true);
       }
 
-      if (stripeEnabled) {
-        const { error: presentError } = await presentPaymentSheet();
-        if (presentError) {
-          setStatus("error");
-          setStatusMessage(
-            `Payment ${presentError.code.toLowerCase()}. Please try again.`,
-          );
-          return;
-        }
+      const { error: presentError } = await presentPaymentSheet();
+      if (presentError) {
+        setStatus("error");
+        setStatusMessage(
+          `Payment ${presentError.code.toLowerCase()}. Please try again.`,
+        );
+        return;
       }
 
       setStatus("success");
